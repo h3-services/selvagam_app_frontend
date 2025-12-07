@@ -7,7 +7,7 @@ import {
   faChartLine, 
   faCog 
 } from '@fortawesome/free-solid-svg-icons';
-import { RiMenu4Fill } from 'react-icons/ri';
+import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../constants/colors';
 import { faSearch } from '@fortawesome/free-solid-svg-icons/faSearch';
 
@@ -26,17 +26,27 @@ const Sidebar = () => {
 
   return (
     <>
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 text-[black]"
-      >
-        <RiMenu4Fill size={34}  />
-      </button>
+      {!isOpen && (
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="lg:hidden fixed top-4 left-4 z-50 p-2 text-[black]"
+        >
+          <RiMenu4Fill size={34} />
+        </button>
+      )}
       
       <div 
         className={`w-64 h-screen fixed left-0 top-0 text-white flex flex-col transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
         style={{ backgroundColor: COLORS.SIDEBAR_BG }}
       >
+        {isOpen && (
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="lg:hidden absolute top-4 right-4 z-50 p-2 text-white"
+          >
+            <RiCloseFill size={34} />
+          </button>
+        )}
       <div className="p-5 border-b border-white/10">
         <h2 className=" text-2xl m-0">Admin Panel</h2>
       </div>
