@@ -5,16 +5,22 @@ import { COLORS } from '../constants/colors';
 
 const ParentAccess = () => {
   const [parents, setParents] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', childName: 'Emma Doe', mobile: '123-456-7890', distance: '2.5 km', date: '2024-01-15' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', childName: 'Liam Smith', mobile: '234-567-8901', distance: '3.8 km', date: '2024-01-20' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', childName: 'Olivia Johnson', mobile: '345-678-9012', distance: '1.2 km', date: '2024-02-01' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', childName: 'Emma Doe', mobile: '123-456-7890', distance: '2.5 km', date: '2024-01-15', location: 'New York, NY' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', childName: 'Liam Smith', mobile: '234-567-8901', distance: '3.8 km', date: '2024-01-20', location: 'Los Angeles, CA' },
+    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', childName: 'Olivia Johnson', mobile: '345-678-9012', distance: '1.2 km', date: '2024-02-01', location: 'Chicago, IL' },
   ]);
   const [showForm, setShowForm] = useState(false);
-  const [newParent, setNewParent] = useState({ name: '', email: '', childName: '', mobile: '' });
+  const [newParent, setNewParent] = useState({ name: '', email: '', childName: '', mobile: '', location: '' });
   const [search, setSearch] = useState('');
   const [selectedParent, setSelectedParent] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [mapSearchQuery, setMapSearchQuery] = useState('');
+  const [showLocationInput, setShowLocationInput] = useState(false);
+  const [tempLocation, setTempLocation] = useState('');
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [markingMode, setMarkingMode] = useState(false);
+  const [markerPercent, setMarkerPercent] = useState(null);
 
   const filteredParents = parents.filter(p => 
     p.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -29,9 +35,11 @@ const ParentAccess = () => {
         email: newParent.email,
         childName: newParent.childName,
         mobile: newParent.mobile,
+        location: newParent.location || 'Not specified',
+        distance: '0 km',
         date: new Date().toISOString().split('T')[0]
       }]);
-      setNewParent({ name: '', email: '', childName: '', mobile: '' });
+      setNewParent({ name: '', email: '', childName: '', mobile: '', location: '' });
       setShowForm(false);
     }
   };
@@ -71,16 +79,28 @@ const ParentAccess = () => {
         </div>
       </div>
 
+      {!selectedParent && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <span className="font-bold" style={{ color: '#40189d' }}>Table</span>
+          </div>
+        </div>
+      )}
+
       {selectedParent && (
         <div className="mb-4">
-          <button 
-            onClick={() => { setSelectedParent(null); setIsEditing(false); }} 
-            className="flex items-center gap-2 text-sm font-medium hover:opacity-70 transition-all"
-            style={{ color: '#40189d' }}
-          >
-            <span className="group-hover:-translate-x-1 transition-transform">←</span>
-            <span>Back to all parents</span>
-          </button>
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <button 
+              onClick={() => { setSelectedParent(null); setIsEditing(false); }} 
+              className="hover:opacity-70 transition-all text-black font-bold"
+            >
+              Table
+            </button>
+            <span style={{ color: '#40189d' }}>/</span>
+            <span style={{ color: '#40189d' }}>{selectedParent.name}</span>
+            <span style={{ color: '#40189d' }}>/</span>
+            <span style={{ color: '#40189d' }}>View</span>
+          </div>
         </div>
       )}
 
@@ -190,6 +210,37 @@ const ParentAccess = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Location Card */}
+                  <div className="lg:col-span-3 group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                    <div className="absolute top-0 right-0 w-20 h-20 rounded-full -mr-10 -mt-10 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
+                    <div className="relative p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-400">Location Address</p>
+                      </div>
+                      {isEditing ? (
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={editData.location}
+                            onChange={(e) => setEditData({ ...editData, location: e.target.value })}
+                            placeholder="Search for a location..."
+                            className="w-full border-2 rounded-lg px-3 py-2 text-base font-semibold outline-none"
+                            style={{ borderColor: '#40189d' }}
+                          />
+                          <FontAwesomeIcon icon={faSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        </div>
+                      ) : (
+                        <p className="text-lg font-bold text-black">{selectedParent.location}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Distance Banner */}
@@ -215,18 +266,70 @@ const ParentAccess = () => {
                 {/* Map Section */}
                 <div className="rounded-xl overflow-hidden shadow-lg border-2 border-gray-100">
                   <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                    <h3 className="text-base font-bold text-black">Location Map</h3>
-                    <p className="text-xs text-gray-500">View parent's location relative to school</p>
+                    <h3 className="text-base font-bold text-black mb-2">Location Map</h3>
+                    {isEditing && (
+                      <div className="mb-2">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={mapSearchQuery}
+                            onChange={(e) => setMapSearchQuery(e.target.value)}
+                            placeholder="Search location (e.g., Karaikudi, New York, Paris)..."
+                            className="w-full border-2 rounded-lg px-3 py-2 pr-16 text-sm outline-none"
+                            style={{ borderColor: '#40189d' }}
+                          />
+                          <button
+                            onClick={() => {
+                              if (mapSearchQuery.trim()) {
+                                setEditData({ ...editData, location: mapSearchQuery });
+                                setMarkerPercent(null);
+                              }
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 text-xs font-medium text-white rounded-md hover:opacity-90 transition-all"
+                            style={{ backgroundColor: '#40189d' }}
+                          >
+                            <FontAwesomeIcon icon={faSearch} className="mr-1" />Set
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-xs font-bold" style={{ color: '#40189d' }}>Selected: {editData.location || 'None'}</p>
+                          <button
+                            onClick={() => setMarkingMode(!markingMode)}
+                            className="px-3 py-1 text-xs font-medium text-white rounded-md hover:opacity-90 transition-all"
+                            style={{ backgroundColor: markingMode ? '#dc2626' : '#40189d' }}
+                          >
+                            {markingMode ? '✓ Marking Mode' : '📍 Mark Location'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="h-64">
+                  <div className="h-64 relative bg-gray-100">
                     <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.1841374555634!2d-73.98823492346618!3d40.75797097138558!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus"
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(editData?.location || selectedParent.location)}&output=embed`}
                       width="100%"
                       height="100%"
                       style={{ border: 0 }}
                       allowFullScreen
                       loading="lazy"
+                      title="Location Map"
                     />
+
+                    {markerPercent && (
+                      <div 
+                        className="absolute z-20 pointer-events-none"
+                        style={{ 
+                          left: `${markerPercent.x}%`, 
+                          top: `${markerPercent.y}%`,
+                          transform: 'translate(-50%, -100%)'
+                        }}
+                      >
+                        <svg className="w-10 h-10 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#40189d" stroke="white" strokeWidth="2"/>
+                          <circle cx="12" cy="9" r="2.5" fill="white"/>
+                        </svg>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -364,7 +467,7 @@ const ParentAccess = () => {
           <>
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setShowForm(false)}></div>
             <div className="fixed inset-0 lg:relative lg:w-80 flex items-center justify-center lg:block z-50 lg:z-auto p-4 lg:p-0">
-              <div className="w-full max-w-md lg:max-w-none lg:h-full flex flex-col bg-white rounded-3xl lg:rounded-t-[50px] shadow-2xl">
+              <div className="w-full max-w-md lg:max-w-none lg:h-auto flex flex-col bg-white rounded-3xl lg:rounded-t-[50px] shadow-2xl">
               <div className="p-6 sm:p-8 text-center relative">
                 <button
                   onClick={() => setShowForm(false)}
@@ -426,6 +529,22 @@ const ParentAccess = () => {
                       placeholder="Mobile Number"
                       value={newParent.mobile}
                       onChange={(e) => setNewParent({ ...newParent, mobile: e.target.value })}
+                      className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
+                      style={{ borderColor: '#e9d5ff' }}
+                      onFocus={(e) => e.target.style.borderColor = '#40189d'}
+                      onBlur={(e) => e.target.style.borderColor = '#e9d5ff'}
+                    />
+                  </div>
+                  <div className="relative">
+                    <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Location Address"
+                      value={newParent.location}
+                      onChange={(e) => setNewParent({ ...newParent, location: e.target.value })}
                       className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
                       style={{ borderColor: '#e9d5ff' }}
                       onFocus={(e) => e.target.style.borderColor = '#40189d'}

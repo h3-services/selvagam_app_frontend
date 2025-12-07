@@ -2,26 +2,22 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faDashboard, 
-  faUsers, 
-  faBox, 
-  faChartLine, 
-  faCog 
+  faUserFriends,
+  faCar
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../constants/colors';
 import { faSearch } from '@fortawesome/free-solid-svg-icons/faSearch';
 
-const Sidebar = () => {
-  const [activeIndex, setActiveIndex] = useState(0);
+const Sidebar = ({ onNavigate }) => {
+  const [activeIndex, setActiveIndex] = useState(2);
   const [isOpen, setIsOpen] = useState(false);
   
   const menuItems = [
-    { icon: faDashboard, label: 'Dashboard', path: '/' },
-    { icon: faSearch, label: 'Search', path: '/search' },
-    { icon: faUsers, label: 'Users', path: '/users' },
-    { icon: faBox, label: 'Products', path: '/products' },
-    { icon: faChartLine, label: 'Analytics', path: '/analytics' },
-    { icon: faCog, label: 'Settings', path: '/settings' },
+    { icon: faDashboard, label: 'Dashboard', page: 'dashboard' },
+    { icon: faSearch, label: 'Search', page: 'search' },
+    { icon: faUserFriends, label: 'Parent Management', page: 'parent-management' },
+    { icon: faCar, label: 'Driver Management', page: 'driver-management' },
   ];
 
   return (
@@ -54,20 +50,21 @@ const Sidebar = () => {
         <nav className="flex-1 py-5">
           {menuItems.map((item, index) => (
             <div key={index} className="relative">
-              <a 
-                href={item.path} 
-                onClick={(e) => { e.preventDefault(); setActiveIndex(index); }}
-                className="flex items-center gap-4 px-5 py-4 no-underline font-medium"
+              <button 
+                onClick={() => { setActiveIndex(index); onNavigate(item.page); }}
+                className="flex items-center gap-4 px-5 py-4 font-medium w-full text-left"
                 style={{
                   backgroundColor: activeIndex === index ? COLORS.SIDEBAR_ACTIVE : 'transparent',
                   color: activeIndex === index ? 'black' : 'white',
                   borderTopRightRadius: activeIndex === index ? '25px' : '0',
                   borderBottomRightRadius: activeIndex === index ? '25px' : '0',
+                  border: 'none',
+                  cursor: 'pointer'
                 }}
               >
                 <FontAwesomeIcon icon={item.icon} className="w-5 h-5" />
                 <span>{item.label}</span>
-              </a>
+              </button>
             </div>
           ))}
         </nav>
