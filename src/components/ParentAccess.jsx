@@ -1,13 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus, faTrash, faCheck, faTimes, faSearch, faEnvelope, faUser, faChild, faPhone, faEye, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix Leaflet default marker icon
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+const customIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#40189d" stroke="white" stroke-width="2"/><circle cx="12" cy="9" r="2.5" fill="white"/></svg>`),
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
+});
 
 const ParentAccess = () => {
   const [parents, setParents] = useState([
     { id: 1, name: 'John Doe', email: 'john@example.com', childName: 'Emma Doe', mobile: '123-456-7890', distance: '2.5 km', date: '2024-01-15', location: 'New York, NY' },
     { id: 2, name: 'Jane Smith', email: 'jane@example.com', childName: 'Liam Smith', mobile: '234-567-8901', distance: '3.8 km', date: '2024-01-20', location: 'Los Angeles, CA' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', childName: 'Olivia Johnson', mobile: '345-678-9012', distance: '1.2 km', date: '2024-02-01', location: 'Chicago, IL' },
+    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', childName: 'Olivia Johnson', mobile: '345-678-9012', distance: '1.2 km', date: '2024-02-01', location: 'San Francisco, CA' },
   ]);
   const [showForm, setShowForm] = useState(false);
   const [newParent, setNewParent] = useState({ name: '', email: '', childName: '', mobile: '', location: '' });
@@ -18,14 +36,43 @@ const ParentAccess = () => {
   const [mapSearchQuery, setMapSearchQuery] = useState('');
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [tempLocation, setTempLocation] = useState('');
-  const [markerPosition, setMarkerPosition] = useState(null);
-  const [markingMode, setMarkingMode] = useState(false);
-  const [markerPercent, setMarkerPercent] = useState(null);
+  const [markerPosition, setMarkerPosition] = useState([40.7128, -74.0060]);
+  const [mapCenter, setMapCenter] = useState([40.7128, -74.0060]);
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [tempMapSearchQuery, setTempMapSearchQuery] = useState('');
+  const [tempMarkerPosition, setTempMarkerPosition] = useState([40.7128, -74.0060]);
+  const [tempMapCenter, setTempMapCenter] = useState([40.7128, -74.0060]);
+  const [tempLocationSuggestions, setTempLocationSuggestions] = useState([]);
+  const [showTempSuggestions, setShowTempSuggestions] = useState(false);
+  const mapRef = useRef(null);
+  const tempMapRef = useRef(null);
 
   const filteredParents = parents.filter(p => 
     p.name.toLowerCase().includes(search.toLowerCase()) || 
     p.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Geocode location when parent is selected
+  useEffect(() => {
+    if (selectedParent && !isEditing) {
+      const geocodeLocation = async () => {
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedParent.location)}&limit=1`);
+          const data = await response.json();
+          if (data.length > 0) {
+            const { lat, lon } = data[0];
+            setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
+            setMapCenter([parseFloat(lat), parseFloat(lon)]);
+          }
+        } catch (error) {
+          console.error('Error geocoding location:', error);
+        }
+      };
+      geocodeLocation();
+    }
+  }, [selectedParent, isEditing]);
 
   const handleAdd = () => {
     if (newParent.name && newParent.email) {
@@ -48,9 +95,23 @@ const ParentAccess = () => {
     setParents(parents.filter(p => p.id !== id));
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     setIsEditing(true);
     setEditData({ ...selectedParent });
+    setMapSearchQuery(selectedParent.location);
+    
+    // Geocode the location to get coordinates
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedParent.location)}&limit=1`);
+      const data = await response.json();
+      if (data.length > 0) {
+        const { lat, lon } = data[0];
+        setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
+        setMapCenter([parseFloat(lat), parseFloat(lon)]);
+      }
+    } catch (error) {
+      console.error('Error geocoding location:', error);
+    }
   };
 
   const handleSaveEdit = () => {
@@ -273,63 +334,88 @@ const ParentAccess = () => {
                           <input
                             type="text"
                             value={mapSearchQuery}
-                            onChange={(e) => setMapSearchQuery(e.target.value)}
-                            placeholder="Search location (e.g., Karaikudi, New York, Paris)..."
-                            className="w-full border-2 rounded-lg px-3 py-2 pr-16 text-sm outline-none"
-                            style={{ borderColor: '#40189d' }}
-                          />
-                          <button
-                            onClick={() => {
-                              if (mapSearchQuery.trim()) {
-                                setEditData({ ...editData, location: mapSearchQuery });
-                                setMarkerPercent(null);
+                            onChange={async (e) => {
+                              const query = e.target.value;
+                              setMapSearchQuery(query);
+                              if (query.length > 2) {
+                                try {
+                                  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=10&addressdetails=1`);
+                                  const data = await response.json();
+                                  setLocationSuggestions(data);
+                                  setShowSuggestions(true);
+                                } catch (error) {
+                                  console.error('Error fetching suggestions:', error);
+                                }
+                              } else {
+                                setShowSuggestions(false);
                               }
                             }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 text-xs font-medium text-white rounded-md hover:opacity-90 transition-all"
-                            style={{ backgroundColor: '#40189d' }}
-                          >
-                            <FontAwesomeIcon icon={faSearch} className="mr-1" />Set
-                          </button>
+                            onFocus={() => locationSuggestions.length > 0 && setShowSuggestions(true)}
+                            placeholder="Search location (e.g., Karaikudi, New York, Paris)..."
+                            className="w-full border-2 rounded-lg px-3 py-2 text-sm outline-none"
+                            style={{ borderColor: '#40189d' }}
+                          />
+                          {showSuggestions && locationSuggestions.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto" style={{ borderColor: '#40189d' }}>
+                              {locationSuggestions.map((suggestion, index) => (
+                                <button
+                                  key={index}
+                                  onClick={async () => {
+                                    const { lat, lon, display_name } = suggestion;
+                                    setMapSearchQuery(display_name);
+                                    setEditData({ ...editData, location: display_name });
+                                    setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
+                                    setMapCenter([parseFloat(lat), parseFloat(lon)]);
+                                    setShowSuggestions(false);
+                                    if (mapRef.current) {
+                                      mapRef.current.setView([parseFloat(lat), parseFloat(lon)], 15);
+                                    }
+                                  }}
+                                  className="w-full text-left px-3 py-2 hover:bg-purple-50 transition-colors text-sm border-b border-gray-100 last:border-b-0"
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#40189d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span className="text-gray-700">{suggestion.display_name}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <div className="flex items-center justify-between mt-2">
+                        <div className="mt-2">
                           <p className="text-xs font-bold" style={{ color: '#40189d' }}>Selected: {editData.location || 'None'}</p>
-                          <button
-                            onClick={() => setMarkingMode(!markingMode)}
-                            className="px-3 py-1 text-xs font-medium text-white rounded-md hover:opacity-90 transition-all"
-                            style={{ backgroundColor: markingMode ? '#dc2626' : '#40189d' }}
-                          >
-                            {markingMode ? '✓ Marking Mode' : '📍 Mark Location'}
-                          </button>
+                          <p className="text-xs text-gray-500 mt-1">💡 Tip: {isEditing ? 'Click on the map to select a location or search above' : 'Search for a location above'}</p>
                         </div>
                       </div>
                     )}
                   </div>
                   <div className="h-64 relative bg-gray-100">
-                    <iframe
-                      src={`https://maps.google.com/maps?q=${encodeURIComponent(editData?.location || selectedParent.location)}&output=embed`}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      title="Location Map"
+                    <LocationMap 
+                      center={mapCenter}
+                      markerPosition={markerPosition}
+                      isEditing={isEditing}
+                      onLocationSelect={async (lat, lng) => {
+                        if (isEditing) {
+                          setMarkerPosition([lat, lng]);
+                          try {
+                            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                            const data = await response.json();
+                            const locationName = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                            setMapSearchQuery(locationName);
+                            setEditData({ ...editData, location: locationName });
+                          } catch (error) {
+                            console.error('Error reverse geocoding:', error);
+                            const locationName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                            setMapSearchQuery(locationName);
+                            setEditData({ ...editData, location: locationName });
+                          }
+                        }
+                      }}
+                      mapRef={mapRef}
                     />
-
-                    {markerPercent && (
-                      <div 
-                        className="absolute z-20 pointer-events-none"
-                        style={{ 
-                          left: `${markerPercent.x}%`, 
-                          top: `${markerPercent.y}%`,
-                          transform: 'translate(-50%, -100%)'
-                        }}
-                      >
-                        <svg className="w-10 h-10 drop-shadow-lg" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#40189d" stroke="white" strokeWidth="2"/>
-                          <circle cx="12" cy="9" r="2.5" fill="white"/>
-                        </svg>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -544,12 +630,23 @@ const ParentAccess = () => {
                       type="text"
                       placeholder="Location Address"
                       value={newParent.location}
-                      onChange={(e) => setNewParent({ ...newParent, location: e.target.value })}
-                      className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
+                      readOnly
+                      className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-24 py-3.5 text-sm focus:bg-white focus:outline-none transition cursor-pointer"
                       style={{ borderColor: '#e9d5ff' }}
-                      onFocus={(e) => e.target.style.borderColor = '#40189d'}
-                      onBlur={(e) => e.target.style.borderColor = '#e9d5ff'}
+                      onClick={() => setShowLocationPicker(true)}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowLocationPicker(true)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium text-white rounded-lg transition-all"
+                      style={{ backgroundColor: '#40189d' }}
+                    >
+                      <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Pick
+                    </button>
                   </div>
                 </div>
                 <button
@@ -565,7 +662,7 @@ const ParentAccess = () => {
           </>
         )}
 
-        {!showForm && (
+        {!showForm && !selectedParent && (
           <button
             onClick={() => setShowForm(true)}
             className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
@@ -574,9 +671,174 @@ const ParentAccess = () => {
             <FontAwesomeIcon icon={faUserPlus} className="text-xl sm:text-2xl" />
           </button>
         )}
+
+        {/* Location Picker Popup */}
+        {showLocationPicker && (
+          <>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setShowLocationPicker(false)}></div>
+            <div className="fixed left-0 top-0 bottom-0 w-full md:w-[500px] bg-white shadow-2xl z-50 flex flex-col animate-slide-in">
+              <div className="p-4 border-b border-gray-200" style={{ backgroundColor: '#40189d' }}>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-white">Pick Location</h3>
+                  <button
+                    onClick={() => setShowLocationPicker(false)}
+                    className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded-lg transition"
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-4 border-b border-gray-200">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={tempMapSearchQuery}
+                    onChange={async (e) => {
+                      const query = e.target.value;
+                      setTempMapSearchQuery(query);
+                      if (query.length > 2) {
+                        try {
+                          const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=10&addressdetails=1`);
+                          const data = await response.json();
+                          setTempLocationSuggestions(data);
+                          setShowTempSuggestions(true);
+                        } catch (error) {
+                          console.error('Error fetching suggestions:', error);
+                        }
+                      } else {
+                        setShowTempSuggestions(false);
+                      }
+                    }}
+                    onFocus={() => tempLocationSuggestions.length > 0 && setShowTempSuggestions(true)}
+                    placeholder="Search location (e.g., Karaikudi, New York, Paris)..."
+                    className="w-full border-2 rounded-lg px-3 py-2 text-sm outline-none"
+                    style={{ borderColor: '#40189d' }}
+                  />
+                  {showTempSuggestions && tempLocationSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto" style={{ borderColor: '#40189d' }}>
+                      {tempLocationSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onClick={async () => {
+                            const { lat, lon, display_name } = suggestion;
+                            setTempMapSearchQuery(display_name);
+                            setTempMarkerPosition([parseFloat(lat), parseFloat(lon)]);
+                            setTempMapCenter([parseFloat(lat), parseFloat(lon)]);
+                            setShowTempSuggestions(false);
+                            if (tempMapRef.current) {
+                              tempMapRef.current.setView([parseFloat(lat), parseFloat(lon)], 15);
+                            }
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-purple-50 transition-colors text-sm border-b border-gray-100 last:border-b-0"
+                        >
+                          <div className="flex items-start gap-2">
+                            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#40189d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="text-gray-700">{suggestion.display_name}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">💡 Click on the map or search above to select a location</p>
+              </div>
+
+              <div className="flex-1 relative">
+                <LocationMap 
+                  center={tempMapCenter}
+                  markerPosition={tempMarkerPosition}
+                  isEditing={true}
+                  onLocationSelect={async (lat, lng) => {
+                    setTempMarkerPosition([lat, lng]);
+                    try {
+                      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                      const data = await response.json();
+                      const locationName = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                      setTempMapSearchQuery(locationName);
+                    } catch (error) {
+                      console.error('Error reverse geocoding:', error);
+                      const locationName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                      setTempMapSearchQuery(locationName);
+                    }
+                  }}
+                  mapRef={tempMapRef}
+                />
+              </div>
+
+              <div className="p-4 border-t border-gray-200">
+                <div className="mb-3">
+                  <p className="text-xs font-bold text-gray-500 mb-1">Selected Location:</p>
+                  <p className="text-sm font-semibold" style={{ color: '#40189d' }}>{tempMapSearchQuery || 'None'}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setNewParent({ ...newParent, location: tempMapSearchQuery });
+                    setShowLocationPicker(false);
+                  }}
+                  disabled={!tempMapSearchQuery}
+                  className="w-full py-3 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: '#40189d' }}
+                >
+                  <FontAwesomeIcon icon={faCheck} className="mr-2" />Done
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 };
 
+// LocationMap Component with click-to-select
+const LocationMap = ({ center, markerPosition, isEditing, onLocationSelect, mapRef }) => {
+  const MapClickHandler = () => {
+    useMapEvents({
+      click: (e) => {
+        if (isEditing) {
+          const { lat, lng } = e.latlng;
+          onLocationSelect(lat, lng);
+        }
+      },
+    });
+    return null;
+  };
+
+  return (
+    <MapContainer
+      center={center}
+      zoom={13}
+      style={{ height: '100%', width: '100%' }}
+      ref={mapRef}
+      key={`${center[0]}-${center[1]}`}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      {markerPosition && <Marker position={markerPosition} icon={customIcon} />}
+      <MapClickHandler />
+    </MapContainer>
+  );
+};
+
 export default ParentAccess;
+
+// Add slide-in animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slide-in {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+  }
+`;
+if (typeof document !== 'undefined') {
+  document.head.appendChild(style);
+}
