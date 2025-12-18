@@ -2,23 +2,31 @@ import { useState } from 'react';
 import Sidebar from './Sidebar';
 import ParentAccess from './ParentAccess';
 import DriverManagement from './DriverManagement';
+import BusManagement from './BusManagement';
+import RouteManagement from './RouteManagement';
 import ComingSoon from './ComingSoon';
+import DashboardOverview from './DashboardOverview';
 import { COLORS } from '../constants/colors';
 
 const Dashboard = () => {
-  const [currentPage, setCurrentPage] = useState('parent-management');
+  const [currentPage, setCurrentPage] = useState('dashboard');
 
   const renderPage = () => {
-    switch(currentPage) {
+    switch (currentPage) {
       case 'parent-management':
         return <ParentAccess />;
       case 'driver-management':
         return <DriverManagement />;
+      case 'bus-management':
+        return <BusManagement />;
+      case 'route-management':
+        return <RouteManagement />;
       case 'dashboard':
+        return <DashboardOverview />;
       case 'search':
         return <ComingSoon />;
       default:
-        return <ParentAccess />;
+        return <DashboardOverview />;
     }
   };
 

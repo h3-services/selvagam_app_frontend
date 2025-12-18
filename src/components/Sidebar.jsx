@@ -1,56 +1,58 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faDashboard, 
+import {
+  faDashboard,
   faUserFriends,
-  faCar
+  faCar,
+  faBus,
+  faMapLocationDot
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../constants/colors';
-import { faSearch } from '@fortawesome/free-solid-svg-icons/faSearch';
 
 const Sidebar = ({ onNavigate }) => {
-  const [activeIndex, setActiveIndex] = useState(2);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const menuItems = [
     { icon: faDashboard, label: 'Dashboard', page: 'dashboard' },
-    { icon: faSearch, label: 'Search', page: 'search' },
     { icon: faUserFriends, label: 'Parent Management', page: 'parent-management' },
     { icon: faCar, label: 'Driver Management', page: 'driver-management' },
+    { icon: faBus, label: 'Bus Management', page: 'bus-management' },
+    { icon: faMapLocationDot, label: 'Route Management', page: 'route-management' },
   ];
 
   return (
     <>
       {!isOpen && (
-        <button 
+        <button
           onClick={() => setIsOpen(true)}
           className="lg:hidden fixed top-4 left-4 z-50 p-2 text-[black]"
         >
           <RiMenu4Fill size={34} />
         </button>
       )}
-      
-      <div 
+
+      <div
         className={`w-64 h-screen fixed left-0 top-0 text-white flex flex-col transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
         style={{ backgroundColor: COLORS.SIDEBAR_BG }}
       >
         {isOpen && (
-          <button 
+          <button
             onClick={() => setIsOpen(false)}
             className="lg:hidden absolute top-4 right-4 z-50 p-2 text-white"
           >
             <RiCloseFill size={34} />
           </button>
         )}
-      <div className="p-5 border-b border-white/10">
-        <h2 className=" text-2xl m-0">Admin Panel</h2>
-      </div>
-      
+        <div className="p-5 border-b border-white/10">
+          <h2 className=" text-2xl m-0">Admin Panel</h2>
+        </div>
+
         <nav className="flex-1 py-5">
           {menuItems.map((item, index) => (
             <div key={index} className="relative">
-              <button 
+              <button
                 onClick={() => { setActiveIndex(index); onNavigate(item.page); }}
                 className="flex items-center gap-4 px-5 py-4 font-medium w-full text-left"
                 style={{
@@ -68,11 +70,11 @@ const Sidebar = ({ onNavigate }) => {
             </div>
           ))}
         </nav>
-      
+
       </div>
-      
+
       {isOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black/50 z-30"
           onClick={() => setIsOpen(false)}
         />

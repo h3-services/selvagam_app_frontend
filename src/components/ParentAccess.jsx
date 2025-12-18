@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserPlus, faTrash, faCheck, faTimes, faSearch, faEnvelope, faUser, faChild, faPhone, faEye, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faUserPlus, faTrash, faCheck, faTimes, faSearch, faEnvelope, faUser, faChild, faPhone, faEye, faEdit, faClock, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -23,12 +24,17 @@ const customIcon = new L.Icon({
 
 const ParentAccess = () => {
   const [parents, setParents] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', childName: 'Emma Doe', mobile: '123-456-7890', distance: '2.5 km', date: '2024-01-15', location: 'New York, NY' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', childName: 'Liam Smith', mobile: '234-567-8901', distance: '3.8 km', date: '2024-01-20', location: 'Los Angeles, CA' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', childName: 'Olivia Johnson', mobile: '345-678-9012', distance: '1.2 km', date: '2024-02-01', location: 'San Francisco, CA' },
+    { id: 1, name: "John Doe", childName: "Alice Doe", email: "john@example.com", mobile: "123-456-7890", location: "123 Main St, New York", date: "2024-01-15", status: 'Approved' },
+    { id: 2, name: "Jane Smith", childName: "Bob Smith", email: "jane@example.com", mobile: "987-654-3210", location: "456 Elm St, Los Angeles", date: "2024-02-10", status: 'Pending' },
+    { id: 3, name: "Robert Johnson", childName: "Charlie Johnson", email: "robert@example.com", mobile: "555-123-4567", location: "789 Pine St, Chicago", date: "2024-03-05", status: 'Rejected' },
+    { id: 4, name: "Sarah Wilson", childName: "Diana Wilson", email: "sarah@example.com", mobile: "444-567-8901", location: "321 Oak Ln, Houston", date: "2024-03-10", status: 'Pending' },
+    { id: 5, name: "Michael Brown", childName: "Ethan Brown", email: "michael@example.com", mobile: "222-333-4444", location: "654 Maple Dr, Seattle", date: "2024-03-12", status: 'Approved' },
+    { id: 6, name: "Emily Davis", childName: "Fiona Davis", email: "emily@example.com", mobile: "777-888-9999", location: "987 Cedar Rd, Boston", date: "2024-03-15", status: 'Pending' },
+    { id: 7, name: "David Miller", childName: "George Miller", email: "david@example.com", mobile: "111-222-3333", location: "159 Birch Blvd, Miami", date: "2024-03-18", status: 'Approved' },
+    { id: 8, name: "Jessica Taylor", childName: "Hannah Taylor", email: "jessica@example.com", mobile: "999-000-1111", location: "753 Spruce Way, Denver", date: "2024-03-20", status: 'Pending' },
   ]);
   const [showForm, setShowForm] = useState(false);
-  const [newParent, setNewParent] = useState({ name: '', email: '', childName: '', mobile: '', location: '' });
+  const [newParent, setNewParent] = useState({ name: '', email: '', childName: '', mobile: '', location: '', status: 'Pending' });
   const [search, setSearch] = useState('');
   const [selectedParent, setSelectedParent] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -48,11 +54,42 @@ const ParentAccess = () => {
   const [showTempSuggestions, setShowTempSuggestions] = useState(false);
   const mapRef = useRef(null);
   const tempMapRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("All"); // All, Pending, Approved, Rejected
 
-  const filteredParents = parents.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) || 
-    p.email.toLowerCase().includes(search.toLowerCase())
-  );
+  // Handlers for Approval Workflow
+  const handleApprove = (id) => {
+    setParents(parents.map(p => p.id === id ? { ...p, status: 'Approved' } : p));
+  };
+
+  const handleReject = (id) => {
+    setParents(parents.map(p => p.id === id ? { ...p, status: 'Rejected' } : p));
+  };
+
+  const handlePending = (id) => {
+    setParents(parents.map(p => p.id === id ? { ...p, status: 'Pending' } : p));
+  };
+
+  const filteredParents = useMemo(() => {
+    let result = parents;
+
+    // Filter by Tab
+    if (activeTab !== "All") {
+      result = result.filter(parent => parent.status === activeTab);
+    }
+
+    // Filter by Search
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(
+        (parent) =>
+          parent.name.toLowerCase().includes(lowerQuery) ||
+          parent.email.toLowerCase().includes(lowerQuery) ||
+          parent.childName.toLowerCase().includes(lowerQuery)
+      );
+    }
+    return result;
+  }, [parents, searchQuery, activeTab]);
 
   // Geocode location when parent is selected
   useEffect(() => {
@@ -84,9 +121,10 @@ const ParentAccess = () => {
         mobile: newParent.mobile,
         location: newParent.location || 'Not specified',
         distance: '0 km',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        status: newParent.status || 'Pending'
       }]);
-      setNewParent({ name: '', email: '', childName: '', mobile: '', location: '' });
+      setNewParent({ name: '', email: '', childName: '', mobile: '', location: '', status: 'Pending' });
       setShowForm(false);
     }
   };
@@ -99,7 +137,7 @@ const ParentAccess = () => {
     setIsEditing(true);
     setEditData({ ...selectedParent });
     setMapSearchQuery(selectedParent.location);
-    
+
     // Geocode the location to get coordinates
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedParent.location)}&limit=1`);
@@ -132,8 +170,8 @@ const ParentAccess = () => {
           <input
             type="text"
             placeholder="Search parents..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-5 py-3 pl-12 rounded-2xl bg-white/80 backdrop-blur-sm border-2 border-purple-100 focus:border-purple-400 focus:bg-white shadow-sm hover:shadow-md transition-all text-sm outline-none"
           />
           <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400" />
@@ -149,26 +187,45 @@ const ParentAccess = () => {
       )}
 
       {selectedParent && (
-        <div className="mb-4">
+        <div className="mb-4 flex items-center gap-4">
+          <button
+            onClick={() => { setSelectedParent(null); setIsEditing(false); }}
+            className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md flex items-center justify-center text-gray-600 transition-all hover:bg-gray-50"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </button>
           <div className="flex items-center gap-2 text-sm font-medium">
-            <button 
-              onClick={() => { setSelectedParent(null); setIsEditing(false); }} 
-              className="hover:opacity-70 transition-all text-black font-bold"
-            >
-              Table
-            </button>
+            <span className="text-gray-500">Back to List</span>
             <span style={{ color: '#40189d' }}>/</span>
             <span style={{ color: '#40189d' }}>{selectedParent.name}</span>
-            <span style={{ color: '#40189d' }}>/</span>
-            <span style={{ color: '#40189d' }}>View</span>
           </div>
         </div>
       )}
 
+      {/* Status Tabs */}
+      {!selectedParent && (
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+          {['All', 'Pending', 'Approved', 'Rejected'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
+                ? 'bg-[#40189d] text-white shadow-md'
+                : 'bg-white text-gray-500 hover:bg-gray-50'
+                }`}
+            >
+              {tab} <span className="ml-1 opacity-60 text-xs bg-black/20 px-1.5 py-0.5 rounded-full">
+                {tab === 'All' ? parents.length : parents.filter(p => p.status === tab).length}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="flex-1 bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div className="flex-1 overflow-hidden">
           {selectedParent ? (
-            <div className="h-full">
+            <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden">
               {/* Hero Header Section */}
               <div className="relative p-5" style={{ backgroundColor: '#40189d' }}>
                 <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-4">
@@ -393,7 +450,7 @@ const ParentAccess = () => {
                     )}
                   </div>
                   <div className="h-64 relative bg-gray-100">
-                    <LocationMap 
+                    <LocationMap
                       center={mapCenter}
                       markerPosition={markerPosition}
                       isEditing={isEditing}
@@ -423,65 +480,141 @@ const ParentAccess = () => {
           ) : (
             <>
               {/* Desktop/Tablet Table View */}
-              <div className="hidden md:block h-full w-full p-6">
-                <div className="space-y-3">
-                  {filteredParents.map((parent, index) => (
-                    <div
-                      key={parent.id}
-                      onClick={() => { setSelectedParent(parent); setShowForm(false); }}
-                      className="group bg-white rounded-2xl p-5 shadow-md hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-purple-200"
-                      style={{ background: 'linear-gradient(to right, #ffffff, #faf5ff)' }}
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg group-hover:scale-110 transition-transform" style={{ backgroundColor: '#40189d' }}>
-                            {parent.name.charAt(0)}
+              <div className="hidden md:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+                <div className="ag-theme-quartz w-full" style={{
+                  height: 'calc(100vh - 220px)',
+                  '--ag-header-background-color': '#f8f5ff',
+                  '--ag-header-foreground-color': '#40189d',
+                  '--ag-font-family': 'inherit',
+                  '--ag-border-radius': '16px',
+                  '--ag-row-hover-color': '#faf5ff',
+                }}>
+                  <AgGridReact
+                    rowData={filteredParents}
+                    columnDefs={[
+                      {
+                        headerName: "Parent Name",
+                        field: "name",
+                        flex: 1.5,
+                        cellRenderer: (params) => (
+                          <div className="flex items-center gap-3 h-full">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                              {params.value.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-900 leading-tight">{params.value}</p>
+                            </div>
                           </div>
-                          <div className={`flex-1 grid gap-6 ${showForm ? 'grid-cols-3' : 'grid-cols-5'}`}>
-                            <div>
-                              <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Parent Name</p>
-                              <p className="font-bold text-gray-900 text-base">{parent.name}</p>
+                        )
+                      },
+                      {
+                        headerName: "Child Name",
+                        field: "childName",
+                        flex: 1.2,
+                        cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500', color: '#374151' }
+                      },
+                      {
+                        headerName: "Email",
+                        field: "email",
+                        flex: 1.5,
+                        cellStyle: { display: 'flex', alignItems: 'center' }
+                      },
+                      {
+                        headerName: "Mobile",
+                        field: "mobile",
+                        flex: 1,
+                        cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500' }
+                      },
+                      {
+                        headerName: "STATUS",
+                        field: "status",
+                        flex: 1,
+                        cellRenderer: (params) => {
+                          const statusColors = {
+                            Pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+                            Approved: 'bg-green-100 text-green-700 border-green-200',
+                            Rejected: 'bg-red-100 text-red-700 border-red-200'
+                          };
+                          return (
+                            <div className="flex items-center h-full">
+                              <span className={`text-xs font-bold px-3 py-1 rounded-full border ${statusColors[params.value] || 'bg-gray-100 text-gray-500'}`}>
+                                {params.value}
+                              </span>
                             </div>
-                            <div>
-                              <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Child Name</p>
-                              <p className="font-semibold text-gray-700 text-base">{parent.childName}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Email</p>
-                              <p className="text-sm text-gray-600">{parent.email}</p>
-                            </div>
-                            {!showForm && (
-                              <div>
-                                <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Mobile</p>
-                                <p className="text-sm text-gray-700 font-medium">{parent.mobile}</p>
-                              </div>
+                          );
+                        }
+                      },
+                      {
+                        headerName: "ACTIONS",
+                        field: "id",
+                        width: 180,
+                        sortable: false,
+                        filter: false,
+                        cellRenderer: (params) => (
+                          <div className="flex items-center justify-end gap-2 h-full">
+                            {/* Status Actions */}
+                            {params.data.status !== 'Approved' && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleApprove(params.data.id); }}
+                                className="w-8 h-8 rounded-full text-green-700 bg-green-100 hover:bg-green-200 transition-all flex items-center justify-center"
+                                title="Approve"
+                              >
+                                <FontAwesomeIcon icon={faCheck} />
+                              </button>
                             )}
-                            {!showForm && (
-                              <div>
-                                <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Date</p>
-                                <p className="text-sm text-gray-600">{parent.date}</p>
-                              </div>
+
+                            {params.data.status !== 'Rejected' && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleReject(params.data.id); }}
+                                className="w-8 h-8 rounded-full text-red-700 bg-red-100 hover:bg-red-200 transition-all flex items-center justify-center"
+                                title="Reject"
+                              >
+                                <FontAwesomeIcon icon={faTimes} />
+                              </button>
                             )}
+
+                            {params.data.status !== 'Pending' && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handlePending(params.data.id); }}
+                                className="w-8 h-8 rounded-full text-yellow-700 bg-yellow-100 hover:bg-yellow-200 transition-all flex items-center justify-center"
+                                title="Set Pending"
+                              >
+                                <FontAwesomeIcon icon={faClock} />
+                              </button>
+                            )}
+
+                            {/* General Actions */}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSelectedParent(params.data); setShowForm(false); }}
+                              className="w-8 h-8 rounded-full text-purple-700 bg-purple-100 hover:bg-purple-200 transition-all flex items-center justify-center"
+                              title="View Details"
+                            >
+                              <FontAwesomeIcon icon={faEye} />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDelete(params.data.id); }}
+                              className="w-8 h-8 rounded-full text-red-700 bg-red-100 hover:bg-red-200 transition-all flex items-center justify-center"
+                              title="Delete Parent"
+                            >
+                              <FontAwesomeIcon icon={faTrash} />
+                            </button>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setSelectedParent(parent); setShowForm(false); }}
-                            className="w-10 h-10 rounded-xl text-white transition-all flex items-center justify-center shadow-md hover:shadow-lg"
-                            style={{ backgroundColor: '#40189d' }}
-                          >
-                            <FontAwesomeIcon icon={faEye} />
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleDelete(parent.id); }}
-                            className="w-10 h-10 rounded-xl bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-md hover:shadow-lg"
-                          >
-                            <FontAwesomeIcon icon={faTrash} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                        )
+                      }
+                    ]}
+                    defaultColDef={{
+                      sortable: true,
+                      filter: true,
+                      resizable: true,
+                      headerClass: "font-bold uppercase text-xs tracking-wide",
+                    }}
+                    rowHeight={80}
+                    headerHeight={50}
+                    pagination={true}
+                    paginationPageSize={5}
+                    paginationPageSizeSelector={[5, 10, 20, 50]}
+                    overlayNoRowsTemplate='<span class="p-4">No parents found</span>'
+                  />
                 </div>
               </div>
 
@@ -508,7 +641,7 @@ const ParentAccess = () => {
                           <FontAwesomeIcon icon={faTrash} className="text-sm" />
                         </button>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-3 mb-4">
                         <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                           <div className="flex items-center gap-2 mb-1">
@@ -525,7 +658,7 @@ const ParentAccess = () => {
                           <p className="text-sm text-gray-900 font-bold truncate">{parent.mobile}</p>
                         </div>
                       </div>
-                      
+
                       <div className="p-3 rounded-xl mb-4" style={{ backgroundColor: '#f8f5ff' }}>
                         <div className="flex items-center gap-2 mb-1">
                           <FontAwesomeIcon icon={faEnvelope} className="text-xs" style={{ color: '#40189d' }} />
@@ -533,7 +666,35 @@ const ParentAccess = () => {
                         </div>
                         <p className="text-sm text-gray-900 font-semibold break-all">{parent.email}</p>
                       </div>
-                      
+
+
+                      <div className="mb-4 flex gap-2 overflow-x-auto">
+                        {parent.status !== 'Approved' && (
+                          <button
+                            onClick={() => handleApprove(parent.id)}
+                            className="flex-1 py-2 bg-green-50 text-green-700 rounded-xl font-bold text-xs hover:bg-green-100 border border-green-100"
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {parent.status !== 'Rejected' && (
+                          <button
+                            onClick={() => handleReject(parent.id)}
+                            className="flex-1 py-2 bg-red-50 text-red-700 rounded-xl font-bold text-xs hover:bg-red-100 border border-red-100"
+                          >
+                            Reject
+                          </button>
+                        )}
+                        {parent.status !== 'Pending' && (
+                          <button
+                            onClick={() => handlePending(parent.id)}
+                            className="flex-1 py-2 bg-yellow-50 text-yellow-700 rounded-xl font-bold text-xs hover:bg-yellow-100 border border-yellow-100 flex items-center justify-center gap-1"
+                          >
+                            <FontAwesomeIcon icon={faClock} /> Set Pending
+                          </button>
+                        )}
+                      </div>
+
                       <button
                         onClick={() => { setSelectedParent(parent); setShowForm(false); }}
                         className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all"
@@ -554,110 +715,132 @@ const ParentAccess = () => {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setShowForm(false)}></div>
             <div className="fixed inset-0 lg:relative lg:w-80 flex items-center justify-center lg:block z-50 lg:z-auto p-4 lg:p-0">
               <div className="w-full max-w-md lg:max-w-none lg:h-auto flex flex-col bg-white rounded-3xl lg:rounded-t-[50px] shadow-2xl">
-              <div className="p-6 sm:p-8 text-center relative">
-                <button
-                  onClick={() => setShowForm(false)}
-                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition"
-                >
-                  <FontAwesomeIcon icon={faTimes} className="text-xl" />
-                </button>
-                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full flex items-center justify-center shadow-xl" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
-                  <FontAwesomeIcon icon={faUserPlus} className="text-white text-3xl sm:text-4xl" />
+                <div className="p-6 sm:p-8 text-center relative">
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition"
+                  >
+                    <FontAwesomeIcon icon={faTimes} className="text-xl" />
+                  </button>
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-full flex items-center justify-center shadow-xl" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
+                    <FontAwesomeIcon icon={faUserPlus} className="text-white text-3xl sm:text-4xl" />
+                  </div>
+                  <h3 className="font-bold text-xl sm:text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add Parent</h3>
+                  <p className="text-gray-500 text-sm mt-1">Fill in the details</p>
                 </div>
-                <h3 className="font-bold text-xl sm:text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add Parent</h3>
-                <p className="text-gray-500 text-sm mt-1">Fill in the details</p>
-              </div>
-              <div className="flex-1 px-6 sm:px-8 pb-6 sm:pb-8 flex flex-col overflow-y-auto">
-                <div className="space-y-4 flex-1">
-                  <div className="relative">
-                    <FontAwesomeIcon icon={faEnvelope} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="email"
-                      placeholder="Email Address"
-                      value={newParent.email}
-                      onChange={(e) => setNewParent({ ...newParent, email: e.target.value })}
-                      className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
-                      style={{ borderColor: '#e9d5ff' }}
-                      onFocus={(e) => e.target.style.borderColor = '#40189d'}
-                      onBlur={(e) => e.target.style.borderColor = '#e9d5ff'}
-                    />
-                  </div>
-                  <div className="relative">
-                    <FontAwesomeIcon icon={faUser} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Parent Name"
-                      value={newParent.name}
-                      onChange={(e) => setNewParent({ ...newParent, name: e.target.value })}
-                      className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
-                      style={{ borderColor: '#e9d5ff' }}
-                      onFocus={(e) => e.target.style.borderColor = '#40189d'}
-                      onBlur={(e) => e.target.style.borderColor = '#e9d5ff'}
-                    />
-                  </div>
-                  <div className="relative">
-                    <FontAwesomeIcon icon={faChild} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Child Name"
-                      value={newParent.childName}
-                      onChange={(e) => setNewParent({ ...newParent, childName: e.target.value })}
-                      className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
-                      style={{ borderColor: '#e9d5ff' }}
-                      onFocus={(e) => e.target.style.borderColor = '#40189d'}
-                      onBlur={(e) => e.target.style.borderColor = '#e9d5ff'}
-                    />
-                  </div>
-                  <div className="relative">
-                    <FontAwesomeIcon icon={faPhone} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="tel"
-                      placeholder="Mobile Number"
-                      value={newParent.mobile}
-                      onChange={(e) => setNewParent({ ...newParent, mobile: e.target.value })}
-                      className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
-                      style={{ borderColor: '#e9d5ff' }}
-                      onFocus={(e) => e.target.style.borderColor = '#40189d'}
-                      onBlur={(e) => e.target.style.borderColor = '#e9d5ff'}
-                    />
-                  </div>
-                  <div className="relative">
-                    <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <input
-                      type="text"
-                      placeholder="Location Address"
-                      value={newParent.location}
-                      readOnly
-                      className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-24 py-3.5 text-sm focus:bg-white focus:outline-none transition cursor-pointer"
-                      style={{ borderColor: '#e9d5ff' }}
-                      onClick={() => setShowLocationPicker(true)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowLocationPicker(true)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium text-white rounded-lg transition-all"
-                      style={{ backgroundColor: '#40189d' }}
-                    >
-                      <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex-1 px-6 sm:px-8 pb-6 sm:pb-8 flex flex-col overflow-y-auto">
+                  <div className="space-y-4 flex-1">
+                    <div className="relative">
+                      <FontAwesomeIcon icon={faEnvelope} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="email"
+                        placeholder="Email Address"
+                        value={newParent.email}
+                        onChange={(e) => setNewParent({ ...newParent, email: e.target.value })}
+                        className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
+                        style={{ borderColor: '#e9d5ff' }}
+                        onFocus={(e) => e.target.style.borderColor = '#40189d'}
+                        onBlur={(e) => e.target.style.borderColor = '#e9d5ff'}
+                      />
+                    </div>
+                    <div className="relative">
+                      <FontAwesomeIcon icon={faUser} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Parent Name"
+                        value={newParent.name}
+                        onChange={(e) => setNewParent({ ...newParent, name: e.target.value })}
+                        className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
+                        style={{ borderColor: '#e9d5ff' }}
+                        onFocus={(e) => e.target.style.borderColor = '#40189d'}
+                        onBlur={(e) => e.target.style.borderColor = '#e9d5ff'}
+                      />
+                    </div>
+                    <div className="relative">
+                      <FontAwesomeIcon icon={faChild} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Child Name"
+                        value={newParent.childName}
+                        onChange={(e) =>
+                          setNewParent({ ...newParent, childName: e.target.value })
+                        }
+                        className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
+                        style={{ borderColor: "#e9d5ff" }}
+                        onFocus={(e) => (e.target.style.borderColor = "#40189d")}
+                        onBlur={(e) => (e.target.style.borderColor = "#e9d5ff")}
+                      />
+                    </div>
+                    <div className="relative">
+                      <FontAwesomeIcon
+                        icon={faPhone}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Mobile Number"
+                        value={newParent.mobile}
+                        onChange={(e) =>
+                          setNewParent({ ...newParent, mobile: e.target.value })
+                        }
+                        className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-4 py-3.5 text-sm focus:bg-white focus:outline-none transition"
+                        style={{ borderColor: "#e9d5ff" }}
+                        onFocus={(e) => (e.target.style.borderColor = "#40189d")}
+                        onBlur={(e) => (e.target.style.borderColor = "#e9d5ff")}
+                      />
+                    </div>
+
+                    {/* Status Selection (Default Pending for now) */}
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className="text-sm font-medium text-gray-700">Initial Status:</span>
+                      <select
+                        value={newParent.status || 'Pending'}
+                        onChange={(e) => setNewParent({ ...newParent, status: e.target.value })}
+                        className="bg-gray-50 border-2 rounded-lg px-3 py-1.5 text-sm outline-none"
+                        style={{ borderColor: "#e9d5ff" }}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                      </select>
+                    </div>
+
+                    <div className="relative">
+                      <svg className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      Pick
-                    </button>
+                      <input
+                        type="text"
+                        placeholder="Location Address"
+                        value={newParent.location}
+                        readOnly
+                        className="w-full bg-gray-50 border-2 rounded-xl pl-12 pr-24 py-3.5 text-sm focus:bg-white focus:outline-none transition cursor-pointer"
+                        style={{ borderColor: '#e9d5ff' }}
+                        onClick={() => setShowLocationPicker(true)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLocationPicker(true)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium text-white rounded-lg transition-all"
+                        style={{ backgroundColor: '#40189d' }}
+                      >
+                        <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Pick
+                      </button>
+                    </div>
                   </div>
+                  <button
+                    onClick={handleAdd}
+                    className="w-full mt-6 py-4 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition"
+                    style={{ backgroundColor: COLORS.SIDEBAR_BG }}
+                  >
+                    Add Parent
+                  </button>
                 </div>
-                <button
-                  onClick={handleAdd}
-                  className="w-full mt-6 py-4 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition"
-                  style={{ backgroundColor: COLORS.SIDEBAR_BG }}
-                >
-                  Add Parent
-                </button>
               </div>
-            </div>
             </div>
           </>
         )}
@@ -688,7 +871,7 @@ const ParentAccess = () => {
                   </button>
                 </div>
               </div>
-              
+
               <div className="p-4 border-b border-gray-200">
                 <div className="relative">
                   <input
@@ -748,7 +931,7 @@ const ParentAccess = () => {
               </div>
 
               <div className="flex-1 relative">
-                <LocationMap 
+                <LocationMap
                   center={tempMapCenter}
                   markerPosition={tempMarkerPosition}
                   isEditing={true}
@@ -831,14 +1014,14 @@ export default ParentAccess;
 // Add slide-in animation
 const style = document.createElement('style');
 style.textContent = `
-  @keyframes slide-in {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
+      @keyframes slide-in {
+        from {transform: translateX(-100%); }
+      to {transform: translateX(0); }
   }
-  .animate-slide-in {
-    animation: slide-in 0.3s ease-out;
+      .animate-slide-in {
+        animation: slide-in 0.3s ease-out;
   }
-`;
+      `;
 if (typeof document !== 'undefined') {
   document.head.appendChild(style);
 }

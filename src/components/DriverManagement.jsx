@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserPlus, faTrash, faCheck, faTimes, faSearch, faEnvelope, faUser, faPhone, faEye, faEdit, faIdCard, faCar } from '@fortawesome/free-solid-svg-icons';
+import { faUserPlus, faTrash, faCheck, faTimes, faSearch, faEnvelope, faUser, faPhone, faEye, faEdit, faIdCard, faCar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 
 const DriverManagement = () => {
@@ -8,6 +9,11 @@ const DriverManagement = () => {
     { id: 1, name: 'Robert Wilson', email: 'robert@example.com', mobile: '555-0101', licenseNumber: 'DL-2024-001', vehicleNumber: 'ABC-1234', date: '2024-01-10' },
     { id: 2, name: 'Sarah Martinez', email: 'sarah@example.com', mobile: '555-0102', licenseNumber: 'DL-2024-002', vehicleNumber: 'XYZ-5678', date: '2024-01-15' },
     { id: 3, name: 'David Brown', email: 'david@example.com', mobile: '555-0103', licenseNumber: 'DL-2024-003', vehicleNumber: 'LMN-9012', date: '2024-02-01' },
+    { id: 4, name: 'Emily Davis', email: 'emily@example.com', mobile: '555-0104', licenseNumber: 'DL-2024-004', vehicleNumber: 'PQR-3456', date: '2024-02-05' },
+    { id: 5, name: 'Michael Chen', email: 'michael@example.com', mobile: '555-0105', licenseNumber: 'DL-2024-005', vehicleNumber: 'UVW-7890', date: '2024-02-10' },
+    { id: 6, name: 'Jessica Taylor', email: 'jessica@example.com', mobile: '555-0106', licenseNumber: 'DL-2024-006', vehicleNumber: 'RST-1234', date: '2024-02-15' },
+    { id: 7, name: 'William Anderson', email: 'william@example.com', mobile: '555-0107', licenseNumber: 'DL-2024-007', vehicleNumber: 'JKL-5678', date: '2024-02-20' },
+    { id: 8, name: 'Olivia Thomas', email: 'olivia@example.com', mobile: '555-0108', licenseNumber: 'DL-2024-008', vehicleNumber: 'MNO-9012', date: '2024-02-25' },
   ]);
   const [showModal, setShowModal] = useState(false);
   const [newDriver, setNewDriver] = useState({ name: '', email: '', mobile: '', licenseNumber: '', vehicleNumber: '' });
@@ -16,8 +22,8 @@ const DriverManagement = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(null);
 
-  const filteredDrivers = drivers.filter(d => 
-    d.name.toLowerCase().includes(search.toLowerCase()) || 
+  const filteredDrivers = drivers.filter(d =>
+    d.name.toLowerCase().includes(search.toLowerCase()) ||
     d.email.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -77,25 +83,24 @@ const DriverManagement = () => {
       )}
 
       {selectedDriver && (
-        <div className="mb-4">
+        <div className="mb-4 flex items-center gap-4">
+          <button
+            onClick={() => { setSelectedDriver(null); setIsEditing(false); }}
+            className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md flex items-center justify-center text-gray-600 transition-all hover:bg-gray-50"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </button>
           <div className="flex items-center gap-2 text-sm font-medium">
-            <button 
-              onClick={() => { setSelectedDriver(null); setIsEditing(false); }} 
-              className="hover:opacity-70 transition-all text-black font-bold"
-            >
-              Table
-            </button>
+            <span className="text-gray-500">Back to List</span>
             <span style={{ color: '#40189d' }}>/</span>
             <span style={{ color: '#40189d' }}>{selectedDriver.name}</span>
-            <span style={{ color: '#40189d' }}>/</span>
-            <span style={{ color: '#40189d' }}>View</span>
           </div>
         </div>
       )}
 
-      <div className="flex-1 bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div className="flex-1 overflow-hidden">
         {selectedDriver ? (
-          <div className="h-full">
+          <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden">
             <div className="relative p-5" style={{ backgroundColor: '#40189d' }}>
               <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -219,61 +224,101 @@ const DriverManagement = () => {
           </div>
         ) : (
           <>
-            <div className="hidden md:block h-full w-full p-6">
-              <div className="space-y-3">
-                {filteredDrivers.map((driver) => (
-                  <div
-                    key={driver.id}
-                    onClick={() => setSelectedDriver(driver)}
-                    className="group bg-white rounded-2xl p-5 shadow-md hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-purple-200"
-                    style={{ background: 'linear-gradient(to right, #ffffff, #faf5ff)' }}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg group-hover:scale-110 transition-transform" style={{ backgroundColor: '#40189d' }}>
-                          {driver.name.charAt(0)}
-                        </div>
-                        <div className="flex-1 grid gap-6 grid-cols-5">
-                          <div>
-                            <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Driver Name</p>
-                            <p className="font-bold text-gray-900 text-base">{driver.name}</p>
+            <div className="hidden md:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+              <div className="ag-theme-quartz w-full" style={{
+                height: 'calc(100vh - 220px)',
+                '--ag-header-background-color': '#f8f5ff',
+                '--ag-header-foreground-color': '#40189d',
+                '--ag-font-family': 'inherit',
+                '--ag-border-radius': '16px',
+                '--ag-row-hover-color': '#faf5ff',
+              }}>
+                <AgGridReact
+                  rowData={filteredDrivers}
+                  columnDefs={[
+                    {
+                      headerName: "Driver Name",
+                      field: "name",
+                      flex: 1.5,
+                      cellRenderer: (params) => (
+                        <div className="flex items-center gap-3 h-full">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                            {params.value.charAt(0)}
                           </div>
                           <div>
-                            <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Email</p>
-                            <p className="text-sm text-gray-600">{driver.email}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Mobile</p>
-                            <p className="text-sm text-gray-700 font-medium">{driver.mobile}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>License</p>
-                            <p className="text-sm text-gray-700 font-medium">{driver.licenseNumber}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium mb-1.5 uppercase tracking-wide" style={{ color: '#40189d' }}>Vehicle</p>
-                            <p className="text-sm text-gray-700 font-medium">{driver.vehicleNumber}</p>
+                            <p className="font-bold text-gray-900 leading-tight">{params.value}</p>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setSelectedDriver(driver); }}
-                          className="w-10 h-10 rounded-xl text-white transition-all flex items-center justify-center shadow-md hover:shadow-lg"
-                          style={{ backgroundColor: '#40189d' }}
-                        >
-                          <FontAwesomeIcon icon={faEye} />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(driver.id); }}
-                          className="w-10 h-10 rounded-xl bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-md hover:shadow-lg"
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                      )
+                    },
+                    {
+                      headerName: "Email",
+                      field: "email",
+                      flex: 1.5,
+                      cellStyle: { display: 'flex', alignItems: 'center' }
+                    },
+                    {
+                      headerName: "Mobile",
+                      field: "mobile",
+                      flex: 1,
+                      cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500' }
+                    },
+                    {
+                      headerName: "License",
+                      field: "licenseNumber",
+                      flex: 1,
+                      cellStyle: { display: 'flex', alignItems: 'center' }
+                    },
+                    {
+                      headerName: "Vehicle",
+                      field: "vehicleNumber",
+                      flex: 1,
+                      cellStyle: { display: 'flex', alignItems: 'center' }
+                    },
+                    {
+                      headerName: "Date",
+                      field: "date",
+                      flex: 1,
+                      cellStyle: { display: 'flex', alignItems: 'center', color: 'gray' }
+                    },
+                    {
+                      headerName: "Actions",
+                      field: "id",
+                      width: 120,
+                      sortable: false,
+                      filter: false,
+                      cellRenderer: (params) => (
+                        <div className="flex items-center gap-2 h-full">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setSelectedDriver(params.data); }}
+                            className="w-8 h-8 rounded-lg text-white transition-all flex items-center justify-center shadow-sm hover:shadow-md hover:scale-105"
+                            style={{ backgroundColor: '#40189d' }}
+                          >
+                            <FontAwesomeIcon icon={faEye} size="sm" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDelete(params.data.id); }}
+                            className="w-8 h-8 rounded-lg bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-sm hover:shadow-md hover:scale-105"
+                          >
+                            <FontAwesomeIcon icon={faTrash} size="sm" />
+                          </button>
+                        </div>
+                      )
+                    }
+                  ]}
+                  defaultColDef={{
+                    sortable: true,
+                    filter: true,
+                    resizable: true,
+                    headerClass: "font-bold uppercase text-xs tracking-wide",
+                  }}
+                  rowHeight={80}
+                  headerHeight={50}
+                  pagination={true}
+                  paginationPageSize={5}
+                  paginationPageSizeSelector={[5, 10, 20, 50]}
+                  overlayNoRowsTemplate='<span class="p-4">No drivers found</span>'
+                />
               </div>
             </div>
 
@@ -299,7 +344,7 @@ const DriverManagement = () => {
                         <FontAwesomeIcon icon={faTrash} className="text-sm" />
                       </button>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                         <div className="flex items-center gap-2 mb-1">
@@ -316,7 +361,7 @@ const DriverManagement = () => {
                         <p className="text-sm text-gray-900 font-bold truncate">{driver.licenseNumber}</p>
                       </div>
                     </div>
-                    
+
                     <div className="p-3 rounded-xl mb-4" style={{ backgroundColor: '#f8f5ff' }}>
                       <div className="flex items-center gap-2 mb-1">
                         <FontAwesomeIcon icon={faEnvelope} className="text-xs" style={{ color: '#40189d' }} />
@@ -324,7 +369,7 @@ const DriverManagement = () => {
                       </div>
                       <p className="text-sm text-gray-900 font-semibold break-all">{driver.email}</p>
                     </div>
-                    
+
                     <button
                       onClick={() => setSelectedDriver(driver)}
                       className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all"
@@ -370,7 +415,7 @@ const DriverManagement = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-8">
               <div className="space-y-5">
                 <div>
