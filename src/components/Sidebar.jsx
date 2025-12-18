@@ -9,19 +9,33 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../constants/colors';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const Sidebar = ({ onNavigate }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Helper to check if a path is active
+  const isActive = (path) => {
+    if (path === '/dashboard' && location.pathname === '/dashboard') return true;
+    if (path !== '/dashboard' && location.pathname.startsWith(path)) return true;
+    return false;
+  };
+
   const menuItems = [
-    { icon: faDashboard, label: 'Dashboard', page: 'dashboard' },
-    { icon: faUserFriends, label: 'Parent Management', page: 'parent-management' },
-    { icon: faCar, label: 'Driver Management', page: 'driver-management' },
-    { icon: faBus, label: 'Bus Management', page: 'bus-management' },
-    { icon: faMapLocationDot, label: 'Route Management', page: 'route-management' },
+    { icon: faDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: faUserFriends, label: 'Parent Management', path: '/parents' },
+    { icon: faCar, label: 'Driver Management', path: '/drivers' },
+    { icon: faBus, label: 'Bus Management', path: '/buses' },
+    { icon: faMapLocationDot, label: 'Route Management', path: '/routes' },
   ];
 
+  const handleNavigation = (path) => {
+    navigate(path);
+    setIsOpen(false);
+  };
+  // ...
   return (
     <>
       {!isOpen && (
@@ -50,25 +64,28 @@ const Sidebar = ({ onNavigate }) => {
         </div>
 
         <nav className="flex-1 py-5">
-          {menuItems.map((item, index) => (
-            <div key={index} className="relative">
-              <button
-                onClick={() => { setActiveIndex(index); onNavigate(item.page); }}
-                className="flex items-center gap-4 px-5 py-4 font-medium w-full text-left"
-                style={{
-                  backgroundColor: activeIndex === index ? COLORS.SIDEBAR_ACTIVE : 'transparent',
-                  color: activeIndex === index ? 'black' : 'white',
-                  borderTopRightRadius: activeIndex === index ? '25px' : '0',
-                  borderBottomRightRadius: activeIndex === index ? '25px' : '0',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <FontAwesomeIcon icon={item.icon} className="w-5 h-5" />
-                <span>{item.label}</span>
-              </button>
-            </div>
-          ))}
+          {menuItems.map((item, index) => {
+            const active = isActive(item.path);
+            return (
+              <div key={index} className="relative">
+                <button
+                  onClick={() => handleNavigation(item.path)}
+                  className="flex items-center gap-4 px-5 py-4 font-medium w-full text-left"
+                  style={{
+                    backgroundColor: active ? COLORS.SIDEBAR_ACTIVE : 'transparent',
+                    color: active ? 'black' : 'white',
+                    borderTopRightRadius: active ? '25px' : '0',
+                    borderBottomRightRadius: active ? '25px' : '0',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <FontAwesomeIcon icon={item.icon} className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </button>
+              </div>
+            )
+          })}
         </nav>
 
       </div>

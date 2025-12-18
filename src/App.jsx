@@ -1,7 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './components/Login'
-import SignUp from './components/SignUp'
 import Dashboard from './components/Dashboard'
+import DashboardOverview from './components/DashboardOverview'
+import ParentAccess from './components/ParentAccess'
+import DriverManagement from './components/DriverManagement'
+import BusManagement from './components/BusManagement'
+import RouteManagement from './components/RouteManagement'
+import ComingSoon from './components/ComingSoon'
 import './App.css'
 
 function App() {
@@ -9,9 +14,18 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Dashboard Layout Wrapper - No specific path prefix, so children determine URL */}
+        <Route element={<Dashboard />}>
+          <Route path="/dashboard" element={<DashboardOverview />} />
+          <Route path="/parents" element={<ParentAccess />} />
+          <Route path="/drivers" element={<DriverManagement />} />
+          <Route path="/buses" element={<BusManagement />} />
+          <Route path="/routes" element={<RouteManagement />} />
+          <Route path="*" element={<ComingSoon />} />
+        </Route>
+
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   )

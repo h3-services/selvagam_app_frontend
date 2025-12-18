@@ -385,13 +385,15 @@ const DriverManagement = () => {
         )}
       </div>
 
-      <button
-        onClick={() => setShowModal(true)}
-        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
-        style={{ backgroundColor: COLORS.SIDEBAR_BG }}
-      >
-        <FontAwesomeIcon icon={faUserPlus} className="text-xl sm:text-2xl" />
-      </button>
+      {!selectedDriver && (
+        <button
+          onClick={() => setShowModal(true)}
+          className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
+          style={{ backgroundColor: COLORS.SIDEBAR_BG }}
+        >
+          <FontAwesomeIcon icon={faUserPlus} className="text-xl sm:text-2xl" />
+        </button>
+      )}
 
       {showModal && (
         <>

@@ -338,19 +338,20 @@ const BusManagement = () => {
                 )}
             </div>
 
-            {/* Add Button */}
-            <button
-                onClick={() => setShowModal(true)}
-                className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
-                style={{ backgroundColor: COLORS.SIDEBAR_BG }}
-            >
-                <FontAwesomeIcon icon={faBus} className="text-xl sm:text-2xl" />
-            </button>
+            {!selectedBus && (
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
+                    style={{ backgroundColor: COLORS.SIDEBAR_BG }}
+                >
+                    <FontAwesomeIcon icon={faBus} className="text-xl sm:text-2xl" />
+                </button>
+            )}
 
             {/* Add Bus Modal */}
             {showModal && (
                 <>
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setShowModal(false)}></div>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
                     <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-50 flex flex-col">
                         <div className="relative p-8 border-b border-purple-100">
                             <button

@@ -3,8 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock, faUserShield } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { auth, db } from '../firebase';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,6 +14,38 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if user exists in Firestore, if not create basic profile
+      const userRef = doc(db, 'schools', 'hope3-school', 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        // Create new user document (Optional: restrict this if you only want pre-approved emails)
+        await setDoc(userRef, {
+          email: user.email,
+          name: user.displayName,
+          photoURL: user.photoURL,
+          role: 'admin', // Default role, change as needed
+          createdAt: serverTimestamp()
+        });
+      }
+
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError('Google Sign-In failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -21,27 +55,24 @@ const Login = () => {
       const usersRef = collection(db, 'schools', 'hope3-school', 'users');
       const q = query(usersRef, where('email', '==', email));
       const snapshot = await getDocs(q);
-      
+
       if (snapshot.empty) {
         setError('No account found with this email.');
         setLoading(false);
         return;
       }
-      
+
       const userData = snapshot.docs[0].data();
-      
+
       if (userData.password !== password) {
         setError('Incorrect password.');
         setLoading(false);
         return;
       }
-      
-      console.log('User Role:', userData.roll);
-      console.log('User Name:', userData.name);
-      console.log('User Email:', userData.email);
-      
+
       navigate('/dashboard');
     } catch (err) {
+      console.error(err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -66,7 +97,7 @@ const Login = () => {
             </div>
           )}
 
-          <form onSubmit={handleEmailLogin} className="space-y-3 sm:space-y-4">
+          <form onSubmit={handleEmailLogin} className="space-y-3 sm:space-y-4 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
               <div className="relative">
@@ -115,17 +146,47 @@ const Login = () => {
             </button>
           </form>
 
-          <p className="text-center text-xs sm:text-sm text-gray-600 mt-4 sm:mt-6">
-            Don't have an account? <button onClick={() => navigate('/signup')} className="font-semibold hover:underline" style={{ color: COLORS.SIDEBAR_BG }}>Sign Up</button>
-          </p>
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full py-3.5 bg-white border-2 rounded-xl font-bold shadow-sm hover:shadow-md hover:bg-purple-50 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+            style={{
+              borderColor: COLORS.SIDEBAR_BG,
+              color: COLORS.SIDEBAR_BG
+            }}
+          >
+            {loading ? (
+              <span>Loading...</span>
+            ) : (
+              <>
+                <FontAwesomeIcon icon={faGoogle} className="text-xl" />
+                <span>Sign in with Google</span>
+              </>
+            )}
+          </button>
+
+          <div className="mt-8 text-center">
+            <p className="text-xs text-gray-400">By signing in, you agree to our Terms and Privacy Policy.</p>
+          </div>
+
+          {/* Sign Up Link Removed */}
         </div>
       </div>
 
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 bg-white">
         <div className="text-center max-w-lg">
-          <img 
-            src="https://img.freepik.com/free-vector/admin-concept-illustration_114360-2139.jpg" 
-            alt="Admin Portal" 
+          <img
+            src="https://img.freepik.com/free-vector/admin-concept-illustration_114360-2139.jpg"
+            alt="Admin Portal"
             className="w-full max-w-md mx-auto mb-8 rounded-2xl"
           />
           <h2 className="text-4xl font-bold mb-4" style={{ color: COLORS.SIDEBAR_BG }}>Admin Portal</h2>
