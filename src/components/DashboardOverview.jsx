@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCar, faUserFriends, faChartLine, faBell } from '@fortawesome/free-solid-svg-icons';
+import { faCar, faUserFriends, faChartLine, faBell, faBus } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -15,9 +15,13 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Custom Bus Icon (using DivIcon for FontAwesome)
+// Custom Bus Icon (using FontAwesome SVG path dynamically)
 const busIcon = L.divIcon({
-    html: `<div style="background-color: #40189d; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);"><svg class="svg-inline--fa fa-bus fa-w-16" style="color: white; font-size: 14px;" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="bus" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 0C114.6 0 0 114.6 0 256v16c0 13.3 10.7 24 24 24s24-10.7 24-24V256c0-114.9 93.1-208 208-208s208 93.1 208 208v16c0 13.3 10.7 24 24 24s24-10.7 24-24V256C512 114.6 397.4 0 256 0zM48 256c0-114.9 93.1-208 208-208s208 93.1 208 208c0 30.2 7.1 58.6 19.7 84H28.3c12.6-25.4 19.7-53.8 19.7-84zm208 224c-114.9 0-208-93.1-208-208 0-7.6 .4-15.1 1.3-22.5h413.4c.9 7.4 1.3 14.9 1.3 22.5 0 114.9-93.1 208-208 208z"/></svg></div>`, // Simplified SVG or use FontAwesome class if globally available, but direct SVG is safer for Leaflet DivIcon
+    html: `<div style="background-color: #40189d; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${faBus.icon[0]} ${faBus.icon[1]}" style="width: 16px; height: 16px; fill: white;">
+        <path d="${faBus.icon[4]}"></path>
+    </svg>
+  </div>`,
     className: 'custom-bus-icon',
     iconSize: [32, 32],
     iconAnchor: [16, 16]
@@ -111,7 +115,7 @@ const DashboardOverview = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* Main Content Area (Active Buses Map) */}
-                <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100/50 p-6 flex flex-col h-[400px]">
+                <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100/50 p-6 flex flex-col h-[400px] lg:h-[calc(100vh-380px)] min-h-[300px]">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-800 text-lg">Live Active Buses</h3>
                         <div className="flex items-center gap-2">
@@ -145,9 +149,9 @@ const DashboardOverview = () => {
                 </div>
 
                 {/* Recent Activity List */}
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100/50 p-6">
-                    <h3 className="font-bold text-gray-800 text-lg mb-6">Recent Activity</h3>
-                    <div className="space-y-6">
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100/50 p-6 flex flex-col h-[400px] lg:h-[calc(100vh-380px)] min-h-[300px]">
+                    <h3 className="font-bold text-gray-800 text-lg mb-6 shrink-0">Recent Activity</h3>
+                    <div className="space-y-6 overflow-y-auto flex-1 pr-2">
                         {recentActivity.map((activity) => (
                             <div key={activity.id} className="flex gap-4 group cursor-pointer">
                                 <div className="relative">
@@ -166,9 +170,6 @@ const DashboardOverview = () => {
                             </div>
                         ))}
                     </div>
-                    <button className="w-full mt-4 py-3 text-sm font-bold text-purple-700 hover:text-purple-800 hover:bg-purple-50 rounded-xl transition-all">
-                        View All Activity
-                    </button>
                 </div>
             </div>
         </div>
