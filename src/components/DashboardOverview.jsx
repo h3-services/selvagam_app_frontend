@@ -1,6 +1,34 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCar, faUserFriends, faChartLine, faBell } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+// Fix for default marker icon in Leaflet + React
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Custom Bus Icon (using DivIcon for FontAwesome)
+const busIcon = L.divIcon({
+    html: `<div style="background-color: #40189d; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);"><svg class="svg-inline--fa fa-bus fa-w-16" style="color: white; font-size: 14px;" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="bus" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 0C114.6 0 0 114.6 0 256v16c0 13.3 10.7 24 24 24s24-10.7 24-24V256c0-114.9 93.1-208 208-208s208 93.1 208 208v16c0 13.3 10.7 24 24 24s24-10.7 24-24V256C512 114.6 397.4 0 256 0zM48 256c0-114.9 93.1-208 208-208s208 93.1 208 208c0 30.2 7.1 58.6 19.7 84H28.3c12.6-25.4 19.7-53.8 19.7-84zm208 224c-114.9 0-208-93.1-208-208 0-7.6 .4-15.1 1.3-22.5h413.4c.9 7.4 1.3 14.9 1.3 22.5 0 114.9-93.1 208-208 208z"/></svg></div>`, // Simplified SVG or use FontAwesome class if globally available, but direct SVG is safer for Leaflet DivIcon
+    className: 'custom-bus-icon',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
+});
+
+// Mock Active Buses Data
+const activeBuses = [
+    { id: 101, number: 'AP 29 BD 1234', location: [17.4401, 78.3489], status: 'Moving', speed: '45 km/h' },
+    { id: 102, number: 'AP 29 BD 5678', location: [17.4501, 78.3589], status: 'Stopped', speed: '0 km/h' },
+    { id: 103, number: 'AP 29 BD 9012', location: [17.4301, 78.3389], status: 'Moving', speed: '30 km/h' },
+];
 
 const DashboardOverview = () => {
     // Mock Statistics Data
@@ -52,7 +80,7 @@ const DashboardOverview = () => {
     ];
 
     return (
-        <div className="h-full bg-[#f2f2f2] p-6 lg:p-8 overflow-y-auto">
+        <div className="h-full p-6 lg:p-8 overflow-y-auto">
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
@@ -79,39 +107,40 @@ const DashboardOverview = () => {
                 ))}
             </div>
 
-            {/* Content Grid (Charts placeholder + Recent Activity) */}
+            {/* Content Grid (Map + Recent Activity) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                {/* Main Content Area (e.g., Graphs) - Placeholder Style */}
-                <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100/50 p-6 flex flex-col">
+                {/* Main Content Area (Active Buses Map) */}
+                <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100/50 p-6 flex flex-col h-[400px]">
                     <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-bold text-gray-800 text-lg">Weekly Activity</h3>
-                        <select className="text-xs bg-gray-50 border-none rounded-lg px-3 py-1.5 text-gray-600 font-medium focus:ring-0 cursor-pointer hover:bg-gray-100 transition">
-                            <option>This Week</option>
-                            <option>Last Week</option>
-                        </select>
+                        <h3 className="font-bold text-gray-800 text-lg">Live Active Buses</h3>
+                        <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wide">Live Updates</span>
+                        </div>
                     </div>
-                    {/* CSS-only simple bar chart visualization */}
-                    <div className="flex-1 flex items-end justify-between px-4 pb-2 gap-4 h-64 border-b border-gray-100 border-dashed">
-                        {[40, 65, 45, 80, 55, 90, 70].map((height, i) => (
-                            <div key={i} className="w-full bg-gray-50 rounded-t-xl relative group h-full flex items-end">
-                                <div
-                                    className="w-full rounded-t-xl transition-all duration-500 relative"
-                                    style={{
-                                        height: `${height}%`,
-                                        backgroundColor: i === 5 ? '#40189d' : '#e9d5ff',
-                                        opacity: i === 5 ? 1 : 0.7
-                                    }}
-                                >
-                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                        {height * 12} trips
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex justify-between mt-4 text-xs text-gray-400 font-bold uppercase tracking-wide px-2">
-                        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                    {/* Map Container */}
+                    <div className="flex-1 rounded-2xl overflow-hidden shadow-inner border border-gray-200 relative">
+                        <MapContainer
+                            center={[17.4401, 78.3489]}
+                            zoom={13}
+                            style={{ height: '100%', width: '100%' }}
+                            scrollWheelZoom={false}
+                        >
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                            />
+                            {activeBuses.map(bus => (
+                                <Marker key={bus.id} position={bus.location} icon={busIcon}>
+                                    <Popup>
+                                        <div className="font-bold text-sm">{bus.number}</div>
+                                        <div className="text-xs text-gray-600">Status: {bus.status}</div>
+                                        <div className="text-xs text-gray-600">Speed: {bus.speed}</div>
+                                    </Popup>
+                                </Marker>
+                            ))}
+                        </MapContainer>
                     </div>
                 </div>
 

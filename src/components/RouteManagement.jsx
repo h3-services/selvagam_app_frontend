@@ -455,6 +455,18 @@ const RouteManagement = () => {
                                             cellStyle: { display: 'flex', alignItems: 'center', fontWeight: 'bold' }
                                         },
                                         {
+                                            headerName: "Stops",
+                                            field: "stops",
+                                            flex: 0.6,
+                                            cellRenderer: (params) => (
+                                                <div className="flex items-center h-full">
+                                                    <span className="bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md font-bold text-xs border border-purple-100">
+                                                        {params.value} Stops
+                                                    </span>
+                                                </div>
+                                            )
+                                        },
+                                        {
                                             headerName: "Bus",
                                             field: "assignedBus",
                                             flex: 0.8,
@@ -539,6 +551,10 @@ const RouteManagement = () => {
                                             <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                                 <p className="text-xs text-gray-500 font-medium">Bus</p>
                                                 <p className="text-sm text-gray-900 font-bold truncate">{route.assignedBus}</p>
+                                            </div>
+                                            <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f8f5ff' }}>
+                                                <p className="text-xs text-gray-500 font-medium">Total Stops</p>
+                                                <p className="text-sm text-gray-900 font-bold truncate">{route.stops} Stops</p>
                                             </div>
                                         </div>
 
