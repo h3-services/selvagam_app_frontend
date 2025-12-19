@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Firebase credentials
+fcm-notification-api/firebase-credentials.json
+*.json

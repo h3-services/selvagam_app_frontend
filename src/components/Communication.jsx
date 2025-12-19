@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faMicrophone, faCommentDots, faUser, faUserTie, faVolumeUp, faAlignLeft } from '@fortawesome/free-solid-svg-icons';
+import { sendNotification } from '../services/notificationService';
 
 const Communication = () => {
     const [recipientType, setRecipientType] = useState('driver'); // 'driver' | 'parent'
     const [messageType, setMessageType] = useState('text'); // 'text' | 'audio'
     const [messageText, setMessageText] = useState('');
     const [isRecording, setIsRecording] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const [title, setTitle] = useState('');
 
     // Mock Recent Messages
     const recentMessages = [
@@ -15,11 +18,28 @@ const Communication = () => {
         { id: 3, to: 'All Parents', type: 'text', content: 'School will be closed tomorrow due to heavy rain.', time: 'Yesterday', recipient: 'Parents' },
     ];
 
-    const handleSendMessage = (e) => {
+    const handleSendMessage = async (e) => {
         e.preventDefault();
-        alert(`Message sent to ${recipientType}s! Type: ${messageType}`);
-        setMessageText('');
-        setIsRecording(false);
+        
+        if (!title.trim() || !messageText.trim()) {
+            alert('Please fill in both title and message');
+            return;
+        }
+
+        setIsSending(true);
+        
+        try {
+            await sendNotification(title.trim(), messageText.trim(), recipientType, messageType);
+            alert(`✅ Notification sent successfully to all ${recipientType}s!`);
+            setTitle('');
+            setMessageText('');
+            setIsRecording(false);
+        } catch (error) {
+            alert('❌ Failed to send notification. Please try again.');
+            console.error('Send notification error:', error);
+        } finally {
+            setIsSending(false);
+        }
     };
 
     return (
@@ -88,9 +108,22 @@ const Communication = () => {
                             </div>
                         </div>
 
-                        {/* 2. Message Content */}
+                        {/* 2. Message Title */}
+                        <div>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">2. Message Title</label>
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder="Enter notification title..."
+                                className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 bg-gray-50/50 transition-shadow"
+                                required
+                            />
+                        </div>
+
+                        {/* 3. Message Content */}
                         <div className="flex-1 flex flex-col">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">2. Message Content</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">3. Message Content</label>
 
                             {/* Type Toggle */}
                             <div className="flex bg-gray-50 p-1.5 rounded-xl mb-4 w-fit">
@@ -112,35 +145,28 @@ const Communication = () => {
 
                             {/* Input Field */}
                             <div className="flex-1 min-h-[200px]">
-                                {messageType === 'text' ? (
-                                    <textarea
-                                        value={messageText}
-                                        onChange={(e) => setMessageText(e.target.value)}
-                                        placeholder={`Write your message to ${recipientType}s here...`}
-                                        className="w-full h-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 transition-shadow"
-                                    ></textarea>
-                                ) : (
-                                    <div
-                                        onClick={() => setIsRecording(!isRecording)}
-                                        className={`w-full h-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all ${isRecording ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 hover:border-purple-300 hover:bg-purple-50'}`}
-                                    >
-                                        <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 transition-all shadow-lg ${isRecording ? 'bg-red-500 animate-pulse scale-110' : 'bg-white text-purple-600'}`}>
-                                            <FontAwesomeIcon icon={faMicrophone} className={`text-2xl ${isRecording ? 'text-white' : ''}`} />
-                                        </div>
-                                        <h3 className={`font-bold text-lg mb-1 ${isRecording ? 'text-red-600' : 'text-gray-700'}`}>
-                                            {isRecording ? 'Recording...' : 'Tap to Record'}
-                                        </h3>
-                                        <p className="text-xs text-gray-500 font-medium">{isRecording ? 'Tap again to stop' : 'Max duration 2:00 mins'}</p>
-                                    </div>
-                                )}
+                                <textarea
+                                    value={messageText}
+                                    onChange={(e) => setMessageText(e.target.value)}
+                                    placeholder={messageType === 'text' ? `Write your message to ${recipientType}s here...` : `Write your voice message to ${recipientType}s here...`}
+                                    className="w-full h-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 transition-shadow"
+                                ></textarea>
                             </div>
                         </div>
 
                         {/* Send Button */}
                         <div className="flex justify-end pt-4 border-t border-gray-100">
-                            <button className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-lg shadow-purple-200 transition-all text-sm flex items-center gap-2 transform active:scale-95">
-                                <FontAwesomeIcon icon={faPaperPlane} />
-                                Send Message
+                            <button 
+                                type="submit"
+                                disabled={isSending || !title.trim() || !messageText.trim()}
+                                className={`px-8 py-3 rounded-xl font-bold shadow-lg transition-all text-sm flex items-center gap-2 transform active:scale-95 ${
+                                    isSending || !title.trim() || !messageText.trim() 
+                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                        : 'bg-purple-600 hover:bg-purple-700 shadow-purple-200'
+                                } text-white`}
+                            >
+                                <FontAwesomeIcon icon={faPaperPlane} className={isSending ? 'animate-pulse' : ''} />
+                                {isSending ? 'Sending...' : 'Send Notification'}
                             </button>
                         </div>
 
