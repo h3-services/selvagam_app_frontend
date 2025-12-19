@@ -7,6 +7,7 @@ import DriverManagement from './components/DriverManagement'
 import BusManagement from './components/BusManagement'
 import RouteManagement from './components/RouteManagement'
 import ComingSoon from './components/ComingSoon'
+import Communication from './components/Communication'
 import './App.css'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/drivers" element={<DriverManagement />} />
           <Route path="/buses" element={<BusManagement />} />
           <Route path="/routes" element={<RouteManagement />} />
+          <Route path="/communication" element={<Communication />} />
           <Route path="*" element={<ComingSoon />} />
         </Route>
 

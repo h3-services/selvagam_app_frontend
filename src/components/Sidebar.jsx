@@ -5,7 +5,8 @@ import {
   faUserFriends,
   faCar,
   faBus,
-  faMapLocationDot
+  faMapLocationDot,
+  faComments
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../constants/colors';
@@ -29,6 +30,7 @@ const Sidebar = () => {
     { icon: faCar, label: 'Driver Management', path: '/drivers' },
     { icon: faBus, label: 'Bus Management', path: '/buses' },
     { icon: faMapLocationDot, label: 'Route Management', path: '/routes' },
+    { icon: faComments, label: 'Communication', path: '/communication' },
   ];
 
   const handleNavigation = (path) => {
