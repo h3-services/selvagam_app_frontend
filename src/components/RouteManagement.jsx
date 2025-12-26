@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapLocationDot, faTrash, faCheck, faTimes, faSearch, faEdit, faEye, faRoute, faLocationDot, faBus, faArrowLeft, faPlus, faSpinner, faCircle, faExchangeAlt, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faMapLocationDot, faTrash, faCheck, faTimes, faSearch, faEdit, faEye, faRoute, faLocationDot, faBus, faArrowLeft, faPlus, faSpinner, faCircle, faExchangeAlt, faChevronDown, faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents } from 'react-leaflet';
@@ -192,15 +192,29 @@ const RouteManagement = () => {
         }));
     };
 
+    // Mock School Locations (mirroring SuperAdmin)
+    const schoolLocations = [
+        { id: 1, name: 'Main Campus', lat: 12.9716, lng: 77.5946 },
+        { id: 2, name: 'Sports Complex', lat: 12.9279, lng: 77.6271 },
+        { id: 3, name: 'City Branch', lat: 13.0358, lng: 77.5970 }
+    ];
+
+
+
+    const [selectedCampus, setSelectedCampus] = useState(schoolLocations[0].id);
+
     const handleAdd = () => {
+        const campus = schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0];
         if (newRoute.routeName) {
-            // Determine start and end from stops if available, else default
-            const startCoords = newRoute.stopPoints.length > 0 ? newRoute.stopPoints[0].position : [17.3850, 78.4867];
-            const endCoords = newRoute.stopPoints.length > 0 ? newRoute.stopPoints[newRoute.stopPoints.length - 1].position : [17.4401, 78.3489];
+            // Start and End are now static based on the selected School Campus
+            const startCoords = [campus.lat, campus.lng];
+            const endCoords = [campus.lat, campus.lng];
 
             setRoutes([...routes, {
                 id: Date.now(),
                 ...newRoute,
+                campusId: campus.id,
+                campusName: campus.name,
                 coordinates: {
                     start: startCoords,
                     end: endCoords
@@ -213,6 +227,7 @@ const RouteManagement = () => {
             setShowModal(false);
         }
     };
+
 
     const handleDelete = (id) => {
         setRoutes(routes.filter(r => r.id !== id));
@@ -494,6 +509,19 @@ const RouteManagement = () => {
                                             )
                                         },
                                         {
+                                            headerName: "Campus",
+                                            field: "campusName",
+                                            flex: 1,
+                                            cellRenderer: (params) => (
+                                                <div className="flex items-center h-full">
+                                                    <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md font-bold text-xs border border-indigo-100 uppercase tracking-wide">
+                                                        <FontAwesomeIcon icon={faBuilding} className="mr-1.5 opacity-70" />
+                                                        {params.value || 'Main Campus'}
+                                                    </span>
+                                                </div>
+                                            )
+                                        },
+                                        {
                                             headerName: "Distance",
                                             field: "distance",
                                             flex: 0.8,
@@ -707,22 +735,65 @@ const RouteManagement = () => {
                                             </div>
                                         )}
                                     </div>
+                                    return (
+                                    // ... (wrapper divs)
                                     <MapContainer
-                                        center={[17.4401, 78.3489]} // Default to School
-                                        zoom={12}
+                                        center={[
+                                            (schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0]).lat,
+                                            (schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0]).lng
+                                        ]}
+                                        zoom={13} // Zoomed out slightly to see more context
+                                        key={selectedCampus}
                                         style={{ height: '100%', width: '100%' }}
                                     >
                                         <TileLayer
                                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                                         />
-                                        <LocationMarker setPosition={setSelectedPosition} position={selectedPosition} />
-                                        {/* Show existing stops as small markers */}
-                                        {newRoute.stopPoints.map((sp, idx) => (
-                                            <Marker key={idx} position={sp.position} opacity={0.6}>
+
+                                        {isEditing && (
+                                            <LocationMarker setPosition={setSelectedPosition} position={selectedPosition} />
+                                        )}
+
+                                        {/* Campus Marker (Start/End) */}
+                                        <Marker position={getCampusCoordinates()} icon={createSchoolIcon()}>
+                                            <Popup>
+                                                <div className="text-center">
+                                                    <b className="text-indigo-900 text-sm">{(schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0]).name}</b>
+                                                    <br />
+                                                    <span className="text-xs text-gray-500">Start & End Point</span>
+                                                </div>
+                                            </Popup>
+                                        </Marker>
+
+                                        {/* Stop Markers (Numbered) */}
+                                        {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
+                                            <Marker
+                                                key={index}
+                                                position={stop.position}
+                                                icon={createStopIcon(index + 1)}
+                                                opacity={isEditing ? 0.9 : 1}
+                                            >
+                                                <Popup>
+                                                    <div className="text-center">
+                                                        <span className="font-bold text-purple-700">Stop #{index + 1}</span>
+                                                        <br />
+                                                        <span className="text-sm font-medium">{stop.name}</span>
+                                                    </div>
+                                                </Popup>
                                             </Marker>
                                         ))}
+
+                                        {/* Circular Route Line */}
+                                        <Polyline
+                                            positions={getRoutePath()}
+                                            color="#40189d"
+                                            weight={4}
+                                            opacity={0.8}
+                                            dashArray="10, 10"
+                                        />
                                     </MapContainer>
+
                                     {!selectedPosition && (
                                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-purple-900 text-xs font-bold px-4 py-2 rounded-full pointer-events-none z-[1000] shadow-lg border border-purple-200">
                                             Click map to set stop location
@@ -738,6 +809,27 @@ const RouteManagement = () => {
                                             <FontAwesomeIcon icon={faRoute} className="text-purple-600" />
                                             Route Details
                                         </h4>
+
+                                        <div>
+                                            <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Select Campus</label>
+                                            <div className="relative">
+                                                <select
+                                                    value={selectedCampus}
+                                                    onChange={(e) => setSelectedCampus(e.target.value)}
+                                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm appearance-none font-bold text-gray-700"
+                                                >
+                                                    {schoolLocations.map(loc => (
+                                                        <option key={loc.id} value={loc.id}>
+                                                            {loc.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-600 pointer-events-none">
+                                                    <FontAwesomeIcon icon={faChevronDown} />
+                                                </div>
+                                            </div>
+                                            <p className="text-[10px] text-gray-500 mt-1 font-medium">Route will start and end at this campus</p>
+                                        </div>
 
                                         <div>
                                             <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Route Name</label>

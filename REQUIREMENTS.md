@@ -1,98 +1,286 @@
-# Admin Portal - Project Requirements Document
+# Fast Cab Admin Portal - Requirements Documentation
 
 ## 1. Project Overview
-The **Admin Portal** is a web-based dashboard designed for school administrators to manage transport logistics. It provides a centralized interface to oversee drivers, buses, routes, and parent access. The application aims to streamline the management of daily school transport operations.
+
+**Fast Cab Admin Portal** is a comprehensive React-based web application for managing school transportation services. It provides administrators with tools to manage parents, drivers, buses, routes, and communication in a single unified platform.
+
+### Tech Stack
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18, Vite |
+| State | React Hooks (useState, useMemo, useEffect) |
+| Routing | React Router DOM v6 |
+| UI Components | AG Grid React, React-Leaflet |
+| Icons | FontAwesome, React Icons |
+| Styling | Tailwind CSS |
+| Backend | Firebase (Auth, Firestore) |
+| Notifications | FCM via custom API |
+| Maps | Leaflet + OpenStreetMap |
+| Deployment | Firebase Hosting |
+
+---
 
 ## 2. User Roles
-- **Administrator**: The primary user with full access to all modules.
-    - Can log in via Email/Password or Google.
-    - Can manage Drivers, Buses, and Routes.
-    - View Dashboard and Parent Access information.
 
-## 3. Technical Stack
-- **Frontend Framework**: React (Vite)
-- **Styling**: Tailwind CSS
-- **Authentication**: Firebase Authentication (Email/Password, Google OAuth)
-- **Database**: Firebase Firestore (configured for User Profiles)
-- **Data Grid**: AG Grid React (for desktop table views)
-- **Maps**: React Leaflet & OpenStreetMap (for Route visualization)
-- **Icons**: FontAwesome
+| Role | Access Level | Description |
+|------|--------------|-------------|
+| Super Admin | Full | Complete system access |
+| Admin | Full | All management features |
+| (Future) Staff | Limited | View-only access to certain modules |
 
-## 4. Functional Requirements
+---
 
-### 4.1 Authentication Module
-- **Login Page**:
-    - Users must be able to log in using their registered Email and Password.
-    - **Google Sign-In**: Users can sign in using their Google account.
-    - **Session Persistence**: The application remembers the logged-in user (configured via Firebase).
-    - **Logout**: Secure logout functionality.
-    - **Error Handling**: Displays messages for incorrect credentials or server errors.
-    - **Backend Integration**: Firebase Authentication.
+## 3. Functional Requirements
 
-### 4.2 Dashboard Overview
-- **Overview Stats**: Display high-level metrics (e.g., Total Buses, Active Routes, Total Students).
-- **Quick Links**: Access to common management sections.
-- *(Note: Currently implemented as a placeholder or basic view)*
+### 3.1 Authentication Module
+**Component:** `Login.jsx`
 
-### 4.3 Driver Management Module
-- **View Drivers**:
-    - **Desktop**: Sortable and filterable table (AG Grid) displaying Name, Email, Mobile, License No, Vehicle No, and Date joined.
-    - **Mobile**: Responsive card view for better accessibility on smaller screens.
-- **Add Driver**:
-    - Modal form to input Driver Name, Email, Mobile, License Number, and Vehicle Number.
-    - Validation for required fields.
-- **Edit Driver**: Ability to modify existing driver details.
-- **Delete Driver**: Ability to remove a driver from the system.
-- **Search**: Real-time search by Name or Email.
-- *(Current Status: Frontend logic with Mock Data)*
+| Feature | Description |
+|---------|-------------|
+| Email/Password Login | Query Firestore users collection |
+| Google OAuth | Firebase Google sign-in with popup |
+| Session Persistence | Via Firebase Auth |
+| Error Handling | Display inline error messages |
 
-### 4.4 Bus Management Module
-- **View Buses**:
-    - **Desktop**: Table view showing Bus Number, Capacity, Assigned Driver, Contact Number, and Status.
-    - **Mobile**: Care view showing key details.
-- **Status Tracking**: Visual indicators for bus status:
-    - **Active** (Green)
-    - **Maintenance** (Orange)
-    - **Inactive** (Red)
-- **Add Bus**: Modal form to register a new bus with Capacity and Driver assignment.
-- **Edit/Delete Bus**: Manage existing fleet records.
-- *(Current Status: Frontend logic with Mock Data)*
+### 3.2 Dashboard Module
+**Component:** `DashboardOverview.jsx`
 
-### 4.5 Route Management Module
-- **View Routes**:
-    - Table view displaying Route Name, Total Distance, Assigned Bus, and Stop Count.
-- **Interactive Map Integration**:
-    - Visual map (Leaflet) to view route stops.
-    - search functionality for locations (using OpenStreetMap/Nominatim).
-- **Add Route**:
-    - Define Route Name and assign a Bus.
-    - **Stop Management**: Add, name, and remove stops visually on the map.
-    - Auto-calculation of stop counts (Distance is currently manual input).
-- **Edit Route**: Modify route details and adjust stops.
-- *(Current Status: Frontend logic with Mock Data)*
+| Feature | Description |
+|---------|-------------|
+| Statistics Cards | Active drivers, parents, buses, routes |
+| Live Bus Map | Leaflet map showing active bus locations |
+| Recent Activity Feed | Scrollable activity list |
+| Quick Stats | Color-coded metric cards |
 
-### 4.6 Parent Access Module
-- **View Parents**:
-    - **Desktop**: Table view showing Parent Name, Child Name, Email, Mobile, and Status.
-    - **Mobile**: Responsive card view.
-- **Approval Workflow**:
-    - **Status Management**: Parents can be **Pending**, **Approved**, or **Rejected**.
-    - **Actions**: Admins can Approve, Reject, or Revert to Pending status directly from the list.
-- **Filtering**:
-    - **Tabs**: Filter list by status (All, Pending, Approved, Rejected).
-    - **Search**: Real-time search by Name, Email, or Child Name.
-- **Location & Map**:
-    - **Geocoding**: Automatic location search using OpenStreetMap (Nominatim).
-    - **Map View**: Visual confirmation of parent's address/pick-up point on a map.
-- **Add/Edit Parent**: Full CRUD capability for parent records.
-- *(Current Status: Frontend logic with Mock Data)*
+### 3.3 Parent Management Module
+**Component:** `ParentAccess.jsx` (1028 lines)
 
-## 5. Non-Functional Requirements
-- **Responsiveness**: The application must be fully responsive, providing a seamless experience on Desktop, Tablet, and Mobile devices.
-- **Performance**: Grid views should handle pagination and filtering efficiently.
-- **Usability**: Consistent UI theme (Purple/White palette) with clear feedback for user actions (modals, loading states).
+| Feature | Description |
+|---------|-------------|
+| Parent CRUD | Add, edit, delete parent records |
+| Approval Workflow | Approve/Reject/Pending parent requests |
+| AG Grid Table | Sortable, filterable desktop view |
+| Mobile Cards | Responsive card-based mobile view |
+| Location Map | Interactive map for parent location |
+| Detail View | Full parent profile with all info |
+| Search | Real-time search filtering |
 
-## 6. Future Roadmap
-- **Backend Integration**: Replace mock data in Management modules with real-time Firestore connections.
-- **Real-time Tracking**: Integrate live GPS tracking for buses.
-- **Role-Based Access Control (RBAC)**: distinctive permissions for Super Admins vs. Transport Managers.
+**Data Fields:**
+- Name, Email, Phone, Address
+- Student Name, Student ID, Grade
+- Status (Active, Pending, Rejected)
+- Location coordinates
+
+### 3.4 Driver Management Module
+**Component:** `DriverManagement.jsx` (523 lines)
+
+| Feature | Description |
+|---------|-------------|
+| Driver CRUD | Add, edit, delete drivers |
+| AG Grid Table | Desktop data grid view |
+| Mobile Cards | Card-based mobile layout |
+| Detail View | Driver profile with license info |
+| Status Badges | Active/Inactive indicators |
+
+**Data Fields:**
+- Name, Email, Phone
+- License Number, License Type
+- Assigned Bus
+- Status
+
+### 3.5 Bus Management Module
+**Component:** `BusManagement.jsx` (479 lines)
+
+| Feature | Description |
+|---------|-------------|
+| Bus CRUD | Add, edit, delete buses |
+| Status Management | Active, Maintenance, Inactive |
+| Capacity Tracking | Seat count per bus |
+| Driver Assignment | Link bus to driver |
+| AG Grid + Mobile Views | Responsive layouts |
+
+**Data Fields:**
+- Bus Number (e.g., BUS-101)
+- Capacity (seats)
+- Assigned Driver Name
+- Contact Number
+- Status
+
+### 3.6 Route Management Module
+**Component:** `RouteManagement.jsx` (930+ lines)
+
+| Feature | Description |
+|---------|-------------|
+| Route CRUD | Create routes with multiple stops |
+| Interactive Map | Leaflet for stop placement |
+| Geocoding Search | Nominatim API for location search |
+| Stop Points | Add/remove stops with coordinates |
+| Polyline Visualization | Route path on map |
+| Bus Assignment | Dropdown to assign buses |
+| Bus Reassignment Modal | Change bus with visual selector |
+
+**Data Fields:**
+- Route Name, Distance
+- Assigned Bus
+- Stop Points (name, coordinates)
+- Start/End coordinates
+
+### 3.7 Communication Module
+**Component:** `Communication.jsx` (181 lines)
+
+| Feature | Description |
+|---------|-------------|
+| Message Composer | Text or voice message input |
+| Recipient Selection | Toggle between Parents/Drivers |
+| Message Type | Text or Voice announcement |
+| Push Notifications | Send via FCM API |
+| Message History | View sent messages |
+
+---
+
+## 4. UI/UX Requirements
+
+### 4.1 Design System
+| Element | Specification |
+|---------|---------------|
+| Primary Color | `#40189d` (Purple) |
+| Active State | White with rounded corners |
+| Cards | 3xl border-radius, shadows |
+| Buttons | Gradient, hover scale effects |
+| Icons | FontAwesome solid icons |
+
+### 4.2 Responsive Breakpoints
+| Breakpoint | Layout |
+|------------|--------|
+| Mobile (<768px) | Card-based views, hamburger menu |
+| Tablet (768-1024px) | Hybrid layout |
+| Desktop (>1024px) | Sidebar + AG Grid tables |
+
+### 4.3 Component Patterns
+- **AG Grid**: Desktop data tables with custom cell renderers
+- **Mobile Cards**: Card-based alternative for small screens
+- **Slide-in Modals**: Right-side panels for add/edit forms
+- **Detail Views**: Full-screen profile views
+- **Maps**: Leaflet with custom markers and polylines
+
+---
+
+## 5. Navigation Structure
+
+```
+/login              → Login Page
+/dashboard          → Dashboard Overview
+/parents            → Parent Management
+/drivers            → Driver Management
+/buses              → Bus Management
+/routes             → Route Management
+/communication      → Communication Center
+```
+
+**Sidebar Menu Items:**
+1. Dashboard
+2. Parent Management
+3. Driver Management
+4. Bus Management
+5. Route Management
+6. Communication
+7. Logout
+
+---
+
+## 6. Integration Requirements
+
+### 6.1 Firebase
+- **Authentication**: Email/password, Google OAuth
+- **Firestore**: User data storage (`schools/{schoolId}/users`)
+- **Analytics**: Page view tracking
+
+### 6.2 Notification Service
+- **Endpoint**: `http://localhost:3001/api/send-notification`
+- **Topics**: `drivers`, `parents`
+- **Message Types**: Text, Voice
+
+### 6.3 External APIs
+- **Nominatim (OpenStreetMap)**: Geocoding for location search
+- **OpenStreetMap Tiles**: Map rendering
+
+---
+
+## 7. Non-Functional Requirements
+
+### 7.1 Performance
+- Pagination on AG Grid (5, 10, 20, 50 items)
+- Debounced search (500ms)
+- Lazy loading for maps
+
+### 7.2 Security
+- Firebase Auth for authentication
+- Admin key verification for notifications
+- Protected routes (redirect to login)
+
+### 7.3 Accessibility
+- Keyboard navigation support
+- Focus indicators on inputs
+- Semantic HTML structure
+
+---
+
+## 8. File Structure
+
+```
+src/
+├── components/
+│   ├── Login.jsx           # Authentication
+│   ├── Dashboard.jsx       # Layout wrapper
+│   ├── DashboardOverview.jsx
+│   ├── ParentAccess.jsx
+│   ├── DriverManagement.jsx
+│   ├── BusManagement.jsx
+│   ├── RouteManagement.jsx
+│   ├── Communication.jsx
+│   ├── Sidebar.jsx
+│   └── ComingSoon.jsx
+├── services/
+│   └── notificationService.js
+├── constants/
+│   └── colors.js
+├── firebase.js
+├── App.jsx
+├── main.jsx
+└── index.css
+```
+
+---
+
+## 9. Future Enhancements
+
+- [ ] Real-time bus tracking with live location updates
+- [ ] Trip scheduling and management
+- [ ] Driver attendance tracking
+- [ ] Parent mobile app integration
+- [ ] SMS notifications as fallback
+- [ ] Report generation and analytics
+- [ ] Multi-school support
+- [ ] Role-based access control (RBAC)
+
+---
+
+## 10. Dependencies
+
+```json
+{
+  "react": "^18.x",
+  "react-router-dom": "^6.x",
+  "ag-grid-react": "latest",
+  "react-leaflet": "^4.x",
+  "leaflet": "^1.x",
+  "@fortawesome/react-fontawesome": "latest",
+  "firebase": "^10.x",
+  "vite": "^5.x"
+}
+```
+
+---
+
+*Document Version: 1.0*  
+*Last Updated: December 26, 2024*

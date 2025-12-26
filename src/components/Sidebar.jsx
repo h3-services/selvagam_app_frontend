@@ -6,7 +6,8 @@ import {
   faCar,
   faBus,
   faMapLocationDot,
-  faComments
+  faComments,
+  faUserShield
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../constants/colors';
@@ -31,6 +32,7 @@ const Sidebar = () => {
     { icon: faBus, label: 'Bus Management', path: '/buses' },
     { icon: faMapLocationDot, label: 'Route Management', path: '/routes' },
     { icon: faComments, label: 'Communication', path: '/communication' },
+    { icon: faUserShield, label: 'Super Admin', path: '/admin' },
   ];
 
   const handleNavigation = (path) => {
