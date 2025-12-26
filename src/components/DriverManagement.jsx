@@ -59,8 +59,8 @@ const DriverManagement = () => {
     <div className="p-3 sm:p-4 md:p-6 lg:p-8 h-auto flex flex-col">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-15 lg:ml-0">Driver Management</h2>
-          <p className="text-sm text-gray-500 mt-1 ml-15 lg:ml-0">Manage driver information and vehicles</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-20 lg:ml-0">Driver Management</h2>
+          <p className="text-sm text-gray-500 mt-1 ml-20 lg:ml-0">Manage driver information and vehicles</p>
         </div>
         <div className="w-full sm:w-auto relative sm:min-w-[300px]">
           <input
@@ -224,7 +224,8 @@ const DriverManagement = () => {
           </div>
         ) : (
           <>
-            <div className="hidden md:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
               <div className="ag-theme-quartz w-full" style={{
                 height: 'calc(100vh - 220px)',
                 '--ag-header-background-color': '#f8f5ff',
@@ -322,10 +323,11 @@ const DriverManagement = () => {
               </div>
             </div>
 
-            <div className="md:hidden p-4 space-y-4">
+            {/* Mobile/Tablet Card View */}
+            <div className="lg:hidden p-1 space-y-4 pb-24">
               {filteredDrivers.map((driver) => (
-                <div key={driver.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
-                  <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#40189d' }}></div>
+                <div key={driver.id} className="relative bg-white rounded-3xl shadow-lg border border-purple-100 overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
                   <div className="relative p-5">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -398,7 +400,7 @@ const DriverManagement = () => {
       {showModal && (
         <>
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
-          <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-50 flex flex-col">
+          <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col">
             <div className="relative p-8 border-b border-purple-100">
               <button
                 onClick={() => setShowModal(false)}

@@ -20,14 +20,14 @@ const Communication = () => {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        
+
         if (!title.trim() || !messageText.trim()) {
             alert('Please fill in both title and message');
             return;
         }
 
         setIsSending(true);
-        
+
         try {
             await sendNotification(title.trim(), messageText.trim(), recipientType, messageType);
             alert(`✅ Notification sent successfully to all ${recipientType}s!`);
@@ -45,8 +45,8 @@ const Communication = () => {
     return (
         <div className="h-full p-6 lg:p-8 flex flex-col">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-800">Communication Hub</h1>
-                <p className="text-gray-500 text-sm mt-1">Send updates and messages to drivers and parents.</p>
+                <h1 className="text-2xl font-bold text-gray-800 ml-20 lg:ml-0">Communication Hub</h1>
+                <p className="text-gray-500 text-sm mt-1 ml-20 lg:ml-0">Send updates and messages to drivers and parents.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
@@ -156,14 +156,13 @@ const Communication = () => {
 
                         {/* Send Button */}
                         <div className="flex justify-end pt-4 border-t border-gray-100">
-                            <button 
+                            <button
                                 type="submit"
                                 disabled={isSending || !title.trim() || !messageText.trim()}
-                                className={`px-8 py-3 rounded-xl font-bold shadow-lg transition-all text-sm flex items-center gap-2 transform active:scale-95 ${
-                                    isSending || !title.trim() || !messageText.trim() 
-                                        ? 'bg-gray-400 cursor-not-allowed' 
-                                        : 'bg-purple-600 hover:bg-purple-700 shadow-purple-200'
-                                } text-white`}
+                                className={`px-8 py-3 rounded-xl font-bold shadow-lg transition-all text-sm flex items-center gap-2 transform active:scale-95 ${isSending || !title.trim() || !messageText.trim()
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-purple-600 hover:bg-purple-700 shadow-purple-200'
+                                    } text-white`}
                             >
                                 <FontAwesomeIcon icon={faPaperPlane} className={isSending ? 'animate-pulse' : ''} />
                                 {isSending ? 'Sending...' : 'Send Notification'}

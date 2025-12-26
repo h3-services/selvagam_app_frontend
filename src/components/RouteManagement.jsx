@@ -272,8 +272,8 @@ const RouteManagement = () => {
         <div className="p-3 sm:p-4 md:p-6 lg:p-8 h-auto flex flex-col">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-15 lg:ml-0">Route Management</h2>
-                    <p className="text-sm text-gray-500 mt-1 ml-15 lg:ml-0">Optimize travel paths and stops</p>
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-20 lg:ml-0">Route Management</h2>
+                    <p className="text-sm text-gray-500 mt-1 ml-20 lg:ml-0">Optimize travel paths and stops</p>
                 </div>
                 <div className="w-full sm:w-auto relative sm:min-w-[300px]">
                     <input
@@ -481,7 +481,8 @@ const RouteManagement = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="hidden md:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+                        {/* Desktop Table View */}
+                        <div className="hidden lg:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
                             <div className="ag-theme-quartz w-full" style={{
                                 height: 'calc(100vh - 220px)',
                                 '--ag-header-background-color': '#f8f5ff',
@@ -605,8 +606,8 @@ const RouteManagement = () => {
                             </div>
                         </div>
 
-                        {/* Mobile View */}
-                        <div className="md:hidden p-4 space-y-4">
+                        {/* Mobile/Tablet Card View */}
+                        <div className="lg:hidden p-4 space-y-4 pb-24">
                             {filteredRoutes.map((route) => (
                                 <div key={route.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
                                     <div className="relative p-5">
@@ -637,7 +638,7 @@ const RouteManagement = () => {
                                                 <p className="text-xs text-gray-500 font-medium mb-2">Assigned Bus</p>
                                                 <button
                                                     onClick={(e) => openBusReassignModal(route.id, e)}
-                                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-600 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
                                                 >
                                                     <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
                                                         <FontAwesomeIcon icon={faBus} className="text-white text-sm" />
@@ -683,7 +684,7 @@ const RouteManagement = () => {
             {showModal && (
                 <>
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
-                    <div className="fixed right-0 top-0 h-full w-full md:w-[1100px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-50 flex flex-col">
+                    <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col transition-all">
                         <div className="relative p-6 sm:p-8 border-b border-purple-100 flex-shrink-0">
                             <button
                                 onClick={() => setShowModal(false)}

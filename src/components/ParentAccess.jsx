@@ -163,8 +163,8 @@ const ParentAccess = () => {
     <div className="p-3 sm:p-4 md:p-6 lg:p-8 h-full flex flex-col via-white ">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-clip-text ml-15 lg:ml-0 ">Parent Access</h2>
-          <p className="text-sm text-gray-500 mt-1 ml-15 lg:ml-0 ">Manage parent information and access</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-clip-text ml-20 lg:ml-0 ">Parent Access</h2>
+          <p className="text-sm text-gray-500 mt-1 ml-20 lg:ml-0 ">Manage parent information and access</p>
         </div>
         <div className="w-full sm:w-auto relative sm:min-w-[300px]">
           <input
@@ -204,12 +204,12 @@ const ParentAccess = () => {
 
       {/* Status Tabs */}
       {!selectedParent && (
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           {['All', 'Pending', 'Approved', 'Rejected'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab
+              className={`px-4 py-2 rounded-xl text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none ${activeTab === tab
                 ? 'bg-[#40189d] text-white shadow-md'
                 : 'bg-white text-gray-500 hover:bg-gray-50'
                 }`}
@@ -480,7 +480,7 @@ const ParentAccess = () => {
           ) : (
             <>
               {/* Desktop/Tablet Table View */}
-              <div className="hidden md:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+              <div className="hidden lg:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
                 <div className="ag-theme-quartz w-full" style={{
                   height: 'calc(100vh - 220px)',
                   '--ag-header-background-color': '#f8f5ff',
@@ -618,8 +618,8 @@ const ParentAccess = () => {
                 </div>
               </div>
 
-              {/* Mobile Card View */}
-              <div className="md:hidden p-4 space-y-4">
+              {/* Mobile/Tablet Card View */}
+              <div className="lg:hidden p-4 space-y-4">
                 {filteredParents.map((parent, index) => (
                   <div key={parent.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
                     <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#40189d' }}></div>
@@ -668,11 +668,11 @@ const ParentAccess = () => {
                       </div>
 
 
-                      <div className="mb-4 flex gap-2 overflow-x-auto">
+                      <div className="mb-4 flex flex-wrap gap-2">
                         {parent.status !== 'Approved' && (
                           <button
                             onClick={() => handleApprove(parent.id)}
-                            className="flex-1 py-2 bg-green-50 text-green-700 rounded-xl font-bold text-xs hover:bg-green-100 border border-green-100"
+                            className="flex-1 min-w-[100px] py-2 bg-green-50 text-green-700 rounded-xl font-bold text-xs hover:bg-green-100 border border-green-100"
                           >
                             Approve
                           </button>
@@ -680,7 +680,7 @@ const ParentAccess = () => {
                         {parent.status !== 'Rejected' && (
                           <button
                             onClick={() => handleReject(parent.id)}
-                            className="flex-1 py-2 bg-red-50 text-red-700 rounded-xl font-bold text-xs hover:bg-red-100 border border-red-100"
+                            className="flex-1 min-w-[100px] py-2 bg-red-50 text-red-700 rounded-xl font-bold text-xs hover:bg-red-100 border border-red-100"
                           >
                             Reject
                           </button>
@@ -688,7 +688,7 @@ const ParentAccess = () => {
                         {parent.status !== 'Pending' && (
                           <button
                             onClick={() => handlePending(parent.id)}
-                            className="flex-1 py-2 bg-yellow-50 text-yellow-700 rounded-xl font-bold text-xs hover:bg-yellow-100 border border-yellow-100 flex items-center justify-center gap-1"
+                            className="flex-1 min-w-[100px] py-2 bg-yellow-50 text-yellow-700 rounded-xl font-bold text-xs hover:bg-yellow-100 border border-yellow-100 flex items-center justify-center gap-1"
                           >
                             <FontAwesomeIcon icon={faClock} /> Set Pending
                           </button>
@@ -713,7 +713,7 @@ const ParentAccess = () => {
         {showForm && (
           <>
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setShowForm(false)}></div>
-            <div className="fixed inset-0 lg:relative lg:w-80 flex items-center justify-center lg:block z-50 lg:z-auto p-4 lg:p-0">
+            <div className="fixed inset-0 lg:relative lg:w-80 flex items-center justify-center lg:block z-[2000] lg:z-auto p-4 lg:p-0">
               <div className="w-full max-w-md lg:max-w-none lg:h-auto flex flex-col bg-white rounded-3xl lg:rounded-t-[50px] shadow-2xl">
                 <div className="p-6 sm:p-8 text-center relative">
                   <button

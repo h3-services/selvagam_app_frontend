@@ -45,22 +45,22 @@ const Sidebar = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="lg:hidden fixed top-4 left-4 z-50 p-2 text-[black]"
+          className="lg:hidden fixed top-4 left-4 z-[1001] p-2.5 bg-white/10 backdrop-blur-md rounded-xl text-black shadow-lg hover:bg-white/20 transition-all active:scale-95 border border-white/10"
         >
-          <RiMenu4Fill size={34} />
+          <RiMenu4Fill size={24} />
         </button>
       )}
 
       <div
-        className={`w-64 h-screen fixed left-0 top-0 text-white flex flex-col transition-transform duration-300 z-40 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+        className={`w-64 h-screen fixed left-0 top-0 text-white flex flex-col transition-transform duration-300 z-[1000] ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-2xl`}
         style={{ backgroundColor: COLORS.SIDEBAR_BG }}
       >
         {isOpen && (
           <button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden absolute top-4 right-4 z-50 p-2 text-white"
+            className="lg:hidden absolute top-4 right-4 z-[1001] p-2 text-white hover:text-purple-200 transition-colors"
           >
-            <RiCloseFill size={34} />
+            <RiCloseFill size={28} />
           </button>
         )}
         <div className="p-5 border-b border-white/10">
@@ -96,7 +96,7 @@ const Sidebar = () => {
 
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          className="lg:hidden fixed inset-0 bg-black/50 z-[999]"
           onClick={() => setIsOpen(false)}
         />
       )}

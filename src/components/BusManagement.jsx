@@ -69,8 +69,8 @@ const BusManagement = () => {
         <div className="p-3 sm:p-4 md:p-6 lg:p-8 h-auto flex flex-col">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-15 lg:ml-0">Bus Management</h2>
-                    <p className="text-sm text-gray-500 mt-1 ml-15 lg:ml-0">Manage fleet and assign drivers</p>
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-20 lg:ml-0">Bus Management</h2>
+                    <p className="text-sm text-gray-500 mt-1 ml-20 lg:ml-0">Manage fleet and assign drivers</p>
                 </div>
                 <div className="w-full sm:w-auto relative sm:min-w-[300px]">
                     <input
@@ -188,7 +188,8 @@ const BusManagement = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="hidden md:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+                        {/* Desktop Table View */}
+                        <div className="hidden lg:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
                             <div className="ag-theme-quartz w-full" style={{
                                 height: 'calc(100vh - 220px)',
                                 '--ag-header-background-color': '#f8f5ff',
@@ -287,10 +288,11 @@ const BusManagement = () => {
                             </div>
                         </div>
 
-                        {/* Mobile View */}
-                        <div className="md:hidden p-4 space-y-4">
+                        {/* Mobile/Tablet Card View */}
+                        <div className="lg:hidden p-1 space-y-4 pb-24">
                             {filteredBuses.map((bus) => (
-                                <div key={bus.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
+                                <div key={bus.id} className="relative bg-white rounded-3xl shadow-lg border border-purple-100 overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
                                     <div className="relative p-5">
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex items-center gap-3">
@@ -299,9 +301,9 @@ const BusManagement = () => {
                                                 </div>
                                                 <div>
                                                     <h3 className="font-bold text-gray-900 text-lg">{bus.busNumber}</h3>
-                                                    <p className={`text-xs font-bold px-2 py-0.5 rounded-full border inline-block mt-1 ${getStatusColor(bus.status)}`}>
+                                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border inline-block mt-1 ${getStatusColor(bus.status)}`}>
                                                         {bus.status}
-                                                    </p>
+                                                    </span>
                                                 </div>
                                             </div>
                                             <button
@@ -314,13 +316,27 @@ const BusManagement = () => {
 
                                         <div className="grid grid-cols-2 gap-3 mb-4">
                                             <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
-                                                <p className="text-xs text-gray-500 font-medium">Driver</p>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <FontAwesomeIcon icon={faUser} className="text-xs" style={{ color: '#40189d' }} />
+                                                    <p className="text-xs text-gray-500 font-medium">Driver</p>
+                                                </div>
                                                 <p className="text-sm text-gray-900 font-bold truncate">{bus.driverName}</p>
                                             </div>
                                             <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
-                                                <p className="text-xs text-gray-500 font-medium">Capacity</p>
-                                                <p className="text-sm text-gray-900 font-bold">{bus.capacity}</p>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <FontAwesomeIcon icon={faUserFriends} className="text-xs" style={{ color: '#40189d' }} />
+                                                    <p className="text-xs text-gray-500 font-medium">Capacity</p>
+                                                </div>
+                                                <p className="text-sm text-gray-900 font-bold">{bus.capacity} Seats</p>
                                             </div>
+                                        </div>
+
+                                        <div className="p-3 rounded-xl mb-4" style={{ backgroundColor: '#f8f5ff' }}>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <FontAwesomeIcon icon={faPhone} className="text-xs" style={{ color: '#40189d' }} />
+                                                <p className="text-xs text-gray-500 font-medium">Contact</p>
+                                            </div>
+                                            <p className="text-sm text-gray-900 font-semibold">{bus.contactNumber}</p>
                                         </div>
 
                                         <button
@@ -352,7 +368,7 @@ const BusManagement = () => {
             {showModal && (
                 <>
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
-                    <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-50 flex flex-col">
+                    <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col">
                         <div className="relative p-8 border-b border-purple-100">
                             <button
                                 onClick={() => setShowModal(false)}

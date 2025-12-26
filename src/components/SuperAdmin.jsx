@@ -156,10 +156,7 @@ const SuperAdmin = () => {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-900 rounded-lg flex items-center justify-center text-white shadow-lg">
-                            <FontAwesomeIcon icon={faShieldHalved} className="text-xl" />
-                        </div>
-                        <div>
+                        <div className="ml-20 lg:ml-0">
                             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">System Administration</h1>
                             <p className="text-gray-500 text-sm">Control access and system configurations</p>
                         </div>
