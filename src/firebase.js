@@ -4,13 +4,13 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBPcBxlMYDr1Q3rnj8iMCGlIOQpyG0rhVw",
-  authDomain: "our-area-b5901.firebaseapp.com",
-  projectId: "our-area-b5901",
-  storageBucket: "our-area-b5901.firebasestorage.app",
-  messagingSenderId: "407606866326",
-  appId: "1:407606866326:web:296ba3730c61c1bdfa6db7",
-  measurementId: "G-F8WF674GLT"
+  apiKey: "AIzaSyDLNwOt1rh-JzjxobZzFeDSHG1tV1IR64s",
+  authDomain: "school-bus-tracking-fbf78.firebaseapp.com",
+  projectId: "school-bus-tracking-fbf78",
+  storageBucket: "school-bus-tracking-fbf78.firebasestorage.app",
+  messagingSenderId: "482721508252",
+  appId: "1:482721508252:web:1ffaf1bab3894c91a33659",
+  measurementId: "G-4NBXVB3JMD"
 };
 
 const app = initializeApp(firebaseConfig);

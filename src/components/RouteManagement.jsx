@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapLocationDot, faTrash, faCheck, faTimes, faSearch, faEdit, faEye, faRoute, faLocationDot, faBus, faArrowLeft, faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faMapLocationDot, faTrash, faCheck, faTimes, faSearch, faEdit, faEye, faRoute, faLocationDot, faBus, faArrowLeft, faPlus, faSpinner, faCircle, faExchangeAlt, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents } from 'react-leaflet';
@@ -126,6 +126,44 @@ const RouteManagement = () => {
     const [selectedRoute, setSelectedRoute] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
+    const [showBusReassignModal, setShowBusReassignModal] = useState(false);
+    const [reassigningRouteId, setReassigningRouteId] = useState(null);
+
+    // Available buses for assignment
+    const availableBuses = [
+        { busNumber: 'BUS-101', capacity: 40, status: 'Active', driverName: 'Robert Wilson' },
+        { busNumber: 'BUS-102', capacity: 40, status: 'Active', driverName: 'Sarah Martinez' },
+        { busNumber: 'BUS-103', capacity: 35, status: 'Maintenance', driverName: 'David Brown' },
+        { busNumber: 'BUS-104', capacity: 40, status: 'Active', driverName: 'Emily Davis' },
+        { busNumber: 'BUS-105', capacity: 30, status: 'Inactive', driverName: 'Michael Chen' },
+        { busNumber: 'BUS-106', capacity: 40, status: 'Active', driverName: 'Jessica Taylor' },
+        { busNumber: 'BUS-107', capacity: 40, status: 'Active', driverName: 'William Anderson' },
+        { busNumber: 'BUS-108', capacity: 35, status: 'Maintenance', driverName: 'Olivia Thomas' },
+    ];
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Active': return 'bg-green-100 text-green-700 border-green-200';
+            case 'Maintenance': return 'bg-orange-100 text-orange-700 border-orange-200';
+            case 'Inactive': return 'bg-red-100 text-red-700 border-red-200';
+            default: return 'bg-gray-100 text-gray-500 border-gray-200';
+        }
+    };
+
+    const handleReassignBus = (routeId, newBusNumber) => {
+        setRoutes(routes.map(r => r.id === routeId ? { ...r, assignedBus: newBusNumber } : r));
+        if (selectedRoute && selectedRoute.id === routeId) {
+            setSelectedRoute({ ...selectedRoute, assignedBus: newBusNumber });
+        }
+        setShowBusReassignModal(false);
+        setReassigningRouteId(null);
+    };
+
+    const openBusReassignModal = (routeId, e) => {
+        if (e) e.stopPropagation();
+        setReassigningRouteId(routeId);
+        setShowBusReassignModal(true);
+    };
 
     const filteredRoutes = useMemo(() => {
         return routes.filter(r =>
@@ -271,7 +309,14 @@ const RouteManagement = () => {
                                     </div>
                                     <div>
                                         <h2 className="text-2xl font-bold text-white">{selectedRoute.routeName}</h2>
-                                        <p className="text-white/80 text-xs font-medium">Total Distance: {selectedRoute.distance}</p>
+                                        <div className="flex items-center gap-3 mt-1">
+                                            <p className="text-white/80 text-xs font-medium">Distance: {selectedRoute.distance}</p>
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30">
+                                                <FontAwesomeIcon icon={faBus} className="text-white text-xs" />
+                                                <span className="text-white font-bold text-xs">{selectedRoute.assignedBus}</span>
+                                                <FontAwesomeIcon icon={faCircle} className="text-green-300 text-[5px] animate-pulse ml-0.5" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 {isEditing ? (
@@ -469,12 +514,24 @@ const RouteManagement = () => {
                                         {
                                             headerName: "Bus",
                                             field: "assignedBus",
-                                            flex: 0.8,
+                                            flex: 1.2,
                                             cellRenderer: (params) => (
                                                 <div className="flex items-center h-full">
-                                                    <span className="bg-purple-50 text-purple-700 px-2 py-1 rounded-md font-bold text-xs">
-                                                        {params.value}
-                                                    </span>
+                                                    <button
+                                                        onClick={(e) => openBusReassignModal(params.data.id, e)}
+                                                        className="group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer"
+                                                        title="Click to reassign bus"
+                                                    >
+                                                        <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+                                                            <FontAwesomeIcon icon={faBus} className="text-white text-xs" />
+                                                        </div>
+                                                        <span className="text-white font-bold text-xs tracking-wide">{params.value}</span>
+                                                        <div className="flex items-center gap-1 ml-1">
+                                                            <FontAwesomeIcon icon={faCircle} className="text-green-300 text-[6px] animate-pulse" />
+                                                            <span className="text-green-200 text-[10px] font-medium">Active</span>
+                                                        </div>
+                                                        <FontAwesomeIcon icon={faExchangeAlt} className="text-white/60 text-[10px] ml-1 group-hover:text-white transition-colors" />
+                                                    </button>
                                                 </div>
                                             )
                                         },
@@ -549,8 +606,19 @@ const RouteManagement = () => {
                                                 <p className="text-sm text-gray-900 font-bold truncate">{route.distance}</p>
                                             </div>
                                             <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
-                                                <p className="text-xs text-gray-500 font-medium">Bus</p>
-                                                <p className="text-sm text-gray-900 font-bold truncate">{route.assignedBus}</p>
+                                                <p className="text-xs text-gray-500 font-medium mb-2">Assigned Bus</p>
+                                                <button
+                                                    onClick={(e) => openBusReassignModal(route.id, e)}
+                                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                                                >
+                                                    <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                                                        <FontAwesomeIcon icon={faBus} className="text-white text-sm" />
+                                                    </div>
+                                                    <div className="flex-1 text-left">
+                                                        <p className="text-white font-bold text-sm">{route.assignedBus}</p>
+                                                    </div>
+                                                    <FontAwesomeIcon icon={faExchangeAlt} className="text-white/70 text-xs" />
+                                                </button>
                                             </div>
                                             <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f8f5ff' }}>
                                                 <p className="text-xs text-gray-500 font-medium">Total Stops</p>
@@ -763,6 +831,78 @@ const RouteManagement = () => {
                                 <FontAwesomeIcon icon={faMapLocationDot} className="mr-2" />
                                 Add Route
                             </button>
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Bus Reassignment Modal */}
+            {showBusReassignModal && (
+                <>
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setShowBusReassignModal(false)}></div>
+                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-md bg-white rounded-3xl shadow-2xl z-50 overflow-hidden">
+                        <div className="p-6 border-b border-purple-100" style={{ backgroundColor: '#40189d' }}>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                        <FontAwesomeIcon icon={faExchangeAlt} className="text-white text-lg" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">Reassign Bus</h3>
+                                        <p className="text-white/70 text-xs">Select a bus for this route</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowBusReassignModal(false)}
+                                    className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-all"
+                                >
+                                    <FontAwesomeIcon icon={faTimes} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="p-4 max-h-[400px] overflow-y-auto">
+                            <div className="space-y-2">
+                                {availableBuses.map((bus) => {
+                                    const currentRoute = routes.find(r => r.id === reassigningRouteId);
+                                    const isCurrentBus = currentRoute?.assignedBus === bus.busNumber;
+                                    return (
+                                        <button
+                                            key={bus.busNumber}
+                                            onClick={() => handleReassignBus(reassigningRouteId, bus.busNumber)}
+                                            disabled={bus.status !== 'Active'}
+                                            className={`w-full p-4 rounded-xl border-2 transition-all text-left ${isCurrentBus
+                                                ? 'border-purple-500 bg-purple-50'
+                                                : bus.status === 'Active'
+                                                    ? 'border-gray-100 hover:border-purple-300 hover:bg-purple-50'
+                                                    : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                                                }`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bus.status === 'Active'
+                                                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600'
+                                                        : 'bg-gray-300'
+                                                        }`}>
+                                                        <FontAwesomeIcon icon={faBus} className="text-white text-sm" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-gray-900">{bus.busNumber}</span>
+                                                            {isCurrentBus && (
+                                                                <span className="text-[10px] font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">Current</span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-gray-500">{bus.driverName} • {bus.capacity} seats</p>
+                                                    </div>
+                                                </div>
+                                                <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${getStatusColor(bus.status)}`}>
+                                                    {bus.status}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </>
