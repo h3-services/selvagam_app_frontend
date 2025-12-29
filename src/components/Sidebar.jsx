@@ -7,11 +7,15 @@ import {
   faBus,
   faMapLocationDot,
   faComments,
-  faUserShield
+  faUserShield,
+  faSignOutAlt,
+  faCode
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../constants/colors';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { auth } from '../firebase';
+import { signOut } from 'firebase/auth';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -32,14 +36,23 @@ const Sidebar = () => {
     { icon: faBus, label: 'Bus Management', path: '/buses' },
     { icon: faMapLocationDot, label: 'Route Management', path: '/routes' },
     { icon: faComments, label: 'Communication', path: '/communication' },
-    { icon: faUserShield, label: 'Super Admin', path: '/admin' },
+    { icon: faUserShield, label: 'Administration', path: '/admin' },
   ];
 
   const handleNavigation = (path) => {
     navigate(path);
     setIsOpen(false);
   };
-  // ...
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login');
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
     <>
       {!isOpen && (
@@ -64,7 +77,7 @@ const Sidebar = () => {
           </button>
         )}
         <div className="p-5 border-b border-white/10">
-          <h2 className=" text-2xl m-0">Admin Panel</h2>
+          <h2 className=" text-2xl m-0">School Management</h2>
         </div>
 
         <nav className="flex-1 py-5">
@@ -91,7 +104,16 @@ const Sidebar = () => {
             )
           })}
         </nav>
-
+        <div className="mt-auto p-5 border-t border-white/10">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-4 px-5 py-4 font-medium w-full text-left text-white hover:bg-white/10 rounded-xl transition-all"
+            style={{ border: 'none', cursor: 'pointer' }}
+          >
+            <FontAwesomeIcon icon={faSignOutAlt} className="w-5 h-5 text-red-400" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
 
       {isOpen && (

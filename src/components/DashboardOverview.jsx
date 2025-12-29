@@ -89,7 +89,7 @@ const DashboardOverview = () => {
             <div className="mb-6 mt-16 lg:mt-0 flex flex-col lg:flex-row lg:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard Overview</h1>
-                    <p className="text-gray-500 text-sm mt-1 font-medium">Welcome back, Admin! Here's what's happening today.</p>
+                    <p className="text-gray-500 text-sm mt-1 font-medium">Welcome back! Here's what's happening in your school today.</p>
                 </div>
                 {/* Date/Time Badge (Optional Polish) */}
                 <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">

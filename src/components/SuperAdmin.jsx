@@ -42,7 +42,7 @@ const SuperAdmin = () => {
         {
             id: 1,
             name: 'John Smith',
-            email: 'john.smith@fastcab.com',
+            email: 'john.smith@hope3school.com',
             phone: '+91 9876543210',
             status: 'Active',
             role: 'Super Admin'
@@ -50,7 +50,7 @@ const SuperAdmin = () => {
         {
             id: 2,
             name: 'Sarah Johnson',
-            email: 'sarah.j@fastcab.com',
+            email: 'sarah.j@hope3school.com',
             phone: '+91 9876543211',
             status: 'Active',
             role: 'Admin'
@@ -58,7 +58,7 @@ const SuperAdmin = () => {
         {
             id: 3,
             name: 'Mike Wilson',
-            email: 'mike.w@fastcab.com',
+            email: 'mike.w@hope3school.com',
             phone: '+91 9876543212',
             status: 'Inactive',
             role: 'Admin'
@@ -168,7 +168,7 @@ const SuperAdmin = () => {
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                             <FontAwesomeIcon icon={faUser} className="text-indigo-600" />
-                            Admin Team
+                            School Management Team
                         </h2>
                         <button
                             onClick={() => setIsAddOpen(!isAddOpen)}
@@ -184,7 +184,7 @@ const SuperAdmin = () => {
                             <div className="bg-white rounded-xl shadow-lg border border-indigo-100 overflow-hidden relative group animate-fade-in-up">
                                 <div className="h-1 bg-indigo-500 w-full absolute top-0 left-0"></div>
                                 <div className="p-6">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-4">New Administrator</h3>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-4">New School Admin</h3>
                                     <div className="space-y-4">
                                         <input
                                             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none"
@@ -236,7 +236,7 @@ const SuperAdmin = () => {
                                                 ) : (
                                                     <h3 className="font-bold text-gray-900">{admin.name}</h3>
                                                 )}
-                                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Administrator</p>
+                                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">School Admin</p>
                                             </div>
                                         </div>
                                         <div className="flex gap-1">
