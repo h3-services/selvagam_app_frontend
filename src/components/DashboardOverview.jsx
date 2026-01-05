@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCar, faUserFriends, faChartLine, faBell, faBus } from '@fortawesome/free-solid-svg-icons';
+import { faCar, faUserFriends, faChartLine, faBell, faBus, faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -40,8 +40,6 @@ const DashboardOverview = () => {
         {
             title: 'Total Drivers',
             value: '28',
-            change: '+12%',
-            trend: 'up',
             icon: faCar,
             color: '#40189d',
             bg: '#f8f5ff'
@@ -49,38 +47,24 @@ const DashboardOverview = () => {
         {
             title: 'Active Parents',
             value: '156',
-            change: '+5%',
-            trend: 'up',
             icon: faUserFriends,
             color: '#db2777',
             bg: '#fdf2f8'
         },
         {
-            title: 'Total Trips',
+            title: 'Route Total',
             value: '1,245',
-            change: '+18%',
-            trend: 'up',
             icon: faChartLine,
             color: '#059669',
             bg: '#ecfdf5'
-        },
-        {
-            title: 'Pending Alerts',
-            value: '3',
-            change: '-2',
-            trend: 'down',
-            icon: faBell,
-            color: '#d97706',
-            bg: '#fffbeb'
         }
     ];
 
-    // Mock Recent Activity Data
-    const recentActivity = [
-        { id: 1, type: 'driver', message: 'New driver "Michael Chen" registered', time: '2 mins ago', color: '#40189d', bg: '#f8f5ff' },
-        { id: 2, type: 'parent', message: 'Parent "Sarah Johnson" added a child', time: '15 mins ago', color: '#db2777', bg: '#fdf2f8' },
-        { id: 3, type: 'system', message: 'System maintenance scheduled for tonight', time: '1 hour ago', color: '#6b7280', bg: '#f3f4f6' },
-        { id: 4, type: 'driver', message: 'Driver "Alex Smith" completed 50 trips', time: '3 hours ago', color: '#40189d', bg: '#f8f5ff' },
+    // Mock Bus Status Data
+    const busStatus = [
+        { label: 'Main Bus', value: '32', color: '#40189d', bg: '#f8f5ff', icon: faBus },
+        { label: 'Active Bus', value: '24', color: '#059669', bg: '#ecfdf5', icon: faCheckCircle },
+        { label: 'Inactive Bus', value: '8', color: '#6b7280', bg: '#f3f4f6', icon: faTimesCircle }
     ];
 
     return (
@@ -92,10 +76,7 @@ const DashboardOverview = () => {
                     <p className="text-gray-500 text-sm mt-1 font-medium">Welcome back! Here's what's happening in your school today.</p>
                 </div>
                 {/* Date/Time Badge (Optional Polish) */}
-                <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">System Online</span>
-                </div>
+                {/* Date/Time Badge (Optional Polish) - REMOVED */}
             </div>
 
             {/* Mobile/Tablet Stats Grid (Vertical) */}
@@ -109,10 +90,12 @@ const DashboardOverview = () => {
                             <div className="w-8 h-8 rounded-full flex items-center justify-center transition-transform active:scale-90 duration-200" style={{ backgroundColor: stat.bg }}>
                                 <FontAwesomeIcon icon={stat.icon} className="text-sm" style={{ color: stat.color }} />
                             </div>
-                            <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg ${stat.trend === 'up' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-                                <FontAwesomeIcon icon={faChartLine} className="text-[10px]" />
-                                <span className="text-[10px] font-bold">{stat.change}</span>
-                            </div>
+                            {stat.change && (
+                                <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg ${stat.trend === 'up' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                                    <FontAwesomeIcon icon={faChartLine} className="text-[10px]" />
+                                    <span className="text-[10px] font-bold">{stat.change}</span>
+                                </div>
+                            )}
                         </div>
 
                         <div>
@@ -124,16 +107,18 @@ const DashboardOverview = () => {
             </div>
 
             {/* Desktop Stats Grid */}
-            <div className="hidden lg:grid grid-cols-4 gap-6 mb-8">
+            <div className="hidden lg:grid grid-cols-3 gap-6 mb-8">
                 {stats.map((stat, index) => (
                     <div key={index} className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100/50">
                         <div className="flex items-start justify-between mb-4">
                             <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform hover:scale-110 duration-300" style={{ backgroundColor: stat.bg }}>
                                 <FontAwesomeIcon icon={stat.icon} className="text-xl" style={{ color: stat.color }} />
                             </div>
-                            <span className={`text-xs font-bold px-2 py-1 rounded-full ${stat.trend === 'up' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
-                                {stat.change}
-                            </span>
+                            {stat.change && (
+                                <span className={`text-xs font-bold px-2 py-1 rounded-full ${stat.trend === 'up' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
+                                    {stat.change}
+                                </span>
+                            )}
                         </div>
                         <div>
                             <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">{stat.title}</p>
@@ -188,39 +173,29 @@ const DashboardOverview = () => {
                     </div>
                 </div>
 
-                {/* Recent Activity List */}
+                {/* Bus Status List */}
                 <div className="bg-white rounded-[2rem] shadow-xl shadow-purple-900/5 border border-gray-100 p-5 lg:p-6 flex flex-col h-[400px] lg:h-[calc(100vh-380px)] min-h-[400px]">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center">
-                            <FontAwesomeIcon icon={faBell} className="text-pink-600" />
+                        <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
+                            <FontAwesomeIcon icon={faBus} className="text-purple-600" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-gray-900 text-lg">Activity Feed</h3>
-                            <p className="text-xs text-gray-500 font-medium">Latest updates & alerts</p>
+                            <h3 className="font-bold text-gray-900 text-lg">Fleet Status</h3>
+                            <p className="text-xs text-gray-500 font-medium">Real-time bus tracking</p>
                         </div>
                     </div>
 
-                    <div className="space-y-0 overflow-y-auto flex-1 pr-2 custom-scrollbar">
-                        {recentActivity.map((activity, index) => (
-                            <div key={activity.id} className="flex gap-4 group relative pb-8 last:pb-0">
-                                {/* Connector Line */}
-                                {index !== recentActivity.length - 1 && (
-                                    <div className="absolute top-10 left-5 w-0.5 h-[calc(100%-10px)] bg-gray-100 group-hover:bg-purple-100 transition-colors"></div>
-                                )}
-
-                                <div className="relative z-10">
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border-2 border-white" style={{ backgroundColor: activity.bg }}>
-                                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activity.color }}></div>
+                    <div className="flex flex-col gap-4 overflow-y-auto flex-1 pr-2 custom-scrollbar justify-center">
+                        {busStatus.map((status, index) => (
+                            <div key={index} className="flex items-center justify-between p-4 rounded-2xl border border-gray-50 hover:border-purple-100 transition-colors group bg-gray-50/50 hover:bg-purple-50/30">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ backgroundColor: status.bg }}>
+                                        <FontAwesomeIcon icon={status.icon} className="text-lg" style={{ color: status.color }} />
                                     </div>
-                                </div>
-                                <div className="pt-1">
-                                    <p className="text-sm font-semibold text-gray-800 leading-snug group-hover:text-purple-700 transition-colors">
-                                        {activity.message}
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1.5 font-medium flex items-center gap-1">
-                                        <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                                        {activity.time}
-                                    </p>
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-500 uppercase tracking-wide group-hover:text-purple-600 transition-colors">{status.label}</p>
+                                        <h4 className="text-2xl font-black text-gray-900">{status.value}</h4>
+                                    </div>
                                 </div>
                             </div>
                         ))}
