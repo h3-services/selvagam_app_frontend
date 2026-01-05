@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCar, faUserFriends, faChartLine, faBus, faCheckCircle, faTimesCircle, faMapMarkerAlt, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faCar, faUserFriends, faChartLine, faBus, faCheckCircle, faTimesCircle, faMapMarkerAlt, faWrench, faArrowRight, faEllipsisH, faRoute } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -48,119 +48,116 @@ const DashboardOverview = () => {
             title: 'Total Drivers',
             value: '28',
             icon: faCar,
-            accent: 'from-blue-500 to-indigo-600',
-            iconBg: 'bg-blue-50',
-            iconColor: 'text-blue-600',
+            iconBg: 'bg-blue-100 text-blue-600',
+            iconColor: 'text-white',
+            variant: 'blue'
         },
         {
             title: 'Active Parents',
             value: '156',
             icon: faUserFriends,
-            accent: 'from-violet-500 to-purple-600',
-            iconBg: 'bg-violet-50',
-            iconColor: 'text-violet-600',
+            iconBg: 'bg-violet-100 text-violet-600',
+            iconColor: 'text-white',
+            variant: 'violet'
         },
         {
             title: 'Route Total',
             value: '1,245',
-            icon: faChartLine,
-            accent: 'from-emerald-500 to-teal-600',
-            iconBg: 'bg-emerald-50',
-            iconColor: 'text-emerald-600',
+            icon: faRoute,
+            iconBg: 'bg-emerald-100 text-emerald-600',
+            iconColor: 'text-white',
+            variant: 'emerald'
         }
     ];
 
     const busStatus = [
-        { label: 'Active Buses', value: '24', status: 'In Transit', color: 'emerald', icon: faBus },
-        { label: 'Maintenance Bus', value: '2', status: 'In Review', color: 'orange', icon: faWrench },
-        { label: 'Inactive Buses', value: '6', status: 'Parked', color: 'slate', icon: faTimesCircle }
+        { label: 'Active Buses', value: '24', color: 'emerald', icon: faBus },
+        { label: 'Maintenance', value: '2', color: 'amber', icon: faWrench },
+        { label: 'Inactive', value: '6', color: 'slate', icon: faTimesCircle }
     ];
 
     return (
-        <div className="h-full p-6 lg:p-8 overflow-y-auto bg-slate-50/50">
+        <div className="h-full p-6 lg:p-10 bg-slate-50 overflow-y-auto">
             {/* Header */}
-            <div className="mb-8 mt-16 lg:mt-0">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-2xl lg:text-3xl font-semibold text-slate-900">Dashboard</h1>
-                        <p className="text-slate-500 text-sm mt-1">Real-time overview of your fleet operations.</p>
-                    </div>
+            <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
                 </div>
             </div>
 
-            {/* Mobile Stats */}
-            <div className="lg:hidden grid grid-cols-2 gap-4 mb-6">
-                {stats.map((stat, index) => (
-                    <div key={index} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80">
-                        <div className={`w-9 h-9 rounded-lg ${stat.iconBg} flex items-center justify-center mb-3`}>
-                            <FontAwesomeIcon icon={stat.icon} className={`text-sm ${stat.iconColor}`} />
-                        </div>
-                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{stat.title}</p>
-                        <h3 className="text-2xl font-bold text-slate-900 mt-0.5">{stat.value}</h3>
-                    </div>
-                ))}
-            </div>
+            {/* Component Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
-            {/* Desktop Stats */}
-            <div className="hidden lg:grid grid-cols-3 gap-5 mb-6">
-                {stats.map((stat, index) => (
-                    <div key={index} className="relative overflow-hidden bg-white rounded-xl p-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group">
-                        {/* Decorative Background Icon (Watermark) */}
-                        <div className={`absolute -right-6 -bottom-6 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-500 rotate-12`}>
-                            <FontAwesomeIcon icon={stat.icon} className={`text-8xl text-slate-900`} />
-                        </div>
+                {/* Stats Row - Spans full width on mobile, top 3 blocks */}
+                <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {stats.map((stat, index) => (
+                        <div key={index} className={`group rounded-3xl p-6 border shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 relative overflow-hidden ${stat.variant === 'dark' ? 'bg-slate-900 border-slate-900 text-white' :
+                            stat.variant === 'blue' ? 'bg-white border-blue-100' :
+                                stat.variant === 'violet' ? 'bg-white border-violet-100' :
+                                    'bg-white border-emerald-100'
+                            }`}>
+                            {/* Decorative Gradients for Color Variants */}
+                            {stat.variant === 'blue' && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[100px] -mr-4 -mt-4 opacity-50 transaction-transform group-hover:scale-110 duration-500"></div>}
+                            {stat.variant === 'violet' && <div className="absolute top-0 right-0 w-32 h-32 bg-violet-50 rounded-bl-[100px] -mr-4 -mt-4 opacity-50 transaction-transform group-hover:scale-110 duration-500"></div>}
+                            {stat.variant === 'emerald' && <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-[100px] -mr-4 -mt-4 opacity-50 transaction-transform group-hover:scale-110 duration-500"></div>}
 
-                        <div className="relative z-10 flex flex-col h-full justify-between">
-                            <div className="flex justify-between items-start mb-2">
-                                <div className={`w-12 h-12 rounded-xl ${stat.iconBg} flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300`}>
-                                    <FontAwesomeIcon icon={stat.icon} className={`text-lg ${stat.iconColor}`} />
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${stat.iconBg}`}>
+                                        <FontAwesomeIcon icon={stat.icon} className="text-lg" />
+                                    </div>
                                 </div>
-                                {/* Optional: Pill badge could go here */}
-                            </div>
-
-                            <div className="mt-3">
-                                <h3 className="text-3xl font-bold text-slate-900 tracking-tight mb-0.5">{stat.value}</h3>
-                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{stat.title}</p>
+                                <div>
+                                    <h3 className={`text-4xl font-bold tracking-tight mb-1 ${stat.variant === 'dark' ? 'text-white' : 'text-black'
+                                        }`}>{stat.value}</h3>
+                                    <p className={`font-medium ${stat.variant === 'dark' ? 'text-slate-400' :
+                                        stat.variant === 'blue' ? 'text-blue-600/80' :
+                                            stat.variant === 'violet' ? 'text-violet-600/80' :
+                                                'text-emerald-600/80'
+                                        }`}>{stat.title}</p>
+                                </div>
                             </div>
                         </div>
+                    ))}
+                </div>
 
-                        {/* Bottom Accent Line */}
-                        <div className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${stat.accent}`}></div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
-
-                {/* Map Section */}
-                <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden flex flex-col h-[480px] lg:h-[560px]">
-                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                                <FontAwesomeIcon icon={faMapMarkerAlt} className="text-indigo-600 text-sm" />
-                            </div>
-                            <h3 className="font-semibold text-slate-800">Live Fleet Tracking</h3>
+                {/* Map Section - Takes up 2 columns */}
+                <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col h-[600px]">
+                    <div className="px-6 py-5 border-b border-slate-50 flex items-center justify-between bg-white z-10">
+                        <div>
+                            <h3 className="font-bold text-lg text-slate-900">Live Fleet Tracking</h3>
+                            <p className="text-slate-400 text-sm">Real-time bus locations</p>
                         </div>
-                        <span className="text-xs font-medium text-slate-400">3 Active</span>
+                        <button className="text-slate-400 hover:text-indigo-600 transition-colors">
+                            <FontAwesomeIcon icon={faEllipsisH} />
+                        </button>
                     </div>
-                    <div className="flex-1 relative">
+                    <div className="flex-1 relative bg-slate-50">
                         <MapContainer
                             center={[17.4401, 78.3489]}
                             zoom={13}
                             style={{ height: '100%', width: '100%' }}
                             scrollWheelZoom={false}
+                            zoomControl={false}
                         >
                             <TileLayer
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             />
                             {activeBuses.map(bus => (
                                 <Marker key={bus.id} position={bus.location} icon={busIcon}>
-                                    <Popup>
-                                        <div className="p-1">
-                                            <p className="font-semibold text-sm text-slate-900">{bus.number}</p>
-                                            <p className="text-xs text-slate-500 mt-1">{bus.status} · {bus.speed}</p>
+                                    <Popup className="custom-popup">
+                                        <div className="p-2 min-w-[150px]">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="font-bold text-slate-900">{bus.number}</span>
+                                                <span className={`w-2 h-2 rounded-full ${bus.status === 'Moving' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 p-2 rounded-lg">
+                                                <FontAwesomeIcon icon={faBus} />
+                                                <span>{bus.status}</span>
+                                                <span className="text-slate-300">|</span>
+                                                <span>{bus.speed}</span>
+                                            </div>
                                         </div>
                                     </Popup>
                                 </Marker>
@@ -169,66 +166,53 @@ const DashboardOverview = () => {
                     </div>
                 </div>
 
-                {/* Fleet Analytics - Premium Dark Design */}
-                <div className="rounded-2xl shadow-xl overflow-hidden flex flex-col h-[480px] lg:h-[560px] bg-gradient-to-br from-slate-800 to-slate-900 text-white relative">
-
-                    {/* Decorative Background Accents */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20 animate-pulse"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
-
-                    <div className="relative z-10 px-6 py-6 border-b border-white/10 flex justify-between items-center">
-                        <div>
-                            <h3 className="font-bold text-white text-xl tracking-tight">Fleet Status</h3>
-                            <p className="text-xs text-slate-400 font-medium mt-1">Real-time operational metrics</p>
-                        </div>
-                        <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/5 shadow-inner">
-                            <FontAwesomeIcon icon={faChartLine} className="text-white/80 text-sm" />
-                        </div>
+                {/* Fleet Status Panel - 1 Column */}
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] p-6 h-[600px] flex flex-col">
+                    <div className="mb-8">
+                        <h3 className="font-bold text-lg text-slate-900">Fleet Status</h3>
                     </div>
 
-                    <div className="relative z-10 flex-1 p-6 flex flex-col justify-center gap-8">
+                    <div className="flex-1 flex flex-col gap-6">
                         {busStatus.map((status, index) => (
-                            <div key={index} className="group">
-                                <div className="flex justify-between items-end mb-3">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${status.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                                                status.color === 'orange' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
-                                                    'bg-slate-700/50 text-slate-400 border border-slate-600/30'
+                            <div key={index} className="group p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition-all duration-300">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${status.color === 'emerald' ? 'bg-emerald-100 text-emerald-600' :
+                                            status.color === 'amber' ? 'bg-amber-100 text-amber-600' :
+                                                'bg-slate-200 text-slate-600'
                                             }`}>
                                             <FontAwesomeIcon icon={status.icon} className="text-sm" />
                                         </div>
                                         <div>
-                                            <span className="text-base font-bold text-white block tracking-wide">{status.label}</span>
-                                            <span className={`text-[10px] font-bold uppercase tracking-wider ${status.color === 'emerald' ? 'text-emerald-400' :
-                                                    status.color === 'orange' ? 'text-orange-400' :
-                                                        'text-slate-500'
-                                                }`}>{status.status}</span>
+                                            <span className="text-sm font-bold text-slate-900 block">{status.label}</span>
                                         </div>
                                     </div>
-                                    <span className="text-2xl font-black text-white tracking-tight">{status.value}</span>
+                                    <span className="text-xl font-bold text-slate-900">{status.value}</span>
                                 </div>
-                                {/* Progress Bar */}
-                                <div className="h-2.5 w-full bg-slate-700/50 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+                                <div className="w-full bg-slate-200/60 rounded-full h-1.5 overflow-hidden">
                                     <div
-                                        className={`h-full rounded-full transition-all duration-1000 shadow-lg ${status.color === 'emerald' ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' :
-                                                status.color === 'orange' ? 'bg-gradient-to-r from-orange-500 to-orange-400' :
-                                                    'bg-slate-600'
+                                        className={`h-full rounded-full transition-all duration-1000 ${status.color === 'emerald' ? 'bg-emerald-500' :
+                                            status.color === 'amber' ? 'bg-amber-500' :
+                                                'bg-slate-400'
                                             }`}
                                         style={{ width: `${(parseInt(status.value) / 32) * 100}%` }}
                                     ></div>
                                 </div>
                             </div>
                         ))}
-                    </div>
 
-                    {/* Summary Footer */}
-                    <div className="relative z-10 px-6 py-5 bg-black/20 backdrop-blur-md border-t border-white/5">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></div>
-                                <span className="text-sm font-medium text-slate-400">Total Vehicles</span>
+                        {/* Total Summary Card */}
+                        <div className="mt-auto bg-slate-900 rounded-2xl p-5 text-white relative overflow-hidden">
+                            <div className="relative z-10">
+                                <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Total Fleet Size</p>
+                                <div className="flex items-end gap-3">
+                                    <span className="text-4xl font-bold">32</span>
+                                    <span className="text-sm text-slate-400 mb-1.5">Vehicles registered</span>
+                                </div>
                             </div>
-                            <span className="text-3xl font-black text-white">32</span>
+                            {/* Decorative circles */}
+                            <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-indigo-500 opacity-20 blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 -ml-6 -mb-6 w-20 h-20 rounded-full bg-emerald-500 opacity-20 blur-2xl"></div>
                         </div>
                     </div>
                 </div>

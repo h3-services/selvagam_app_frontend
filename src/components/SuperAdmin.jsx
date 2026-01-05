@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faUser, faEnvelope, faPhone, faPlus, faTimes, faCheck,
-    faTrash, faPen, faShieldHalved, faLocationDot, faBuilding, faMapMarkerAlt
+    faTrash, faPen, faShieldHalved, faLocationDot, faBuilding, faMapMarkerAlt, faClock
 } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
@@ -69,6 +69,12 @@ const SuperAdmin = () => {
     const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '' });
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({});
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [deleteType, setDeleteType] = useState(null); // 'admin' | 'location'
+    const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+    const [deactivatingItemId, setDeactivatingItemId] = useState(null);
+    const [deactivationReason, setDeactivationReason] = useState("");
 
     // School Location State - Now supporting multiple locations
     const [locations, setLocations] = useState([
@@ -116,9 +122,27 @@ const SuperAdmin = () => {
     };
 
     const toggleStatus = (id) => {
-        setAdmins(admins.map(a =>
-            a.id === id ? { ...a, status: a.status === 'Active' ? 'Inactive' : 'Active' } : a
-        ));
+        const admin = admins.find(a => a.id === id);
+        if (admin && admin.status === 'Active') {
+            setDeactivatingItemId(id);
+            setDeactivationReason("");
+            setShowDeactivateModal(true);
+        } else {
+            setAdmins(admins.map(a =>
+                a.id === id ? { ...a, status: 'Active' } : a
+            ));
+        }
+    };
+
+    const confirmDeactivation = () => {
+        if (deactivatingItemId) {
+            setAdmins(admins.map(a =>
+                a.id === deactivatingItemId ? { ...a, status: 'Inactive', deactivationReason } : a
+            ));
+            setDeactivatingItemId(null);
+            setDeactivationReason("");
+            setShowDeactivateModal(false);
+        }
     };
 
     // Location Management Handlers
@@ -141,12 +165,34 @@ const SuperAdmin = () => {
         setEditLocationData(null);
     };
 
-    const deleteLocation = (id) => {
-        setLocations(locations.filter(l => l.id !== id));
-        if (editingLocationId === id) {
-            setEditingLocationId(null);
-            setEditLocationData(null);
+    const handleDeleteAdmin = (id) => {
+        setItemToDelete(id);
+        setDeleteType('admin');
+        setShowDeleteConfirm(true);
+    };
+
+    const handleDeleteLocation = (id) => {
+        setItemToDelete(id);
+        setDeleteType('location');
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = () => {
+        if (!itemToDelete || !deleteType) return;
+
+        if (deleteType === 'admin') {
+            setAdmins(admins.filter(a => a.id !== itemToDelete));
+        } else if (deleteType === 'location') {
+            setLocations(locations.filter(l => l.id !== itemToDelete));
+            if (editingLocationId === itemToDelete) {
+                setEditingLocationId(null);
+                setEditLocationData(null);
+            }
         }
+
+        setShowDeleteConfirm(false);
+        setItemToDelete(null);
+        setDeleteType(null);
     };
 
     return (
@@ -248,7 +294,7 @@ const SuperAdmin = () => {
                                             ) : (
                                                 <>
                                                     <button onClick={() => startEdit(admin)} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faPen} size="sm" /></button>
-                                                    <button onClick={() => setAdmins(admins.filter(a => a.id !== admin.id))} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faTrash} size="sm" /></button>
+                                                    <button onClick={() => handleDeleteAdmin(admin.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faTrash} size="sm" /></button>
                                                 </>
                                             )}
                                         </div>
@@ -385,7 +431,7 @@ const SuperAdmin = () => {
                                                         </div>
                                                         <div className="flex gap-2">
                                                             <button onClick={saveEditLocation} className="p-1.5 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 text-xs font-bold">Save</button>
-                                                            <button onClick={() => deleteLocation(loc.id)} className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-bold">Delete</button>
+                                                            <button onClick={() => handleDeleteLocation(loc.id)} className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-bold">Delete</button>
                                                         </div>
                                                     </div>
                                                     <div className="text-xs text-indigo-500 mt-1">
@@ -456,6 +502,85 @@ const SuperAdmin = () => {
                 </section>
 
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setShowDeleteConfirm(false)}
+                    />
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
+                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
+                            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+                                Are you sure you want to delete this {deleteType === 'admin' ? 'admin account' : 'school location'}? This action cannot be undone and will remove all associated data.
+                            </p>
+                            <div className="flex gap-3 w-full">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Deactivation Reason Modal */}
+            {showDeactivateModal && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setShowDeactivateModal(false)}
+                    />
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300 text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-6 mx-auto">
+                            <FontAwesomeIcon icon={faClock} className="text-2xl text-amber-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Reason for Deactivation</h3>
+                        <p className="text-gray-500 text-sm mb-6 leading-relaxed text-center">
+                            Please provide a reason why this admin is being moved to inactive status.
+                        </p>
+                        <textarea
+                            value={deactivationReason}
+                            onChange={(e) => setDeactivationReason(e.target.value)}
+                            placeholder="Enter reason here..."
+                            className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 mb-6 min-h-[100px]"
+                            autoFocus
+                        />
+                        <div className="flex gap-3 w-full">
+                            <button
+                                onClick={() => setShowDeactivateModal(false)}
+                                className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDeactivation}
+                                disabled={!deactivationReason.trim()}
+                                className={`flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${deactivationReason.trim()
+                                    ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200'
+                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    }`}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

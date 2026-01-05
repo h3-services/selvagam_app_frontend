@@ -14,7 +14,7 @@ const Communication = () => {
     // Mock Recent Messages
     const recentMessages = [
         { id: 1, to: 'All Drivers', type: 'text', content: 'Urgent: Road closure on Route 5 due to maintenance.', time: '10 mins ago', recipient: 'Drivers' },
-        { id: 2, to: 'Parent: Sarah Johnson', type: 'audio', content: 'Voice Message (0:30)', time: '1 hour ago', recipient: 'Parent' },
+        { id: 2, to: 'All Parents', type: 'audio', content: 'Voice Message: School Annual Day Update', time: '1 hour ago', recipient: 'Parents' },
         { id: 3, to: 'All Parents', type: 'text', content: 'School will be closed tomorrow due to heavy rain.', time: 'Yesterday', recipient: 'Parents' },
     ];
 
@@ -91,7 +91,7 @@ const Communication = () => {
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${recipientType === 'driver' ? 'bg-purple-200' : 'bg-gray-100'}`}>
                                         <FontAwesomeIcon icon={faUserTie} className="text-lg" />
                                     </div>
-                                    <span className="font-bold text-sm">Drivers</span>
+                                    <span className="font-bold text-sm">All Drivers</span>
                                     {recipientType === 'driver' && <div className="absolute top-2 right-2 w-3 h-3 bg-purple-600 rounded-full ring-2 ring-white"></div>}
                                 </button>
                                 <button
@@ -102,7 +102,7 @@ const Communication = () => {
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${recipientType === 'parent' ? 'bg-pink-200' : 'bg-gray-100'}`}>
                                         <FontAwesomeIcon icon={faUser} className="text-lg" />
                                     </div>
-                                    <span className="font-bold text-sm">Parents</span>
+                                    <span className="font-bold text-sm">All Parents</span>
                                     {recipientType === 'parent' && <div className="absolute top-2 right-2 w-3 h-3 bg-pink-600 rounded-full ring-2 ring-white"></div>}
                                 </button>
                             </div>
@@ -148,7 +148,7 @@ const Communication = () => {
                                 <textarea
                                     value={messageText}
                                     onChange={(e) => setMessageText(e.target.value)}
-                                    placeholder={messageType === 'text' ? `Write your message to ${recipientType}s here...` : `Write your voice message to ${recipientType}s here...`}
+                                    placeholder={messageType === 'text' ? `Write your message to all ${recipientType}s here...` : `Write your voice message to all ${recipientType}s here...`}
                                     className="w-full h-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 transition-shadow"
                                 ></textarea>
                             </div>

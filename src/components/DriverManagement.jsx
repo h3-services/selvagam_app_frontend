@@ -1,26 +1,65 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { CiMenuKebab } from "react-icons/ci";
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserPlus, faTrash, faCheck, faTimes, faSearch, faEnvelope, faUser, faPhone, faEye, faEdit, faIdCard, faCar, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faUserPlus, faTrash, faCheck, faTimes, faSearch, faEnvelope, faUser, faPhone, faEye, faEdit, faIdCard, faCar, faArrowLeft, faRoute, faChevronRight, faEllipsisV, faClock } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 
 const DriverManagement = () => {
   const [drivers, setDrivers] = useState([
-    { id: 1, name: 'Robert Wilson', email: 'robert@example.com', mobile: '555-0101', licenseNumber: 'DL-2024-001', vehicleNumber: 'ABC-1234', date: '2024-01-10' },
-    { id: 2, name: 'Sarah Martinez', email: 'sarah@example.com', mobile: '555-0102', licenseNumber: 'DL-2024-002', vehicleNumber: 'XYZ-5678', date: '2024-01-15' },
-    { id: 3, name: 'David Brown', email: 'david@example.com', mobile: '555-0103', licenseNumber: 'DL-2024-003', vehicleNumber: 'LMN-9012', date: '2024-02-01' },
-    { id: 4, name: 'Emily Davis', email: 'emily@example.com', mobile: '555-0104', licenseNumber: 'DL-2024-004', vehicleNumber: 'PQR-3456', date: '2024-02-05' },
-    { id: 5, name: 'Michael Chen', email: 'michael@example.com', mobile: '555-0105', licenseNumber: 'DL-2024-005', vehicleNumber: 'UVW-7890', date: '2024-02-10' },
-    { id: 6, name: 'Jessica Taylor', email: 'jessica@example.com', mobile: '555-0106', licenseNumber: 'DL-2024-006', vehicleNumber: 'RST-1234', date: '2024-02-15' },
-    { id: 7, name: 'William Anderson', email: 'william@example.com', mobile: '555-0107', licenseNumber: 'DL-2024-007', vehicleNumber: 'JKL-5678', date: '2024-02-20' },
-    { id: 8, name: 'Olivia Thomas', email: 'olivia@example.com', mobile: '555-0108', licenseNumber: 'DL-2024-008', vehicleNumber: 'MNO-9012', date: '2024-02-25' },
+    { id: 1, name: 'Driver 1', email: 'driver1@example.com', mobile: '9876543210', licenseNumber: 'DL-2024-001', vehicleNumber: 'Bus 1 - TN 33 AA 1234', route: 'Gandhipuram - Railway Station', date: '2024-01-10', status: 'Active' },
+    { id: 2, name: 'Driver 2', email: 'driver2@example.com', mobile: '9876543211', licenseNumber: 'DL-2024-002', vehicleNumber: 'Bus 2 - TN 33 AA 5678', route: 'Ukkadam - Town Hall', date: '2024-01-15', status: 'Inactive' },
+    { id: 3, name: 'Driver 3', email: 'driver3@example.com', mobile: '9876543212', licenseNumber: 'DL-2024-003', vehicleNumber: 'Bus 3 - TN 33 AA 9012', route: 'Saravanampatti - Prozone Mall', date: '2024-02-01', status: 'Active' },
+    { id: 4, name: 'Driver 4', email: 'driver4@example.com', mobile: '9876543213', licenseNumber: 'DL-2024-004', vehicleNumber: 'Bus 4 - TN 33 AA 3456', route: 'Peelamedu - Airport', date: '2024-02-05', status: 'Active' },
+    { id: 5, name: 'Driver 5', email: 'driver5@example.com', mobile: '9876543214', licenseNumber: 'DL-2024-005', vehicleNumber: 'Bus 5 - TN 33 AA 7890', route: 'R.S. Puram - Brookefields', date: '2024-02-10', status: 'Inactive' },
+    { id: 6, name: 'Driver 6', email: 'driver6@example.com', mobile: '9876543215', licenseNumber: 'DL-2024-006', vehicleNumber: 'Bus 6 - TN 33 AA 2345', route: 'Vadavalli - Maruthamalai', date: '2024-02-15', status: 'Active' },
+    { id: 7, name: 'Driver 7', email: 'driver7@example.com', mobile: '9876543216', licenseNumber: 'DL-2024-007', vehicleNumber: 'Bus 7 - TN 33 AA 6789', route: 'Singanallur - Bus Stand', date: '2024-02-20', status: 'Active' },
+    { id: 8, name: 'Driver 8', email: 'driver8@example.com', mobile: '9876543217', licenseNumber: 'DL-2024-008', vehicleNumber: 'Bus 8 - TN 33 AA 0123', route: 'Saibaba Colony - Thudiyalur', date: '2024-02-25', status: 'Inactive' },
   ]);
   const [showModal, setShowModal] = useState(false);
-  const [newDriver, setNewDriver] = useState({ name: '', email: '', mobile: '', licenseNumber: '', vehicleNumber: '' });
+  const [newDriver, setNewDriver] = useState({ name: '', email: '', mobile: '', licenseNumber: '', vehicleNumber: '', route: '', status: 'Active' });
   const [search, setSearch] = useState('');
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [activeMenuId, setActiveMenuId] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [deactivatingItemId, setDeactivatingItemId] = useState(null);
+  const [deactivationReason, setDeactivationReason] = useState("");
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const handleToggleStatus = (id) => {
+    const driver = drivers.find(d => d.id === id);
+    if (driver && driver.status === 'Active') {
+      setDeactivatingItemId(id);
+      setDeactivationReason("");
+      setShowDeactivateModal(true);
+    } else {
+      setDrivers(drivers.map(d =>
+        d.id === id ? { ...d, status: 'Active' } : d
+      ));
+    }
+  };
+
+  const confirmDeactivation = () => {
+    if (deactivatingItemId) {
+      setDrivers(drivers.map(d =>
+        d.id === deactivatingItemId ? { ...d, status: 'Inactive', deactivationReason } : d
+      ));
+      setDeactivatingItemId(null);
+      setDeactivationReason("");
+      setShowDeactivateModal(false);
+    }
+  };
 
   const filteredDrivers = drivers.filter(d =>
     d.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -40,7 +79,16 @@ const DriverManagement = () => {
   };
 
   const handleDelete = (id) => {
-    setDrivers(drivers.filter(d => d.id !== id));
+    setItemToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      setDrivers(drivers.filter(d => d.id !== itemToDelete));
+      setItemToDelete(null);
+      setShowDeleteConfirm(false);
+    }
   };
 
   const handleEdit = () => {
@@ -56,28 +104,37 @@ const DriverManagement = () => {
   };
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8 h-auto flex flex-col">
+    <div className="p-4 md:p-6 lg:p-8 h-full flex flex-col">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-20 lg:ml-0">Driver Management</h2>
-          <p className="text-sm text-gray-500 mt-1 ml-20 lg:ml-0">Manage driver information and vehicles</p>
+          <p className="text-sm text-gray-500 mt-1 ml-20 lg:ml-0">Manage school bus drivers and status</p>
         </div>
-        <div className="w-full sm:w-auto relative sm:min-w-[300px]">
+        <div className="w-full sm:w-auto relative sm:min-w-[300px] lg:hidden">
           <input
             type="text"
             placeholder="Search drivers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-5 py-3 pl-12 rounded-2xl bg-white/80 backdrop-blur-sm border-2 border-purple-100 focus:border-purple-400 focus:bg-white shadow-sm hover:shadow-md transition-all text-sm outline-none"
+            className="w-full px-4 py-2 pl-10 rounded-xl bg-white border border-purple-100 focus:border-purple-400 focus:bg-white transition-all text-sm outline-none shadow-sm"
           />
-          <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400" />
+          <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
       </div>
 
       {!selectedDriver && (
-        <div className="mb-4">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <span className="font-bold" style={{ color: '#40189d' }}>Table</span>
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-2">
+          <div className="flex flex-col items-start gap-2 w-full lg:w-auto pl-6">
+            <div className="relative w-full lg:w-96 hidden lg:block">
+              <input
+                type="text"
+                placeholder="Search drivers..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full px-4 py-2 pl-10 rounded-xl bg-white border border-purple-100 focus:border-purple-400 focus:bg-white transition-all text-sm outline-none shadow-sm"
+              />
+              <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
           </div>
         </div>
       )}
@@ -241,72 +298,139 @@ const DriverManagement = () => {
                       headerName: "Driver Name",
                       field: "name",
                       flex: 1.5,
+                      cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                       cellRenderer: (params) => (
-                        <div className="flex items-center gap-3 h-full">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                        <div
+                          className="flex items-start gap-3 w-full cursor-pointer group"
+                          onClick={() => setSelectedDriver(params.data)}
+                        >
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110 flex-shrink-0" style={{ backgroundColor: '#40189d' }}>
                             {params.value.charAt(0)}
                           </div>
-                          <div>
-                            <p className="font-bold text-gray-900 leading-tight">{params.value}</p>
+                          <div className="flex flex-col">
+                            <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value}</p>
+                            <div className="flex items-center gap-1 -mt-0.5">
+                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">View Details</span>
+                              <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
+                            </div>
                           </div>
                         </div>
                       )
                     },
-                    {
-                      headerName: "Email",
-                      field: "email",
-                      flex: 1.5,
-                      cellStyle: { display: 'flex', alignItems: 'center' }
-                    },
+
                     {
                       headerName: "Mobile",
                       field: "mobile",
                       flex: 1,
                       cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500' }
                     },
-                    {
-                      headerName: "License",
-                      field: "licenseNumber",
-                      flex: 1,
-                      cellStyle: { display: 'flex', alignItems: 'center' }
-                    },
+
                     {
                       headerName: "Vehicle",
                       field: "vehicleNumber",
-                      flex: 1,
+                      flex: 1.5,
                       cellStyle: { display: 'flex', alignItems: 'center' }
                     },
                     {
-                      headerName: "Date",
-                      field: "date",
-                      flex: 1,
-                      cellStyle: { display: 'flex', alignItems: 'center', color: 'gray' }
+                      headerName: "Route",
+                      field: "route",
+                      flex: 1.5,
+                      cellStyle: { display: 'flex', alignItems: 'center' }
                     },
+                    {
+                      headerName: "Status",
+                      field: "status",
+                      flex: 1,
+                      cellRenderer: (params) => (
+                        <div className="flex items-center h-full">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${params.value === 'Active' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'
+                            }`}>
+                            {params.value}
+                          </span>
+                        </div>
+                      )
+                    },
+
                     {
                       headerName: "Actions",
                       field: "id",
-                      width: 120,
+                      width: 100,
                       sortable: false,
                       filter: false,
-                      cellRenderer: (params) => (
-                        <div className="flex items-center gap-2 h-full">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setSelectedDriver(params.data); }}
-                            className="w-8 h-8 rounded-lg text-white transition-all flex items-center justify-center shadow-sm hover:shadow-md hover:scale-105"
-                            style={{ backgroundColor: '#40189d' }}
-                          >
-                            <FontAwesomeIcon icon={faEye} size="sm" />
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleDelete(params.data.id); }}
-                            className="w-8 h-8 rounded-lg bg-red-100 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center shadow-sm hover:shadow-md hover:scale-105"
-                          >
-                            <FontAwesomeIcon icon={faTrash} size="sm" />
-                          </button>
-                        </div>
-                      )
+                      cellStyle: { overflow: 'visible' },
+                      cellRenderer: (params) => {
+                        const rowsPerPage = params.api.paginationGetPageSize();
+                        const indexOnPage = params.node.rowIndex % rowsPerPage;
+                        const totalRows = params.api.getDisplayedRowCount();
+                        const isLastRows = totalRows > 2 && (indexOnPage >= rowsPerPage - 2 || params.node.rowIndex >= totalRows - 2);
+                        const isActive = (params.data.status || '').toLowerCase() === 'active';
+
+                        return (
+                          <div className="flex items-center justify-center h-full relative">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const currentId = params.context.activeMenuId;
+                                const clickedId = params.data.id;
+                                params.context.setActiveMenuId(currentId === clickedId ? null : clickedId);
+                              }}
+                              className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-xl ${params.context.activeMenuId === params.data.id
+                                  ? "bg-purple-100 text-purple-600 shadow-inner"
+                                  : "text-gray-400 hover:bg-gray-100"
+                                }`}
+                            >
+                              <CiMenuKebab />
+                            </button>
+
+                            {params.context.activeMenuId === params.data.id && (
+                              <div className={`absolute right-0 bg-white/90 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white py-2.5 w-44 z-[999] animate-in fade-in zoom-in duration-200 ${isLastRows
+                                ? "bottom-[80%] mb-2 slide-in-from-bottom-2"
+                                : "top-[80%] mt-2 slide-in-from-top-2"
+                                }`}>
+                                <div className="px-3 pb-1.5 mb-1.5 border-b border-gray-100/50">
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleStatus(params.data.id);
+                                    params.context.setActiveMenuId(null);
+                                  }}
+                                  className={`w-[calc(100%-16px)] mx-2 text-left px-3 py-2 text-sm rounded-xl flex items-center gap-3 transition-all duration-200 group/item ${isActive ? 'text-red-600 hover:bg-red-600 hover:text-white' : 'text-green-600 hover:bg-green-600 hover:text-white'}`}
+                                >
+                                  <div className={`w-6 h-6 rounded-lg group-hover/item:bg-white/20 flex items-center justify-center transition-colors ${isActive ? 'bg-red-50' : 'bg-green-50'}`}>
+                                    <FontAwesomeIcon icon={isActive ? faTimes : faCheck} className="text-[10px]" />
+                                  </div>
+                                  <span className="font-medium">{isActive ? 'Set Inactive' : 'Approve'}</span>
+                                </button>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(params.data.id);
+                                    params.context.setActiveMenuId(null);
+                                  }}
+                                  className="w-[calc(100%-16px)] mx-2 mt-1 text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-900 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
+                                >
+                                  <div className="w-6 h-6 rounded-lg bg-gray-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
+                                    <FontAwesomeIcon icon={faTrash} className="text-[10px]" />
+                                  </div>
+                                  <span className="font-medium">Delete Driver</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
                     }
                   ]}
+                  context={{ activeMenuId, setActiveMenuId }}
+                  getRowStyle={params => {
+                    if (params.data.id === activeMenuId) {
+                      return { zIndex: 999, overflow: 'visible' };
+                    }
+                    return { zIndex: 1 };
+                  }}
                   defaultColDef={{
                     sortable: true,
                     filter: true,
@@ -399,7 +523,7 @@ const DriverManagement = () => {
 
       {showModal && (
         <>
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1999]"></div>
           <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col">
             <div className="relative p-8 border-b border-purple-100">
               <button
@@ -462,7 +586,7 @@ const DriverManagement = () => {
                     </div>
                     <input
                       type="tel"
-                      placeholder="555-0000"
+                      placeholder="9876543210"
                       value={newDriver.mobile}
                       onChange={(e) => setNewDriver({ ...newDriver, mobile: e.target.value })}
                       className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
@@ -494,11 +618,49 @@ const DriverManagement = () => {
                     </div>
                     <input
                       type="text"
-                      placeholder="ABC-1234"
+                      placeholder="Bus 1 - TN 33 AA 1234"
                       value={newDriver.vehicleNumber}
                       onChange={(e) => setNewDriver({ ...newDriver, vehicleNumber: e.target.value })}
                       className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
                     />
+                  </div>
+                </div>
+
+
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Assigned Route</label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
+                      <FontAwesomeIcon icon={faRoute} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Route 101"
+                      value={newDriver.route}
+                      onChange={(e) => setNewDriver({ ...newDriver, route: e.target.value })}
+                      className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Status</label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
+                      <FontAwesomeIcon icon={faCheck} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
+                    </div>
+                    <select
+                      value={newDriver.status}
+                      onChange={(e) => setNewDriver({ ...newDriver, status: e.target.value })}
+                      className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm appearance-none"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -516,6 +678,84 @@ const DriverManagement = () => {
             </div>
           </div>
         </>
+      )}
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShowDeleteConfirm(false)}
+          />
+          <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
+                <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
+              <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+                Are you sure you want to delete this driver record? This action cannot be undone and will remove all associated data.
+              </p>
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deactivation Reason Modal */}
+      {showDeactivateModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShowDeactivateModal(false)}
+          />
+          <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-6 mx-auto">
+              <FontAwesomeIcon icon={faClock} className="text-2xl text-amber-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Reason for Deactivation</h3>
+            <p className="text-gray-500 text-sm mb-6 leading-relaxed text-center">
+              Please provide a reason why this driver is being moved to inactive status.
+            </p>
+            <textarea
+              value={deactivationReason}
+              onChange={(e) => setDeactivationReason(e.target.value)}
+              placeholder="Enter reason here..."
+              className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 mb-6 min-h-[100px]"
+              autoFocus
+            />
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setShowDeactivateModal(false)}
+                className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeactivation}
+                disabled={!deactivationReason.trim()}
+                className={`flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${deactivationReason.trim()
+                  ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

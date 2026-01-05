@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { CiMenuKebab } from "react-icons/ci";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapLocationDot, faTrash, faCheck, faTimes, faSearch, faEdit, faEye, faRoute, faLocationDot, faBus, faArrowLeft, faPlus, faSpinner, faCircle, faExchangeAlt, faChevronDown, faBuilding } from '@fortawesome/free-solid-svg-icons';
+import { faMapLocationDot, faTrash, faCheck, faTimes, faSearch, faEdit, faEye, faRoute, faLocationDot, faBus, faArrowLeft, faPlus, faSpinner, faCircle, faExchangeAlt, faChevronDown, faBuilding, faEllipsisV, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../constants/colors';
 
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents } from 'react-leaflet';
@@ -128,6 +129,16 @@ const RouteManagement = () => {
     const [editData, setEditData] = useState(null);
     const [showBusReassignModal, setShowBusReassignModal] = useState(false);
     const [reassigningRouteId, setReassigningRouteId] = useState(null);
+    const [activeMenuId, setActiveMenuId] = useState(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenuId(null);
+        window.addEventListener('click', handleClickOutside);
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, []);
 
     // Available buses for assignment
     const availableBuses = [
@@ -230,7 +241,16 @@ const RouteManagement = () => {
 
 
     const handleDelete = (id) => {
-        setRoutes(routes.filter(r => r.id !== id));
+        setItemToDelete(id);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = () => {
+        if (itemToDelete) {
+            setRoutes(routes.filter(r => r.id !== itemToDelete));
+            setItemToDelete(null);
+            setShowDeleteConfirm(false);
+        }
     };
 
     const handleEdit = () => {
@@ -275,22 +295,31 @@ const RouteManagement = () => {
                     <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-20 lg:ml-0">Route Management</h2>
                     <p className="text-sm text-gray-500 mt-1 ml-20 lg:ml-0">Optimize travel paths and stops</p>
                 </div>
-                <div className="w-full sm:w-auto relative sm:min-w-[300px]">
+                <div className="w-full sm:w-auto relative sm:min-w-[300px] lg:hidden">
                     <input
                         type="text"
                         placeholder="Search routes..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full px-5 py-3 pl-12 rounded-2xl bg-white/80 backdrop-blur-sm border-2 border-purple-100 focus:border-purple-400 focus:bg-white shadow-sm hover:shadow-md transition-all text-sm outline-none"
+                        className="w-full px-4 py-2 pl-10 rounded-xl bg-white border border-purple-100 focus:border-purple-400 focus:bg-white transition-all text-sm outline-none shadow-sm"
                     />
-                    <FontAwesomeIcon icon={faSearch} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400" />
+                    <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 </div>
             </div>
 
             {!selectedRoute && (
-                <div className="mb-4">
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                        <span className="font-bold" style={{ color: '#40189d' }}>Table</span>
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-2">
+                    <div className="flex flex-col items-start gap-2 w-full lg:w-auto pl-6">
+                        <div className="relative w-full lg:w-96 hidden lg:block">
+                            <input
+                                type="text"
+                                placeholder="Search routes..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full px-4 py-2 pl-10 rounded-xl bg-white border border-purple-100 focus:border-purple-400 focus:bg-white transition-all text-sm outline-none shadow-sm"
+                            />
+                            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        </div>
                     </div>
                 </div>
             )}
@@ -498,13 +527,21 @@ const RouteManagement = () => {
                                             headerName: "Route Name",
                                             field: "routeName",
                                             flex: 1.5,
+                                            cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                             cellRenderer: (params) => (
-                                                <div className="flex items-center gap-3 h-full">
-                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                                                <div
+                                                    className="flex items-center gap-3 w-full cursor-pointer group"
+                                                    onClick={() => setSelectedRoute(params.data)}
+                                                >
+                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
                                                         <FontAwesomeIcon icon={faRoute} />
                                                     </div>
-                                                    <div>
-                                                        <p className="font-bold text-gray-900 leading-tight">{params.value}</p>
+                                                    <div className="flex flex-col">
+                                                        <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value}</p>
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">View Details</span>
+                                                            <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )
@@ -521,12 +558,6 @@ const RouteManagement = () => {
                                                     </span>
                                                 </div>
                                             )
-                                        },
-                                        {
-                                            headerName: "Distance",
-                                            field: "distance",
-                                            flex: 0.8,
-                                            cellStyle: { display: 'flex', alignItems: 'center', fontWeight: 'bold' }
                                         },
                                         {
                                             headerName: "Stops",
@@ -567,29 +598,83 @@ const RouteManagement = () => {
                                         {
                                             headerName: "Actions",
                                             field: "id",
-                                            width: 120,
+                                            width: 100,
                                             sortable: false,
                                             filter: false,
-                                            cellRenderer: (params) => (
-                                                <div className="flex items-center gap-2 h-full">
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setSelectedRoute(params.data); }}
-                                                        className="w-8 h-8 rounded-lg text-purple-700 bg-purple-100 hover:bg-purple-200 transition-all flex items-center justify-center"
-                                                        title="View Details"
-                                                    >
-                                                        <FontAwesomeIcon icon={faEye} size="sm" />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); handleDelete(params.data.id); }}
-                                                        className="w-8 h-8 rounded-lg text-red-700 bg-red-100 hover:bg-red-200 transition-all flex items-center justify-center"
-                                                        title="Delete"
-                                                    >
-                                                        <FontAwesomeIcon icon={faTrash} size="sm" />
-                                                    </button>
-                                                </div>
-                                            )
+                                            cellStyle: { overflow: 'visible' },
+                                            cellRenderer: (params) => {
+                                                const rowsPerPage = params.api.paginationGetPageSize();
+                                                const indexOnPage = params.node.rowIndex % rowsPerPage;
+                                                const totalRows = params.api.getDisplayedRowCount();
+                                                // Only flip if not the first half of a very short list, or if it's genuinely near the bottom
+                                                const isLastRows = totalRows > 2 && (indexOnPage >= rowsPerPage - 2 || params.node.rowIndex >= totalRows - 2);
+
+                                                return (
+                                                    <div className="flex items-center justify-center h-full relative">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const currentId = params.context.activeMenuId;
+                                                                const clickedId = params.data.id;
+                                                                params.context.setActiveMenuId(currentId === clickedId ? null : clickedId);
+                                                            }}
+                                                            className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-xl ${params.context.activeMenuId === params.data.id
+                                                                    ? "bg-purple-100 text-purple-600 shadow-inner"
+                                                                    : "text-gray-400 hover:bg-gray-100"
+                                                                }`}
+                                                        >
+                                                            <CiMenuKebab />
+                                                        </button>
+
+                                                        {params.context.activeMenuId === params.data.id && (
+                                                            <div className={`absolute right-0 bg-white/90 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white py-2.5 w-44 z-[999] animate-in fade-in zoom-in duration-200 ${isLastRows
+                                                                ? "bottom-[80%] mb-2 slide-in-from-bottom-2"
+                                                                : "top-[80%] mt-2 slide-in-from-top-2"
+                                                                }`}>
+                                                                <div className="px-3 pb-1.5 mb-1.5 border-b border-gray-100/50">
+                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
+                                                                </div>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedRoute(params.data);
+                                                                        params.context.setActiveMenuId(null);
+                                                                    }}
+                                                                    className="w-[calc(100%-16px)] mx-2 text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-600 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
+                                                                >
+                                                                    <div className="w-6 h-6 rounded-lg bg-purple-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
+                                                                        <FontAwesomeIcon icon={faEye} className="text-[10px]" />
+                                                                    </div>
+                                                                    <span className="font-medium">View Details</span>
+                                                                </button>
+
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleDelete(params.data.id);
+                                                                        params.context.setActiveMenuId(null);
+                                                                    }}
+                                                                    className="w-[calc(100%-16px)] mx-2 mt-1 text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-900 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
+                                                                >
+                                                                    <div className="w-6 h-6 rounded-lg bg-gray-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
+                                                                        <FontAwesomeIcon icon={faTrash} className="text-[10px]" />
+                                                                    </div>
+                                                                    <span className="font-medium">Delete Route</span>
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
                                         }
                                     ]}
+                                    context={{ activeMenuId, setActiveMenuId }}
+                                    getRowStyle={params => {
+                                        if (params.data.id === activeMenuId) {
+                                            return { zIndex: 999, overflow: 'visible' };
+                                        }
+                                        return { zIndex: 1 };
+                                    }}
                                     defaultColDef={{
                                         sortable: true,
                                         filter: true,
@@ -999,6 +1084,40 @@ const RouteManagement = () => {
                         </div>
                     </div>
                 </>
+            )}
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setShowDeleteConfirm(false)}
+                    />
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
+                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
+                            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+                                Are you sure you want to delete this route record? This action cannot be undone and will remove all associated data.
+                            </p>
+                            <div className="flex gap-3 w-full">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDelete}
+                                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
