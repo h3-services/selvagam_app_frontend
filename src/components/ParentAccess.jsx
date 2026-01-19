@@ -43,14 +43,14 @@ const ParentAccess = () => {
   const [mapSearchQuery, setMapSearchQuery] = useState('');
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [tempLocation, setTempLocation] = useState('');
-  const [markerPosition, setMarkerPosition] = useState([40.7128, -74.0060]);
-  const [mapCenter, setMapCenter] = useState([40.7128, -74.0060]);
+  const [markerPosition, setMarkerPosition] = useState([12.6074, 80.0463]);
+  const [mapCenter, setMapCenter] = useState([12.6074, 80.0463]);
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [tempMapSearchQuery, setTempMapSearchQuery] = useState('');
-  const [tempMarkerPosition, setTempMarkerPosition] = useState([40.7128, -74.0060]);
-  const [tempMapCenter, setTempMapCenter] = useState([40.7128, -74.0060]);
+  const [tempMarkerPosition, setTempMarkerPosition] = useState([12.6074, 80.0463]);
+  const [tempMapCenter, setTempMapCenter] = useState([12.6074, 80.0463]);
   const [tempLocationSuggestions, setTempLocationSuggestions] = useState([]);
   const [showTempSuggestions, setShowTempSuggestions] = useState(false);
   const mapRef = useRef(null);
@@ -142,9 +142,9 @@ const ParentAccess = () => {
         distance: '0 km',
         date: new Date().toISOString().split('T')[0],
         date: new Date().toISOString().split('T')[0],
-        status: newParent.status || 'Inactive'
+        status: newParent.status || 'Approved'
       }]);
-      setNewParent({ name: '', childName: '', mobile: '', location: '', status: 'Inactive' });
+      setNewParent({ name: '', childName: '', mobile: '', location: '', status: 'Approved' });
       setShowForm(false);
     }
   };
@@ -240,24 +240,7 @@ const ParentAccess = () => {
             </div>
           </div>
 
-          <div className="bg-white p-1.5 rounded-full shadow-sm border border-purple-100 flex items-center">
-            {['All', 'Approved', 'Inactive'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap flex items-center gap-2 ${activeTab === tab
-                  ? 'text-white shadow-md'
-                  : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                style={activeTab === tab ? { backgroundColor: COLORS.SIDEBAR_BG } : {}}
-              >
-                {tab}
-                <span className={`text-xs px-2 py-0.5 rounded-full ${activeTab === tab ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
-                  {tab === 'All' ? parents.length : parents.filter(p => p.status === tab).length}
-                </span>
-              </button>
-            ))}
-          </div>
+
         </div>
       )}
 
@@ -519,7 +502,7 @@ const ParentAccess = () => {
                         cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                         cellRenderer: (params) => (
                           <div
-                            className="flex items-start gap-3 w-full cursor-pointer group"
+                            className="flex items-center gap-3 w-full cursor-pointer group"
                             onClick={() => { setSelectedParent(params.data); setShowForm(false); }}
                           >
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
@@ -546,7 +529,7 @@ const ParentAccess = () => {
                         headerName: "Mobile",
                         field: "mobile",
                         flex: 1,
-                        cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500' }
+                        cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '500' }
                       },
                       {
                         headerName: "Location",
@@ -560,24 +543,7 @@ const ParentAccess = () => {
                           </div>
                         )
                       },
-                      {
-                        headerName: "STATUS",
-                        field: "status",
-                        flex: 1,
-                        cellRenderer: (params) => {
-                          const statusColors = {
-                            Approved: 'bg-green-100 text-green-700 border-green-200',
-                            Inactive: 'bg-red-100 text-red-700 border-red-200'
-                          };
-                          return (
-                            <div className="flex items-center h-full">
-                              <span className={`text-xs font-bold px-3 py-1 rounded-full border ${statusColors[params.value] || 'bg-gray-100 text-gray-500'}`}>
-                                {params.value}
-                              </span>
-                            </div>
-                          );
-                        }
-                      },
+
                       {
                         headerName: "ACTIONS",
                         field: "id",
@@ -586,82 +552,18 @@ const ParentAccess = () => {
                         filter: false,
                         cellStyle: { overflow: 'visible' },
                         cellRenderer: (params) => {
-                          const rowsPerPage = params.api.paginationGetPageSize();
-                          const indexOnPage = params.node.rowIndex % rowsPerPage;
-                          const totalRows = params.api.getDisplayedRowCount();
-                          const isLastRows = totalRows > 2 && (indexOnPage >= rowsPerPage - 2 || params.node.rowIndex >= totalRows - 2);
-                          const isApproved = (params.data.status || '').toLowerCase() === 'approved';
-
                           return (
                             <div className="flex items-center justify-center h-full relative">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  const currentId = params.context.activeMenuId;
-                                  const clickedId = params.data.id;
-                                  params.context.setActiveMenuId(currentId === clickedId ? null : clickedId);
+                                  handleDelete(params.data.id);
                                 }}
-                                className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-xl ${params.context.activeMenuId === params.data.id
-                                  ? "bg-purple-100 text-purple-600 shadow-inner"
-                                  : "text-gray-400 hover:bg-gray-100"
-                                  }`}
+                                className="w-8 h-8 rounded-full text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center text-sm"
+                                title="Recycle Bin"
                               >
-                                <CiMenuKebab />
+                                <FontAwesomeIcon icon={faTrash} />
                               </button>
-
-                              {params.context.activeMenuId === params.data.id && (
-                                <div className={`absolute right-0 bg-white/90 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white py-2.5 w-44 z-[999] animate-in fade-in zoom-in duration-200 ${isLastRows
-                                  ? "bottom-[80%] mb-2 slide-in-from-bottom-2"
-                                  : "top-[80%] mt-2 slide-in-from-top-2"
-                                  }`}>
-                                  <div className="px-3 pb-1.5 mb-1.5 border-b border-gray-100/50">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
-                                  </div>
-                                  {isApproved ? (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeactivate(params.data.id);
-                                        params.context.setActiveMenuId(null);
-                                      }}
-                                      className="w-[calc(100%-16px)] mx-2 text-left px-3 py-2 text-sm text-red-600 hover:bg-red-600 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
-                                    >
-                                      <div className="w-6 h-6 rounded-lg bg-red-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
-                                        <FontAwesomeIcon icon={faTimes} className="text-[10px]" />
-                                      </div>
-                                      <span className="font-medium">Set Inactive</span>
-                                    </button>
-                                  ) : (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleApprove(params.data.id);
-                                        params.context.setActiveMenuId(null);
-                                      }}
-                                      className="w-[calc(100%-16px)] mx-2 text-left px-3 py-2 text-sm text-green-600 hover:bg-green-600 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
-                                    >
-                                      <div className="w-6 h-6 rounded-lg bg-green-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
-                                        <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
-                                      </div>
-                                      <span className="font-medium">Approve</span>
-                                    </button>
-                                  )}
-
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDelete(params.data.id);
-                                      params.context.setActiveMenuId(null);
-                                    }}
-                                    className="w-[calc(100%-16px)] mx-2 mt-1 text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-900 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
-                                  >
-                                    <div className="w-6 h-6 rounded-lg bg-gray-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
-                                      <FontAwesomeIcon icon={faTrash} className="text-[10px]" />
-                                    </div>
-                                    <span className="font-medium">Delete Parent</span>
-                                  </button>
-                                </div>
-                              )}
                             </div>
                           );
                         }
@@ -676,7 +578,7 @@ const ParentAccess = () => {
                     }}
                     defaultColDef={{
                       sortable: true,
-                      filter: true,
+                      filter: false,
                       resizable: true,
                       headerClass: "font-bold uppercase text-xs tracking-wide",
                     }}
@@ -734,23 +636,7 @@ const ParentAccess = () => {
 
 
 
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {parent.status !== 'Approved' ? (
-                          <button
-                            onClick={() => handleApprove(parent.id)}
-                            className="flex-1 min-w-[100px] py-2 bg-green-50 text-green-700 rounded-xl font-bold text-xs hover:bg-green-100 border border-green-100"
-                          >
-                            Approve
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleDeactivate(parent.id)}
-                            className="flex-1 min-w-[100px] py-2 bg-red-50 text-red-700 rounded-xl font-bold text-xs hover:bg-red-100 border border-red-100"
-                          >
-                            Deactivate
-                          </button>
-                        )}
-                      </div>
+
 
                       <button
                         onClick={() => { setSelectedParent(parent); setShowForm(false); }}
@@ -773,21 +659,22 @@ const ParentAccess = () => {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1999]" onClick={() => setShowForm(false)}></div>
 
             {/* Right Side Drawer */}
-            <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] shadow-2xl z-[2000] flex flex-col animate-slide-in" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
-              <div className="relative p-8 border-b border-white/10">
+            <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col animate-slide-in">
+              <div className="relative p-8 border-b border-purple-100">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition text-white/70 hover:text-white"
+                  className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-purple-100 transition"
+                  style={{ color: COLORS.SIDEBAR_BG }}
                 >
                   <FontAwesomeIcon icon={faTimes} className="text-xl" />
                 </button>
                 <div className="flex items-center gap-4 mb-2">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg bg-white/10 backdrop-blur-sm border border-white/10">
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
                     <FontAwesomeIcon icon={faUserPlus} className="text-white text-2xl" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-2xl text-white">Add Parent</h3>
-                    <p className="text-white/60 text-sm">Enter parent information</p>
+                    <h3 className="font-bold text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add Parent</h3>
+                    <p className="text-gray-500 text-sm">Enter parent information</p>
                   </div>
                 </div>
               </div>
@@ -798,9 +685,9 @@ const ParentAccess = () => {
 
                   {/* Name Input */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-2 text-white/90">Parent Name</label>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Parent Name</label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center bg-purple-50">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
                         <FontAwesomeIcon icon={faUser} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
                       </div>
                       <input
@@ -808,16 +695,16 @@ const ParentAccess = () => {
                         placeholder="Enter full name"
                         value={newParent.name}
                         onChange={(e) => setNewParent({ ...newParent, name: e.target.value })}
-                        className="w-full bg-white border-none rounded-xl pl-16 pr-4 py-3.5 text-sm focus:ring-4 focus:ring-purple-500/30 focus:outline-none transition shadow-sm text-gray-900 placeholder:text-gray-400"
+                        className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
                       />
                     </div>
                   </div>
 
                   {/* Child Name Input */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-2 text-white/90">Child Name</label>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Child Name</label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center bg-purple-50">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
                         <FontAwesomeIcon icon={faChild} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
                       </div>
                       <input
@@ -825,16 +712,16 @@ const ParentAccess = () => {
                         placeholder="Enter child's name (comma separated)"
                         value={newParent.childName}
                         onChange={(e) => setNewParent({ ...newParent, childName: e.target.value })}
-                        className="w-full bg-white border-none rounded-xl pl-16 pr-4 py-3.5 text-sm focus:ring-4 focus:ring-purple-500/30 focus:outline-none transition shadow-sm text-gray-900 placeholder:text-gray-400"
+                        className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
                       />
                     </div>
                   </div>
 
                   {/* Mobile Input */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-2 text-white/90">Mobile Number</label>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Mobile Number</label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center bg-purple-50">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
                         <FontAwesomeIcon icon={faPhone} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
                       </div>
                       <input
@@ -842,37 +729,18 @@ const ParentAccess = () => {
                         placeholder="555-0000"
                         value={newParent.mobile}
                         onChange={(e) => setNewParent({ ...newParent, mobile: e.target.value })}
-                        className="w-full bg-white border-none rounded-xl pl-16 pr-4 py-3.5 text-sm focus:ring-4 focus:ring-purple-500/30 focus:outline-none transition shadow-sm text-gray-900 placeholder:text-gray-400"
+                        className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
                       />
                     </div>
                   </div>
 
-                  {/* Status Selection */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-2 text-white/90">Account Status</label>
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center bg-purple-50">
-                        <FontAwesomeIcon icon={faClock} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
-                      </div>
-                      <select
-                        value={newParent.status || 'Inactive'}
-                        onChange={(e) => setNewParent({ ...newParent, status: e.target.value })}
-                        className="w-full bg-white border-none rounded-xl pl-16 pr-4 py-3.5 text-sm focus:ring-4 focus:ring-purple-500/30 focus:outline-none transition shadow-sm appearance-none text-gray-900"
-                      >
-                        <option value="Approved">Approved</option>
-                        <option value="Inactive">Inactive</option>
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                      </div>
-                    </div>
-                  </div>
+
 
                   {/* Location Input */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-2 text-white/90">Location Address</label>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Location Address</label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center bg-purple-50">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
                         <svg className="w-4 h-4" style={{ color: COLORS.SIDEBAR_BG }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -884,7 +752,7 @@ const ParentAccess = () => {
                         value={newParent.location}
                         readOnly
                         onClick={() => setShowLocationPicker(true)}
-                        className="w-full bg-white border-none rounded-xl pl-16 pr-24 py-3.5 text-sm focus:ring-4 focus:ring-purple-500/30 focus:outline-none transition shadow-sm cursor-pointer hover:bg-purple-50 text-gray-900 placeholder:text-gray-400"
+                        className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-24 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm cursor-pointer hover:bg-purple-50"
                       />
                       <button
                         type="button"
@@ -900,11 +768,11 @@ const ParentAccess = () => {
                 </div>
               </div>
 
-              <div className="p-8 border-t border-white/10 bg-transparent">
+              <div className="p-8 border-t border-purple-100 bg-transparent">
                 <button
                   onClick={handleAdd}
-                  className="w-full py-4 bg-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-base"
-                  style={{ color: COLORS.SIDEBAR_BG }}
+                  className="w-full py-4 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-base text-white"
+                  style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
                   <FontAwesomeIcon icon={faCheck} className="mr-2" />
                   Add Parent
@@ -927,8 +795,8 @@ const ParentAccess = () => {
         {/* Location Picker Popup */}
         {showLocationPicker && (
           <>
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1500]" onClick={() => setShowLocationPicker(false)}></div>
-            <div className="fixed left-0 top-0 bottom-0 w-full md:w-[500px] bg-white shadow-2xl z-[1501] flex flex-col animate-slide-in">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[2500]" onClick={() => setShowLocationPicker(false)}></div>
+            <div className="fixed left-0 top-0 bottom-0 w-full md:w-[500px] bg-white shadow-2xl z-[2501] flex flex-col animate-slide-in">
               <div className="p-4 border-b border-gray-200" style={{ backgroundColor: '#40189d' }}>
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-white">Pick Location</h3>

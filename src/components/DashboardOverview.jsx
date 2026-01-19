@@ -53,7 +53,7 @@ const DashboardOverview = () => {
             variant: 'blue'
         },
         {
-            title: 'Active Parents',
+            title: 'Total Parents',
             value: '156',
             icon: faUserFriends,
             iconBg: 'bg-violet-100 text-violet-600',
@@ -62,7 +62,7 @@ const DashboardOverview = () => {
         },
         {
             title: 'Route Total',
-            value: '1,245',
+            value: '5',
             icon: faRoute,
             iconBg: 'bg-emerald-100 text-emerald-600',
             iconColor: 'text-white',
