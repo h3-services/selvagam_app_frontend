@@ -602,8 +602,8 @@ const ParentAccess = () => {
                                   params.context.setActiveMenuId(currentId === clickedId ? null : clickedId);
                                 }}
                                 className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-xl ${params.context.activeMenuId === params.data.id
-                                    ? "bg-purple-100 text-purple-600 shadow-inner"
-                                    : "text-gray-400 hover:bg-gray-100"
+                                  ? "bg-purple-100 text-purple-600 shadow-inner"
+                                  : "text-gray-400 hover:bg-gray-100"
                                   }`}
                               >
                                 <CiMenuKebab />
@@ -927,8 +927,8 @@ const ParentAccess = () => {
         {/* Location Picker Popup */}
         {showLocationPicker && (
           <>
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setShowLocationPicker(false)}></div>
-            <div className="fixed left-0 top-0 bottom-0 w-full md:w-[500px] bg-white shadow-2xl z-50 flex flex-col animate-slide-in">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1500]" onClick={() => setShowLocationPicker(false)}></div>
+            <div className="fixed left-0 top-0 bottom-0 w-full md:w-[500px] bg-white shadow-2xl z-[1501] flex flex-col animate-slide-in">
               <div className="p-4 border-b border-gray-200" style={{ backgroundColor: '#40189d' }}>
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-white">Pick Location</h3>

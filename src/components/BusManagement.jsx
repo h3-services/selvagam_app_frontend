@@ -309,8 +309,8 @@ const BusManagement = () => {
                                                                 params.context.setActiveMenuId(currentId === clickedId ? null : clickedId);
                                                             }}
                                                             className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-xl ${params.context.activeMenuId === params.data.id
-                                                                    ? "bg-purple-100 text-purple-600 shadow-inner"
-                                                                    : "text-gray-400 hover:bg-gray-100"
+                                                                ? "bg-purple-100 text-purple-600 shadow-inner"
+                                                                : "text-gray-400 hover:bg-gray-100"
                                                                 }`}
                                                         >
                                                             <CiMenuKebab />
@@ -508,8 +508,8 @@ const BusManagement = () => {
             {/* Add Bus Modal */}
             {showModal && (
                 <>
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
-                    <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col">
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1500]" onClick={() => setShowModal(false)}></div>
+                    <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[1501] flex flex-col">
                         <div className="relative p-8 border-b border-purple-100">
                             <button
                                 onClick={() => setShowModal(false)}

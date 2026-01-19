@@ -214,6 +214,38 @@ const RouteManagement = () => {
 
     const [selectedCampus, setSelectedCampus] = useState(schoolLocations[0].id);
 
+    // Helper to get current campus coordinates
+    const getCampusCoordinates = () => {
+        const campus = schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0];
+        return [campus.lat, campus.lng];
+    };
+
+    // Create custom school/campus icon
+    const createSchoolIcon = () => {
+        return L.divIcon({
+            className: 'custom-school-icon',
+            html: `<div style="background: linear-gradient(135deg, #40189d, #6b21a8); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 12px rgba(64,24,157,0.4);">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="18" height="18" fill="white">
+                    <path d="M337.8 5.4C327-1.8 313-1.8 302.2 5.4L166.3 96H48C21.5 96 0 117.5 0 144V464c0 26.5 21.5 48 48 48H256V320c0-17.7 14.3-32 32-32h64c17.7 0 32 14.3 32 32V512H592c26.5 0 48-21.5 48-48V144c0-26.5-21.5-48-48-48H473.7L337.8 5.4zM96 192h32c17.7 0 32 14.3 32 32V256c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V224c0-17.7 14.3-32 32-32zm400 32c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H528c-17.7 0-32-14.3-32-32V224zM96 352h32c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V384c0-17.7 14.3-32 32-32zm400 32c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H528c-17.7 0-32-14.3-32-32V384z"/>
+                </svg>
+            </div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18],
+            popupAnchor: [0, -18]
+        });
+    };
+
+    // Create custom numbered stop icon
+    const createStopIcon = (number) => {
+        return L.divIcon({
+            className: 'custom-stop-icon',
+            html: `<div style="background: #ef4444; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 8px rgba(239,68,68,0.4); color: white; font-weight: bold; font-size: 12px;">${number}</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            popupAnchor: [0, -14]
+        });
+    };
+
     const handleAdd = () => {
         const campus = schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0];
         if (newRoute.routeName) {
@@ -619,8 +651,8 @@ const RouteManagement = () => {
                                                                 params.context.setActiveMenuId(currentId === clickedId ? null : clickedId);
                                                             }}
                                                             className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-xl ${params.context.activeMenuId === params.data.id
-                                                                    ? "bg-purple-100 text-purple-600 shadow-inner"
-                                                                    : "text-gray-400 hover:bg-gray-100"
+                                                                ? "bg-purple-100 text-purple-600 shadow-inner"
+                                                                : "text-gray-400 hover:bg-gray-100"
                                                                 }`}
                                                         >
                                                             <CiMenuKebab />
@@ -768,8 +800,8 @@ const RouteManagement = () => {
             {/* Add Route Modal */}
             {showModal && (
                 <>
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
-                    <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col transition-all">
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1500]" onClick={() => setShowModal(false)}></div>
+                    <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[1501] flex flex-col transition-all">
                         <div className="relative p-6 sm:p-8 border-b border-purple-100 flex-shrink-0">
                             <button
                                 onClick={() => setShowModal(false)}
@@ -821,14 +853,12 @@ const RouteManagement = () => {
                                             </div>
                                         )}
                                     </div>
-                                    return (
-                                    // ... (wrapper divs)
                                     <MapContainer
                                         center={[
                                             (schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0]).lat,
                                             (schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0]).lng
                                         ]}
-                                        zoom={13} // Zoomed out slightly to see more context
+                                        zoom={13}
                                         key={selectedCampus}
                                         style={{ height: '100%', width: '100%' }}
                                     >
@@ -837,9 +867,7 @@ const RouteManagement = () => {
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                                         />
 
-                                        {isEditing && (
-                                            <LocationMarker setPosition={setSelectedPosition} position={selectedPosition} />
-                                        )}
+                                        <LocationMarker setPosition={setSelectedPosition} position={selectedPosition} />
 
                                         {/* Campus Marker (Start/End) */}
                                         <Marker position={getCampusCoordinates()} icon={createSchoolIcon()}>
@@ -853,12 +881,11 @@ const RouteManagement = () => {
                                         </Marker>
 
                                         {/* Stop Markers (Numbered) */}
-                                        {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
+                                        {newRoute.stopPoints && newRoute.stopPoints.map((stop, index) => (
                                             <Marker
                                                 key={index}
                                                 position={stop.position}
                                                 icon={createStopIcon(index + 1)}
-                                                opacity={isEditing ? 0.9 : 1}
                                             >
                                                 <Popup>
                                                     <div className="text-center">
@@ -870,14 +897,20 @@ const RouteManagement = () => {
                                             </Marker>
                                         ))}
 
-                                        {/* Circular Route Line */}
-                                        <Polyline
-                                            positions={getRoutePath()}
-                                            color="#40189d"
-                                            weight={4}
-                                            opacity={0.8}
-                                            dashArray="10, 10"
-                                        />
+                                        {/* Route Line */}
+                                        {newRoute.stopPoints && newRoute.stopPoints.length > 0 && (
+                                            <Polyline
+                                                positions={[
+                                                    getCampusCoordinates(),
+                                                    ...newRoute.stopPoints.map(s => s.position),
+                                                    getCampusCoordinates()
+                                                ]}
+                                                color="#40189d"
+                                                weight={4}
+                                                opacity={0.8}
+                                                dashArray="10, 10"
+                                            />
+                                        )}
                                     </MapContainer>
 
                                     {!selectedPosition && (
@@ -1017,8 +1050,8 @@ const RouteManagement = () => {
             {/* Bus Reassignment Modal */}
             {showBusReassignModal && (
                 <>
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setShowBusReassignModal(false)}></div>
-                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-md bg-white rounded-3xl shadow-2xl z-50 overflow-hidden">
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1500]" onClick={() => setShowBusReassignModal(false)}></div>
+                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-md bg-white rounded-3xl shadow-2xl z-[1501] overflow-hidden">
                         <div className="p-6 border-b border-purple-100" style={{ backgroundColor: '#40189d' }}>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
