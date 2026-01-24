@@ -30,7 +30,10 @@ const Communication = () => {
         setIsSending(true);
 
         try {
-            await sendNotification(title.trim(), messageText.trim(), recipientType, messageType, fcmToken.trim());
+            // Clean the FCM token - remove any prefix like "FCM Token: "
+            const cleanToken = fcmToken.trim().replace(/^FCM Token:\s*/i, '');
+            
+            await sendNotification(title.trim(), messageText.trim(), recipientType, messageType, cleanToken);
             alert(`✅ Notification sent successfully!`);
             setTitle('');
             setMessageText('');
