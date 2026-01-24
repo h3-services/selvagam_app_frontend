@@ -6,6 +6,7 @@ import ParentAccess from './components/ParentAccess'
 import DriverManagement from './components/DriverManagement'
 import BusManagement from './components/BusManagement'
 import RouteManagement from './components/RouteManagement'
+import TripManagement from './components/TripManagement'
 import ComingSoon from './components/ComingSoon'
 import Communication from './components/Communication'
 import SuperAdmin from './components/SuperAdmin'
@@ -24,6 +25,7 @@ function App() {
           <Route path="/drivers" element={<DriverManagement />} />
           <Route path="/buses" element={<BusManagement />} />
           <Route path="/routes" element={<RouteManagement />} />
+          <Route path="/trips" element={<TripManagement />} />
           <Route path="/communication" element={<Communication />} />
           <Route path="/admin" element={<SuperAdmin />} />
           <Route path="*" element={<ComingSoon />} />
