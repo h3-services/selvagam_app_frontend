@@ -1,32 +1,39 @@
-const API_URL = 'http://localhost:3001/api/send-notification';
-const ADMIN_KEY = 'selvagam-admin-key-2024';
-
-export const sendNotification = async (title, body, recipientType, messageType) => {
+export const sendNotification = async (title, body, recipientType, messageType, fcmToken) => {
   try {
-    const topic = recipientType === 'driver' ? 'drivers' : 'parents';
-    
-    const response = await fetch(API_URL, {
+    console.log('📱 Sending notification via local backend:', {
+      title,
+      body,
+      recipientType,
+      messageType,
+      token: fcmToken?.substring(0, 20) + '...'
+    });
+
+    const response = await fetch('http://localhost:3001/api/send-notification-device', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-ADMIN-KEY': ADMIN_KEY
       },
       body: JSON.stringify({
         title,
         body,
-        topic,
-        messageType
+        recipientType,
+        messageType,
+        token: fcmToken
       })
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(errorData.details || 'Failed to send notification');
     }
 
     const result = await response.json();
+    console.log('✅ Backend Response:', result);
+
     return result;
+
   } catch (error) {
-    console.error('Error sending notification:', error);
+    console.error('❌ Notification Error:', error);
     throw error;
   }
 };

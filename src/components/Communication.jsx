@@ -10,6 +10,7 @@ const Communication = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [title, setTitle] = useState('');
+    const [fcmToken, setFcmToken] = useState('');
 
     // Mock Recent Messages
     const recentMessages = [
@@ -21,18 +22,19 @@ const Communication = () => {
     const handleSendMessage = async (e) => {
         e.preventDefault();
 
-        if (!title.trim() || !messageText.trim()) {
-            alert('Please fill in both title and message');
+        if (!title.trim() || !messageText.trim() || !fcmToken.trim()) {
+            alert('Please fill in all fields');
             return;
         }
 
         setIsSending(true);
 
         try {
-            await sendNotification(title.trim(), messageText.trim(), recipientType, messageType);
-            alert(`✅ Notification sent successfully to all ${recipientType}s!`);
+            await sendNotification(title.trim(), messageText.trim(), recipientType, messageType, fcmToken.trim());
+            alert(`✅ Notification sent successfully!`);
             setTitle('');
             setMessageText('');
+            setFcmToken('');
             setIsRecording(false);
         } catch (error) {
             alert('❌ Failed to send notification. Please try again.');
@@ -108,9 +110,22 @@ const Communication = () => {
                             </div>
                         </div>
 
-                        {/* 2. Message Title */}
+                        {/* 2. FCM Token */}
                         <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">2. Message Title</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">2. FCM Device Token</label>
+                            <input
+                                type="text"
+                                value={fcmToken}
+                                onChange={(e) => setFcmToken(e.target.value)}
+                                placeholder="Enter FCM token for target device..."
+                                className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 bg-gray-50/50 transition-shadow font-mono"
+                                required
+                            />
+                        </div>
+
+                        {/* 3. Message Title */}
+                        <div>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">3. Message Title</label>
                             <input
                                 type="text"
                                 value={title}
@@ -121,9 +136,9 @@ const Communication = () => {
                             />
                         </div>
 
-                        {/* 3. Message Content */}
+                        {/* 4. Message Content */}
                         <div className="flex-1 flex flex-col">
-                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">3. Message Content</label>
+                            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">4. Message Content</label>
 
                             {/* Type Toggle */}
                             <div className="flex bg-gray-50 p-1.5 rounded-xl mb-4 w-fit">
@@ -158,8 +173,8 @@ const Communication = () => {
                         <div className="flex justify-end pt-4 border-t border-gray-100">
                             <button
                                 type="submit"
-                                disabled={isSending || !title.trim() || !messageText.trim()}
-                                className={`px-8 py-3 rounded-xl font-bold shadow-lg transition-all text-sm flex items-center gap-2 transform active:scale-95 ${isSending || !title.trim() || !messageText.trim()
+                                disabled={isSending || !title.trim() || !messageText.trim() || !fcmToken.trim()}
+                                className={`px-8 py-3 rounded-xl font-bold shadow-lg transition-all text-sm flex items-center gap-2 transform active:scale-95 ${isSending || !title.trim() || !messageText.trim() || !fcmToken.trim()
                                     ? 'bg-gray-400 cursor-not-allowed'
                                     : 'bg-purple-600 hover:bg-purple-700 shadow-purple-200'
                                     } text-white`}
