@@ -10,6 +10,7 @@ import TripManagement from './components/TripManagement'
 import ComingSoon from './components/ComingSoon'
 import Communication from './components/Communication'
 import SuperAdmin from './components/SuperAdmin'
+import Reports from './components/Reports'
 import './App.css'
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/trips" element={<TripManagement />} />
           <Route path="/communication" element={<Communication />} />
           <Route path="/admin" element={<SuperAdmin />} />
+          <Route path="/reports" element={<Reports />} />
           <Route path="*" element={<ComingSoon />} />
         </Route>
 

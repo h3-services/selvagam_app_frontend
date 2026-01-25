@@ -18,7 +18,11 @@ const TripManagement = () => {
             startTime: '08:00 AM',
             endTime: '09:30 AM',
             status: 'Completed',
-            date: '2024-01-20'
+
+            date: '2024-01-20',
+            date: '2024-01-20',
+            driverMobile: '+91 98765 43210',
+            description: 'Regular morning route for downtown office areas'
         },
         {
             id: 'TRIP-002',
@@ -28,7 +32,11 @@ const TripManagement = () => {
             startTime: '08:15 AM',
             endTime: '09:45 AM',
             status: 'In Progress',
-            date: '2024-01-20'
+
+            date: '2024-01-20',
+            date: '2024-01-20',
+            driverMobile: '+91 98765 43211',
+            description: 'Serves Westside residential complex'
         },
         {
             id: 'TRIP-003',
@@ -38,11 +46,16 @@ const TripManagement = () => {
             startTime: '07:45 AM',
             endTime: '09:15 AM',
             status: 'In Progress',
-            date: '2024-01-21'
+
+            date: '2024-01-21',
+            date: '2024-01-21',
+            driverMobile: '+91 98765 43212',
+            description: 'North Hills school district loop'
         },
     ]);
 
     const [activeMenuId, setActiveMenuId] = useState(null);
+    const [activeStatusId, setActiveStatusId] = useState(null);
 
     const filteredTrips = trips.filter(trip =>
         trip.route.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -102,101 +115,73 @@ const TripManagement = () => {
                 </div>
             )
         },
-        {
-            headerName: "Bus Number",
-            field: "bus",
-            flex: 1,
-            cellStyle: { display: 'flex', alignItems: 'center' },
-            cellRenderer: params => (
-                <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faBus} className="text-gray-400" />
-                    <span>{params.value}</span>
-                </div>
-            )
-        },
+
         {
             headerName: "Driver",
             field: "driver",
             flex: 1,
             cellStyle: { display: 'flex', alignItems: 'center' },
             cellRenderer: params => (
-                <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
-                        <FontAwesomeIcon icon={faUser} size="xs" />
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                        <FontAwesomeIcon icon={faUser} size="sm" />
                     </div>
-                    <span>{params.value}</span>
+                    <div className="flex flex-col justify-center -space-y-0.5">
+                        <span className="font-semibold text-gray-900 text-sm leading-none">{params.data.driver}</span>
+                        <span className="text-[11px] text-gray-500 font-medium leading-none mt-1">{params.data.driverMobile}</span>
+                    </div>
                 </div>
             )
+        },
+        {
+            headerName: "Description",
+            field: "description",
+            flex: 1.5,
+            wrapText: true,
+            autoHeight: true,
+            cellStyle: { display: 'flex', alignItems: 'center', color: '#6b7280', fontSize: '0.875rem', whiteSpace: 'normal', lineHeight: '1.4', paddingTop: '12px', paddingBottom: '12px' }
         },
         {
             headerName: "Status",
             field: "status",
             flex: 1,
-            cellStyle: { display: 'flex', alignItems: 'center' },
-            cellRenderer: params => <StatusBadge status={params.value} />
-        },
-
-        {
-            headerName: "Actions",
-            field: "id",
-            width: 100,
-            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
-            sortable: false,
-            filter: false,
-            cellRenderer: (params) => (
+            cellStyle: { display: 'flex', alignItems: 'center', overflow: 'visible' },
+            cellRenderer: params => (
                 <div className="relative">
-                    <button
+                    <div
                         onClick={(e) => {
                             e.stopPropagation();
-                            setActiveMenuId(activeMenuId === params.value ? null : params.value);
+                            setActiveStatusId(activeStatusId === params.data.id ? null : params.data.id);
                         }}
-                        className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors"
+                        className="cursor-pointer hover:opacity-80 transition-opacity"
                     >
-                        <FontAwesomeIcon icon={faEllipsisV} />
-                    </button>
-
-                    {activeMenuId === params.value && (
-                        <div className="absolute right-full top-0 mr-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                            <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                <FontAwesomeIcon icon={faEye} className="text-gray-400" /> View Details
-                            </button>
-                            <button className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors">
-                                <FontAwesomeIcon icon={faEdit} className="text-gray-400" /> Edit Trip
-                            </button>
-
-                            <div className="border-t border-gray-100 my-1"></div>
-                            <p className="px-4 py-1 text-[10px] uppercase font-bold text-gray-400 tracking-wider">Update Status</p>
-
-
+                        <StatusBadge status={params.value} />
+                    </div>
+                    {activeStatusId === params.data.id && (
+                        <div className="absolute left-0 top-full mt-2 w-40 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
                             <button
-                                onClick={(e) => { e.stopPropagation(); handleStatusChange(params.value, 'In Progress'); setActiveMenuId(null); }}
+                                onClick={(e) => { e.stopPropagation(); handleStatusChange(params.data.id, 'In Progress'); setActiveStatusId(null); }}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors"
                             >
                                 <FontAwesomeIcon icon={faSpinner} className="text-blue-400" /> In Progress
                             </button>
                             <button
-                                onClick={(e) => { e.stopPropagation(); handleStatusChange(params.value, 'Completed'); setActiveMenuId(null); }}
+                                onClick={(e) => { e.stopPropagation(); handleStatusChange(params.data.id, 'Completed'); setActiveStatusId(null); }}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 flex items-center gap-3 transition-colors"
                             >
                                 <FontAwesomeIcon icon={faCheckCircle} className="text-green-400" /> Completed
-                            </button>
-
-                            <div className="border-t border-gray-100 my-1"></div>
-                            <button
-                                onClick={() => handleDelete(params.value)}
-                                className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors border-t border-gray-50"
-                            >
-                                <FontAwesomeIcon icon={faTrash} /> Delete Trip
                             </button>
                         </div>
                     )}
                 </div>
             )
-        }
+        },
+
+
     ];
 
     return (
-        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in" onClick={() => setActiveMenuId(null)}>
+        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in" onClick={() => { setActiveMenuId(null); setActiveStatusId(null); }}>
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-8 py-6 sticky top-0 z-30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -249,7 +234,7 @@ const TripManagement = () => {
                             overlayNoRowsTemplate='<span class="p-4">No trips found</span>'
                             animateRows={true}
                             getRowStyle={params => {
-                                if (params.data.id === activeMenuId) {
+                                if (params.data.id === activeMenuId || params.data.id === activeStatusId) {
                                     return { zIndex: 999, overflow: 'visible' };
                                 }
                                 return { zIndex: 'auto' };

@@ -10,7 +10,8 @@ import {
   faUserShield,
   faSignOutAlt,
   faCode,
-  faCalendarCheck
+  faCalendarCheck,
+  faChartBar
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../constants/colors';
@@ -37,6 +38,7 @@ const Sidebar = () => {
     { icon: faBus, label: 'Bus Management', path: '/buses' },
     { icon: faMapLocationDot, label: 'Route Management', path: '/routes' },
     { icon: faCalendarCheck, label: 'Trip Management', path: '/trips' },
+    { icon: faChartBar, label: 'Reports', path: '/reports' },
     { icon: faComments, label: 'Communication', path: '/communication' },
     { icon: faUserShield, label: 'Administration', path: '/admin' },
   ];
