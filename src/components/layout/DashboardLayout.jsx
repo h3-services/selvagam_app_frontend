@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { COLORS } from '../constants/colors';
+import { COLORS } from '../../constants/colors';
 
 const Dashboard = () => {
   return (

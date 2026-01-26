@@ -14,9 +14,9 @@ import {
   faChartBar
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
-import { COLORS } from '../constants/colors';
+import { COLORS } from '../../constants/colors';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { auth } from '../firebase';
+import { auth } from '../../config/firebase';
 import { signOut } from 'firebase/auth';
 
 const Sidebar = () => {
