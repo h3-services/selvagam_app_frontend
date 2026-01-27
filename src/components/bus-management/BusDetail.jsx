@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faCheck, faEdit, faArrowLeft, faBus, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faCheck, faEdit, faArrowLeft, faBus, faUser, faIndustry, faCogs, faCalendarCheck, faIdCard, faShieldAlt } from '@fortawesome/free-solid-svg-icons';
 
 const BusDetail = ({ selectedBus, onBack, onUpdate, getStatusColor }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -59,27 +59,70 @@ const BusDetail = ({ selectedBus, onBack, onUpdate, getStatusColor }) => {
 
             <div className="p-5 overflow-y-auto flex-1">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* Driver Card */}
+
+                    {/* Brand */}
                     <div className="group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full -mr-10 -mt-10 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
                         <div className="relative p-4">
-                            <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Assigned Driver</p>
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3 shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                                <FontAwesomeIcon icon={faIndustry} className="text-white text-sm" />
+                            </div>
+                            <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Bus Brand</p>
                             {isEditing ? (
                                 <input
                                     type="text"
-                                    value={editData?.driverName}
-                                    onChange={(e) => setEditData({ ...editData, driverName: e.target.value })}
+                                    value={editData?.bus_brand || ''}
+                                    onChange={(e) => setEditData({ ...editData, bus_brand: e.target.value })}
                                     className="w-full border-2 rounded-lg px-3 py-2 text-base font-bold outline-none"
                                     style={{ borderColor: '#40189d' }}
                                 />
                             ) : (
-                                <p className="text-lg font-bold text-black">{selectedBus.driverName}</p>
+                                <p className="text-lg font-bold text-black">{selectedBus.bus_brand || 'N/A'}</p>
                             )}
+                        </div>
+                    </div>
+
+                    {/* Model */}
+                    <div className="group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full -mr-10 -mt-10 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
+                        <div className="relative p-4">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3 shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                                <FontAwesomeIcon icon={faCogs} className="text-white text-sm" />
+                            </div>
+                            <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Bus Model</p>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    value={editData?.bus_model || ''}
+                                    onChange={(e) => setEditData({ ...editData, bus_model: e.target.value })}
+                                    className="w-full border-2 rounded-lg px-3 py-2 text-base font-bold outline-none"
+                                    style={{ borderColor: '#40189d' }}
+                                />
+                            ) : (
+                                <p className="text-lg font-bold text-black">{selectedBus.bus_model || 'N/A'}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Assigned Driver */}
+                    <div className="group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full -mr-10 -mt-10 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
+                        <div className="relative p-4">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3 shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                                <FontAwesomeIcon icon={faUser} className="text-white text-sm" />
+                            </div>
+                            <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Assigned Driver</p>
+                            <p className="text-lg font-bold text-black">{selectedBus.driverName}</p>
                         </div>
                     </div>
 
                     {/* Status Card */}
                     <div className="group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full -mr-10 -mt-10 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
                         <div className="relative p-4">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3 shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                                <FontAwesomeIcon icon={faShieldAlt} className="text-white text-sm" />
+                            </div>
                             <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Status</p>
                             {isEditing ? (
                                 <select
@@ -96,6 +139,54 @@ const BusDetail = ({ selectedBus, onBack, onUpdate, getStatusColor }) => {
                                 <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(selectedBus.status)}`}>
                                     {selectedBus.status}
                                 </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* RC Expiry */}
+                    <div className="group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full -mr-10 -mt-10 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
+                        <div className="relative p-4">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3 shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                                <FontAwesomeIcon icon={faIdCard} className="text-white text-sm" />
+                            </div>
+                            <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">RC Expiry Date</p>
+                            {isEditing ? (
+                                <input
+                                    type="date"
+                                    value={editData?.rc_expiry_date || ''}
+                                    onChange={(e) => setEditData({ ...editData, rc_expiry_date: e.target.value })}
+                                    className="w-full border-2 rounded-lg px-3 py-2 text-base font-bold outline-none"
+                                    style={{ borderColor: '#40189d' }}
+                                />
+                            ) : (
+                                <p className={`text-lg font-bold ${selectedBus.rc_expiry_date && new Date(selectedBus.rc_expiry_date) < new Date() ? 'text-red-500' : 'text-black'}`}>
+                                    {selectedBus.rc_expiry_date || 'N/A'}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* FC Expiry */}
+                    <div className="group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full -mr-10 -mt-10 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
+                        <div className="relative p-4">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3 shadow-sm" style={{ backgroundColor: '#40189d' }}>
+                                <FontAwesomeIcon icon={faCalendarCheck} className="text-white text-sm" />
+                            </div>
+                            <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">FC Expiry Date</p>
+                            {isEditing ? (
+                                <input
+                                    type="date"
+                                    value={editData?.fc_expiry_date || ''}
+                                    onChange={(e) => setEditData({ ...editData, fc_expiry_date: e.target.value })}
+                                    className="w-full border-2 rounded-lg px-3 py-2 text-base font-bold outline-none"
+                                    style={{ borderColor: '#40189d' }}
+                                />
+                            ) : (
+                                <p className={`text-lg font-bold ${selectedBus.fc_expiry_date && new Date(selectedBus.fc_expiry_date) < new Date() ? 'text-red-500' : 'text-black'}`}>
+                                    {selectedBus.fc_expiry_date || 'N/A'}
+                                </p>
                             )}
                         </div>
                     </div>

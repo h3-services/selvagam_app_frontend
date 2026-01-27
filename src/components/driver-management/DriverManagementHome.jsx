@@ -1,22 +1,19 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faUserPlus, faTrash, faClock, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faUserPlus, faTrash, faClock, faArrowLeft, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import DriverList from './DriverList';
 import DriverDetail from './DriverDetail';
 import AddDriverForm from './AddDriverForm';
+import { driverService } from '../../services/driverService';
+
+import { busService } from '../../services/busService';
 
 const DriverManagementHome = () => {
-    const [drivers, setDrivers] = useState([
-        { id: 1, name: 'Driver 1', email: 'driver1@example.com', mobile: '9876543210', licenseNumber: 'DL-2024-001', vehicleNumber: 'Bus 1 - TN 33 AA 1234', route: 'Gandhipuram - Railway Station', date: '2024-01-10', status: 'Active' },
-        { id: 2, name: 'Driver 2', email: 'driver2@example.com', mobile: '9876543211', licenseNumber: 'DL-2024-002', vehicleNumber: 'Bus 2 - TN 33 AA 5678', route: 'Ukkadam - Town Hall', date: '2024-01-15', status: 'Inactive' },
-        { id: 3, name: 'Driver 3', email: 'driver3@example.com', mobile: '9876543212', licenseNumber: 'DL-2024-003', vehicleNumber: 'Bus 3 - TN 33 AA 9012', route: 'Saravanampatti - Prozone Mall', date: '2024-02-01', status: 'Active' },
-        { id: 4, name: 'Driver 4', email: 'driver4@example.com', mobile: '9876543213', licenseNumber: 'DL-2024-004', vehicleNumber: 'Bus 4 - TN 33 AA 3456', route: 'Peelamedu - Airport', date: '2024-02-05', status: 'Active' },
-        { id: 5, name: 'Driver 5', email: 'driver5@example.com', mobile: '9876543214', licenseNumber: 'DL-2024-005', vehicleNumber: 'Bus 5 - TN 33 AA 7890', route: 'R.S. Puram - Brookefields', date: '2024-02-10', status: 'Inactive' },
-        { id: 6, name: 'Driver 6', email: 'driver6@example.com', mobile: '9876543215', licenseNumber: 'DL-2024-006', vehicleNumber: 'Bus 6 - TN 33 AA 2345', route: 'Vadavalli - Maruthamalai', date: '2024-02-15', status: 'Active' },
-        { id: 7, name: 'Driver 7', email: 'driver7@example.com', mobile: '9876543216', licenseNumber: 'DL-2024-007', vehicleNumber: 'Bus 7 - TN 33 AA 6789', route: 'Singanallur - Bus Stand', date: '2024-02-20', status: 'Active' },
-        { id: 8, name: 'Driver 8', email: 'driver8@example.com', mobile: '9876543217', licenseNumber: 'DL-2024-008', vehicleNumber: 'Bus 8 - TN 33 AA 0123', route: 'Saibaba Colony - Thudiyalur', date: '2024-02-25', status: 'Inactive' },
-    ]);
+    const [drivers, setDrivers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const [showModal, setShowModal] = useState(false);
     const [search, setSearch] = useState('');
     const [selectedDriver, setSelectedDriver] = useState(null);
@@ -26,6 +23,50 @@ const DriverManagementHome = () => {
     const [showDeactivateModal, setShowDeactivateModal] = useState(false);
     const [deactivatingItemId, setDeactivatingItemId] = useState(null);
     const [deactivationReason, setDeactivationReason] = useState("");
+
+    // Fetch Drivers & Buses to map vehicles
+    const fetchDrivers = async () => {
+        setLoading(true);
+        try {
+            const [driversData, busesData] = await Promise.all([
+                driverService.getAllDrivers(),
+                busService.getAllBuses()
+            ]);
+
+            // Create a lookup for bus (driver_id -> bus_number)
+            const driverBusMap = {};
+            if (Array.isArray(busesData)) {
+                busesData.forEach(bus => {
+                    if (bus.driver_id) {
+                        driverBusMap[bus.driver_id] = bus.bus_number;
+                    }
+                });
+            }
+
+            // Map API data to UI format
+            const mappedDrivers = Array.isArray(driversData) ? driversData.map(d => ({
+                ...d,
+                id: d.driver_id,
+                mobile: d.phone, // UI uses mobile, API uses phone
+                licenseNumber: d.licence_number, // Note spelling
+                status: d.status.charAt(0).toUpperCase() + d.status.slice(1).toLowerCase(), // "ACTIVE" -> "Active"
+                date: d.created_at ? d.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+                vehicleNumber: driverBusMap[d.driver_id] || 'Unassigned',
+                route: 'Unassigned'
+            })) : [];
+            setDrivers(mappedDrivers);
+            setError(null);
+        } catch (err) {
+            setError('Failed to load drivers.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDrivers();
+    }, []);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -41,9 +82,11 @@ const DriverManagementHome = () => {
             setDeactivationReason("");
             setShowDeactivateModal(true);
         } else {
+            // Optimistic update
             setDrivers(drivers.map(d =>
                 d.id === id ? { ...d, status: 'Active' } : d
             ));
+            // TODO: Call API to update status
         }
     };
 
@@ -52,6 +95,7 @@ const DriverManagementHome = () => {
             setDrivers(drivers.map(d =>
                 d.id === deactivatingItemId ? { ...d, status: 'Inactive', deactivationReason } : d
             ));
+            // TODO: Call API to update status
             setDeactivatingItemId(null);
             setDeactivationReason("");
             setShowDeactivateModal(false);
@@ -59,17 +103,20 @@ const DriverManagementHome = () => {
     };
 
     const filteredDrivers = drivers.filter(d =>
-        d.name.toLowerCase().includes(search.toLowerCase()) ||
-        d.email.toLowerCase().includes(search.toLowerCase())
+        d.name?.toLowerCase().includes(search.toLowerCase()) ||
+        d.email?.toLowerCase().includes(search.toLowerCase())
     );
 
-    const handleAdd = (newDriver) => {
-        setDrivers([...drivers, {
-            id: Date.now(),
-            ...newDriver,
-            date: new Date().toISOString().split('T')[0]
-        }]);
-        setShowModal(false);
+    const handleAdd = async (newDriver) => {
+        try {
+            await driverService.createDriver(newDriver);
+            await fetchDrivers(); // Refresh list to see new driver
+            setShowModal(false);
+            // Optional: Success notification
+        } catch (err) {
+            console.error(err);
+            alert("Failed to create driver: " + (err.response?.data?.message || err.message));
+        }
     };
 
     const handleDelete = (id) => {
@@ -77,17 +124,55 @@ const DriverManagementHome = () => {
         setShowDeleteConfirm(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (itemToDelete) {
-            setDrivers(drivers.filter(d => d.id !== itemToDelete));
-            setItemToDelete(null);
-            setShowDeleteConfirm(false);
+            try {
+                await driverService.deleteDriver(itemToDelete);
+                // Optimistic notification or just refresh
+                await fetchDrivers();
+                setShowDeleteConfirm(false);
+                setItemToDelete(null);
+            } catch (err) {
+                console.error(err);
+                alert("Failed to delete driver: " + (err.response?.data?.message || err.message));
+            }
         }
     };
 
-    const handleUpdate = (updatedData) => {
-        setDrivers(drivers.map(d => d.id === updatedData.id ? updatedData : d));
-        setSelectedDriver(updatedData);
+    const handleUpdate = async (updatedData) => {
+        try {
+            // Map UI fields back to API fields
+            const apiPayload = {
+                name: updatedData.name,
+                email: updatedData.email,
+                phone: Number(updatedData.mobile), // Map mobile -> phone
+                dob: updatedData.dob,
+                licence_number: updatedData.licenseNumber, // Map licenseNumber -> licence_number
+                licence_expiry: updatedData.licence_expiry,
+                aadhar_number: updatedData.aadhar_number,
+                photo_url: updatedData.photo_url,
+                licence_url: updatedData.licence_url,
+                aadhar_url: updatedData.aadhar_url,
+                is_available: updatedData.is_available,
+                status: updatedData.status
+                // Password is usually not updated here unless a specific change password flow exists
+            };
+
+            await driverService.updateDriver(updatedData.id, apiPayload);
+
+            // Update local state to reflect changes immediately in Detail view without full reload if possible,
+            // but fetching ensures data consistency.
+            await fetchDrivers();
+
+            // Update the selected driver view with the new data (merged with UI mappings)
+            // We can re-find the driver from the new list or manually patch it for speed.
+            // For now, let's just update the local selectedDriver with the UI fields so the view doesn't jump.
+            setSelectedDriver(updatedData);
+
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update driver: " + (err.response?.data?.message || err.message));
+        }
     };
 
     return (
@@ -126,40 +211,39 @@ const DriverManagementHome = () => {
                 </div>
             )}
 
-            {selectedDriver && (
-                <div className="mb-4 flex items-center gap-4">
-                    <button
-                        onClick={() => setSelectedDriver(null)}
-                        className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md flex items-center justify-center text-gray-600 transition-all hover:bg-gray-50"
-                    >
-                        <FontAwesomeIcon icon={faArrowLeft} />
-                    </button>
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                        <span className="text-gray-500">Back to List</span>
-                        <span style={{ color: '#40189d' }}>/</span>
-                        <span style={{ color: '#40189d' }}>{selectedDriver.name}</span>
+            {loading ? (
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3">
+                        <FontAwesomeIcon icon={faSpinner} className="text-4xl text-purple-600 animate-spin" />
+                        <p className="text-gray-500 font-medium">Loading drivers...</p>
                     </div>
                 </div>
+            ) : error ? (
+                <div className="flex-1 flex items-center justify-center text-red-500">
+                    {error} <button onClick={fetchDrivers} className="ml-2 underline hover:text-red-700">Retry</button>
+                </div>
+            ) : null}
+
+            {!loading && !error && (
+                selectedDriver ? (
+                    <DriverDetail
+                        selectedDriver={selectedDriver}
+                        onBack={() => setSelectedDriver(null)}
+                        onUpdate={handleUpdate}
+                    />
+                ) : (
+                    <DriverList
+                        filteredDrivers={filteredDrivers}
+                        setSelectedDriver={setSelectedDriver}
+                        handleToggleStatus={handleToggleStatus}
+                        handleDelete={handleDelete}
+                        activeMenuId={activeMenuId}
+                        setActiveMenuId={setActiveMenuId}
+                    />
+                )
             )}
 
-            {selectedDriver ? (
-                <DriverDetail
-                    selectedDriver={selectedDriver}
-                    onBack={() => setSelectedDriver(null)}
-                    onUpdate={handleUpdate}
-                />
-            ) : (
-                <DriverList
-                    filteredDrivers={filteredDrivers}
-                    setSelectedDriver={setSelectedDriver}
-                    handleToggleStatus={handleToggleStatus}
-                    handleDelete={handleDelete}
-                    activeMenuId={activeMenuId}
-                    setActiveMenuId={setActiveMenuId}
-                />
-            )}
-
-            {!selectedDriver && (
+            {!selectedDriver && !loading && (
                 <button
                     onClick={() => setShowModal(true)}
                     className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"

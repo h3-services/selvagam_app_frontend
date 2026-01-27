@@ -19,6 +19,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "ag-grid-community": "^35.0.0",
     "ag-grid-react": "^35.0.0",
+    "axios": "^1.13.3",
     "cors": "^2.8.5",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.6.0",

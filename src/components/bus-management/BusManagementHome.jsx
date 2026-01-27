@@ -1,22 +1,16 @@
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faBus, faArrowLeft, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faBus, faArrowLeft, faTrash, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import BusList from './BusList';
 import BusDetail from './BusDetail';
 import AddBusForm from './AddBusForm';
+import { busService } from '../../services/busService';
 
 const BusManagementHome = () => {
-    const [buses, setBuses] = useState([
-        { id: 1, busNumber: 'BUS-101', capacity: 40, driverName: 'Robert Wilson', contactNumber: '555-0101', route: 'Route A - Downtown', status: 'Active' },
-        { id: 2, busNumber: 'BUS-102', capacity: 40, driverName: 'Sarah Martinez', contactNumber: '555-0102', route: 'Route B - Westside', status: 'Active' },
-        { id: 3, busNumber: 'BUS-103', capacity: 35, driverName: 'David Brown', contactNumber: '555-0103', route: 'Route C - North Hills', status: 'Maintenance' },
-        { id: 4, busNumber: 'BUS-104', capacity: 40, driverName: 'Emily Davis', contactNumber: '555-0104', route: 'Route D - Eastgate', status: 'Active' },
-        { id: 5, busNumber: 'BUS-105', capacity: 30, driverName: 'Michael Chen', contactNumber: '555-0105', route: 'Route E - Southpark', status: 'Inactive' },
-        { id: 6, busNumber: 'BUS-106', capacity: 40, driverName: 'Jessica Taylor', contactNumber: '555-0106', route: 'Route F - Central', status: 'Active' },
-        { id: 7, busNumber: 'BUS-107', capacity: 40, driverName: 'William Anderson', contactNumber: '555-0107', route: 'Route G - Harbor', status: 'Active' },
-        { id: 8, busNumber: 'BUS-108', capacity: 35, driverName: 'Olivia Thomas', contactNumber: '555-0108', route: 'Route H - University', status: 'Maintenance' },
-    ]);
+    const [buses, setBuses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const [showModal, setShowModal] = useState(false);
     const [search, setSearch] = useState('');
@@ -24,6 +18,42 @@ const BusManagementHome = () => {
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
+
+    // Fetch Buses
+    const fetchBuses = async () => {
+        setLoading(true);
+        try {
+            const data = await busService.getAllBuses();
+            // Map API response to match internal UI shape
+            // Note: driver_id is present, but UI shows driverName. 
+            // Ideally backend returns driver name populated or we fetch drivers to map.
+            // For now, we will just show 'Assigned' or 'Unassigned' based on driver_id presence, or mock it.
+            // In a real scenario, you'd likely join with driver data or the API would provide it.
+            const mappedBuses = Array.isArray(data) ? data.map(b => ({
+                id: b.bus_id,
+                busNumber: b.bus_number,
+                capacity: b.seating_capacity,
+                // Fallback: The API example provided only has driver_id. 
+                // We display 'Assigned' vs 'Unassigned' until we can fetch driver details.
+                driverName: b.driver_id ? (b.driver_name || 'Assigned') : 'Unassigned',
+                contactNumber: 'N/A',
+                route: b.route_id ? (b.route_name || 'Assigned') : 'Unassigned',
+                status: b.status ? (b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase()) : 'Inactive',
+                ...b
+            })) : [];
+            setBuses(mappedBuses);
+            setError(null);
+        } catch (err) {
+            setError('Failed to load buses.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchBuses();
+    }, []);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -39,11 +69,8 @@ const BusManagementHome = () => {
         );
     }, [buses, search]);
 
-    const handleAdd = (newBus) => {
-        setBuses([...buses, {
-            id: Date.now(),
-            ...newBus
-        }]);
+    const handleAdd = async (newBus) => {
+        await fetchBuses();
         setShowModal(false);
     };
 
@@ -52,21 +79,29 @@ const BusManagementHome = () => {
         setShowDeleteConfirm(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (itemToDelete) {
-            setBuses(buses.filter(b => b.id !== itemToDelete));
+            try {
+                // await busService.deleteBus(itemToDelete);
+                setBuses(buses.filter(b => b.id !== itemToDelete));
+            } catch (e) {
+                alert("Failed to delete bus");
+            }
             setItemToDelete(null);
             setShowDeleteConfirm(false);
         }
     };
 
     const handleStatusChange = (id, newStatus) => {
+        // Optimistic update
         setBuses(buses.map(b => b.id === id ? { ...b, status: newStatus } : b));
+        // TODO: Call API to update status
     };
 
     const handleUpdate = (updatedData) => {
         setBuses(buses.map(b => b.id === updatedData.id ? updatedData : b));
         setSelectedBus(updatedData);
+        // TODO: Call API
     };
 
     const getStatusColor = (status) => {
@@ -114,29 +149,39 @@ const BusManagementHome = () => {
                 </div>
             )}
 
-            {selectedBus && (
-                <div className="mb-4 flex items-center gap-4">
-                    <button
-                        onClick={() => setSelectedBus(null)}
-                        className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md flex items-center justify-center text-gray-600 transition-all hover:bg-gray-50"
-                    >
-                        <FontAwesomeIcon icon={faArrowLeft} />
-                    </button>
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                        <span className="text-gray-500">Back to List</span>
-                        <span style={{ color: '#40189d' }}>/</span>
-                        <span style={{ color: '#40189d' }}>{selectedBus.busNumber}</span>
+            {loading ? (
+                <div className="flex-1 flex items-center justify-center min-h-[200px]">
+                    <div className="flex flex-col items-center gap-3">
+                        <FontAwesomeIcon icon={faSpinner} className="text-4xl text-purple-600 animate-spin" />
+                        <p className="text-gray-500 font-medium">Loading fleet data...</p>
                     </div>
                 </div>
-            )}
-
-            {selectedBus ? (
-                <BusDetail
-                    selectedBus={selectedBus}
-                    onBack={() => setSelectedBus(null)}
-                    onUpdate={handleUpdate}
-                    getStatusColor={getStatusColor}
-                />
+            ) : error ? (
+                <div className="flex-1 flex items-center justify-center text-red-500">
+                    {error} <button onClick={fetchBuses} className="ml-2 underline hover:text-red-700">Retry</button>
+                </div>
+            ) : selectedBus ? (
+                <>
+                    <div className="mb-4 flex items-center gap-4">
+                        <button
+                            onClick={() => setSelectedBus(null)}
+                            className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md flex items-center justify-center text-gray-600 transition-all hover:bg-gray-50"
+                        >
+                            <FontAwesomeIcon icon={faArrowLeft} />
+                        </button>
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                            <span className="text-gray-500">Back to List</span>
+                            <span style={{ color: '#40189d' }}>/</span>
+                            <span style={{ color: '#40189d' }}>{selectedBus.busNumber}</span>
+                        </div>
+                    </div>
+                    <BusDetail
+                        selectedBus={selectedBus}
+                        onBack={() => setSelectedBus(null)}
+                        onUpdate={handleUpdate}
+                        getStatusColor={getStatusColor}
+                    />
+                </>
             ) : (
                 <BusList
                     filteredBuses={filteredBuses}
@@ -149,7 +194,7 @@ const BusManagementHome = () => {
                 />
             )}
 
-            {!selectedBus && (
+            {!selectedBus && !loading && (
                 <button
                     onClick={() => setShowModal(true)}
                     className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
