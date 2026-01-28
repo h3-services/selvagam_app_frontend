@@ -8,7 +8,7 @@
 1. Go to Firebase Console → Project Settings → Service Accounts
 2. Click "Generate new private key"
 3. Download the JSON file
-4. Copy these values to `server.js`:
+4. Copy these values to `src/server.js`:
    - `private_key_id`
    - `private_key` (keep the quotes and \n characters)
    - `client_email`
@@ -49,7 +49,7 @@ FirebaseMessaging.onMessage.listen((message) {
 
 ## ✅ Deployment Checklist
 
-- [ ] Replace Firebase credentials in `server.js`
+- [ ] Replace Firebase credentials in `src/server.js`
 - [ ] Test both API endpoints
 - [ ] Mobile app subscribed to topics
 - [ ] Admin portal connected to API

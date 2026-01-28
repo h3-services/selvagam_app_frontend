@@ -15,6 +15,13 @@ console.log('🔧 Server starting...');
 console.log('🌐 CORS enabled for all origins');
 
 // Initialize Google Auth
+if (!fs.existsSync('./firebase-credentials.json')) {
+  console.error('❌ CRITICAL ERROR: firebase-credentials.json not found!');
+  console.error('👉 Please download your service account key from Firebase Console');
+  console.error('   and save it as "firebase-credentials.json" in this directory.');
+  console.error('   Path: ' + process.cwd() + '/firebase-credentials.json');
+}
+
 const auth = new GoogleAuth({
   keyFile: './firebase-credentials.json',
   scopes: ['https://www.googleapis.com/auth/firebase.messaging'],
@@ -31,18 +38,18 @@ async function getAccessToken() {
 app.post('/api/send-notification-device', async (req, res) => {
   try {
     const { title, body, token, recipientType, messageType } = req.body;
-    
-    console.log('📱 Sending notification:', { 
-      title, 
-      body, 
+
+    console.log('📱 Sending notification:', {
+      title,
+      body,
       recipientType,
       messageType,
-      token: token?.substring(0, 20) + '...' 
+      token: token?.substring(0, 20) + '...'
     });
-    
+
     // Get OAuth access token
     const accessToken = await getAccessToken();
-    
+
     // FCM HTTP v1 API payload
     const message = {
       message: {
@@ -85,25 +92,25 @@ app.post('/api/send-notification-device', async (req, res) => {
 
     const result = await response.json();
     console.log('✅ Notification sent successfully:', result.name);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       messageId: result.name,
       message: 'Notification sent to mobile device'
     });
 
   } catch (error) {
     console.error('❌ Error sending notification:', error.message);
-    res.status(500).json({ 
-      error: 'Failed to send notification', 
-      details: error.message 
+    res.status(500).json({
+      error: 'Failed to send notification',
+      details: error.message
     });
   }
 });
 
 // Test endpoint
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'FCM HTTP v1 API Server Running',
     project: PROJECT_ID,
     status: 'Ready to send notifications'
