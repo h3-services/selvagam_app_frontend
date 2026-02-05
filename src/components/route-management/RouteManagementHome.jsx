@@ -1,47 +1,70 @@
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faArrowLeft, faTrash, faMapLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faArrowLeft, faTrash, faMapLocationDot, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import RouteList from './RouteList';
 import RouteDetail from './RouteDetail';
 import AddRouteForm from './AddRouteForm';
 import BusReassignModal from './BusReassignModal';
+import { routeService } from '../../services/routeService';
 
 const RouteManagementHome = () => {
-    // Mock data with coordinates for Hyderabad/India locations as example
-    const [routes, setRoutes] = useState([
-        {
-            id: 1,
-            routeName: 'Route A - Downtown',
-            distance: '12 km',
-            assignedBus: 'BUS-101',
-            stops: 3,
-            stopPoints: [
-                { name: 'City School', position: [17.4401, 78.3489] },
-                { name: 'Main Street', position: [17.4201, 78.4000] },
-                { name: 'Central Station', position: [17.3850, 78.4867] }
-            ],
-            coordinates: {
-                start: [17.4401, 78.3489],
-                end: [17.3850, 78.4867]
-            }
-        },
-        {
-            id: 2,
-            routeName: 'Route B - Westside',
-            distance: '18 km',
-            assignedBus: 'BUS-104',
-            stops: 2,
-            stopPoints: [
-                { name: 'City School', position: [17.4401, 78.3489] },
-                { name: 'West Mall', position: [17.4375, 78.4483] }
-            ],
-            coordinates: {
-                start: [17.4401, 78.3489],
-                end: [17.4375, 78.4483]
-            }
-        },
-    ]);
+    const [routes, setRoutes] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchAllData();
+    }, []);
+
+    const fetchAllData = async () => {
+        setLoading(true);
+        try {
+            const [routesData, stopsData] = await Promise.all([
+                routeService.getAllRoutes(),
+                routeService.getAllRouteStops()
+            ]);
+
+            // Transform and merge data
+            const mappedRoutes = routesData.map(route => {
+                // Get stops for this route
+                const routeStops = stopsData.filter(stop => stop.route_id === route.route_id);
+                
+                // Sort stops by pickup order
+                routeStops.sort((a, b) => (a.pickup_stop_order || 0) - (b.pickup_stop_order || 0));
+
+                // Map to UI format
+                const stopPoints = routeStops.map(stop => ({
+                    name: stop.stop_name,
+                    position: [stop.latitude, stop.longitude],
+                    id: stop.stop_id
+                }));
+
+                const startCoord = stopPoints.length > 0 ? stopPoints[0].position : [12.6083, 80.0528]; // Default fallback
+                const endCoord = stopPoints.length > 0 ? stopPoints[stopPoints.length - 1].position : [12.6083, 80.0528];
+
+                return {
+                    id: route.route_id,
+                    routeName: route.name,
+                    distance: 'N/A', // Not in API yet
+                    assignedBus: 'Unassigned', // Not in API yet
+                    stops: routeStops.length,
+                    stopPoints: stopPoints,
+                    coordinates: {
+                        start: startCoord,
+                        end: endCoord
+                    },
+                    status: route.routes_active_status,
+                    originalData: route
+                };
+            });
+
+            setRoutes(mappedRoutes);
+        } catch (error) {
+            console.error("Failed to fetch route data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const [showModal, setShowModal] = useState(false);
     const [search, setSearch] = useState('');
@@ -129,9 +152,42 @@ const RouteManagementHome = () => {
         }
     };
 
-    const handleUpdate = (updatedData) => {
-        setRoutes(routes.map(r => r.id === updatedData.id ? updatedData : r));
-        setSelectedRoute(updatedData);
+    const handleUpdate = async (updatedData) => {
+        try {
+            // 1. Handle Deleted Stops
+            const originalStops = selectedRoute.stopPoints || [];
+            const currentStops = updatedData.stopPoints || [];
+            
+            const originalStopIds = new Set(originalStops.map(s => s.id).filter(id => id));
+            const currentStopIds = new Set(currentStops.map(s => s.id).filter(id => id));
+            
+            const stopsToDelete = [...originalStopIds].filter(id => !currentStopIds.has(id));
+            
+            // Delete removed stops
+            await Promise.all(stopsToDelete.map(id => routeService.deleteRouteStop(id)));
+
+            // 2. Update Route Details (Always call PUT on save)
+            await routeService.updateRoute(updatedData.id, { 
+                name: updatedData.routeName,
+                routes_active_status: updatedData.status || 'ACTIVE' 
+            });
+
+            // Refresh Data
+            await fetchAllData();
+            
+            // Update local selection to reflect new IDs
+            // We need to find the updated route from the refreshed list
+            // Since fetchAllData setsRoutes, we can't easily wait for state update here to set selectedRoute immediately
+            // But fetchAllData is async.
+            
+            // For smoother UX, we might want to manually update selectedRoute with placeholders or just close/refresh
+            // Let's just update the list for now; the user might need to re-select or we rely on the list update
+             setSelectedRoute(null); // Go back to list view on save, or we'd need to re-find the route
+             
+        } catch (error) {
+            console.error("Error updating route:", error);
+            alert("Failed to save changes. Please try again.");
+        }
     };
 
     return (
@@ -172,7 +228,11 @@ const RouteManagementHome = () => {
 
 
 
-            {selectedRoute ? (
+            {loading ? (
+                <div className="flex-1 flex items-center justify-center min-h-[400px]">
+                    <FontAwesomeIcon icon={faCircleNotch} spin className="text-4xl text-purple-600" />
+                </div>
+            ) : selectedRoute ? (
                 <RouteDetail
                     selectedRoute={selectedRoute}
                     onBack={() => setSelectedRoute(null)}

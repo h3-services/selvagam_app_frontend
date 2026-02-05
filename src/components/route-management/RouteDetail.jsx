@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faMapLocationDot, faBus, faCircle, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { routeService } from '../../services/routeService';
 import { LocationMarker } from './RouteMapUtils';
 
 const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
@@ -12,6 +13,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
     const [locationSearchQuery, setLocationSearchQuery] = useState('');
     const [searchSuggestions, setSearchSuggestions] = useState([]);
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+    const [isAddingStop, setIsAddingStop] = useState(false);
 
     useEffect(() => {
         if (selectedRoute) {
@@ -54,16 +56,51 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
         setIsEditing(false);
     };
 
-    const handleEditAddStop = () => {
+    const handleEditAddStop = async () => {
         if (currentStopName.trim() && selectedPosition) {
-            setEditData(prev => ({
-                ...prev,
-                stopPoints: [...(prev.stopPoints || []), { name: currentStopName.trim(), position: [selectedPosition.lat, selectedPosition.lng] }],
-                stops: (prev.stops || 0) + 1
-            }));
-            setCurrentStopName('');
-            setSelectedPosition(null);
-            setLocationSearchQuery('');
+            setIsAddingStop(true);
+            try {
+                if (!editData.id) {
+                    console.error("Missing route ID in editData:", editData);
+                    alert("Route ID is missing. Cannot add stop.");
+                    setIsAddingStop(false);
+                    return;
+                }
+
+                // Determine order
+                const currentStops = editData.stopPoints || [];
+                const order = currentStops.length + 1;
+
+                const stopData = {
+                    route_id: editData.id,
+                    stop_name: currentStopName.trim(),
+                    latitude: parseFloat(selectedPosition.lat.toFixed(6)),
+                    longitude: parseFloat(selectedPosition.lng.toFixed(6)),
+                    pickup_stop_order: parseInt(order),
+                    drop_stop_order: 9 // Match the successful example from user just in case 0 is reserved
+                };
+
+                const createdStop = await routeService.createRouteStop(stopData);
+
+                setEditData(prev => ({
+                    ...prev,
+                    stopPoints: [...(prev.stopPoints || []), { 
+                        name: createdStop.stop_name || currentStopName.trim(), 
+                        position: [createdStop.latitude || selectedPosition.lat, createdStop.longitude || selectedPosition.lng],
+                        id: createdStop.stop_id 
+                    }],
+                    stops: (prev.stops || 0) + 1
+                }));
+                
+                setCurrentStopName('');
+                setSelectedPosition(null);
+                setLocationSearchQuery('');
+            } catch (error) {
+                console.error("Failed to add stop:", error);
+                alert("Failed to add stop. Please try again.");
+            } finally {
+                setIsAddingStop(false);
+            }
         }
     };
 
@@ -158,14 +195,16 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                                     />
                                     <button
                                         onClick={handleEditAddStop}
-                                        disabled={!currentStopName.trim() || !selectedPosition}
-                                        className={`px-3 rounded-lg text-white shadow-sm transition-all ${(!currentStopName.trim() || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 hover:shadow-md'}`}
+                                        disabled={!currentStopName.trim() || !selectedPosition || isAddingStop}
+                                        className={`px-3 rounded-lg text-white shadow-sm transition-all ${(!currentStopName.trim() || !selectedPosition || isAddingStop) ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 hover:shadow-md'}`}
                                     >
-                                        <FontAwesomeIcon icon={faPlus} />
+                                        <FontAwesomeIcon icon={isAddingStop ? faSpinner : faPlus} className={isAddingStop ? "animate-spin" : ""} />
                                     </button>
                                 </div>
                                 <p className="text-[10px] text-gray-500 font-medium ml-1">
-                                    {!selectedPosition ? "1. Search & Select location on map" : "2. Name the stop and click +"}
+                                    {!selectedPosition 
+                                        ? "1. Search & Select location on map" 
+                                        : `2. Name the stop and click + (${selectedPosition.lat.toFixed(5)}, ${selectedPosition.lng.toFixed(5)})`}
                                 </p>
                             </div>
                         )}
@@ -229,7 +268,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                             </div>
                         )}
                         <MapContainer
-                            center={[17.4401, 78.3489] || selectedRoute.coordinates?.start} // Default to school area
+                            center={[12.6083, 80.0528] || selectedRoute.coordinates?.start} // Default to school area
                             zoom={11}
                             style={{ height: '100%', width: '100%' }}
                             scrollWheelZoom={true}
@@ -253,15 +292,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                             ))}
 
                             {/* Optional Route Line if needed, can connect all points */}
-                            {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 1 && (
-                                <Polyline
-                                    positions={(isEditing ? editData.stopPoints : selectedRoute.stopPoints).map(s => s.position)}
-                                    color="#40189d"
-                                    weight={4}
-                                    opacity={0.7}
-                                    dashArray="10, 10"
-                                />
-                            )}
+
                         </MapContainer>
                     </div>
                 </div>

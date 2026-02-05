@@ -201,15 +201,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                 </div>
                             </div>
 
-                            <div className="mt-auto pt-6">
-                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-[#40189d] animate-pulse"></div>
-                                        <p className="text-xs font-bold text-gray-900 tracking-tight">System Identity Verified</p>
-                                    </div>
-                                    <p className="text-[10px] font-black text-gray-400">ID: {selectedStudent.id?.toString().substring(0, 8)}</p>
-                                </div>
-                            </div>
+
                         </div>
 
                         {/* Address & Map Section - Bottom Full Width */}
