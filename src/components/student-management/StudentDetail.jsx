@@ -90,10 +90,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                             </div>
                             <div>
                                 <h2 className="text-3xl font-bold tracking-tight" style={{ color: '#40189d' }}>{selectedStudent.name}</h2>
-                                <div className="flex items-center gap-3 mt-1">
-                                    <span className="px-2 py-0.5 rounded-md bg-purple-100 text-[10px] font-bold text-purple-700 uppercase tracking-widest">Student ID: {selectedStudent.id?.toString().substring(0, 8)}</span>
-                                    <span className="text-gray-500 text-xs font-medium italic">Enrolled on {selectedStudent.date}</span>
-                                </div>
+
                             </div>
                         </div>
                         {isEditing ? (
