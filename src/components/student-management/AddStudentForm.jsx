@@ -5,7 +5,7 @@ import { COLORS } from '../../constants/colors';
 import LocationMap from './LocationMap';
 
 const AddStudentForm = ({ show, onClose, onAdd }) => {
-    const [newStudent, setNewStudent] = useState({ name: '', parentName: '', mobile: '', location: '', status: 'Inactive' });
+    const [newStudent, setNewStudent] = useState({ name: '', primaryParent: '', mobile: '', location: '', status: 'Inactive' });
     const [showLocationPicker, setShowLocationPicker] = useState(false);
 
     // Map Picker State
@@ -19,7 +19,7 @@ const AddStudentForm = ({ show, onClose, onAdd }) => {
     const handleAdd = () => {
         if (newStudent.name && newStudent.mobile) {
             onAdd(newStudent);
-            setNewStudent({ name: '', parentName: '', mobile: '', location: '', status: 'Inactive' });
+            setNewStudent({ name: '', primaryParent: '', mobile: '', location: '', status: 'Inactive' });
         }
     };
 
@@ -72,7 +72,7 @@ const AddStudentForm = ({ show, onClose, onAdd }) => {
 
                         {/* Parent Name Input */}
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Parent Name</label>
+                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Primary Parent</label>
                             <div className="relative">
                                 <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
                                     <FontAwesomeIcon icon={faUserTie} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
@@ -80,8 +80,8 @@ const AddStudentForm = ({ show, onClose, onAdd }) => {
                                 <input
                                     type="text"
                                     placeholder="Enter parent's name"
-                                    value={newStudent.parentName}
-                                    onChange={(e) => setNewStudent({ ...newStudent, parentName: e.target.value })}
+                                    value={newStudent.primaryParent}
+                                    onChange={(e) => setNewStudent({ ...newStudent, primaryParent: e.target.value })}
                                     className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
                                 />
                             </div>

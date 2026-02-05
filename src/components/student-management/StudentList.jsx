@@ -50,16 +50,20 @@ const StudentList = ({
                                     )
                                 },
                                 {
-                                    headerName: "Parent Name",
-                                    field: "parentName",
-                                    flex: 1.2,
-                                    cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500', color: '#374151' }
+                                    headerName: "Parents",
+                                    flex: 1.5,
+                                    cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500', color: '#374151' },
+                                    valueGetter: (params) => {
+                                        const p1 = params.data.parent1Name;
+                                        const p2 = params.data.parent2Name;
+                                        return p2 ? `${p1}, ${p2}` : p1;
+                                    }
                                 },
                                 {
                                     headerName: "Mobile",
                                     field: "mobile",
                                     flex: 1,
-                                    cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '500' }
+                                    cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '500' }
                                 },
                                 {
                                     headerName: "Location",
@@ -149,9 +153,10 @@ const StudentList = ({
                                     <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                         <div className="flex items-center gap-2 mb-1">
                                             <FontAwesomeIcon icon={faUserTie} className="text-xs" style={{ color: '#40189d' }} />
-                                            <p className="text-xs text-gray-500 font-medium">Parent</p>
+                                            <p className="text-xs text-gray-500 font-medium">Parents</p>
                                         </div>
-                                        <p className="text-sm text-gray-900 font-bold truncate">{student.parentName}</p>
+                                        <p className="text-sm text-gray-900 font-bold truncate">{student.parent1Name}</p>
+                                        {student.parent2Name && <p className="text-xs text-gray-500 font-medium truncate mt-0.5">{student.parent2Name}</p>}
                                     </div>
                                     <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                         <div className="flex items-center gap-2 mb-1">

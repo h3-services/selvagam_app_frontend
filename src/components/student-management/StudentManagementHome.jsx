@@ -1,23 +1,18 @@
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faTrash, faClock, faUserPlus, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faTrash, faClock, faUserPlus, faArrowLeft, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import StudentList from './StudentList';
 import StudentDetail from './StudentDetail';
 import AddStudentForm from './AddStudentForm';
+import { studentService } from '../../services/studentService';
+import { parentService } from '../../services/parentService';
 
 const StudentManagementHome = () => {
     // State
-    const [students, setStudents] = useState([
-        { id: 1, name: "Student 1", parentName: "Parent 1", mobile: "9876543210", location: "123 Main St, New York", date: "2024-01-15", status: 'Approved' },
-        { id: 2, name: "Student 2", parentName: "Parent 2", mobile: "9876543211", location: "456 Elm St, Los Angeles", date: "2024-02-10", status: 'Inactive' },
-        { id: 3, name: "Student 3", parentName: "Parent 3", mobile: "9876543212", location: "789 Pine St, Chicago", date: "2024-03-05", status: 'Inactive' },
-        { id: 4, name: "Student 4", parentName: "Parent 4", mobile: "9876543213", location: "321 Oak Ln, Houston", date: "2024-03-10", status: 'Inactive' },
-        { id: 5, name: "Student 5", parentName: "Parent 5", mobile: "9876543214", location: "654 Maple Dr, Seattle", date: "2024-03-12", status: 'Approved' },
-        { id: 6, name: "Student 6", parentName: "Parent 6", mobile: "9876543215", location: "987 Cedar Rd, Boston", date: "2024-03-15", status: 'Inactive' },
-        { id: 7, name: "Student 7", parentName: "Parent 7", mobile: "9876543216", location: "159 Birch Blvd, Miami", date: "2024-03-18", status: 'Approved' },
-        { id: 8, name: "Student 8", parentName: "Parent 8", mobile: "9876543217", location: "753 Spruce Way, Denver", date: "2024-03-20", status: 'Inactive' },
-    ]);
+    const [students, setStudents] = useState([]);
+    const [parents, setParents] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTab, setActiveTab] = useState("All");
     const [selectedStudent, setSelectedStudent] = useState(null);
@@ -30,6 +25,49 @@ const StudentManagementHome = () => {
     const [showDeactivateModal, setShowDeactivateModal] = useState(false);
     const [deactivatingItemId, setDeactivatingItemId] = useState(null);
     const [deactivationReason, setDeactivationReason] = useState("");
+
+    // Fetch students and parents on mount
+    useEffect(() => {
+        fetchAllData();
+    }, []);
+
+    const fetchAllData = async () => {
+        setLoading(true);
+        try {
+            const [studentData, parentData] = await Promise.all([
+                studentService.getAllStudents(),
+                parentService.getAllParents()
+            ]);
+            
+            setParents(parentData);
+
+            // Map API data to UI structure, linking parents
+            const mappedStudents = studentData.map(s => {
+                const parent1 = parentData.find(p => p.parent_id === s.parent_id);
+                const parent2 = s.s_parent_id ? parentData.find(p => p.parent_id === s.s_parent_id) : null;
+                
+                return {
+                    id: s.student_id,
+                    name: s.name,
+                    primaryParent: parent1 ? parent1.name : (s.parent_id || 'Unknown'),
+                    parent1Name: parent1 ? parent1.name : (s.parent_id || 'Unknown'),
+                    parent2Name: parent2 ? parent2.name : '',
+                    parentEmail: parent1 ? parent1.email : 'N/A',
+                    mobile: parent1 ? parent1.phone : (s.emergency_contact || 'N/A'),
+                    location: parent1 ? `${parent1.street}, ${parent1.city}, ${parent1.district}` : 'Route: ' + (s.pickup_route_id ? s.pickup_route_id.substring(0, 8) : 'None'),
+                    date: s.created_at ? s.created_at.split('T')[0] : 'N/A',
+                    status: s.transport_status === 'ACTIVE' ? 'Approved' : 'Inactive',
+                    originalData: s, // Keep reference to original data
+                    parentData: parent1 // Keep reference to primary parent data
+                };
+            });
+            setStudents(mappedStudents);
+        } catch (error) {
+            console.error("Failed to fetch data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -48,26 +86,44 @@ const StudentManagementHome = () => {
             result = result.filter(
                 (student) =>
                     student.name.toLowerCase().includes(lowerQuery) ||
-                    student.parentName.toLowerCase().includes(lowerQuery)
+                    student.primaryParent.toLowerCase().includes(lowerQuery)
             );
         }
         return result;
     }, [students, searchQuery, activeTab]);
 
-    const handleAddStudent = (newStudent) => {
-        setStudents([...students, {
-            id: Date.now(),
-            ...newStudent,
-            distance: '0 km',
-            date: new Date().toISOString().split('T')[0],
-            status: newStudent.status || 'Approved'
-        }]);
-        setShowForm(false);
+    const handleAddStudent = async (newStudentData) => {
+        try {
+            // Prepare data for API (mapping back)
+            const apiData = {
+                name: newStudentData.name,
+                emergency_contact: newStudentData.mobile,
+                transport_status: 'ACTIVE',
+                student_status: 'CURRENT',
+                // other fields could be set to defaults or picked from form
+            };
+            await studentService.createStudent(apiData);
+            await fetchAllData(); // Refresh list
+            setShowForm(false);
+        } catch (error) {
+            console.error("Error adding student:", error);
+        }
     };
 
-    const handleUpdateStudent = (updatedStudent) => {
-        setStudents(students.map(s => s.id === updatedStudent.id ? updatedStudent : s));
-        setSelectedStudent(updatedStudent);
+    const handleUpdateStudent = async (updatedStudent) => {
+        try {
+            const apiData = {
+                ...updatedStudent.originalData,
+                name: updatedStudent.name,
+                emergency_contact: updatedStudent.mobile,
+                // map other fields as needed
+            };
+            await studentService.updateStudent(updatedStudent.id, apiData);
+            await fetchAllData(); // Refresh list
+            setSelectedStudent(null); // Go back to list
+        } catch (error) {
+            console.error("Error updating student:", error);
+        }
     };
 
     const handleDelete = (id) => {
@@ -75,11 +131,16 @@ const StudentManagementHome = () => {
         setShowDeleteConfirm(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (itemToDelete) {
-            setStudents(students.filter(s => s.id !== itemToDelete));
-            setItemToDelete(null);
-            setShowDeleteConfirm(false);
+            try {
+                await studentService.deleteStudent(itemToDelete);
+                setStudents(students.filter(s => s.id !== itemToDelete));
+                setItemToDelete(null);
+                setShowDeleteConfirm(false);
+            } catch (error) {
+                console.error("Error deleting student:", error);
+            }
         }
     };
 
@@ -138,7 +199,14 @@ const StudentManagementHome = () => {
             )}
 
             {/* Main Content Area */}
-            {selectedStudent ? (
+            {loading ? (
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <FontAwesomeIcon icon={faCircleNotch} className="text-4xl text-purple-600 animate-spin" />
+                        <p className="text-gray-500 font-medium">Loading students...</p>
+                    </div>
+                </div>
+            ) : selectedStudent ? (
                 <StudentDetail
                     selectedStudent={selectedStudent}
                     onBack={() => setSelectedStudent(null)}
