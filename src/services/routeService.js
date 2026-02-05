@@ -48,8 +48,12 @@ export const routeService = {
     // Create route stop
     createRouteStop: async (stopData) => {
         try {
-            console.log("Creating route stop with payload:", JSON.stringify(stopData, null, 2));
-            const response = await api.post('/route-stops', stopData);
+            const response = await api.post('/route-stops', stopData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
             return response.data;
         } catch (error) {
             console.error("Error creating route stop:", error);
@@ -57,6 +61,17 @@ export const routeService = {
             if (error.response) {
                 console.error("Server Response Data:", error.response.data);
             }
+            throw error;
+        }
+    },
+
+    // Update route stop
+    updateRouteStop: async (stopId, stopData) => {
+        try {
+            const response = await api.put(`/route-stops/${stopId}`, stopData);
+            return response.data;
+        } catch (error) {
+            console.error("Error updating route stop:", error);
             throw error;
         }
     },

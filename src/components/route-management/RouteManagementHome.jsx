@@ -36,7 +36,8 @@ const RouteManagementHome = () => {
                 const stopPoints = routeStops.map(stop => ({
                     name: stop.stop_name,
                     position: [stop.latitude, stop.longitude],
-                    id: stop.stop_id
+                    id: stop.stop_id,
+                    order: stop.pickup_stop_order
                 }));
 
                 const startCoord = stopPoints.length > 0 ? stopPoints[0].position : [12.6083, 80.0528]; // Default fallback
@@ -96,9 +97,9 @@ const RouteManagementHome = () => {
 
     // Mock School Locations (mirroring SuperAdmin)
     const schoolLocations = [
-        { id: 1, name: 'Main Campus', lat: 12.9716, lng: 77.5946 },
-        { id: 2, name: 'Sports Complex', lat: 12.9279, lng: 77.6271 },
-        { id: 3, name: 'City Branch', lat: 13.0358, lng: 77.5970 }
+        { id: 1, name: 'Main Campus', lat: 12.6083, lng: 80.0528 },
+        { id: 2, name: 'Sports Complex', lat: 12.6100, lng: 80.0550 },
+        { id: 3, name: 'City Branch', lat: 12.6050, lng: 80.0500 }
     ];
 
     const getStatusColor = (status) => {
@@ -131,12 +132,36 @@ const RouteManagementHome = () => {
         );
     }, [routes, search]);
 
-    const handleAdd = (newRouteData) => {
-        setRoutes([...routes, {
-            id: Date.now(),
-            ...newRouteData
-        }]);
-        setShowModal(false);
+    const handleAdd = async (newRouteData) => {
+        try {
+            // 1. Create the Route
+            const routePayload = {
+                name: newRouteData.routeName,
+                routes_active_status: 'ACTIVE'
+            };
+            const createdRoute = await routeService.createRoute(routePayload);
+
+            // 2. Create Stops (if any)
+            if (newRouteData.stopPoints && newRouteData.stopPoints.length > 0) {
+                await Promise.all(newRouteData.stopPoints.map((stop, index) => {
+                    const stopData = {
+                        route_id: createdRoute.route_id,
+                        stop_name: stop.name,
+                        latitude: parseFloat(stop.position[0].toFixed(6)),
+                        longitude: parseFloat(stop.position[1].toFixed(6)),
+                        pickup_stop_order: index + 1,
+                        drop_stop_order: index + 1
+                    };
+                    return routeService.createRouteStop(stopData);
+                }));
+            }
+
+            await fetchAllData();
+            setShowModal(false);
+        } catch (error) {
+            console.error("Failed to create route:", error);
+            alert("Failed to create route. Please check the logs.");
+        }
     };
 
     const handleDelete = (id) => {
@@ -144,11 +169,17 @@ const RouteManagementHome = () => {
         setShowDeleteConfirm(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (itemToDelete) {
-            setRoutes(routes.filter(r => r.id !== itemToDelete));
-            setItemToDelete(null);
-            setShowDeleteConfirm(false);
+            try {
+                await routeService.deleteRoute(itemToDelete);
+                await fetchAllData();
+                setItemToDelete(null);
+                setShowDeleteConfirm(false);
+            } catch (error) {
+                console.error("Failed to delete route:", error);
+                alert("Failed to delete route.");
+            }
         }
     };
 
@@ -166,11 +197,49 @@ const RouteManagementHome = () => {
             // Delete removed stops
             await Promise.all(stopsToDelete.map(id => routeService.deleteRouteStop(id)));
 
-            // 2. Update Route Details (Always call PUT on save)
-            await routeService.updateRoute(updatedData.id, { 
-                name: updatedData.routeName,
-                routes_active_status: updatedData.status || 'ACTIVE' 
-            });
+            // 2. Handle New Stops
+            const newStops = currentStops.filter(s => !s.id);
+            await Promise.all(newStops.map((stop, index) => {
+                const order = currentStops.indexOf(stop) + 1;
+                return routeService.createRouteStop({
+                    route_id: updatedData.id,
+                    stop_name: stop.name,
+                    latitude: stop.position[0],
+                    longitude: stop.position[1],
+                    pickup_stop_order: order,
+                    drop_stop_order: order
+                });
+            }));
+
+            // 3. Handle Updated Stops (Existing)
+            const existingStops = currentStops.filter(s => s.id);
+            await Promise.all(existingStops.map(async (stop) => {
+                const order = currentStops.indexOf(stop) + 1;
+                try {
+                    return await routeService.updateRouteStop(stop.id, {
+                        route_id: updatedData.id, // Adding route_id just in case
+                        stop_name: stop.name,
+                        latitude: stop.position[0],
+                        longitude: stop.position[1],
+                        pickup_stop_order: order,
+                        drop_stop_order: order
+                    });
+                } catch (error) {
+                    if (error.response && error.response.status === 404) {
+                        console.warn(`Stop ${stop.id} not found on server, skipping update.`);
+                        return null; 
+                    }
+                    throw error;
+                }
+            }));
+
+            // 3. Update Route Details (if name changed)
+            if (updatedData.routeName !== selectedRoute.routeName) {
+                 await routeService.updateRoute(updatedData.id, { 
+                    name: updatedData.routeName,
+                    routes_active_status: updatedData.status || 'ACTIVE' 
+                });
+            }
 
             // Refresh Data
             await fetchAllData();

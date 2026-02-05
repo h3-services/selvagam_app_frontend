@@ -5,14 +5,18 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import { COLORS } from '../../constants/colors';
 import { LocationMarker, createSchoolIcon, createStopIcon } from './RouteMapUtils';
 
-const AddRouteForm = ({ show, onClose, onAdd, schoolLocations }) => {
+const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
+    // Default fallback campus if array is empty
+    const defaultCampus = { id: 0, name: 'Default Campus', lat: 12.6083, lng: 80.0528 };
+    const initialCampusId = schoolLocations.length > 0 ? schoolLocations[0].id : defaultCampus.id;
+
     const [newRoute, setNewRoute] = useState({ routeName: '', distance: '', assignedBus: '', stops: 0, stopPoints: [] });
     const [currentStopName, setCurrentStopName] = useState('');
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [locationSearchQuery, setLocationSearchQuery] = useState('');
     const [searchSuggestions, setSearchSuggestions] = useState([]);
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
-    const [selectedCampus, setSelectedCampus] = useState(schoolLocations[0].id);
+    const [selectedCampus, setSelectedCampus] = useState(initialCampusId);
 
     // Debounce search for suggestions
     useEffect(() => {
@@ -66,7 +70,8 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations }) => {
     };
 
     const handleAddRoute = () => {
-        const campus = schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0];
+        const defaultCampus = { id: 0, name: 'Default Campus', lat: 12.6083, lng: 80.0528 };
+        const campus = schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0] || defaultCampus;
         if (newRoute.routeName) {
             const startCoords = [campus.lat, campus.lng];
             const endCoords = [campus.lat, campus.lng];
@@ -89,7 +94,8 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations }) => {
 
     // Helper to get current campus coordinates
     const getCampusCoordinates = () => {
-        const campus = schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0];
+        const defaultCampus = { id: 0, name: 'Default Campus', lat: 12.6083, lng: 80.0528 };
+        const campus = schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0] || defaultCampus;
         return [campus.lat, campus.lng];
     };
 
@@ -152,12 +158,13 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations }) => {
                             </div>
                             <MapContainer
                                 center={[
-                                    (schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0]).lat,
-                                    (schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0]).lng
+                                    (schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0] || { lat: 12.6083 }).lat,
+                                    (schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0] || { lng: 80.0528 }).lng
                                 ]}
-                                zoom={13}
+                                zoom={11}
                                 key={selectedCampus}
                                 style={{ height: '100%', width: '100%' }}
+                                scrollWheelZoom={true}
                             >
                                 <TileLayer
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -170,7 +177,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations }) => {
                                 <Marker position={getCampusCoordinates()} icon={createSchoolIcon()}>
                                     <Popup>
                                         <div className="text-center">
-                                            <b className="text-indigo-900 text-sm">{(schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0]).name}</b>
+                                            <b className="text-indigo-900 text-sm">{(schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0] || { name: 'Default Campus' }).name}</b>
                                             <br />
                                             <span className="text-xs text-gray-500">Start & End Point</span>
                                         </div>
@@ -195,19 +202,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations }) => {
                                 ))}
 
                                 {/* Route Line */}
-                                {newRoute.stopPoints && newRoute.stopPoints.length > 0 && (
-                                    <Polyline
-                                        positions={[
-                                            getCampusCoordinates(),
-                                            ...newRoute.stopPoints.map(s => s.position),
-                                            getCampusCoordinates()
-                                        ]}
-                                        color="#40189d"
-                                        weight={4}
-                                        opacity={0.8}
-                                        dashArray="10, 10"
-                                    />
-                                )}
+
                             </MapContainer>
 
                             {!selectedPosition && (
@@ -234,7 +229,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations }) => {
                                             onChange={(e) => setSelectedCampus(e.target.value)}
                                             className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm appearance-none font-bold text-gray-700"
                                         >
-                                            {schoolLocations.map(loc => (
+                                            {(schoolLocations || []).map(loc => (
                                                 <option key={loc.id} value={loc.id}>
                                                     {loc.name}
                                                 </option>

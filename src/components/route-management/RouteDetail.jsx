@@ -14,6 +14,24 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
     const [searchSuggestions, setSearchSuggestions] = useState([]);
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
     const [isAddingStop, setIsAddingStop] = useState(false);
+    const [editingStopIndex, setEditingStopIndex] = useState(null);
+    const [editingStopName, setEditingStopName] = useState('');
+
+    const handleStartStopEdit = (index, name) => {
+        setEditingStopIndex(index);
+        setEditingStopName(name);
+    };
+
+    const handleSaveStopEdit = (index) => {
+        if (!editingStopName.trim()) return;
+        
+        const updatedStops = [...editData.stopPoints];
+        updatedStops[index] = { ...updatedStops[index], name: editingStopName.trim() };
+        
+        setEditData({ ...editData, stopPoints: updatedStops });
+        setEditingStopIndex(null);
+        setEditingStopName('');
+    };
 
     useEffect(() => {
         if (selectedRoute) {
@@ -51,9 +69,14 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
         setSearchSuggestions([]);
     };
 
-    const handleSaveEdit = () => {
-        onUpdate(editData);
-        setIsEditing(false);
+    const handleSaveEdit = async () => {
+        try {
+            await onUpdate(editData);
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Failed to save route:", error);
+            // Error handling is likely done in parent's onUpdate, but we catch here to prevent exiting edit mode if failed
+        }
     };
 
     const handleEditAddStop = async () => {
@@ -69,7 +92,9 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
 
                 // Determine order
                 const currentStops = editData.stopPoints || [];
-                const order = currentStops.length + 1;
+                const existingOrders = currentStops.map(s => s.order || 0);
+                const maxOrder = existingOrders.length > 0 ? Math.max(...existingOrders) : 0;
+                const order = maxOrder + 1;
 
                 const stopData = {
                     route_id: editData.id,
@@ -77,8 +102,10 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                     latitude: parseFloat(selectedPosition.lat.toFixed(6)),
                     longitude: parseFloat(selectedPosition.lng.toFixed(6)),
                     pickup_stop_order: parseInt(order),
-                    drop_stop_order: 9 // Match the successful example from user just in case 0 is reserved
+                    drop_stop_order: parseInt(order) // Matching pickup order to avoid 0 validation error
                 };
+                
+
 
                 const createdStop = await routeService.createRouteStop(stopData);
 
@@ -97,7 +124,11 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                 setLocationSearchQuery('');
             } catch (error) {
                 console.error("Failed to add stop:", error);
-                alert("Failed to add stop. Please try again.");
+                const errorData = error.response?.data || error.message;
+                console.error("Full Error Response:", JSON.stringify(errorData, null, 2));
+                
+                const errorMsg = error.response?.data?.detail || (typeof errorData === 'object' ? JSON.stringify(errorData) : String(errorData)) || "Unknown error";
+                alert(`Failed to add stop: ${errorMsg}`);
             } finally {
                 setIsAddingStop(false);
             }
@@ -120,6 +151,21 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
     }
 
     if (!selectedRoute) return null;
+
+    const handleMapClick = (latlng) => {
+        if (editingStopIndex !== null) {
+            // Update existing stop location
+            const updatedStops = [...editData.stopPoints];
+            updatedStops[editingStopIndex] = {
+                ...updatedStops[editingStopIndex],
+                position: [latlng.lat, latlng.lng]
+            };
+            setEditData({ ...editData, stopPoints: updatedStops });
+        } else {
+            // Set location for new stop
+            setSelectedPosition(latlng);
+        }
+    };
 
     return (
         <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
@@ -150,7 +196,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                             )}
 
                             <div className="flex items-center gap-3 mt-1">
-                                <p className="text-white/80 text-xs font-medium">Distance: {selectedRoute.distance}</p>
+
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30">
                                     <FontAwesomeIcon icon={faBus} className="text-white text-xs" />
                                     <span className="text-white font-bold text-xs">{selectedRoute.assignedBus}</span>
@@ -213,19 +259,49 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                             {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
                                 (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
                                     <div key={index} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 flex-1">
                                             <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
                                                 {index + 1}
                                             </div>
-                                            <p className="text-sm font-bold text-gray-800">{stop.name}</p>
+                                            {editingStopIndex === index ? (
+                                                <div className="flex flex-col gap-1 flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <input 
+                                                            type="text" 
+                                                            value={editingStopName}
+                                                            onChange={(e) => setEditingStopName(e.target.value)}
+                                                            className="flex-1 bg-gray-50 border border-purple-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
+                                                            autoFocus
+                                                        />
+                                                        <button onClick={() => handleSaveStopEdit(index)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors">
+                                                            <FontAwesomeIcon icon={faCheck} />
+                                                        </button>
+                                                    </div>
+                                                    <span className="text-[10px] text-purple-600 font-medium ml-1 animate-pulse">
+                                                        * Click map to update location
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm font-bold text-gray-800">{stop.name}</p>
+                                            )}
                                         </div>
                                         {isEditing && (
-                                            <button
-                                                onClick={() => handleEditRemoveStop(index)}
-                                                className="text-gray-400 hover:text-red-500 transition-colors"
-                                            >
-                                                <FontAwesomeIcon icon={faTimes} />
-                                            </button>
+                                            <div className="flex gap-2 pl-2">
+                                                {editingStopIndex !== index && (
+                                                    <button
+                                                        onClick={() => handleStartStopEdit(index, stop.name)}
+                                                        className="text-gray-400 hover:text-purple-600 transition-colors"
+                                                    >
+                                                        <FontAwesomeIcon icon={faEdit} />
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={() => handleEditRemoveStop(index)}
+                                                    className="text-gray-400 hover:text-red-500 transition-colors"
+                                                >
+                                                    <FontAwesomeIcon icon={faTimes} />
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 ))
@@ -279,7 +355,10 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                             />
 
                             {isEditing && (
-                                <LocationMarker setPosition={setSelectedPosition} position={selectedPosition} />
+                                <LocationMarker 
+                                    setPosition={handleMapClick} 
+                                    position={editingStopIndex !== null ? null : selectedPosition} 
+                                />
                             )}
 
                             {/* Render all stop points */}
