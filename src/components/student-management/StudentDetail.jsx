@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faTimes, faCheck, faEdit, faChild, faPhone, faSearch, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faTimes, faCheck, faEdit, faChild, faPhone, faSearch, faArrowLeft, faUserTie } from '@fortawesome/free-solid-svg-icons';
 import LocationMap from './LocationMap';
 
-const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
+const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
     const [mapSearchQuery, setMapSearchQuery] = useState('');
@@ -15,13 +15,13 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
 
     // Initial load and Geocode
     useEffect(() => {
-        if (selectedParent) {
-            setEditData({ ...selectedParent });
-            setMapSearchQuery(selectedParent.location);
+        if (selectedStudent) {
+            setEditData({ ...selectedStudent });
+            setMapSearchQuery(selectedStudent.location);
             // Geocode logic
             const geocodeLocation = async () => {
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedParent.location)}&limit=1`);
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedStudent.location)}&limit=1`);
                     const data = await response.json();
                     if (data.length > 0) {
                         const { lat, lon } = data[0];
@@ -34,7 +34,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
             };
             geocodeLocation();
         }
-    }, [selectedParent]);
+    }, [selectedStudent]);
 
     const handleSaveEdit = () => {
         const updatedData = { ...editData, date: new Date().toISOString().split('T')[0] };
@@ -58,20 +58,20 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
                             </button>
                             <div className="relative">
                                 <div className="w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg bg-white/20 backdrop-blur-sm border-2 border-white/30">
-                                    {selectedParent.name.charAt(0)}
+                                    {selectedStudent.name.charAt(0)}
                                 </div>
                                 <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-md">
-                                    <FontAwesomeIcon icon={faUser} className="text-xs" style={{ color: '#40189d' }} />
+                                    <FontAwesomeIcon icon={faChild} className="text-xs" style={{ color: '#40189d' }} />
                                 </div>
                             </div>
                             <div>
-                                <h2 className="text-2xl font-bold text-white">{selectedParent.name}</h2>
-                                <p className="text-white/80 text-xs font-medium">Parent Account • {selectedParent.date}</p>
+                                <h2 className="text-2xl font-bold text-white">{selectedStudent.name}</h2>
+                                <p className="text-white/80 text-xs font-medium">Student Account • {selectedStudent.date}</p>
                             </div>
                         </div>
                         {isEditing ? (
                             <div className="flex gap-2">
-                                <button onClick={() => { setIsEditing(false); setEditData(selectedParent); }} className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium">
+                                <button onClick={() => { setIsEditing(false); setEditData(selectedStudent); }} className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium">
                                     <FontAwesomeIcon icon={faTimes} className="mr-1" />Cancel
                                 </button>
                                 <button onClick={handleSaveEdit} className="px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium">
@@ -89,24 +89,24 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
                 {/* Content Section */}
                 <div className="p-5 overflow-y-auto flex-1">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-                        {/* Child Name Card */}
+                        {/* Parent Name Card */}
                         <div className="group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
                             <div className="absolute top-0 right-0 w-20 h-20 rounded-full -mr-10 -mt-10 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
                             <div className="relative p-4">
                                 <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3 shadow-sm" style={{ backgroundColor: '#40189d' }}>
-                                    <FontAwesomeIcon icon={faChild} className="text-white text-sm" />
+                                    <FontAwesomeIcon icon={faUserTie} className="text-white text-sm" />
                                 </div>
-                                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Child Name</p>
+                                <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">Parent Name</p>
                                 {isEditing ? (
                                     <input
                                         type="text"
-                                        value={editData.childName}
-                                        onChange={(e) => setEditData({ ...editData, childName: e.target.value })}
+                                        value={editData.parentName}
+                                        onChange={(e) => setEditData({ ...editData, parentName: e.target.value })}
                                         className="w-full border-2 rounded-lg px-3 py-2 text-base font-bold outline-none"
                                         style={{ borderColor: '#40189d' }}
                                     />
                                 ) : (
-                                    <p className="text-lg font-bold text-black">{selectedParent.childName}</p>
+                                    <p className="text-lg font-bold text-black">{selectedStudent.parentName}</p>
                                 )}
                             </div>
                         </div>
@@ -128,7 +128,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
                                         style={{ borderColor: '#40189d' }}
                                     />
                                 ) : (
-                                    <p className="text-lg font-bold text-black">{selectedParent.mobile}</p>
+                                    <p className="text-lg font-bold text-black">{selectedStudent.mobile}</p>
                                 )}
                             </div>
                         </div>
@@ -159,7 +159,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
                                         <FontAwesomeIcon icon={faSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                     </div>
                                 ) : (
-                                    <p className="text-lg font-bold text-black">{selectedParent.location}</p>
+                                    <p className="text-lg font-bold text-black">{selectedStudent.location}</p>
                                 )}
                             </div>
                         </div>
@@ -174,7 +174,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
                         <div className="relative p-5 flex items-center justify-between">
                             <div>
                                 <p className="text-white/80 text-xs font-bold uppercase tracking-wide mb-1">Distance from School</p>
-                                <p className="text-4xl font-bold text-white">{selectedParent.distance || '0 km'}</p>
+                                <p className="text-4xl font-bold text-white">{selectedStudent.distance || '0 km'}</p>
                             </div>
                             <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,4 +285,4 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate }) => {
     );
 };
 
-export default ParentDetail;
+export default StudentDetail;

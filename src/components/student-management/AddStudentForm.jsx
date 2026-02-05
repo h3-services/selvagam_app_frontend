@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import LocationMap from './LocationMap';
 
-const AddParentForm = ({ show, onClose, onAdd }) => {
-    const [newParent, setNewParent] = useState({ name: '', childName: '', mobile: '', location: '', status: 'Inactive' });
+const AddStudentForm = ({ show, onClose, onAdd }) => {
+    const [newStudent, setNewStudent] = useState({ name: '', parentName: '', mobile: '', location: '', status: 'Inactive' });
     const [showLocationPicker, setShowLocationPicker] = useState(false);
 
     // Map Picker State
@@ -17,9 +17,9 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
     const tempMapRef = useRef(null);
 
     const handleAdd = () => {
-        if (newParent.name && newParent.mobile) {
-            onAdd(newParent);
-            setNewParent({ name: '', childName: '', mobile: '', location: '', status: 'Inactive' });
+        if (newStudent.name && newStudent.mobile) {
+            onAdd(newStudent);
+            setNewStudent({ name: '', parentName: '', mobile: '', location: '', status: 'Inactive' });
         }
     };
 
@@ -45,8 +45,8 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                             <FontAwesomeIcon icon={faUserPlus} className="text-white text-2xl" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add Parent</h3>
-                            <p className="text-gray-500 text-sm">Enter parent information</p>
+                            <h3 className="font-bold text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add Student</h3>
+                            <p className="text-gray-500 text-sm">Enter student information</p>
                         </div>
                     </div>
                 </div>
@@ -55,33 +55,33 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                     <div className="space-y-5">
                         {/* Name Input */}
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Parent Name</label>
-                            <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
-                                    <FontAwesomeIcon icon={faUser} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="Enter full name"
-                                    value={newParent.name}
-                                    onChange={(e) => setNewParent({ ...newParent, name: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Child Name Input */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Child Name</label>
+                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Student Name</label>
                             <div className="relative">
                                 <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
                                     <FontAwesomeIcon icon={faChild} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="Enter child's name (comma separated)"
-                                    value={newParent.childName}
-                                    onChange={(e) => setNewParent({ ...newParent, childName: e.target.value })}
+                                    placeholder="Enter full name"
+                                    value={newStudent.name}
+                                    onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                                    className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Parent Name Input */}
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Parent Name</label>
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
+                                    <FontAwesomeIcon icon={faUserTie} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Enter parent's name"
+                                    value={newStudent.parentName}
+                                    onChange={(e) => setNewStudent({ ...newStudent, parentName: e.target.value })}
                                     className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
                                 />
                             </div>
@@ -97,8 +97,8 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                                 <input
                                     type="tel"
                                     placeholder="555-0000"
-                                    value={newParent.mobile}
-                                    onChange={(e) => setNewParent({ ...newParent, mobile: e.target.value })}
+                                    value={newStudent.mobile}
+                                    onChange={(e) => setNewStudent({ ...newStudent, mobile: e.target.value })}
                                     className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
                                 />
                             </div>
@@ -117,7 +117,7 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                                 <input
                                     type="text"
                                     placeholder="Select location..."
-                                    value={newParent.location}
+                                    value={newStudent.location}
                                     readOnly
                                     onClick={() => setShowLocationPicker(true)}
                                     className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-24 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm cursor-pointer hover:bg-purple-50"
@@ -142,7 +142,7 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                         style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                     >
                         <FontAwesomeIcon icon={faCheck} className="mr-2" />
-                        Add Parent
+                        Add Student
                     </button>
                 </div>
             </div>
@@ -251,7 +251,7 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                             </div>
                             <button
                                 onClick={() => {
-                                    setNewParent({ ...newParent, location: tempMapSearchQuery });
+                                    setNewStudent({ ...newStudent, location: tempMapSearchQuery });
                                     setShowLocationPicker(false);
                                 }}
                                 disabled={!tempMapSearchQuery}
@@ -268,4 +268,4 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
     );
 };
 
-export default AddParentForm;
+export default AddStudentForm;

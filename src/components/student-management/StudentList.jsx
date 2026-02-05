@@ -1,10 +1,10 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faChevronRight, faEye, faPhone, faChild, faRoute } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faChevronRight, faEye, faPhone, faChild, faRoute, faUserTie } from '@fortawesome/free-solid-svg-icons';
 
-const ParentList = ({
-    filteredParents,
-    setSelectedParent,
+const StudentList = ({
+    filteredStudents,
+    setSelectedStudent,
     setShowForm,
     handleDelete,
     activeMenuId,
@@ -24,17 +24,17 @@ const ParentList = ({
                         '--ag-row-hover-color': '#faf5ff',
                     }}>
                         <AgGridReact
-                            rowData={filteredParents}
+                            rowData={filteredStudents}
                             columnDefs={[
                                 {
-                                    headerName: "Parent Name",
+                                    headerName: "Student Name",
                                     field: "name",
                                     flex: 1.5,
                                     cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                     cellRenderer: (params) => (
                                         <div
                                             className="flex items-center gap-3 w-full cursor-pointer group"
-                                            onClick={() => { setSelectedParent(params.data); setShowForm(false); }}
+                                            onClick={() => { setSelectedStudent(params.data); setShowForm(false); }}
                                         >
                                             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
                                                 {params.value.charAt(0)}
@@ -50,8 +50,8 @@ const ParentList = ({
                                     )
                                 },
                                 {
-                                    headerName: "Child Name",
-                                    field: "childName",
+                                    headerName: "Parent Name",
+                                    field: "parentName",
                                     flex: 1.2,
                                     cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500', color: '#374151' }
                                 },
@@ -116,29 +116,29 @@ const ParentList = ({
                             pagination={true}
                             paginationPageSize={5}
                             paginationPageSizeSelector={[5, 10, 20, 50]}
-                            overlayNoRowsTemplate='<span class="p-4">No parents found</span>'
+                            overlayNoRowsTemplate='<span class="p-4">No students found</span>'
                         />
                     </div>
                 </div>
 
                 {/* Mobile/Tablet Card View */}
                 <div className="lg:hidden p-4 space-y-4">
-                    {filteredParents.map((parent, index) => (
-                        <div key={parent.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
+                    {filteredStudents.map((student, index) => (
+                        <div key={student.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
                             <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#40189d' }}></div>
                             <div className="relative p-5">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#40189d' }}>
-                                            {parent.name.charAt(0)}
+                                            {student.name.charAt(0)}
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 text-lg">{parent.name}</h3>
-                                            <p className="text-xs font-medium" style={{ color: '#40189d' }}>{parent.date}</p>
+                                            <h3 className="font-bold text-gray-900 text-lg">{student.name}</h3>
+                                            <p className="text-xs font-medium" style={{ color: '#40189d' }}>{student.date}</p>
                                         </div>
                                     </div>
                                     <button
-                                        onClick={() => handleDelete(parent.id)}
+                                        onClick={() => handleDelete(student.id)}
                                         className="w-10 h-10 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center"
                                     >
                                         <FontAwesomeIcon icon={faTrash} className="text-sm" />
@@ -148,22 +148,22 @@ const ParentList = ({
                                 <div className="grid grid-cols-2 gap-3 mb-4">
                                     <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                         <div className="flex items-center gap-2 mb-1">
-                                            <FontAwesomeIcon icon={faChild} className="text-xs" style={{ color: '#40189d' }} />
-                                            <p className="text-xs text-gray-500 font-medium">Child</p>
+                                            <FontAwesomeIcon icon={faUserTie} className="text-xs" style={{ color: '#40189d' }} />
+                                            <p className="text-xs text-gray-500 font-medium">Parent</p>
                                         </div>
-                                        <p className="text-sm text-gray-900 font-bold truncate">{parent.childName}</p>
+                                        <p className="text-sm text-gray-900 font-bold truncate">{student.parentName}</p>
                                     </div>
                                     <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                         <div className="flex items-center gap-2 mb-1">
                                             <FontAwesomeIcon icon={faPhone} className="text-xs" style={{ color: '#40189d' }} />
                                             <p className="text-xs text-gray-500 font-medium">Mobile</p>
                                         </div>
-                                        <p className="text-sm text-gray-900 font-bold truncate">{parent.mobile}</p>
+                                        <p className="text-sm text-gray-900 font-bold truncate">{student.mobile}</p>
                                     </div>
                                 </div>
 
                                 <button
-                                    onClick={() => { setSelectedParent(parent); setShowForm(false); }}
+                                    onClick={() => { setSelectedStudent(student); setShowForm(false); }}
                                     className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all"
                                     style={{ backgroundColor: '#40189d' }}
                                 >
@@ -178,4 +178,4 @@ const ParentList = ({
     );
 };
 
-export default ParentList;
+export default StudentList;

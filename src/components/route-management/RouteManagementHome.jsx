@@ -170,21 +170,7 @@ const RouteManagementHome = () => {
                 </div>
             )}
 
-            {selectedRoute && (
-                <div className="mb-4 flex items-center gap-4">
-                    <button
-                        onClick={() => setSelectedRoute(null)}
-                        className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm hover:shadow-md flex items-center justify-center text-gray-600 transition-all hover:bg-gray-50"
-                    >
-                        <FontAwesomeIcon icon={faArrowLeft} />
-                    </button>
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                        <span className="text-gray-500">Back to List</span>
-                        <span style={{ color: '#40189d' }}>/</span>
-                        <span style={{ color: '#40189d' }}>{selectedRoute.routeName}</span>
-                    </div>
-                </div>
-            )}
+
 
             {selectedRoute ? (
                 <RouteDetail

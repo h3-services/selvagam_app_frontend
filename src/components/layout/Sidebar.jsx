@@ -33,7 +33,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: faDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: faUserFriends, label: 'Parent Management', path: '/parents' },
+    { icon: faUserFriends, label: 'Student Management', path: '/students' },
     { icon: faCar, label: 'Driver Management', path: '/drivers' },
     { icon: faBus, label: 'Bus Management', path: '/buses' },
     { icon: faMapLocationDot, label: 'Route Management', path: '/routes' },
