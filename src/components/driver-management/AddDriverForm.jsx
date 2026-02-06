@@ -88,8 +88,19 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
 
         if (isValid) {
             onAdd({
-                ...newDriver,
-                phone: Number(newDriver.phone)
+                name: newDriver.name,
+                phone: Number(newDriver.phone),
+                email: newDriver.email,
+                licence_number: newDriver.licence_number,
+                licence_expiry: newDriver.licence_expiry,
+                status: 'ACTIVE', // Default status from API spec
+                // Additional fields present in form but maybe not in basic JSON example, sending anyway as they are likely needed
+                dob: newDriver.dob,
+                aadhar_number: newDriver.aadhar_number,
+                photo_url: newDriver.photo_url,
+                licence_url: newDriver.licence_url,
+                aadhar_url: newDriver.aadhar_url,
+                password: newDriver.password
             });
             // Reset
             setNewDriver({

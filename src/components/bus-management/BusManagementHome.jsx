@@ -6,9 +6,13 @@ import BusList from './BusList';
 import BusDetail from './BusDetail';
 import AddBusForm from './AddBusForm';
 import { busService } from '../../services/busService';
+import { driverService } from '../../services/driverService';
+import { routeService } from '../../services/routeService';
 
 const BusManagementHome = () => {
     const [buses, setBuses] = useState([]);
+    const [drivers, setDrivers] = useState([]);
+    const [routes, setRoutes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -19,32 +23,39 @@ const BusManagementHome = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
 
-    // Fetch Buses
-    const fetchBuses = async () => {
+    // Fetch All Data
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const data = await busService.getAllBuses();
-            // Map API response to match internal UI shape
-            // Note: driver_id is present, but UI shows driverName. 
-            // Ideally backend returns driver name populated or we fetch drivers to map.
-            // For now, we will just show 'Assigned' or 'Unassigned' based on driver_id presence, or mock it.
-            // In a real scenario, you'd likely join with driver data or the API would provide it.
-            const mappedBuses = Array.isArray(data) ? data.map(b => ({
+            const [busesData, driversData, routesData] = await Promise.all([
+                busService.getAllBuses(),
+                driverService.getAllDrivers(), 
+                routeService.getAllRoutes() 
+            ]);
+            
+            // Map Bus Data
+            const mappedBuses = Array.isArray(busesData) ? busesData.map(b => ({
+                ...b,
                 id: b.bus_id,
-                busNumber: b.bus_number,
+                busNumber: b.registration_number || b.bus_number || 'Unknown',
                 capacity: b.seating_capacity,
-                // Fallback: The API example provided only has driver_id. 
-                // We display 'Assigned' vs 'Unassigned' until we can fetch driver details.
-                driverName: b.driver_id ? (b.driver_name || 'Assigned') : 'Unassigned',
-                contactNumber: 'N/A',
-                route: b.route_id ? (b.route_name || 'Assigned') : 'Unassigned',
+                // Attempt to find driver name if driver_id exists but name doesn't
+                driverName: b.driver_name || (b.driver_id ? driversData.find(d => d.driver_id === b.driver_id)?.name || 'Assigned' : 'Unassigned'),
+                contactNumber: 'N/A', 
+                // Attempt to find route name
+                route: b.route_name || (b.route_id ? routesData.find(r => r.route_id === b.route_id)?.name || 'Assigned' : 'Unassigned'),
                 status: b.status ? (b.status.charAt(0).toUpperCase() + b.status.slice(1).toLowerCase()) : 'Inactive',
-                ...b
+                vehicle_type: b.vehicle_type,
+                bus_brand: b.bus_brand,
+                bus_model: b.bus_model
             })) : [];
+
             setBuses(mappedBuses);
+            setDrivers(driversData || []);
+            setRoutes(routesData || []);
             setError(null);
         } catch (err) {
-            setError('Failed to load buses.');
+            setError('Failed to load fleet data.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -52,7 +63,7 @@ const BusManagementHome = () => {
     };
 
     useEffect(() => {
-        fetchBuses();
+        fetchData();
     }, []);
 
     // Close menu when clicking outside
@@ -64,14 +75,38 @@ const BusManagementHome = () => {
 
     const filteredBuses = useMemo(() => {
         return buses.filter(b =>
-            b.busNumber.toLowerCase().includes(search.toLowerCase()) ||
-            b.driverName.toLowerCase().includes(search.toLowerCase())
+            (b.busNumber && b.busNumber.toLowerCase().includes(search.toLowerCase())) ||
+            (b.driverName && b.driverName.toLowerCase().includes(search.toLowerCase()))
         );
     }, [buses, search]);
 
-    const handleAdd = async (newBus) => {
-        await fetchBuses();
-        setShowModal(false);
+    const handleAdd = async (newBusData) => {
+        setLoading(true);
+        try {
+            const payload = {
+                registration_number: newBusData.registration_number,
+                vehicle_type: newBusData.vehicle_type || 'School Bus',
+                bus_brand: newBusData.bus_brand,
+                bus_model: newBusData.bus_model,
+                seating_capacity: parseInt(newBusData.seating_capacity || 0),
+                status: (newBusData.status || 'ACTIVE').toUpperCase(),
+                driver_id: newBusData.driver_id || null, 
+                route_id: newBusData.route_id || null,
+                rc_expiry_date: newBusData.rc_expiry_date || null,
+                fc_expiry_date: newBusData.fc_expiry_date || null,
+                rc_book_url: newBusData.rc_book_url || null,
+                fc_certificate_url: newBusData.fc_certificate_url || null
+            };
+
+            await busService.createBus(payload);
+            await fetchData();
+            setShowModal(false);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to create bus: " + (err.response?.data?.detail || err.message));
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDelete = (id) => {
@@ -98,10 +133,45 @@ const BusManagementHome = () => {
         // TODO: Call API to update status
     };
 
-    const handleUpdate = (updatedData) => {
-        setBuses(buses.map(b => b.id === updatedData.id ? updatedData : b));
-        setSelectedBus(updatedData);
-        // TODO: Call API
+    const handleUpdate = async (updatedData) => {
+        setLoading(true);
+        try {
+            const payload = {
+                registration_number: updatedData.busNumber, // map back to backend field name
+                driver_id: updatedData.driver_id,
+                route_id: updatedData.route_id,
+                vehicle_type: updatedData.vehicle_type,
+                bus_brand: updatedData.bus_brand,
+                bus_model: updatedData.bus_model,
+                seating_capacity: parseInt(updatedData.capacity || 0), // map back to backend field name
+                rc_expiry_date: updatedData.rc_expiry_date,
+                fc_expiry_date: updatedData.fc_expiry_date,
+                rc_book_url: updatedData.rc_book_url,
+                fc_certificate_url: updatedData.fc_certificate_url,
+                status: (updatedData.status || 'ACTIVE').toUpperCase()
+            };
+
+            const response = await busService.updateBus(updatedData.id, payload);
+            
+            // Refetch or update local state with response
+            // For now, simpler to just update local state slightly to match view model
+            const newBusModel = {
+                ...updatedData,
+                // ensure we keep the view model consistent
+                busNumber: response.registration_number || updatedData.busNumber,
+                capacity: response.seating_capacity || updatedData.capacity,
+                status: response.status ? (response.status.charAt(0).toUpperCase() + response.status.slice(1).toLowerCase()) : updatedData.status
+            };
+
+            setBuses(buses.map(b => b.id === updatedData.id ? newBusModel : b));
+            setSelectedBus(newBusModel);
+            alert("Bus updated successfully!");
+        } catch (err) {
+            console.error("Failed to update bus:", err);
+            alert("Failed to update bus details. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const getStatusColor = (status) => {
@@ -158,7 +228,7 @@ const BusManagementHome = () => {
                 </div>
             ) : error ? (
                 <div className="flex-1 flex items-center justify-center text-red-500">
-                    {error} <button onClick={fetchBuses} className="ml-2 underline hover:text-red-700">Retry</button>
+                    {error} <button onClick={fetchData} className="ml-2 underline hover:text-red-700">Retry</button>
                 </div>
             ) : selectedBus ? (
                 <>
@@ -195,6 +265,8 @@ const BusManagementHome = () => {
                 show={showModal}
                 onClose={() => setShowModal(false)}
                 onAdd={handleAdd}
+                drivers={drivers}
+                routes={routes}
             />
 
             {/* Delete Confirmation Modal */}

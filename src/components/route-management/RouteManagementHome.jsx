@@ -49,6 +49,7 @@ const RouteManagementHome = () => {
                     distance: 'N/A', // Not in API yet
                     assignedBus: 'Unassigned', // Not in API yet
                     stops: routeStops.length,
+                    studentCount: Math.floor(Math.random() * 40) + 15, // Mock data for now
                     stopPoints: stopPoints,
                     coordinates: {
                         start: startCoord,

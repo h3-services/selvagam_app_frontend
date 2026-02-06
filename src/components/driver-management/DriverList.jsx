@@ -1,6 +1,6 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faTrash, faTimes, faCheck, faPhone, faIdCard, faEnvelope, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTrash, faTimes, faCheck, faPhone, faIdCard, faEnvelope, faEye, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { CiMenuKebab } from "react-icons/ci";
 
 const DriverList = ({
@@ -71,14 +71,76 @@ const DriverList = ({
                                 headerName: "Status",
                                 field: "status",
                                 flex: 1,
-                                cellRenderer: (params) => (
-                                    <div className="flex items-center h-full">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${params.value === 'Active' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'
-                                            }`}>
-                                            {params.value}
-                                        </span>
-                                    </div>
-                                )
+                                cellStyle: { overflow: 'visible' },
+                                cellRenderer: (params) => {
+                                    const status = params.value;
+                                    const isActive = status === 'Active';
+                                    const { activeMenuId, setActiveMenuId } = params.context;
+                                    const isOpen = activeMenuId === params.data.id;
+                                    
+                                    const toggleStatus = () => {
+                                        handleToggleStatus(params.data.id); 
+                                        setActiveMenuId(null);
+                                    };
+
+                                    const getGradient = () => isActive 
+                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200' 
+                                        : 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-200';
+
+                                    return (
+                                        <div className="flex items-center h-full relative">
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveMenuId(isOpen ? null : params.data.id);
+                                                }}
+                                                className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer ${getGradient()}`}
+                                            >
+                                                <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                                                    <FontAwesomeIcon icon={isActive ? faCheck : faTimes} className="text-white text-[10px]" />
+                                                </div>
+                                                
+                                                <span className="text-white font-bold text-xs tracking-wide">{status}</span>
+                                                
+                                                {isActive && (
+                                                    <div className="flex items-center ml-1">
+                                                        <span className="relative flex h-2 w-2">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-50"></span>
+                                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                <FontAwesomeIcon icon={faChevronDown} className="text-white/60 text-[10px] ml-1 group-hover:text-white transition-colors" />
+                                            </button>
+
+                                            {isOpen && (
+                                                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 z-[1000] overflow-hidden animate-in fade-in zoom-in duration-200 ring-1 ring-black/5">
+                                                    <div className="px-3 py-2 border-b border-gray-100 bg-gray-50/50">
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Change Status</p>
+                                                    </div>
+                                                    <div className="p-1">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleStatus();
+                                                            }}
+                                                            className={`w-full text-left px-3 py-2.5 text-xs font-bold flex items-center gap-3 rounded-lg transition-all hover:bg-gray-50 ${!isActive ? 'text-green-600' : 'text-red-600'}`}
+                                                        >
+                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${!isActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                                                <FontAwesomeIcon icon={!isActive ? faCheck : faTimes} />
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-gray-900">Switch to {!isActive ? 'Active' : 'Inactive'}</span>
+                                                                <span className="text-[10px] text-gray-400 font-medium">Click to confirm</span>
+                                                            </div>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }
                             },
                             {
                                 headerName: "Actions",
@@ -87,70 +149,20 @@ const DriverList = ({
                                 sortable: false,
                                 filter: false,
                                 cellStyle: { overflow: 'visible' },
-                                cellRenderer: (params) => {
-                                    const rowsPerPage = params.api.paginationGetPageSize();
-                                    const indexOnPage = params.node.rowIndex % rowsPerPage;
-                                    const totalRows = params.api.getDisplayedRowCount();
-                                    const isLastRows = totalRows > 2 && (indexOnPage >= rowsPerPage - 2 || params.node.rowIndex >= totalRows - 2);
-                                    const isActive = (params.data.status || '').toLowerCase() === 'active';
-
-                                    return (
-                                        <div className="flex items-center justify-center h-full relative">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const currentId = params.context.activeMenuId;
-                                                    const clickedId = params.data.id;
-                                                    params.context.setActiveMenuId(currentId === clickedId ? null : clickedId);
-                                                }}
-                                                className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-xl ${params.context.activeMenuId === params.data.id
-                                                    ? "bg-purple-100 text-purple-600 shadow-inner"
-                                                    : "text-gray-400 hover:bg-gray-100"
-                                                    }`}
-                                            >
-                                                <CiMenuKebab />
-                                            </button>
-
-                                            {params.context.activeMenuId === params.data.id && (
-                                                <div className={`absolute right-0 bg-white/90 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white py-2.5 w-44 z-[999] animate-in fade-in zoom-in duration-200 ${isLastRows
-                                                    ? "bottom-[80%] mb-2 slide-in-from-bottom-2"
-                                                    : "top-[80%] mt-2 slide-in-from-top-2"
-                                                    }`}>
-                                                    <div className="px-3 pb-1.5 mb-1.5 border-b border-gray-100/50">
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
-                                                    </div>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleToggleStatus(params.data.id);
-                                                            params.context.setActiveMenuId(null);
-                                                        }}
-                                                        className={`w-[calc(100%-16px)] mx-2 text-left px-3 py-2 text-sm rounded-xl flex items-center gap-3 transition-all duration-200 group/item ${isActive ? 'text-red-600 hover:bg-red-600 hover:text-white' : 'text-green-600 hover:bg-green-600 hover:text-white'}`}
-                                                    >
-                                                        <div className={`w-6 h-6 rounded-lg group-hover/item:bg-white/20 flex items-center justify-center transition-colors ${isActive ? 'bg-red-50' : 'bg-green-50'}`}>
-                                                            <FontAwesomeIcon icon={isActive ? faTimes : faCheck} className="text-[10px]" />
-                                                        </div>
-                                                        <span className="font-medium">{isActive ? 'Set Inactive' : 'Approve'}</span>
-                                                    </button>
-
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(params.data.id);
-                                                            params.context.setActiveMenuId(null);
-                                                        }}
-                                                        className="w-[calc(100%-16px)] mx-2 mt-1 text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-900 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
-                                                    >
-                                                        <div className="w-6 h-6 rounded-lg bg-gray-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
-                                                            <FontAwesomeIcon icon={faTrash} className="text-[10px]" />
-                                                        </div>
-                                                        <span className="font-medium">Delete Driver</span>
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                }
+                                cellRenderer: (params) => (
+                                    <div className="flex items-center justify-center h-full">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(params.data.id);
+                                            }}
+                                            className="w-8 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
+                                            title="Delete Driver"
+                                        >
+                                            <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                                        </button>
+                                    </div>
+                                )
                             }
                         ]}
                         context={{ activeMenuId, setActiveMenuId }}
@@ -162,7 +174,6 @@ const DriverList = ({
                         }}
                         defaultColDef={{
                             sortable: true,
-                            filter: true,
                             resizable: true,
                             headerClass: "font-bold uppercase text-xs tracking-wide",
                         }}

@@ -99,7 +99,6 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                         columnDefs={columnDefs}
                         defaultColDef={{
                             sortable: true,
-                            filter: false,
                             resizable: true,
                             headerClass: "font-bold uppercase text-xs tracking-wide",
                         }}

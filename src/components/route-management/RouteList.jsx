@@ -1,6 +1,6 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRoute, faChevronRight, faBuilding, faBus, faCircle, faExchangeAlt, faEye, faTrash, faMapLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { faRoute, faChevronRight, faBuilding, faBus, faCircle, faExchangeAlt, faEye, faTrash, faMapLocationDot, faUserFriends } from '@fortawesome/free-solid-svg-icons';
 import { CiMenuKebab } from "react-icons/ci";
 
 const RouteList = ({
@@ -51,14 +51,14 @@ const RouteList = ({
                                 )
                             },
                             {
-                                headerName: "Campus",
-                                field: "campusName",
+                                headerName: "No. of Students",
+                                field: "studentCount",
                                 flex: 1,
                                 cellRenderer: (params) => (
                                     <div className="flex items-center h-full">
-                                        <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md font-bold text-xs border border-indigo-100 uppercase tracking-wide">
-                                            <FontAwesomeIcon icon={faBuilding} className="mr-1.5 opacity-70" />
-                                            {params.value || 'Main Campus'}
+                                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold text-xs border border-blue-100 uppercase tracking-wide">
+                                            <FontAwesomeIcon icon={faUserFriends} className="mr-1.5 opacity-70" />
+                                            {params.value} Students
                                         </span>
                                     </div>
                                 )
@@ -100,75 +100,25 @@ const RouteList = ({
                                 )
                             },
                             {
-                                headerName: "Actions",
+                                headerName: "Delete",
                                 field: "id",
                                 width: 100,
                                 sortable: false,
                                 filter: false,
-                                cellStyle: { overflow: 'visible' },
-                                cellRenderer: (params) => {
-                                    const rowsPerPage = params.api.paginationGetPageSize();
-                                    const indexOnPage = params.node.rowIndex % rowsPerPage;
-                                    const totalRows = params.api.getDisplayedRowCount();
-                                    const isLastRows = totalRows > 2 && (indexOnPage >= rowsPerPage - 2 || params.node.rowIndex >= totalRows - 2);
-
-                                    return (
-                                        <div className="flex items-center justify-center h-full relative">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const currentId = params.context.activeMenuId;
-                                                    const clickedId = params.data.id;
-                                                    params.context.setActiveMenuId(currentId === clickedId ? null : clickedId);
-                                                }}
-                                                className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-xl ${params.context.activeMenuId === params.data.id
-                                                    ? "bg-purple-100 text-purple-600 shadow-inner"
-                                                    : "text-gray-400 hover:bg-gray-100"
-                                                    }`}
-                                            >
-                                                <CiMenuKebab />
-                                            </button>
-
-                                            {params.context.activeMenuId === params.data.id && (
-                                                <div className={`absolute right-0 bg-white/90 backdrop-blur-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white py-2.5 w-44 z-[999] animate-in fade-in zoom-in duration-200 ${isLastRows
-                                                    ? "bottom-[80%] mb-2 slide-in-from-bottom-2"
-                                                    : "top-[80%] mt-2 slide-in-from-top-2"
-                                                    }`}>
-                                                    <div className="px-3 pb-1.5 mb-1.5 border-b border-gray-100/50">
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Actions</p>
-                                                    </div>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedRoute(params.data);
-                                                            params.context.setActiveMenuId(null);
-                                                        }}
-                                                        className="w-[calc(100%-16px)] mx-2 text-left px-3 py-2 text-sm text-purple-600 hover:bg-purple-600 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
-                                                    >
-                                                        <div className="w-6 h-6 rounded-lg bg-purple-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
-                                                            <FontAwesomeIcon icon={faEye} className="text-[10px]" />
-                                                        </div>
-                                                        <span className="font-medium">View Details</span>
-                                                    </button>
-
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(params.data.id);
-                                                            params.context.setActiveMenuId(null);
-                                                        }}
-                                                        className="w-[calc(100%-16px)] mx-2 mt-1 text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-900 hover:text-white rounded-xl flex items-center gap-3 transition-all duration-200 group/item"
-                                                    >
-                                                        <div className="w-6 h-6 rounded-lg bg-gray-50 group-hover/item:bg-white/20 flex items-center justify-center transition-colors">
-                                                            <FontAwesomeIcon icon={faTrash} className="text-[10px]" />
-                                                        </div>
-                                                        <span className="font-medium">Delete Route</span>
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                }
+                                cellRenderer: (params) => (
+                                    <div className="flex items-center justify-center h-full">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(params.data.id);
+                                            }}
+                                            className="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
+                                            title="Delete Route"
+                                        >
+                                            <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                                        </button>
+                                    </div>
+                                )
                             }
                         ]}
                         context={{ activeMenuId, setActiveMenuId }}
@@ -180,7 +130,6 @@ const RouteList = ({
                         }}
                         defaultColDef={{
                             sortable: true,
-                            filter: true,
                             resizable: true,
                             headerClass: "font-bold uppercase text-xs tracking-wide",
                         }}
@@ -219,8 +168,8 @@ const RouteList = ({
 
                             <div className="grid grid-cols-2 gap-3 mb-4">
                                 <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
-                                    <p className="text-xs text-gray-500 font-medium">Distance</p>
-                                    <p className="text-sm text-gray-900 font-bold truncate">{route.distance}</p>
+                                    <p className="text-xs text-gray-500 font-medium">No. of Students</p>
+                                    <p className="text-sm text-gray-900 font-bold truncate">{route.studentCount} Students</p>
                                 </div>
                                 <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                     <p className="text-xs text-gray-500 font-medium mb-2">Assigned Bus</p>

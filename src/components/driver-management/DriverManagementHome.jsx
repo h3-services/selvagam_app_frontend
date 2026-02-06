@@ -108,14 +108,16 @@ const DriverManagementHome = () => {
     );
 
     const handleAdd = async (newDriver) => {
+        setLoading(true);
         try {
             await driverService.createDriver(newDriver);
             await fetchDrivers(); // Refresh list to see new driver
             setShowModal(false);
-            // Optional: Success notification
         } catch (err) {
             console.error(err);
             alert("Failed to create driver: " + (err.response?.data?.message || err.message));
+        } finally {
+            setLoading(false);
         }
     };
 
