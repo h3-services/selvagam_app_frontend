@@ -8,8 +8,12 @@ import AddRouteForm from './AddRouteForm';
 import BusReassignModal from './BusReassignModal';
 import { routeService } from '../../services/routeService';
 
+import { driverService } from '../../services/driverService';
+import { busService } from '../../services/busService';
+
 const RouteManagementHome = () => {
     const [routes, setRoutes] = useState([]);
+    const [activeBuses, setActiveBuses] = useState([]); // Renamed to avoid confusion, mapped for modal
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -19,10 +23,44 @@ const RouteManagementHome = () => {
     const fetchAllData = async () => {
         setLoading(true);
         try {
-            const [routesData, stopsData] = await Promise.all([
+            const [routesData, stopsData, busesData, driversData] = await Promise.all([
                 routeService.getAllRoutes(),
-                routeService.getAllRouteStops()
+                routeService.getAllRouteStops(),
+                busService.getAllBuses(),
+                driverService.getAllDrivers()
             ]);
+
+            // Create Driver Map (id -> name)
+            const driverMap = {};
+            if (Array.isArray(driversData)) {
+                driversData.forEach(d => driverMap[d.driver_id] = d.name);
+            }
+
+            // Create a lookup for bus assigned to route (route_id -> bus_number)
+            const routeBusMap = {};
+            // Map buses for reassign modal
+            const mappedBuses = [];
+
+            if (Array.isArray(busesData)) {
+                busesData.forEach(bus => {
+                    const busNum = bus.registration_number || bus.bus_number || 'Unknown Bus';
+                    const driverName = bus.driver_name || (bus.driver_id ? driverMap[bus.driver_id] : 'Unassigned');
+                    
+                    if (bus.route_id) {
+                        routeBusMap[bus.route_id] = busNum;
+                    }
+
+                    mappedBuses.push({
+                        busNumber: busNum,
+                        capacity: bus.seating_capacity || 0,
+                        status: bus.status ? (bus.status.charAt(0).toUpperCase() + bus.status.slice(1).toLowerCase()) : 'Inactive',
+                        driverName: driverName,
+                        id: bus.bus_id
+                    });
+                });
+            }
+            
+            setActiveBuses(mappedBuses);
 
             // Transform and merge data
             const mappedRoutes = routesData.map(route => {
@@ -47,7 +85,7 @@ const RouteManagementHome = () => {
                     id: route.route_id,
                     routeName: route.name,
                     distance: 'N/A', // Not in API yet
-                    assignedBus: 'Unassigned', // Not in API yet
+                    assignedBus: routeBusMap[route.route_id] || 'Unassigned',
                     stops: routeStops.length,
                     studentCount: Math.floor(Math.random() * 40) + 15, // Mock data for now
                     stopPoints: stopPoints,
@@ -83,18 +121,6 @@ const RouteManagementHome = () => {
         window.addEventListener('click', handleClickOutside);
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);
-
-    // Available buses for assignment
-    const availableBuses = [
-        { busNumber: 'BUS-101', capacity: 40, status: 'Active', driverName: 'Robert Wilson' },
-        { busNumber: 'BUS-102', capacity: 40, status: 'Active', driverName: 'Sarah Martinez' },
-        { busNumber: 'BUS-103', capacity: 35, status: 'Maintenance', driverName: 'David Brown' },
-        { busNumber: 'BUS-104', capacity: 40, status: 'Active', driverName: 'Emily Davis' },
-        { busNumber: 'BUS-105', capacity: 30, status: 'Inactive', driverName: 'Michael Chen' },
-        { busNumber: 'BUS-106', capacity: 40, status: 'Active', driverName: 'Jessica Taylor' },
-        { busNumber: 'BUS-107', capacity: 40, status: 'Active', driverName: 'William Anderson' },
-        { busNumber: 'BUS-108', capacity: 35, status: 'Maintenance', driverName: 'Olivia Thomas' },
-    ];
 
     // Mock School Locations (mirroring SuperAdmin)
     const schoolLocations = [
@@ -161,7 +187,7 @@ const RouteManagementHome = () => {
             setShowModal(false);
         } catch (error) {
             console.error("Failed to create route:", error);
-            alert("Failed to create route. Please check the logs.");
+            // alert("Failed to create route. Please check the logs.");
         }
     };
 
@@ -179,7 +205,7 @@ const RouteManagementHome = () => {
                 setShowDeleteConfirm(false);
             } catch (error) {
                 console.error("Failed to delete route:", error);
-                alert("Failed to delete route.");
+                // alert("Failed to delete route.");
             }
         }
     };
@@ -256,7 +282,7 @@ const RouteManagementHome = () => {
              
         } catch (error) {
             console.error("Error updating route:", error);
-            alert("Failed to save changes. Please try again.");
+            // alert("Failed to save changes. Please try again.");
         }
     };
 
@@ -341,7 +367,7 @@ const RouteManagementHome = () => {
                 show={showBusReassignModal}
                 onClose={() => setShowBusReassignModal(false)}
                 onReassign={handleReassignBus}
-                availableBuses={availableBuses}
+                availableBuses={activeBuses}
                 routes={routes}
                 reassigningRouteId={reassigningRouteId}
                 getStatusColor={getStatusColor}

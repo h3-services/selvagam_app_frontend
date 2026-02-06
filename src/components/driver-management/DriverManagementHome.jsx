@@ -8,6 +8,7 @@ import AddDriverForm from './AddDriverForm';
 import { driverService } from '../../services/driverService';
 
 import { busService } from '../../services/busService';
+import { routeService } from '../../services/routeService';
 
 const DriverManagementHome = () => {
     const [drivers, setDrivers] = useState([]);
@@ -24,36 +25,51 @@ const DriverManagementHome = () => {
     const [deactivatingItemId, setDeactivatingItemId] = useState(null);
     const [deactivationReason, setDeactivationReason] = useState("");
 
-    // Fetch Drivers & Buses to map vehicles
+    // Fetch Drivers, Buses & Routes to map vehicles and routes
     const fetchDrivers = async () => {
         setLoading(true);
         try {
-            const [driversData, busesData] = await Promise.all([
+            const [driversData, busesData, routesData] = await Promise.all([
                 driverService.getAllDrivers(),
-                busService.getAllBuses()
+                busService.getAllBuses(),
+                routeService.getAllRoutes()
             ]);
 
-            // Create a lookup for bus (driver_id -> bus_number)
+            // Create a lookup for bus (driver_id -> bus details)
             const driverBusMap = {};
             if (Array.isArray(busesData)) {
                 busesData.forEach(bus => {
                     if (bus.driver_id) {
-                        driverBusMap[bus.driver_id] = bus.bus_number;
+                        driverBusMap[bus.driver_id] = bus;
                     }
                 });
             }
 
+            // Create a lookup for route (route_id -> route name)
+            const routeMap = {};
+            if (Array.isArray(routesData)) {
+                routesData.forEach(route => {
+                    routeMap[route.route_id] = route.name;
+                });
+            }
+
             // Map API data to UI format
-            const mappedDrivers = Array.isArray(driversData) ? driversData.map(d => ({
-                ...d,
-                id: d.driver_id,
-                mobile: d.phone, // UI uses mobile, API uses phone
-                licenseNumber: d.licence_number, // Note spelling
-                status: d.status.charAt(0).toUpperCase() + d.status.slice(1).toLowerCase(), // "ACTIVE" -> "Active"
-                date: d.created_at ? d.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
-                vehicleNumber: driverBusMap[d.driver_id] || 'Unassigned',
-                route: 'Unassigned'
-            })) : [];
+            const mappedDrivers = Array.isArray(driversData) ? driversData.map(d => {
+                const assignedBus = driverBusMap[d.driver_id];
+                const busNumber = assignedBus ? (assignedBus.registration_number || assignedBus.bus_number || 'Unknown Bus') : 'Unassigned';
+                const routeName = assignedBus && assignedBus.route_id ? (routeMap[assignedBus.route_id] || 'Unknown Route') : 'Unassigned';
+
+                return {
+                    ...d,
+                    id: d.driver_id,
+                    mobile: d.phone, // UI uses mobile, API uses phone
+                    licenseNumber: d.licence_number, // Note spelling
+                    status: d.status.charAt(0).toUpperCase() + d.status.slice(1).toLowerCase(), // "ACTIVE" -> "Active"
+                    date: d.created_at ? d.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+                    vehicleNumber: busNumber,
+                    route: routeName
+                };
+            }) : [];
             setDrivers(mappedDrivers);
             setError(null);
         } catch (err) {
@@ -115,7 +131,7 @@ const DriverManagementHome = () => {
             setShowModal(false);
         } catch (err) {
             console.error(err);
-            alert("Failed to create driver: " + (err.response?.data?.message || err.message));
+            // alert("Failed to create driver: " + (err.response?.data?.message || err.message));
         } finally {
             setLoading(false);
         }
@@ -136,7 +152,7 @@ const DriverManagementHome = () => {
                 setItemToDelete(null);
             } catch (err) {
                 console.error(err);
-                alert("Failed to delete driver: " + (err.response?.data?.message || err.message));
+                // alert("Failed to delete driver: " + (err.response?.data?.message || err.message));
             }
         }
     };
@@ -173,7 +189,7 @@ const DriverManagementHome = () => {
 
         } catch (err) {
             console.error(err);
-            alert("Failed to update driver: " + (err.response?.data?.message || err.message));
+            // alert("Failed to update driver: " + (err.response?.data?.message || err.message));
         }
     };
 

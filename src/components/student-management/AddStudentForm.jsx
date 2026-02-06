@@ -1,26 +1,90 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
-import LocationMap from './LocationMap';
+import { routeService } from '../../services/routeService';
 
-const AddStudentForm = ({ show, onClose, onAdd }) => {
-    const [newStudent, setNewStudent] = useState({ name: '', primaryParent: '', mobile: '', location: '', status: 'Inactive' });
-    const [showLocationPicker, setShowLocationPicker] = useState(false);
+const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
+    const defaultFormState = {
+        name: '',
+        parent_id: '',
+        s_parent_id: '',
+        dob: '',
+        class_id: '',
+        pickup_route_id: '',
+        drop_route_id: '',
+        pickup_stop_id: '',
+        drop_stop_id: '',
+        emergency_contact: '',
+        student_photo_url: '',
+    };
 
-    // Map Picker State
-    const [tempMapSearchQuery, setTempMapSearchQuery] = useState('');
-    const [tempMarkerPosition, setTempMarkerPosition] = useState([12.6074, 80.0463]);
-    const [tempMapCenter, setTempMapCenter] = useState([12.6074, 80.0463]);
-    const [tempLocationSuggestions, setTempLocationSuggestions] = useState([]);
-    const [showTempSuggestions, setShowTempSuggestions] = useState(false);
-    const tempMapRef = useRef(null);
+    const [formData, setFormData] = useState(defaultFormState);
+    const [routes, setRoutes] = useState([]);
+    const [stops, setStops] = useState([]);
+    const [filteredPickupStops, setFilteredPickupStops] = useState([]);
+    const [filteredDropStops, setFilteredDropStops] = useState([]);
+    const [loadingData, setLoadingData] = useState(false);
 
-    const handleAdd = () => {
-        if (newStudent.name && newStudent.mobile) {
-            onAdd(newStudent);
-            setNewStudent({ name: '', primaryParent: '', mobile: '', location: '', status: 'Inactive' });
+    useEffect(() => {
+        if (show) {
+            fetchRoutesAndStops();
         }
+    }, [show]);
+
+    const fetchRoutesAndStops = async () => {
+        setLoadingData(true);
+        try {
+            const [routesData, stopsData] = await Promise.all([
+                routeService.getAllRoutes(),
+                routeService.getAllRouteStops()
+            ]);
+            setRoutes(routesData || []);
+            setStops(stopsData || []);
+        } catch (error) {
+            console.error("Failed to fetch routes/stops:", error);
+        } finally {
+            setLoadingData(false);
+        }
+    };
+
+    // Filter stops when route changes
+    useEffect(() => {
+        if (formData.pickup_route_id) {
+            setFilteredPickupStops(stops.filter(s => s.route_id === formData.pickup_route_id));
+        } else {
+            setFilteredPickupStops([]);
+        }
+    }, [formData.pickup_route_id, stops]);
+
+    useEffect(() => {
+        if (formData.drop_route_id) {
+            setFilteredDropStops(stops.filter(s => s.route_id === formData.drop_route_id));
+        } else {
+            setFilteredDropStops([]);
+        }
+    }, [formData.drop_route_id, stops]);
+
+    const handleChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSave = () => {
+        // Basic validation
+        if (!formData.name || !formData.parent_id || !formData.dob) {
+            alert("Please fill in required fields: Name, Primary Parent, DOB");
+            return;
+        }
+
+        // Prepare payload for API
+        const payload = {
+            ...formData,
+            // Ensure numbers where needed
+            emergency_contact: formData.emergency_contact ? Number(formData.emergency_contact) : 0
+        };
+
+        onAdd(payload);
+        setFormData(defaultFormState);
     };
 
     if (!show) return null;
@@ -31,239 +95,236 @@ const AddStudentForm = ({ show, onClose, onAdd }) => {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1999]" onClick={onClose}></div>
 
             {/* Right Side Drawer */}
-            <div className="fixed right-0 top-0 h-full w-full sm:w-[450px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col animate-slide-in">
-                <div className="relative p-8 border-b border-purple-100">
+            <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[2000] flex flex-col animate-slide-in">
+                {/* Header */}
+                <div className="relative p-6 border-b border-purple-100 bg-white">
                     <button
                         onClick={onClose}
-                        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-purple-100 transition"
-                        style={{ color: COLORS.SIDEBAR_BG }}
+                        className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-gray-600"
                     >
-                        <FontAwesomeIcon icon={faTimes} className="text-xl" />
+                        <FontAwesomeIcon icon={faTimes} />
                     </button>
-                    <div className="flex items-center gap-4 mb-2">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
-                            <FontAwesomeIcon icon={faUserPlus} className="text-white text-2xl" />
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
+                            <FontAwesomeIcon icon={faUserPlus} className="text-white text-lg" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add Student</h3>
-                            <p className="text-gray-500 text-sm">Enter student information</p>
+                            <h3 className="font-bold text-xl text-gray-900">Add New Student</h3>
+                            <p className="text-gray-500 text-xs">Create a new student profile</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8">
-                    <div className="space-y-5">
-                        {/* Name Input */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Student Name</label>
-                            <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
-                                    <FontAwesomeIcon icon={faChild} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
+                {/* Form Content */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    
+                    {/* Section: Basic Info */}
+                    <div className="space-y-4">
+                        <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Student Details</h4>
+                        <div className="grid grid-cols-1 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Full Name *</label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faChild} /></div>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => handleChange('name', e.target.value)}
+                                        className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-medium"
+                                        placeholder="e.g. John Doe"
+                                    />
                                 </div>
-                                <input
-                                    type="text"
-                                    placeholder="Enter full name"
-                                    value={newStudent.name}
-                                    onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                                />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Date of Birth *</label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faCalendar} /></div>
+                                        <input
+                                            type="date"
+                                            value={formData.dob}
+                                            onChange={(e) => handleChange('dob', e.target.value)}
+                                            className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-medium text-gray-600"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Class/Grade</label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faSchool} /></div>
+                                        <input
+                                            type="text"
+                                            value={formData.class_id}
+                                            onChange={(e) => handleChange('class_id', e.target.value)}
+                                            className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-medium"
+                                            placeholder="e.g. 5-A"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Photo URL</label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faImage} /></div>
+                                    <input
+                                        type="text"
+                                        value={formData.student_photo_url}
+                                        onChange={(e) => handleChange('student_photo_url', e.target.value)}
+                                        className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-medium"
+                                        placeholder="https://example.com/photo.jpg"
+                                    />
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Parent Name Input */}
+                    {/* Section: Parents */}
+                    <div className="space-y-4">
+                        <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Parent/Guardian Info</h4>
+                        
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Primary Parent</label>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Primary Parent *</label>
                             <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
-                                    <FontAwesomeIcon icon={faUserTie} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="Enter parent's name"
-                                    value={newStudent.primaryParent}
-                                    onChange={(e) => setNewStudent({ ...newStudent, primaryParent: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Mobile Input */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Mobile Number</label>
-                            <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
-                                    <FontAwesomeIcon icon={faPhone} className="text-sm" style={{ color: COLORS.SIDEBAR_BG }} />
-                                </div>
-                                <input
-                                    type="tel"
-                                    placeholder="555-0000"
-                                    value={newStudent.mobile}
-                                    onChange={(e) => setNewStudent({ ...newStudent, mobile: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Location Input */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Location Address</label>
-                            <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f3e8ff' }}>
-                                    <svg className="w-4 h-4" style={{ color: COLORS.SIDEBAR_BG }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="Select location..."
-                                    value={newStudent.location}
-                                    readOnly
-                                    onClick={() => setShowLocationPicker(true)}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl pl-16 pr-24 py-3.5 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm cursor-pointer hover:bg-purple-50"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowLocationPicker(true)}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-bold text-white rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95"
-                                    style={{ backgroundColor: COLORS.SIDEBAR_BG }}
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faUserTie} /></div>
+                                <select
+                                    value={formData.parent_id}
+                                    onChange={(e) => handleChange('parent_id', e.target.value)}
+                                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-medium appearance-none"
                                 >
-                                    Pick Map
-                                </button>
+                                    <option value="">Select Primary Parent</option>
+                                    {parents.map(p => (
+                                        <option key={p.parent_id} value={p.parent_id}>{p.name} ({p.phone})</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                         <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Secondary Parent (Optional)</label>
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faUser} /></div>
+                                <select
+                                    value={formData.s_parent_id}
+                                    onChange={(e) => handleChange('s_parent_id', e.target.value)}
+                                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-medium appearance-none"
+                                >
+                                    <option value="">Select Secondary Parent</option>
+                                    {parents.map(p => (
+                                        <option key={p.parent_id} value={p.parent_id}>{p.name} ({p.phone})</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Emergency Contact Number</label>
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faPhone} /></div>
+                                <input
+                                    type="number"
+                                    value={formData.emergency_contact}
+                                    onChange={(e) => handleChange('emergency_contact', e.target.value)}
+                                    className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all font-medium"
+                                    placeholder="e.g. 9876543210"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section: Transport */}
+                    <div className="space-y-4">
+                        <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Transport Allocation</h4>
+                        
+                        <div className="bg-purple-50 rounded-xl p-4 space-y-4">
+                            <h5 className="text-xs font-bold text-purple-800 uppercase">Pickup Details</h5>
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Route</label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faBus} /></div>
+                                    <select
+                                        value={formData.pickup_route_id}
+                                        onChange={(e) => handleChange('pickup_route_id', e.target.value)}
+                                        className="w-full pl-10 pr-3 py-2 bg-white border border-purple-100 rounded-lg text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none font-medium"
+                                    >
+                                        <option value="">Select Pickup Route</option>
+                                        {routes.map(r => (
+                                            <option key={r.route_id} value={r.route_id}>{r.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Stop</label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faMapMarkerAlt} /></div>
+                                    <select
+                                        value={formData.pickup_stop_id}
+                                        onChange={(e) => handleChange('pickup_stop_id', e.target.value)}
+                                        disabled={!formData.pickup_route_id}
+                                        className="w-full pl-10 pr-3 py-2 bg-white border border-purple-100 rounded-lg text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-200 outline-none font-medium disabled:bg-gray-100 disabled:text-gray-400"
+                                    >
+                                        <option value="">Select Pickup Stop</option>
+                                        {filteredPickupStops.map(s => (
+                                            <option key={s.stop_id} value={s.stop_id}>{s.stop_name} (Order: {s.pickup_stop_order})</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                         <div className="bg-blue-50 rounded-xl p-4 space-y-4">
+                            <h5 className="text-xs font-bold text-blue-800 uppercase">Drop Details</h5>
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Route</label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faBus} /></div>
+                                    <select
+                                        value={formData.drop_route_id}
+                                        onChange={(e) => handleChange('drop_route_id', e.target.value)}
+                                        className="w-full pl-10 pr-3 py-2 bg-white border border-blue-100 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none font-medium"
+                                    >
+                                        <option value="">Select Drop Route</option>
+                                        {routes.map(r => (
+                                            <option key={r.route_id} value={r.route_id}>{r.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Stop</label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 text-center"><FontAwesomeIcon icon={faMapMarkerAlt} /></div>
+                                    <select
+                                        value={formData.drop_stop_id}
+                                        onChange={(e) => handleChange('drop_stop_id', e.target.value)}
+                                        disabled={!formData.drop_route_id}
+                                        className="w-full pl-10 pr-3 py-2 bg-white border border-blue-100 rounded-lg text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none font-medium disabled:bg-gray-100 disabled:text-gray-400"
+                                    >
+                                        <option value="">Select Drop Stop</option>
+                                        {filteredDropStops.map(s => (
+                                            <option key={s.stop_id} value={s.stop_id}>{s.stop_name} (Order: {s.drop_stop_order})</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="p-8 border-t border-purple-100 bg-transparent">
+                {/* Footer Actions */}
+                <div className="p-6 border-t border-purple-100 bg-gray-50 mt-auto">
                     <button
-                        onClick={handleAdd}
-                        className="w-full py-4 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-base text-white"
+                        onClick={handleSave}
+                        className="w-full py-3.5 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all text-white text-sm tracking-wide flex items-center justify-center gap-2"
                         style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                     >
-                        <FontAwesomeIcon icon={faCheck} className="mr-2" />
-                        Add Student
+                        <FontAwesomeIcon icon={faCheck} />
+                        Create Student Profile
                     </button>
                 </div>
             </div>
-
-            {/* Location Picker Popup */}
-            {showLocationPicker && (
-                <>
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[2500]" onClick={() => setShowLocationPicker(false)}></div>
-                    <div className="fixed left-0 top-0 bottom-0 w-full md:w-[500px] bg-white shadow-2xl z-[2501] flex flex-col animate-slide-in">
-                        <div className="p-4 border-b border-gray-200" style={{ backgroundColor: '#40189d' }}>
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-bold text-white">Pick Location</h3>
-                                <button
-                                    onClick={() => setShowLocationPicker(false)}
-                                    className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded-lg transition"
-                                >
-                                    <FontAwesomeIcon icon={faTimes} />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="p-4 border-b border-gray-200">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={tempMapSearchQuery}
-                                    onChange={async (e) => {
-                                        const query = e.target.value;
-                                        setTempMapSearchQuery(query);
-                                        if (query.length > 2) {
-                                            try {
-                                                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=10&addressdetails=1`);
-                                                const data = await response.json();
-                                                setTempLocationSuggestions(data);
-                                                setShowTempSuggestions(true);
-                                            } catch (error) {
-                                                console.error('Error fetching suggestions:', error);
-                                            }
-                                        } else {
-                                            setShowTempSuggestions(false);
-                                        }
-                                    }}
-                                    onFocus={() => tempLocationSuggestions.length > 0 && setShowTempSuggestions(true)}
-                                    placeholder="Search location (e.g., Karaikudi, New York, Paris)..."
-                                    className="w-full border-2 rounded-lg px-3 py-2 text-sm outline-none"
-                                    style={{ borderColor: '#40189d' }}
-                                />
-                                {showTempSuggestions && tempLocationSuggestions.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto" style={{ borderColor: '#40189d' }}>
-                                        {tempLocationSuggestions.map((suggestion, index) => (
-                                            <button
-                                                key={index}
-                                                onClick={async () => {
-                                                    const { lat, lon, display_name } = suggestion;
-                                                    setTempMapSearchQuery(display_name);
-                                                    setTempMarkerPosition([parseFloat(lat), parseFloat(lon)]);
-                                                    setTempMapCenter([parseFloat(lat), parseFloat(lon)]);
-                                                    setShowTempSuggestions(false);
-                                                    if (tempMapRef.current) {
-                                                        tempMapRef.current.setView([parseFloat(lat), parseFloat(lon)], 15);
-                                                    }
-                                                }}
-                                                className="w-full text-left px-3 py-2 hover:bg-purple-50 transition-colors text-sm border-b border-gray-100 last:border-b-0"
-                                            >
-                                                <div className="flex items-start gap-2">
-                                                    <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#40189d' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                    <span className="text-gray-700">{suggestion.display_name}</span>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-2">💡 Click on the map or search above to select a location</p>
-                        </div>
-
-                        <div className="flex-1 relative">
-                            <LocationMap
-                                center={tempMapCenter}
-                                markerPosition={tempMarkerPosition}
-                                isEditing={true}
-                                onLocationSelect={async (lat, lng) => {
-                                    setTempMarkerPosition([lat, lng]);
-                                    try {
-                                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-                                        const data = await response.json();
-                                        const locationName = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                                        setTempMapSearchQuery(locationName);
-                                    } catch (error) {
-                                        console.error('Error reverse geocoding:', error);
-                                        const locationName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                                        setTempMapSearchQuery(locationName);
-                                    }
-                                }}
-                                mapRef={tempMapRef}
-                            />
-                        </div>
-
-                        <div className="p-4 border-t border-gray-200">
-                            <div className="mb-3">
-                                <p className="text-xs font-bold text-gray-500 mb-1">Selected Location:</p>
-                                <p className="text-sm font-semibold" style={{ color: '#40189d' }}>{tempMapSearchQuery || 'None'}</p>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setNewStudent({ ...newStudent, location: tempMapSearchQuery });
-                                    setShowLocationPicker(false);
-                                }}
-                                disabled={!tempMapSearchQuery}
-                                className="w-full py-3 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                style={{ backgroundColor: '#40189d' }}
-                            >
-                                <FontAwesomeIcon icon={faCheck} className="mr-2" />Done
-                            </button>
-                        </div>
-                    </div>
-                </>
-            )}
         </>
     );
 };

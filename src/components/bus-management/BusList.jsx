@@ -96,7 +96,7 @@ const BusList = ({
                                         switch(s) {
                                             case 'Active': return 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200';
                                             case 'Maintenance': return 'bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-200';
-                                            case 'Inactive': return 'bg-gradient-to-r from-slate-500 to-gray-600 shadow-slate-200';
+                                            case 'Inactive': return 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-200';
                                             default: return 'bg-gray-500';
                                         }
                                     };
@@ -159,7 +159,7 @@ const BusList = ({
                                                             >
                                                                 <div className={`w-6 h-6 rounded-md flex items-center justify-center ${
                                                                     option === 'Active' ? 'bg-green-100 text-green-600' : 
-                                                                    option === 'Maintenance' ? 'bg-orange-100 text-orange-600' : 'bg-red-100 text-red-600'
+                                                                    option === 'Maintenance' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'
                                                                 }`}>
                                                                     <FontAwesomeIcon icon={getStatusIcon(option)} className="text-[10px]" />
                                                                 </div>

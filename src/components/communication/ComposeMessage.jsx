@@ -15,7 +15,7 @@ const ComposeMessage = () => {
         e.preventDefault();
 
         if (!title.trim() || !messageText.trim() || !fcmToken.trim()) {
-            alert('Please fill in all fields');
+            console.error('Please fill in all fields');
             return;
         }
 
@@ -26,12 +26,12 @@ const ComposeMessage = () => {
             const cleanToken = fcmToken.trim().replace(/^FCM Token:\s*/i, '');
 
             await sendNotification(title.trim(), messageText.trim(), recipientType, messageType, cleanToken);
-            alert(`✅ Notification sent successfully!`);
+            // alert(`✅ Notification sent successfully!`);
             setTitle('');
             setMessageText('');
             setFcmToken('');
         } catch (error) {
-            alert('❌ Failed to send notification. Please try again.');
+            // alert('❌ Failed to send notification. Please try again.');
             console.error('Send notification error:', error);
         } finally {
             setIsSending(false);

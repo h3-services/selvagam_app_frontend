@@ -115,8 +115,8 @@ const BusDetail = ({ selectedBus, onBack, onUpdate }) => {
                                     </select>
                                 ) : (
                                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                                        selectedBus.status === 'Active' ? 'bg-green-50 text-green-600 border-green-200' : 
-                                        selectedBus.status === 'Maintenance' ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-red-50 text-red-600 border-red-200'
+                                        selectedBus.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
+                                        selectedBus.status === 'Maintenance' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-rose-50 text-rose-600 border-rose-200'
                                     }`}>
                                         {selectedBus.status}
                                     </span>
@@ -135,12 +135,12 @@ const BusDetail = ({ selectedBus, onBack, onUpdate }) => {
                             <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Health Check</h4>
                             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-purple-200 transition-all">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${selectedBus.status === 'Active' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${selectedBus.status === 'Active' ? 'bg-emerald-100 text-emerald-600' : selectedBus.status === 'Maintenance' ? 'bg-blue-100 text-blue-600' : 'bg-rose-100 text-rose-600'}`}>
                                         <FontAwesomeIcon icon={selectedBus.status === 'Active' ? faCheck : faCircleExclamation} className="text-xl" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-gray-900">Vehicle Status</p>
-                                        <p className={`text-xs font-bold mt-0.5 ${selectedBus.status === 'Active' ? 'text-green-600' : 'text-orange-500'}`}>
+                                        <p className={`text-xs font-bold mt-0.5 ${selectedBus.status === 'Active' ? 'text-emerald-600' : selectedBus.status === 'Maintenance' ? 'text-blue-500' : 'text-rose-500'}`}>
                                             {selectedBus.status === 'Active' ? 'Operational' : 'Attention Needed'}
                                         </p>
                                     </div>

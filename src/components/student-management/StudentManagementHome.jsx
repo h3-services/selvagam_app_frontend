@@ -94,19 +94,13 @@ const StudentManagementHome = () => {
 
     const handleAddStudent = async (newStudentData) => {
         try {
-            // Prepare data for API (mapping back)
-            const apiData = {
-                name: newStudentData.name,
-                emergency_contact: newStudentData.mobile,
-                transport_status: 'ACTIVE',
-                student_status: 'CURRENT',
-                // other fields could be set to defaults or picked from form
-            };
-            await studentService.createStudent(apiData);
+            // newStudentData now contains the full payload from AddStudentForm
+            await studentService.createStudent(newStudentData);
             await fetchAllData(); // Refresh list
             setShowForm(false);
         } catch (error) {
             console.error("Error adding student:", error);
+            // alert("Failed to create student."); // Optional: reintroduce if needed
         }
     };
 
@@ -228,6 +222,7 @@ const StudentManagementHome = () => {
                 show={showForm}
                 onClose={() => setShowForm(false)}
                 onAdd={handleAddStudent}
+                parents={parents}
             />
 
             {/* Floating Add Button */}

@@ -85,7 +85,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
             try {
                 if (!editData.id) {
                     console.error("Missing route ID in editData:", editData);
-                    alert("Route ID is missing. Cannot add stop.");
+                    // alert("Route ID is missing. Cannot add stop.");
                     setIsAddingStop(false);
                     return;
                 }
@@ -128,7 +128,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                 console.error("Full Error Response:", JSON.stringify(errorData, null, 2));
                 
                 const errorMsg = error.response?.data?.detail || (typeof errorData === 'object' ? JSON.stringify(errorData) : String(errorData)) || "Unknown error";
-                alert(`Failed to add stop: ${errorMsg}`);
+                // alert(`Failed to add stop: ${errorMsg}`);
             } finally {
                 setIsAddingStop(false);
             }

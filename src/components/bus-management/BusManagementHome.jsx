@@ -103,7 +103,7 @@ const BusManagementHome = () => {
             setShowModal(false);
         } catch (err) {
             console.error(err);
-            alert("Failed to create bus: " + (err.response?.data?.detail || err.message));
+            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -120,7 +120,7 @@ const BusManagementHome = () => {
                 // await busService.deleteBus(itemToDelete);
                 setBuses(buses.filter(b => b.id !== itemToDelete));
             } catch (e) {
-                alert("Failed to delete bus");
+                console.error("Failed to delete bus", e);
             }
             setItemToDelete(null);
             setShowDeleteConfirm(false);
@@ -165,10 +165,8 @@ const BusManagementHome = () => {
 
             setBuses(buses.map(b => b.id === updatedData.id ? newBusModel : b));
             setSelectedBus(newBusModel);
-            alert("Bus updated successfully!");
         } catch (err) {
             console.error("Failed to update bus:", err);
-            alert("Failed to update bus details. Please try again.");
         } finally {
             setLoading(false);
         }
