@@ -730,7 +730,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                 <div className="p-5 border-t border-gray-200 bg-white/90 backdrop-blur-md flex-shrink-0 z-20">
                     <button
                         onClick={handleSaveStudent}
-                        className="w-full sm:w-[500px] mx-auto py-4 rounded-2xl font-bold text-white shadow-xl shadow-gray-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-base flex items-center justify-center gap-3"
+                        className="w-full py-4 rounded-2xl font-bold text-white shadow-xl shadow-gray-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-base flex items-center justify-center gap-3"
                         style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                     >
                         <span>Confirm & Create Student Profile</span>

@@ -54,5 +54,15 @@ export const driverService = {
             console.error(`Error deleting driver ${driverId}:`, error);
             throw error;
         }
+    },
+    // Update driver status
+    updateDriverStatus: async (driverId, status) => {
+        try {
+            const response = await api.put(`/drivers/${driverId}/status`, { status });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating driver status ${driverId}:`, error);
+            throw error;
+        }
     }
 };

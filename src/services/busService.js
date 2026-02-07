@@ -54,5 +54,16 @@ export const busService = {
             console.error(`Error deleting bus ${busId}:`, error);
             throw error;
         }
+    },
+
+    // Update bus status
+    updateBusStatus: async (busId, status) => {
+        try {
+            const response = await api.patch(`/buses/${busId}/status`, { status });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating bus status ${busId}:`, error);
+            throw error;
+        }
     }
 };

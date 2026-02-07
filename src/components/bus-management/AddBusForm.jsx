@@ -1,7 +1,71 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faBus, faUserFriends, faUser, faPhone, faCheck } from '@fortawesome/free-solid-svg-icons';
-import { COLORS } from '../../constants/colors';
+import { faTimes, faBus, faCheck, faMagic, faExclamationCircle, faHashtag, faTruck, faTrademark, faCarSide, faChair, faInfoCircle, faUser, faRoute, faCalendarAlt, faLink } from '@fortawesome/free-solid-svg-icons';
+
+const InputField = ({ label, icon, type = "text", placeholder, value, onChange, className = "", error, errorMessage }) => {
+    let borderColor = "border-gray-100";
+    let focusColor = "focus:border-purple-400 focus:ring-purple-50";
+    let iconColor = "bg-gray-100 text-gray-500";
+    let textColor = "text-gray-700";
+
+    if (error) {
+        borderColor = "border-red-500";
+        focusColor = "focus:border-red-500 focus:ring-red-50";
+        iconColor = "bg-red-50 text-red-500";
+        textColor = "text-red-600";
+    }
+
+    return (
+        <div className={className}>
+            <div className="flex justify-between items-center mb-2">
+                <label className={`block text-xs font-bold uppercase tracking-wide ${error ? 'text-red-500' : 'text-gray-700'}`}>
+                    {label}
+                </label>
+                {error && <span className="text-xs text-red-500 font-medium flex items-center gap-1"><FontAwesomeIcon icon={faExclamationCircle} /> {errorMessage || "Required"}</span>}
+            </div>
+            <div className="relative">
+                <div className={`absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${iconColor}`}>
+                    <FontAwesomeIcon icon={icon} className="text-sm" />
+                </div>
+                <input
+                    type={type}
+                    placeholder={placeholder}
+                    value={value}
+                    onChange={onChange}
+                    className={`w-full bg-white border-2 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:outline-none transition-all shadow-sm font-medium placeholder-gray-400 focus:ring-4 ${borderColor} ${focusColor} ${textColor}`}
+                />
+            </div>
+        </div>
+    );
+};
+
+const SelectField = ({ label, icon, value, onChange, options, className = "", placeholder = "Select..." }) => {
+    return (
+        <div className={className}>
+            <label className="block text-xs font-bold uppercase tracking-wide text-gray-700 mb-2">
+                {label}
+            </label>
+            <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center">
+                    <FontAwesomeIcon icon={icon} className="text-sm" />
+                </div>
+                <select
+                    value={value}
+                    onChange={onChange}
+                    className="w-full bg-white border-2 border-gray-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:ring-4 focus:ring-purple-50 focus:outline-none transition-all shadow-sm font-medium text-gray-700 appearance-none"
+                >
+                    <option value="" disabled>{placeholder}</option>
+                    {options.map((opt, idx) => (
+                        <option key={idx} value={opt.value}>{opt.label}</option>
+                    ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
     const [newBus, setNewBus] = useState({ 
@@ -19,7 +83,12 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
         fc_certificate_url: ''
     });
 
-    const handleTestFill = () => {
+    const [touched, setTouched] = useState({});
+
+    // Simple validation (can be expanded)
+    const isValid = newBus.registration_number && newBus.vehicle_type;
+
+    const generateRandomBus = () => {
         setNewBus({
             registration_number: `TN${Math.floor(Math.random() * 90) + 10}AB${Math.floor(Math.random() * 9000) + 1000}`,
             vehicle_type: ['School Bus', 'Mini', 'Van'][Math.floor(Math.random() * 3)],
@@ -34,10 +103,12 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
             rc_book_url: 'https://example.com/rc_book.pdf',
             fc_certificate_url: 'https://example.com/fc_cert.pdf'
         });
+        setTouched({ registration_number: true, vehicle_type: true });
     };
 
     const handleAdd = () => {
-        if (newBus.registration_number && newBus.vehicle_type) {
+        setTouched({ registration_number: true, vehicle_type: true });
+        if (isValid) {
             onAdd(newBus);
             setNewBus({ 
                 registration_number: '', 
@@ -53,7 +124,27 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                 rc_book_url: '',
                 fc_certificate_url: ''
             });
+            setTouched({});
         }
+    };
+
+    const handleClose = () => {
+        setNewBus({ 
+            registration_number: '', 
+            vehicle_type: 'School Bus', 
+            bus_brand: '', 
+            bus_model: '', 
+            seating_capacity: '', 
+            status: 'Active',
+            driver_id: '',
+            route_id: '',
+            rc_expiry_date: '',
+            fc_expiry_date: '',
+            rc_book_url: '',
+            fc_certificate_url: ''
+        });
+        setTouched({});
+        onClose();
     };
 
     useEffect(() => {
@@ -71,206 +162,196 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
 
     return (
         <>
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1500]" onClick={onClose}></div>
-            <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[1501] flex flex-col animate-slide-in">
-                <div className="relative p-8 border-b border-purple-100">
-                    <button
-                        onClick={onClose}
-                        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-purple-100 transition"
-                        style={{ color: COLORS.SIDEBAR_BG }}
-                    >
-                        <FontAwesomeIcon icon={faTimes} className="text-xl" />
-                    </button>
-                    <div className="flex items-center gap-4 mb-2">
-                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
-                            <FontAwesomeIcon icon={faBus} className="text-white text-2xl" />
-                        </div>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1500]" onClick={handleClose}></div>
+            <div className="fixed right-0 top-0 h-full w-full md:w-[800px] bg-white shadow-2xl z-[1501] flex flex-col animate-slide-in">
+                {/* Header */}
+                <div className="relative px-8 py-6 bg-white/80 backdrop-blur-md border-b border-gray-100 flex-shrink-0 z-10 flex justify-between items-center">
+                    <div className="flex items-center gap-5">
+                       <div className="relative">
+                            <div className="absolute inset-0 bg-purple-600 blur-lg opacity-20 rounded-full"></div>
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl relative z-10 text-white">
+                                <FontAwesomeIcon icon={faBus} className="text-lg" />
+                            </div>
+                       </div>
                         <div>
-                            <h3 className="font-bold text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add New Bus</h3>
-                            <p className="text-gray-500 text-sm">Enter detailed bus vehicle information</p>
+                            <h3 className="font-bold text-2xl text-gray-900 tracking-tight">Add New Bus</h3>
+                            <p className="text-gray-500 text-sm font-medium">Enter detailed bus vehicle information</p>
                         </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                         <button 
+                            onClick={generateRandomBus}
+                            className="h-10 px-4 rounded-full bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs gap-2 transition-colors duration-200"
+                            title="Auto Fill Demo Data"
+                        >
+                            <FontAwesomeIcon icon={faMagic} /> Auto Fill
+                        </button>
+                        <button 
+                            onClick={handleClose} 
+                            className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors duration-200"
+                        >
+                            <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                        </button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-8">
-                    <div className="space-y-6">
+                {/* Body */}
+                <div className="flex-1 overflow-y-auto p-8 bg-white">
+                    <div className="space-y-8">
                         
-                        {/* Registration & Type Group */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Reg. Number *</label>
-                                <input
-                                    type="text"
-                                    placeholder="TN01AB1234"
+                        {/* Vehicle Information */}
+                        <div>
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                                Vehicle Information
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <InputField 
+                                    label="Reg. Number" 
+                                    icon={faHashtag} 
                                     value={newBus.registration_number}
                                     onChange={(e) => setNewBus({ ...newBus, registration_number: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                    placeholder="TN01AB1234"
+                                    error={touched.registration_number && !newBus.registration_number}
+                                    errorMessage="Reg. No is required"
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Type *</label>
-                                <select
+                                <SelectField 
+                                    label="Vehicle Type" 
+                                    icon={faTruck}
                                     value={newBus.vehicle_type}
                                     onChange={(e) => setNewBus({ ...newBus, vehicle_type: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                                >
-                                    <option value="School Bus">School Bus</option>
-                                    <option value="Mini">Mini Bus</option>
-                                    <option value="Van">Van</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Brand & Model Group */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Brand</label>
-                                <input
-                                    type="text"
-                                    placeholder="Brand"
+                                    options={[
+                                        { value: 'School Bus', label: 'School Bus' },
+                                        { value: 'Mini', label: 'Mini Bus' },
+                                        { value: 'Van', label: 'Van' }
+                                    ]}
+                                />
+                                <InputField 
+                                    label="Brand" 
+                                    icon={faTrademark} 
                                     value={newBus.bus_brand}
                                     onChange={(e) => setNewBus({ ...newBus, bus_brand: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                    placeholder="e.g. Tata, Ashok Leyland"
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Model</label>
-                                <input
-                                    type="text"
-                                    placeholder="Model"
+                                <InputField 
+                                    label="Model" 
+                                    icon={faCarSide} 
                                     value={newBus.bus_model}
                                     onChange={(e) => setNewBus({ ...newBus, bus_model: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                    placeholder="e.g. Starbus"
                                 />
                             </div>
                         </div>
 
-                        {/* Capacity & Status */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Capacity</label>
-                                <input
+                        {/* Status & Capacity */}
+                        <div>
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                                Configuration
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <InputField 
+                                    label="Seating Capacity" 
+                                    icon={faChair} 
                                     type="number"
-                                    placeholder="Seats"
                                     value={newBus.seating_capacity}
                                     onChange={(e) => setNewBus({ ...newBus, seating_capacity: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                    placeholder="40"
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Status</label>
-                                <select
+                                <SelectField 
+                                    label="Status" 
+                                    icon={faInfoCircle}
                                     value={newBus.status}
                                     onChange={(e) => setNewBus({ ...newBus, status: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                                >
-                                    <option value="Active">Active</option>
-                                    <option value="Maintenance">Maintenance</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
+                                    options={[
+                                        { value: 'Active', label: 'Active' },
+                                        { value: 'Maintenance', label: 'Maintenance' },
+                                        { value: 'Inactive', label: 'Inactive' }
+                                    ]}
+                                />
                             </div>
                         </div>
 
-                        <div className="border-t border-gray-100 my-2"></div>
-
-                        {/* Driver & Route Assignment */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Assign Driver</label>
-                            <select
-                                value={newBus.driver_id}
-                                onChange={(e) => setNewBus({ ...newBus, driver_id: e.target.value })}
-                                className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                            >
-                                <option value="">Select Driver (Optional)</option>
-                                {drivers.map(driver => (
-                                    <option key={driver.driver_id} value={driver.driver_id}>
-                                        {driver.name}
-                                    </option>
-                                ))}
-                            </select>
+                         {/* Assignment */}
+                         <div>
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                                Operations
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <SelectField 
+                                    label="Assign Driver" 
+                                    icon={faUser}
+                                    value={newBus.driver_id}
+                                    onChange={(e) => setNewBus({ ...newBus, driver_id: e.target.value })}
+                                    options={drivers.map(d => ({ value: d.driver_id, label: d.name }))}
+                                    placeholder="Select Driver (Optional)"
+                                />
+                                <SelectField 
+                                    label="Assign Route" 
+                                    icon={faRoute}
+                                    value={newBus.route_id}
+                                    onChange={(e) => setNewBus({ ...newBus, route_id: e.target.value })}
+                                    options={routes.map(r => ({ value: r.route_id, label: r.name }))}
+                                    placeholder="Select Route (Optional)"
+                                />
+                            </div>
                         </div>
 
+                        {/* Documents & Expiry */}
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>Assign Route</label>
-                            <select
-                                value={newBus.route_id}
-                                onChange={(e) => setNewBus({ ...newBus, route_id: e.target.value })}
-                                className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                            >
-                                <option value="">Select Route (Optional)</option>
-                                {routes.map(route => (
-                                    <option key={route.route_id} value={route.route_id}>
-                                        {route.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="border-t border-gray-100 my-2"></div>
-
-                        {/* Expiry Dates */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>RC Expiry Date</label>
-                                <input
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                                Documents & Compliance
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <InputField 
+                                    label="RC Expiry Date" 
+                                    icon={faCalendarAlt} 
                                     type="date"
                                     value={newBus.rc_expiry_date}
                                     onChange={(e) => setNewBus({ ...newBus, rc_expiry_date: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm text-gray-500 focus:border-purple-400 focus:outline-none transition shadow-sm"
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>FC Expiry Date</label>
-                                <input
+                                <InputField 
+                                    label="FC Expiry Date" 
+                                    icon={faCalendarAlt} 
                                     type="date"
                                     value={newBus.fc_expiry_date}
                                     onChange={(e) => setNewBus({ ...newBus, fc_expiry_date: e.target.value })}
-                                    className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm text-gray-500 focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                />
+                                <InputField 
+                                    label="RC Book URL" 
+                                    icon={faLink} 
+                                    value={newBus.rc_book_url}
+                                    onChange={(e) => setNewBus({ ...newBus, rc_book_url: e.target.value })}
+                                    placeholder="https://..."
+                                />
+                                <InputField 
+                                    label="FC Certificate URL" 
+                                    icon={faLink} 
+                                    value={newBus.fc_certificate_url}
+                                    onChange={(e) => setNewBus({ ...newBus, fc_certificate_url: e.target.value })}
+                                    placeholder="https://..."
                                 />
                             </div>
-                        </div>
-
-                        {/* Documents */}
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>RC Book URL</label>
-                            <input
-                                type="text"
-                                placeholder="https://..."
-                                value={newBus.rc_book_url}
-                                onChange={(e) => setNewBus({ ...newBus, rc_book_url: e.target.value })}
-                                className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: COLORS.SIDEBAR_BG }}>FC Certificate URL</label>
-                            <input
-                                type="text"
-                                placeholder="https://..."
-                                value={newBus.fc_certificate_url}
-                                onChange={(e) => setNewBus({ ...newBus, fc_certificate_url: e.target.value })}
-                                className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
-                            />
                         </div>
 
                     </div>
                 </div>
 
-                <div className="p-8 border-t border-purple-100 bg-white flex gap-3">
-                    <button
-                        onClick={handleTestFill}
-                        className="flex-1 py-4 text-gray-700 bg-gray-100 rounded-xl font-bold hover:bg-gray-200 transition-all text-base"
-                    >
-                        Test Fill
-                    </button>
+                {/* Footer */}
+                <div className="p-5 border-t border-gray-200 bg-white/90 backdrop-blur-md flex-shrink-0 z-20">
                     <button
                         onClick={handleAdd}
-                        disabled={!newBus.registration_number}
-                        className="flex-[2] py-4 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ backgroundColor: COLORS.SIDEBAR_BG }}
+                        className={`w-full py-4 rounded-2xl font-bold text-white shadow-xl shadow-purple-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-base flex items-center justify-center gap-3 ${
+                            !isValid
+                                ? 'bg-gray-800 opacity-50 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-xl hover:scale-[1.01]'
+                        }`}
+                        disabled={!isValid}
                     >
-                        <FontAwesomeIcon icon={faCheck} className="mr-2" />
-                        Add Bus
+                        <span>Add Vehicle</span>
+                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><FontAwesomeIcon icon={faCheck} className="text-sm" /></div>
                     </button>
                 </div>
             </div>

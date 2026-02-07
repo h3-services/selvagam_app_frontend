@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUserPlus, faUser, faEnvelope, faPhone, faIdCard, faCalendarAlt, faPassport, faCheck, faLock, faLink, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUserPlus, faUser, faEnvelope, faPhone, faIdCard, faCalendarAlt, faPassport, faCheck, faLock, faLink, faExclamationCircle, faMagic } from '@fortawesome/free-solid-svg-icons';
 
 const InputField = ({ label, icon, type = "text", placeholder, value, onChange, className = "", error, errorMessage, maxLength }) => {
     let borderColor = "border-gray-100";
@@ -181,21 +181,33 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
         <>
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1999]" onClick={handleClose}></div>
             <div className="fixed right-0 top-0 h-full w-full md:w-[800px] bg-white shadow-2xl z-[2000] flex flex-col animate-slide-in">
-                <div className="relative p-6 border-b border-gray-100 bg-white">
-                    <button
-                        onClick={handleClose}
-                        className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-gray-100 transition"
-                    >
-                        <FontAwesomeIcon icon={faTimes} className="text-sm" />
-                    </button>
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-50 text-gray-900 border border-gray-100 shadow-sm">
-                            <FontAwesomeIcon icon={faUserPlus} className="text-xl" />
-                        </div>
+                <div className="relative px-8 py-6 bg-white/80 backdrop-blur-md border-b border-gray-100 flex-shrink-0 z-10 flex justify-between items-center">
+                    <div className="flex items-center gap-5">
+                       <div className="relative">
+                            <div className="absolute inset-0 bg-gray-900 blur-lg opacity-20 rounded-full"></div>
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center shadow-xl relative z-10 text-white">
+                                <FontAwesomeIcon icon={faUserPlus} className="text-lg" />
+                            </div>
+                       </div>
                         <div>
-                            <h3 className="font-bold text-xl text-gray-900">Add New Driver</h3>
-                            <p className="text-gray-500 text-sm">Create a new driver account</p>
+                            <h3 className="font-bold text-2xl text-gray-900 tracking-tight">Add New Driver</h3>
+                            <p className="text-gray-500 text-sm font-medium">Create a new driver account</p>
                         </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                         <button 
+                            onClick={generateRandomDriver}
+                            className="h-10 px-4 rounded-full bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs gap-2 transition-colors duration-200"
+                            title="Auto Fill Demo Data"
+                        >
+                            <FontAwesomeIcon icon={faMagic} /> Auto Fill
+                        </button>
+                        <button 
+                            onClick={handleClose} 
+                            className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors duration-200"
+                        >
+                            <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                        </button>
                     </div>
                 </div>
 
@@ -244,22 +256,17 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
                     </div>
                 </div>
 
-                <div className="p-6 border-t border-gray-100 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex gap-3">
-                    <button
-                        onClick={generateRandomDriver}
-                        className="flex-1 py-3.5 text-gray-700 bg-gray-100 rounded-xl font-bold hover:bg-gray-200 transition-all text-sm"
-                    >
-                        Test Fill
-                    </button>
+                <div className="p-5 border-t border-gray-200 bg-white/90 backdrop-blur-md flex-shrink-0 z-20">
                     <button
                         onClick={handleAdd}
-                        className={`flex-[2] py-3.5 text-white rounded-xl font-bold shadow-lg transition-all text-sm flex items-center justify-center ${!isValid && Object.keys(touched).length > 0
+                        className={`w-full py-4 rounded-2xl font-bold text-white shadow-xl shadow-gray-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-base flex items-center justify-center gap-3 ${
+                            !isValid && Object.keys(touched).length > 0
                                 ? 'bg-gray-800'
                                 : 'bg-gray-900 hover:bg-black hover:shadow-xl hover:scale-[1.01]'
-                            }`}
+                        }`}
                     >
-                        <FontAwesomeIcon icon={faCheck} className="mr-2" />
-                        Create Driver
+                        <span>Create Driver Account</span>
+                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><FontAwesomeIcon icon={faCheck} className="text-sm" /></div>
                     </button>
                 </div>
             </div>

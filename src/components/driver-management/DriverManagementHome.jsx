@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faUserPlus, faTrash, faClock, faArrowLeft, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faUserPlus, faTrash, faArrowLeft, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import DriverList from './DriverList';
 import DriverDetail from './DriverDetail';
@@ -21,9 +21,7 @@ const DriverManagementHome = () => {
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
-    const [showDeactivateModal, setShowDeactivateModal] = useState(false);
-    const [deactivatingItemId, setDeactivatingItemId] = useState(null);
-    const [deactivationReason, setDeactivationReason] = useState("");
+
 
     // Fetch Drivers, Buses & Routes to map vehicles and routes
     const fetchDrivers = async () => {
@@ -91,30 +89,26 @@ const DriverManagementHome = () => {
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);
 
-    const handleToggleStatus = (id) => {
+    const handleToggleStatus = async (id) => {
         const driver = drivers.find(d => d.id === id);
-        if (driver && driver.status === 'Active') {
-            setDeactivatingItemId(id);
-            setDeactivationReason("");
-            setShowDeactivateModal(true);
-        } else {
-            // Optimistic update
-            setDrivers(drivers.map(d =>
-                d.id === id ? { ...d, status: 'Active' } : d
-            ));
-            // TODO: Call API to update status
-        }
-    };
+        if (!driver) return;
 
-    const confirmDeactivation = () => {
-        if (deactivatingItemId) {
+        const newStatus = driver.status === 'Active' ? 'INACTIVE' : 'ACTIVE';
+        const newStatusUI = driver.status === 'Active' ? 'Inactive' : 'Active';
+
+        // Optimistic update
+        setDrivers(drivers.map(d =>
+            d.id === id ? { ...d, status: newStatusUI } : d
+        ));
+
+        try {
+            await driverService.updateDriverStatus(id, newStatus);
+        } catch (err) {
+            console.error(`Failed to update driver status to ${newStatus}:`, err);
+            // Revert on error
             setDrivers(drivers.map(d =>
-                d.id === deactivatingItemId ? { ...d, status: 'Inactive', deactivationReason } : d
+                d.id === id ? { ...d, status: driver.status } : d
             ));
-            // TODO: Call API to update status
-            setDeactivatingItemId(null);
-            setDeactivationReason("");
-            setShowDeactivateModal(false);
         }
     };
 
@@ -312,49 +306,7 @@ const DriverManagementHome = () => {
                 </div>
             )}
 
-            {/* Deactivation Reason Modal */}
-            {showDeactivateModal && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
-                        onClick={() => setShowDeactivateModal(false)}
-                    />
-                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300 text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-6 mx-auto">
-                            <FontAwesomeIcon icon={faClock} className="text-2xl text-amber-600" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Reason for Deactivation</h3>
-                        <p className="text-gray-500 text-sm mb-6 leading-relaxed text-center">
-                            Please provide a reason why this driver is being moved to inactive status.
-                        </p>
-                        <textarea
-                            value={deactivationReason}
-                            onChange={(e) => setDeactivationReason(e.target.value)}
-                            placeholder="Enter reason here..."
-                            className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 mb-6 min-h-[100px]"
-                            autoFocus
-                        />
-                        <div className="flex gap-3 w-full">
-                            <button
-                                onClick={() => setShowDeactivateModal(false)}
-                                className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmDeactivation}
-                                disabled={!deactivationReason.trim()}
-                                className={`flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${deactivationReason.trim()
-                                    ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200'
-                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                    }`}
-                            >
-                                Confirm
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+
         </div>
     );
 };

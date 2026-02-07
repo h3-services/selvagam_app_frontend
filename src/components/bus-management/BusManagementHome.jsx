@@ -127,10 +127,27 @@ const BusManagementHome = () => {
         }
     };
 
-    const handleStatusChange = (id, newStatus) => {
+    const handleStatusChange = async (id, newStatus) => {
+        // Store previous state for rollback
+        const previousBuses = [...buses];
+        
         // Optimistic update
         setBuses(buses.map(b => b.id === id ? { ...b, status: newStatus } : b));
-        // TODO: Call API to update status
+
+        try {
+            // API expects uppercase status usually, but let's check `AddBusForm`.
+            // User instruction text implies consistent enum.
+            // Let's send it as is or uppercased? 
+            // In `handleUpdate`, it sends `(updatedData.status || 'ACTIVE').toUpperCase()`.
+            // So we should verify. The API doc snippet for bus status PATCH doesn't specify values but likely same as others.
+            // I will default to sending UPPERCASE.
+            await busService.updateBusStatus(id, newStatus.toUpperCase());
+        } catch (err) {
+            console.error("Failed to update bus status:", err);
+            // Revert on error
+            setBuses(previousBuses);
+            // Optional: alert or toast
+        }
     };
 
     const handleUpdate = async (updatedData) => {
