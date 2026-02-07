@@ -100,7 +100,26 @@ const StudentManagementHome = () => {
             setShowForm(false);
         } catch (error) {
             console.error("Error adding student:", error);
-            // alert("Failed to create student."); // Optional: reintroduce if needed
+            
+            // Extract meaningful error message for user feedback
+            let errorMessage = "Failed to create student. Please check your inputs.";
+            if (error.response?.data) {
+                console.error("Validation Errors:", JSON.stringify(error.response.data, null, 2));
+                // Try to extract specific error message from API response
+                const apiError = error.response.data;
+                if (apiError.message) {
+                    errorMessage = apiError.message;
+                } else if (apiError.detail) {
+                    errorMessage = typeof apiError.detail === 'string' 
+                        ? apiError.detail 
+                        : JSON.stringify(apiError.detail);
+                } else if (apiError.errors) {
+                    errorMessage = Object.values(apiError.errors).flat().join(', ');
+                }
+            }
+            
+            alert(errorMessage);
+            // Don't close the form - let user fix the errors
         }
     };
 

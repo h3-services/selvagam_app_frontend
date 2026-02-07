@@ -4,6 +4,7 @@ import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCa
 import { COLORS } from '../../constants/colors';
 import { routeService } from '../../services/routeService';
 import { parentService } from '../../services/parentService';
+import { classService } from '../../services/classService';
 
 const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false }) => (
     <div className="relative group">
@@ -90,6 +91,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
     // Data State
     const [routes, setRoutes] = useState([]);
     const [stops, setStops] = useState([]);
+    const [classes, setClasses] = useState([]);
     const [filteredPickupStops, setFilteredPickupStops] = useState([]);
     const [filteredDropStops, setFilteredDropStops] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
@@ -110,14 +112,16 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
     const fetchRoutesAndStops = async () => {
         setLoadingData(true);
         try {
-            const [routesData, stopsData] = await Promise.all([
+            const [routesData, stopsData, classesData] = await Promise.all([
                 routeService.getAllRoutes(),
-                routeService.getAllRouteStops()
+                routeService.getAllRouteStops(),
+                classService.getAllClasses()
             ]);
             setRoutes(routesData || []);
             setStops(stopsData || []);
+            setClasses(classesData || []);
         } catch (error) {
-            console.error("Failed to fetch routes/stops:", error);
+            console.error("Failed to fetch routes/stops/classes:", error);
         } finally {
             setLoadingData(false);
         }
@@ -148,18 +152,26 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
         
         setLoadingParent(true);
         try {
+            // Most APIs expect phone as a string (preserves formatting, leading zeros, etc.)
             const payload = {
                 ...newParent,
-                phone: Number(newParent.phone) || 0,
-                // Ensure other fields are strings if needed
+                phone: String(newParent.phone).trim(),
             };
             
+            console.log("Parent Payload:", JSON.stringify(payload, null, 2));
             const createdParent = await parentService.createParent(payload);
+            
+            // Normalize parent_id from API response (handle different response structures)
+            const parentId = createdParent.parent_id || createdParent.id || createdParent.data?.parent_id;
+            if (!parentId) {
+                throw new Error("Failed to get parent ID from response");
+            }
+            
             const newParentEntry = {
                 ...createdParent,
                 name: newParent.name,
                 phone: newParent.phone,
-                parent_id: createdParent.parent_id || createdParent.id // Fallback
+                parent_id: parentId
             };
 
             setLocalParents(prev => [...prev, newParentEntry]);
@@ -181,18 +193,31 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             return;
         }
 
+        // Validate: pickup and drop stops cannot be the same
+        if (formData.pickup_stop_id && formData.drop_stop_id && 
+            formData.pickup_stop_id === formData.drop_stop_id) {
+            alert("Pickup stop and Drop stop cannot be the same. Please select different stops.");
+            return;
+        }
+
+        // Build payload matching the working Swagger example exactly
         const payload = {
-            ...formData,
-            emergency_contact: formData.emergency_contact ? Number(formData.emergency_contact) : 0,
-            s_parent_id: formData.s_parent_id || null,
-            pickup_route_id: formData.pickup_route_id || null,
-            drop_route_id: formData.drop_route_id || null,
-            pickup_stop_id: formData.pickup_stop_id || null,
-            drop_stop_id: formData.drop_stop_id || null,
-            student_photo_url: formData.student_photo_url || null,
-            class_id: formData.class_id || null,
+            name: formData.name,
+            parent_id: formData.parent_id,
+            dob: formData.dob,
+            s_parent_id: formData.s_parent_id || null, // Backend requires this field (even as null)
         };
 
+        // Add optional fields only if they have actual values
+        if (formData.class_id) payload.class_id = formData.class_id;
+        if (formData.pickup_route_id) payload.pickup_route_id = formData.pickup_route_id;
+        if (formData.drop_route_id) payload.drop_route_id = formData.drop_route_id;
+        if (formData.pickup_stop_id) payload.pickup_stop_id = formData.pickup_stop_id;
+        if (formData.drop_stop_id) payload.drop_stop_id = formData.drop_stop_id;
+        if (formData.emergency_contact) payload.emergency_contact = Number(formData.emergency_contact);
+        if (formData.student_photo_url) payload.student_photo_url = formData.student_photo_url;
+
+        console.log("Student Payload:", JSON.stringify(payload, null, 2));
         onAdd(payload);
         setFormData(defaultStudentState);
         setIsAddingNewParent(false);
@@ -203,11 +228,12 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
 
     const handleAutoFill = () => {
         const dummyStudent = {
-            name: "Arjun Sharma",
+            name: "Siranjeevan",
             dob: "2016-08-15",
             gender: "Male",
             blood_group: "B+",
-            class_id: "5-B",
+            // Use first active class from the fetched list
+            class_id: classes.find(c => c.status === 'ACTIVE')?.class_id || "", 
             section: "B",
             roll_no: "42",
             admission_no: "ADM-2024-050",
@@ -240,11 +266,21 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
         }
     };
 
+    // Reset form when drawer closes
+    const handleClose = () => {
+        setFormData(defaultStudentState);
+        setNewParent(defaultParentState);
+        setIsAddingNewParent(false);
+        setIsSearchingParent(false);
+        setParentSearchQuery('');
+        onClose();
+    };
+
     if (!show) return null;
 
     return (
         <>
-            <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[1999] transition-opacity duration-300" onClick={onClose} />
+            <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[1999] transition-opacity duration-300" onClick={handleClose} />
             
             <div className={`fixed right-0 top-0 h-full bg-slate-50 shadow-2xl z-[2000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
                 (isAddingNewParent || isSearchingParent) ? 'w-full sm:w-[1100px]' : 'w-full sm:w-[500px]'
@@ -273,7 +309,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                             <FontAwesomeIcon icon={faMagic} /> Auto Fill
                         </button>
                         <button 
-                            onClick={onClose} 
+                            onClick={handleClose} 
                             className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors duration-200"
                         >
                             <FontAwesomeIcon icon={faTimes} className="text-lg" />
@@ -317,20 +353,17 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                 value={formData.dob} 
                                                 onChange={(e) => handleChange('dob', e.target.value)} 
                                             />
-                                            {/* 
-                                                TODO: class_id is expected to be a UUID by backend (referenced in successful curl).
-                                                Currently acts as text. If backend requires UUID, this needs to be a dropdown.
-                                                For now, keeping as text but user must input valid UUID or backend must accept string.
-                                                If "5-A" is entered, and backend validation fails, that's the issue.
-                                            */}
-                                            <InputField 
-                                                label="Class ID (UUID)" 
+                                            <SelectField 
+                                                label="Class" 
                                                 icon={faSchool} 
                                                 value={formData.class_id} 
                                                 onChange={(e) => handleChange('class_id', e.target.value)} 
-                                                placeholder="e.g. c026850a-..." 
+                                                placeholder="Select Class"
+                                                options={classes.filter(c => c.status === 'ACTIVE').map(c => ({
+                                                    value: c.class_id, 
+                                                    label: `Class ${c.class_name} - Section ${c.section} (${c.academic_year})`
+                                                }))} 
                                             />
-                                        </div>
                                         
                                         <InputField 
                                             label="Photo URL (Optional)" 

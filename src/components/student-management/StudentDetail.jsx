@@ -32,17 +32,29 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
             }
 
             // Geocode logic
+            // Geocode logic
             const geocodeLocation = async () => {
+                // If no location provided or it's a dummy placeholder, skip
+                if (!selectedStudent.location || selectedStudent.location.includes("CityA")) return;
+
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedStudent.location)}&limit=1`);
-                    const data = await response.json();
-                    if (data.length > 0) {
+                    // unexpected 522 from allorigins, trying codetabs
+                    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedStudent.location)}&limit=1`;
+                    // CodeTabs proxy is another alternative
+                    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(nominatimUrl)}`;
+                    
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error('Geocoding failed');
+                    
+                    const data = await response.json(); // CodeTabs returns direct JSON, no wrapping
+
+                    if (data && data.length > 0) {
                         const { lat, lon } = data[0];
                         setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
                         setMapCenter([parseFloat(lat), parseFloat(lon)]);
                     }
                 } catch (error) {
-                    console.error('Error geocoding location:', error);
+                    console.warn('Geocoding error (likely CORS/Proxy):', error.message);
                 }
             };
             geocodeLocation();
@@ -263,13 +275,17 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                                 if (isEditing) {
                                                     setMarkerPosition([lat, lng]);
                                                     try {
-                                                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-                                                        const data = await response.json();
+                                                        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+                                                        const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(nominatimUrl)}`;
+                                                        
+                                                        const response = await fetch(proxyUrl);
+                                                        const data = await response.json(); // CodeTabs direct JSON
+
                                                         const locationName = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
                                                         setMapSearchQuery(locationName);
                                                         setEditData({ ...editData, location: locationName });
                                                     } catch (error) {
-                                                        console.error('Error reverse geocoding:', error);
+                                                        // Suppress error - fallback to coords
                                                         const locationName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
                                                         setMapSearchQuery(locationName);
                                                         setEditData({ ...editData, location: locationName });
@@ -289,11 +305,17 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                                             setMapSearchQuery(query);
                                                             if (query.length > 2) {
                                                                 try {
-                                                                    const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
-                                                                    const data = await resp.json();
+                                                                    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
+                                                                    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(nominatimUrl)}`;
+                                                                    
+                                                                    const resp = await fetch(proxyUrl);
+                                                                    const data = await resp.json(); // CodeTabs direct JSON
+                                                                    
                                                                     setLocationSuggestions(data);
                                                                     setShowSuggestions(true);
-                                                                } catch (err) {}
+                                                                } catch (err) {
+                                                                    // Suppress error
+                                                                }
                                                             }
                                                         }}
                                                         placeholder="Search on map..."
