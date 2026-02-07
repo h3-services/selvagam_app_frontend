@@ -183,7 +183,14 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
 
         const payload = {
             ...formData,
-            emergency_contact: formData.emergency_contact ? Number(formData.emergency_contact) : 0
+            emergency_contact: formData.emergency_contact ? Number(formData.emergency_contact) : 0,
+            s_parent_id: formData.s_parent_id || null,
+            pickup_route_id: formData.pickup_route_id || null,
+            drop_route_id: formData.drop_route_id || null,
+            pickup_stop_id: formData.pickup_stop_id || null,
+            drop_stop_id: formData.drop_stop_id || null,
+            student_photo_url: formData.student_photo_url || null,
+            class_id: formData.class_id || null,
         };
 
         onAdd(payload);
@@ -303,7 +310,6 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                             placeholder="e.g. Michael Scott" 
                                         />
 
-                                        <div className="grid grid-cols-2 gap-5">
                                             <InputField 
                                                 label="Date of Birth" 
                                                 icon={faCalendar} 
@@ -311,12 +317,18 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                 value={formData.dob} 
                                                 onChange={(e) => handleChange('dob', e.target.value)} 
                                             />
+                                            {/* 
+                                                TODO: class_id is expected to be a UUID by backend (referenced in successful curl).
+                                                Currently acts as text. If backend requires UUID, this needs to be a dropdown.
+                                                For now, keeping as text but user must input valid UUID or backend must accept string.
+                                                If "5-A" is entered, and backend validation fails, that's the issue.
+                                            */}
                                             <InputField 
-                                                label="Class / Grade" 
+                                                label="Class ID (UUID)" 
                                                 icon={faSchool} 
                                                 value={formData.class_id} 
                                                 onChange={(e) => handleChange('class_id', e.target.value)} 
-                                                placeholder="e.g. 5-A" 
+                                                placeholder="e.g. c026850a-..." 
                                             />
                                         </div>
                                         
