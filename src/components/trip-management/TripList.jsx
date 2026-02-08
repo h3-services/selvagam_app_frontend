@@ -23,6 +23,15 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             )
         },
         {
+            headerName: "Bus",
+            field: "bus",
+            flex: 1,
+            cellStyle: { display: 'flex', alignItems: 'center' },
+            cellRenderer: params => (
+                <div className="font-medium text-gray-700">{params.value || '-'}</div>
+            )
+        },
+        {
             headerName: "Driver",
             field: "driver",
             flex: 1,
@@ -40,13 +49,12 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             )
         },
         {
-            headerName: "Description",
-            field: "description",
-            flex: 1.5,
-            wrapText: true,
-            autoHeight: true,
-            cellStyle: { display: 'flex', alignItems: 'center', color: '#6b7280', fontSize: '0.875rem', whiteSpace: 'normal', lineHeight: '1.4', paddingTop: '12px', paddingBottom: '12px' }
+            headerName: "Date",
+            field: "date",
+            flex: 0.8,
+            cellStyle: { display: 'flex', alignItems: 'center', color: '#6b7280' },
         },
+
         {
             headerName: "Status",
             field: "status",

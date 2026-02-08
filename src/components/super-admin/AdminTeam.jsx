@@ -10,15 +10,20 @@ const AdminTeam = ({
     onToggleStatus
 }) => {
     const [isAddOpen, setIsAddOpen] = useState(false);
-    const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '' });
+    const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '', password: '' });
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({});
 
     const handleAdd = () => {
-        if (newAdmin.name && newAdmin.email) {
-            onAddAdmin(newAdmin);
-            setNewAdmin({ name: '', email: '', phone: '' });
+        if (newAdmin.name && newAdmin.email && newAdmin.password) {
+            onAddAdmin({
+                ...newAdmin,
+                phone: Number(newAdmin.phone) // Ensure phone is sent as Number
+            });
+            setNewAdmin({ name: '', email: '', phone: '', password: '' });
             setIsAddOpen(false);
+        } else {
+             alert("Please fill in all required fields (Name, Email, Password)");
         }
     };
 
@@ -72,6 +77,13 @@ const AdminTeam = ({
                                     placeholder="Phone Number"
                                     value={newAdmin.phone}
                                     onChange={(e) => setNewAdmin({ ...newAdmin, phone: e.target.value })}
+                                />
+                                <input
+                                    type="password"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none"
+                                    placeholder="Password"
+                                    value={newAdmin.password}
+                                    onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
                                 />
                                 <button
                                     onClick={handleAdd}

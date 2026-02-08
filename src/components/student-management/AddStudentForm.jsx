@@ -152,10 +152,12 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
         
         setLoadingParent(true);
         try {
-            // Most APIs expect phone as a string (preserves formatting, leading zeros, etc.)
+            // API expects phone as a Number based on Swagger example
             const payload = {
                 ...newParent,
-                phone: String(newParent.phone).trim(),
+                phone: Number(newParent.phone) || 0,
+                door_no: String(newParent.door_no || ''), // Ensure string
+                pincode: String(newParent.pincode || ''), // Ensure string
             };
             
             console.log("Parent Payload:", JSON.stringify(payload, null, 2));
@@ -181,7 +183,17 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             
         } catch (error) {
             console.error("Failed to create parent:", error);
-            alert("Failed to create parent. Please check inputs.");
+            
+            let errorMessage = "Failed to create parent. Please check inputs.";
+            if (error.response?.data) {
+                const apiError = error.response.data;
+                if (apiError.message) {
+                    errorMessage = apiError.message;
+                } else if (apiError.detail) {
+                    errorMessage = typeof apiError.detail === 'string' ? apiError.detail : JSON.stringify(apiError.detail);
+                }
+            }
+            alert(errorMessage);
         } finally {
             setLoadingParent(false);
         }
@@ -248,11 +260,14 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
         };
         setFormData(prev => ({ ...prev, ...dummyStudent }));
         
+        // Generate random 4 digits to ensure uniqueness
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+        
         setNewParent({
             name: "Rajesh Sharma",
-            phone: "9876543210",
-            email: "rajesh.sharma@example.com",
-            parent_role: "FATHER",
+            phone: `987654${randomSuffix}`, // Unique phone
+            email: `rajesh.sharma${randomSuffix}@example.com`, // Unique email
+            parent_role: "GUARDIAN", 
             password: "password123",
             door_no: "45/2",
             street: "Green Avenue",

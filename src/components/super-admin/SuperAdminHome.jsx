@@ -1,39 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import AdminTeam from './AdminTeam';
 import SchoolLocations from './SchoolLocations';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import DeactivationReasonModal from './DeactivationReasonModal';
+import { adminService } from '../../services/adminService';
 
 const SuperAdminHome = () => {
     // Admin Data State
-    const [admins, setAdmins] = useState([
-        {
-            id: 1,
-            name: 'John Smith',
-            email: 'john.smith@hope3school.com',
-            phone: '+91 9876543210',
-            status: 'Active',
-            role: 'Super Admin'
-        },
-        {
-            id: 2,
-            name: 'Sarah Johnson',
-            email: 'sarah.j@hope3school.com',
-            phone: '+91 9876543211',
-            status: 'Active',
-            role: 'Admin'
-        },
-        {
-            id: 3,
-            name: 'Mike Wilson',
-            email: 'mike.w@hope3school.com',
-            phone: '+91 9876543212',
-            status: 'Inactive',
-            role: 'Admin'
-        },
-    ]);
+    const [admins, setAdmins] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchAdmins();
+    }, []);
+
+    const fetchAdmins = async () => {
+        try {
+            const data = await adminService.getAllAdmins();
+            const mappedAdmins = data.map(admin => ({
+                id: admin.admin_id,
+                name: admin.name,
+                email: admin.email,
+                phone: admin.phone,
+                status: admin.status.charAt(0).toUpperCase() + admin.status.slice(1).toLowerCase(), // ACTIVE -> Active
+                role: 'Admin' // Default role since API doesn't provide it yet
+            }));
+            setAdmins(mappedAdmins);
+        } catch (error) {
+            console.error("Failed to load admins:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Location Data State
     const [locations, setLocations] = useState([
@@ -54,17 +54,23 @@ const SuperAdminHome = () => {
     const [deactivatingItemId, setDeactivatingItemId] = useState(null);
 
     // --- Admin Handlers ---
-    const handleAddAdmin = (newAdmin) => {
-        setAdmins([...admins, {
-            id: Date.now(),
-            ...newAdmin,
-            status: 'Active',
-            role: 'Admin'
-        }]);
+    const handleAddAdmin = async (newAdmin) => {
+        try {
+            await adminService.createAdmin(newAdmin);
+            fetchAdmins();
+        } catch (error) {
+            console.error("Failed to add admin:", error);
+            alert("Failed to create admin");
+        }
     };
 
-    const handleUpdateAdmin = (id, updatedData) => {
-        setAdmins(admins.map(a => a.id === id ? updatedData : a));
+    const handleUpdateAdmin = async (id, updatedData) => {
+        try {
+            await adminService.updateAdmin(id, updatedData);
+            fetchAdmins();
+        } catch (error) {
+           console.error("Failed to update admin:", error);
+        }
     };
 
     const handleDeleteAdminRequest = (id) => {
@@ -73,23 +79,29 @@ const SuperAdminHome = () => {
         setShowDeleteConfirm(true);
     };
 
-    const handleToggleAdminStatus = (id) => {
+    const handleToggleAdminStatus = async (id) => {
         const admin = admins.find(a => a.id === id);
         if (admin && admin.status === 'Active') {
             setDeactivatingItemId(id);
             setShowDeactivateModal(true);
         } else {
-            setAdmins(admins.map(a =>
-                a.id === id ? { ...a, status: 'Active' } : a
-            ));
+             try {
+                await adminService.updateAdminStatus(id, 'ACTIVE');
+                fetchAdmins();
+            } catch (err) {
+                console.error("Failed to activate admin:", err);
+            }
         }
     };
 
-    const confirmDeactivation = (reason) => {
+    const confirmDeactivation = async (reason) => {
         if (deactivatingItemId) {
-            setAdmins(admins.map(a =>
-                a.id === deactivatingItemId ? { ...a, status: 'Inactive', deactivationReason: reason } : a
-            ));
+             try {
+                await adminService.updateAdminStatus(deactivatingItemId, 'INACTIVE');
+                fetchAdmins();
+            } catch (err) {
+                console.error("Failed to deactivate admin:", err);
+            }
             setDeactivatingItemId(null);
             setShowDeactivateModal(false);
         }
@@ -111,11 +123,17 @@ const SuperAdminHome = () => {
     };
 
     // --- Shared Handlers ---
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (!itemToDelete || !deleteType) return;
 
         if (deleteType === 'admin') {
-            setAdmins(admins.filter(a => a.id !== itemToDelete));
+            try {
+                await adminService.deleteAdmin(itemToDelete);
+                fetchAdmins();
+            } catch (err) {
+                console.error("Failed to delete admin:", err);
+                alert("Failed to delete admin");
+            }
         } else if (deleteType === 'location') {
             setLocations(locations.filter(l => l.id !== itemToDelete));
         }
