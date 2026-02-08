@@ -54,5 +54,16 @@ export const parentService = {
             console.error(`Error deleting parent ${parentId}:`, error);
             throw error;
         }
+    },
+
+    // Get all parent FCM tokens
+    getAllParentFcmTokens: async () => {
+        try {
+            const response = await api.get('/parents/fcm-tokens/all');
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching parent FCM tokens:", error);
+            throw error;
+        }
     }
 };

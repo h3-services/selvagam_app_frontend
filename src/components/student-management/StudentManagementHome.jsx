@@ -1,6 +1,7 @@
+import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faTrash, faClock, faUserPlus, faArrowLeft, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faTrash, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import StudentList from './StudentList';
 import StudentDetail from './StudentDetail';
@@ -9,6 +10,7 @@ import { studentService } from '../../services/studentService';
 import { parentService } from '../../services/parentService';
 
 const StudentManagementHome = () => {
+    const navigate = useNavigate();
     // State
     const [students, setStudents] = useState([]);
     const [parents, setParents] = useState([]);
@@ -188,6 +190,13 @@ const StudentManagementHome = () => {
 
                     {!selectedStudent && (
                         <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => navigate('/parents')}
+                                className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 hover:border-indigo-200 hover:text-indigo-600 transition-all shadow-sm active:scale-95 flex items-center gap-2"
+                            >
+                                <FontAwesomeIcon icon={faUser} />
+                                Manage Parents
+                            </button>
                             <div className="relative group">
                                 <input
                                     type="text"

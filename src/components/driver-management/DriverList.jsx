@@ -1,7 +1,6 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faTrash, faTimes, faCheck, faPhone, faIdCard, faEnvelope, faEye, faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { CiMenuKebab } from "react-icons/ci";
+import { faChevronRight, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 const DriverList = ({
     filteredDrivers,
@@ -30,6 +29,7 @@ const DriverList = ({
                                 headerName: "Driver Name",
                                 field: "name",
                                 flex: 1.5,
+                                filter: false,
                                 cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                 cellRenderer: (params) => (
                                     <div
@@ -43,7 +43,7 @@ const DriverList = ({
                                             <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value || 'Unknown'}</p>
                                             <div className="flex items-center gap-1 -mt-0.5">
                                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">View Details</span>
-                                                <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
+                                                <FontAwesomeIcon icon={faChevronRight} className="text--[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
                                             </div>
                                         </div>
                                     </div>
@@ -53,94 +53,38 @@ const DriverList = ({
                                 headerName: "Mobile",
                                 field: "mobile",
                                 flex: 1,
+                                filter: false,
                                 cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500' }
                             },
                             {
                                 headerName: "Vehicle",
                                 field: "vehicleNumber",
                                 flex: 1.5,
+                                filter: false,
                                 cellStyle: { display: 'flex', alignItems: 'center' }
                             },
                             {
                                 headerName: "Route",
                                 field: "route",
                                 flex: 1.5,
+                                filter: false,
                                 cellStyle: { display: 'flex', alignItems: 'center' }
                             },
                             {
                                 headerName: "Status",
                                 field: "status",
                                 flex: 1,
-                                cellStyle: { overflow: 'visible' },
-                                cellRenderer: (params) => {
-                                    const status = params.value;
-                                    const isActive = status === 'Active';
-                                    const { activeMenuId, setActiveMenuId } = params.context;
-                                    const isOpen = activeMenuId === params.data.id;
-                                    
-                                    const toggleStatus = () => {
-                                        handleToggleStatus(params.data.id); 
-                                        setActiveMenuId(null);
-                                    };
-
-                                    const getGradient = () => isActive 
-                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200' 
-                                        : 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-200';
-
-                                    return (
-                                        <div className="flex items-center h-full relative">
-                                            <button 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setActiveMenuId(isOpen ? null : params.data.id);
-                                                }}
-                                                className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer ${getGradient()}`}
-                                            >
-                                                <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                                                    <FontAwesomeIcon icon={isActive ? faCheck : faTimes} className="text-white text-[10px]" />
-                                                </div>
-                                                
-                                                <span className="text-white font-bold text-xs tracking-wide">{status}</span>
-                                                
-                                                {isActive && (
-                                                    <div className="flex items-center ml-1">
-                                                        <span className="relative flex h-2 w-2">
-                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-50"></span>
-                                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                                                        </span>
-                                                    </div>
-                                                )}
-
-                                                <FontAwesomeIcon icon={faChevronDown} className="text-white/60 text-[10px] ml-1 group-hover:text-white transition-colors" />
-                                            </button>
-
-                                            {isOpen && (
-                                                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 z-[1000] overflow-hidden animate-in fade-in zoom-in duration-200 ring-1 ring-black/5">
-                                                    <div className="px-3 py-2 border-b border-gray-100 bg-gray-50/50">
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Change Status</p>
-                                                    </div>
-                                                    <div className="p-1">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                toggleStatus();
-                                                            }}
-                                                            className={`w-full text-left px-3 py-2.5 text-xs font-bold flex items-center gap-3 rounded-lg transition-all hover:bg-gray-50 ${!isActive ? 'text-green-600' : 'text-red-600'}`}
-                                                        >
-                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${!isActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
-                                                                <FontAwesomeIcon icon={!isActive ? faCheck : faTimes} />
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-gray-900">Switch to {!isActive ? 'Active' : 'Inactive'}</span>
-                                                                <span className="text-[10px] text-gray-400 font-medium">Click to confirm</span>
-                                                            </div>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                }
+                                filter: false, // Disabled filter
+                                cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
+                                cellRenderer: (params) => (
+                                    <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${
+                                        params.value === 'Active'
+                                            ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
+                                            : 'bg-slate-50 text-slate-500 ring-1 ring-slate-100'
+                                    }`}>
+                                        {params.value || 'Inactive'}
+                                    </span>
+                                )
                             },
                             {
                                 headerName: "Actions",
@@ -165,13 +109,6 @@ const DriverList = ({
                                 )
                             }
                         ]}
-                        context={{ activeMenuId, setActiveMenuId }}
-                        getRowStyle={params => {
-                            if (params.data.id === activeMenuId) {
-                                return { zIndex: 999, overflow: 'visible' };
-                            }
-                            return { zIndex: 1 };
-                        }}
                         defaultColDef={{
                             sortable: true,
                             resizable: true,
@@ -190,8 +127,8 @@ const DriverList = ({
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden p-1 space-y-4 pb-24">
                 {filteredDrivers.map((driver) => (
-                    <div key={driver.id} className="relative bg-white rounded-3xl shadow-lg border border-purple-100 overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
+                    <div key={driver.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
+                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#40189d' }}></div>
                         <div className="relative p-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
@@ -200,7 +137,7 @@ const DriverList = ({
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-gray-900 text-lg">{driver.name}</h3>
-                                        <p className="text-xs font-medium" style={{ color: '#40189d' }}>{driver.date}</p>
+                                        <p className="text-xs font-medium text-gray-500">{driver.email}</p>
                                     </div>
                                 </div>
                                 <button
@@ -211,38 +148,39 @@ const DriverList = ({
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <FontAwesomeIcon icon={faPhone} className="text-xs" style={{ color: '#40189d' }} />
-                                        <p className="text-xs text-gray-500 font-medium">Mobile</p>
-                                    </div>
+                            <div className="grid grid-cols-2 gap-3 mb-2">
+                                <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f8f5ff' }}>
+                                    <p className="text-xs text-gray-500 font-medium mb-1">Mobile</p>
                                     <p className="text-sm text-gray-900 font-bold truncate">{driver.mobile}</p>
                                 </div>
                                 <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <FontAwesomeIcon icon={faIdCard} className="text-xs" style={{ color: '#40189d' }} />
-                                        <p className="text-xs text-gray-500 font-medium">License</p>
-                                    </div>
+                                    <p className="text-xs text-gray-500 font-medium mb-1">License</p>
                                     <p className="text-sm text-gray-900 font-bold truncate">{driver.licenseNumber}</p>
                                 </div>
-                            </div>
-
-                            <div className="p-3 rounded-xl mb-4" style={{ backgroundColor: '#f8f5ff' }}>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <FontAwesomeIcon icon={faEnvelope} className="text-xs" style={{ color: '#40189d' }} />
-                                    <p className="text-xs text-gray-500 font-medium">Email</p>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                    <p className="text-xs text-gray-500 font-medium mb-1">Status</p>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                        driver.status === 'Active' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-50'
+                                    }`}>
+                                        {driver.status || 'Inactive'}
+                                    </span>
                                 </div>
-                                <p className="text-sm text-gray-900 font-semibold break-all">{driver.email}</p>
                             </div>
-
-                            <button
-                                onClick={() => setSelectedDriver(driver)}
-                                className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all"
-                                style={{ backgroundColor: '#40189d' }}
-                            >
-                                <FontAwesomeIcon icon={faEye} className="mr-2" /> View Full Details
-                            </button>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                    <p className="text-xs text-gray-500 font-medium mb-1">Vehicle</p>
+                                    <p className="text-xs text-gray-900 font-medium truncate">{driver.vehicleNumber}</p>
+                                </div>
+                                <div 
+                                    className="p-3 rounded-xl flex items-center justify-center cursor-pointer hover:bg-indigo-50 transition-colors"
+                                    style={{ border: '1px solid #e0e7ff', backgroundColor: 'white' }}
+                                    onClick={() => setSelectedDriver(driver)}
+                                >
+                                    <span className="text-xs font-bold text-indigo-600 flex items-center">
+                                        View Details <FontAwesomeIcon icon={faChevronRight} className="ml-2 text-[10px]" />
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}

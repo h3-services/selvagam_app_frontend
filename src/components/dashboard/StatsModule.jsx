@@ -1,46 +1,115 @@
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCar, faUserFriends, faRoute } from '@fortawesome/free-solid-svg-icons';
+import { faCar, faUserFriends, faRoute, faGraduationCap, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { studentService } from '../../services/studentService';
+import { driverService } from '../../services/driverService';
+import { parentService } from '../../services/parentService';
+import { routeService } from '../../services/routeService';
 
 const StatsModule = () => {
-    const stats = [
+    const [stats, setStats] = useState([
+        {
+            title: 'Total Students',
+            value: '-',
+            icon: faGraduationCap,
+            iconBg: 'bg-indigo-100 text-indigo-600',
+            variant: 'indigo',
+            loading: true
+        },
         {
             title: 'Total Drivers',
-            value: '28',
+            value: '-',
             icon: faCar,
-            iconBg: 'bg-blue-100 text-blue-600',
-            iconColor: 'text-white',
-            variant: 'blue'
+            iconBg: 'bg-purple-100 text-purple-600',
+            variant: 'purple',
+            loading: true
         },
         {
             title: 'Total Parents',
-            value: '156',
+            value: '-',
             icon: faUserFriends,
-            iconBg: 'bg-violet-100 text-violet-600',
-            iconColor: 'text-white',
-            variant: 'violet'
+            iconBg: 'bg-pink-100 text-pink-600',
+            variant: 'pink',
+            loading: true
         },
         {
-            title: 'Route Total',
-            value: '5',
+            title: 'Active Routes',
+            value: '-',
             icon: faRoute,
             iconBg: 'bg-emerald-100 text-emerald-600',
-            iconColor: 'text-white',
-            variant: 'emerald'
+            variant: 'emerald',
+            loading: true
         }
-    ];
+    ]);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const [students, drivers, parents, routes] = await Promise.all([
+                    studentService.getAllStudents(),
+                    driverService.getAllDrivers(),
+                    parentService.getAllParents(),
+                    routeService.getAllRoutes()
+                ]);
+
+                setStats([
+                    {
+                        title: 'Total Students',
+                        value: students.length,
+                        icon: faGraduationCap,
+                        iconBg: 'bg-indigo-100 text-indigo-600',
+                        variant: 'indigo',
+                        loading: false
+                    },
+                    {
+                        title: 'Total Drivers',
+                        value: drivers.length,
+                        icon: faCar,
+                        iconBg: 'bg-purple-100 text-purple-600',
+                        variant: 'purple',
+                        loading: false
+                    },
+                    {
+                        title: 'Total Parents',
+                        value: parents.length,
+                        icon: faUserFriends,
+                        iconBg: 'bg-pink-100 text-pink-600',
+                        variant: 'pink',
+                        loading: false
+                    },
+                    {
+                        title: 'Active Routes',
+                        value: routes.length,
+                        icon: faRoute,
+                        iconBg: 'bg-emerald-100 text-emerald-600',
+                        variant: 'emerald',
+                        loading: false
+                    }
+                ]);
+            } catch (error) {
+                console.error("Error fetching dashboard stats:", error);
+                // Simplify error handling by just removing loading state
+                setStats(prev => prev.map(s => ({ ...s, loading: false, value: '0' })));
+            }
+        };
+
+        fetchStats();
+    }, []);
 
     return (
-        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-                <div key={index} className={`group rounded-3xl p-6 border shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] transition-all duration-300 relative overflow-hidden ${stat.variant === 'dark' ? 'bg-slate-900 border-slate-900 text-white' :
-                    stat.variant === 'blue' ? 'bg-white border-blue-100' :
-                        stat.variant === 'violet' ? 'bg-white border-violet-100' :
-                            'bg-white border-emerald-100'
-                    }`}>
-                    {/* Decorative Gradients for Color Variants */}
-                    {stat.variant === 'blue' && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[100px] -mr-4 -mt-4 opacity-50 transaction-transform group-hover:scale-110 duration-500"></div>}
-                    {stat.variant === 'violet' && <div className="absolute top-0 right-0 w-32 h-32 bg-violet-50 rounded-bl-[100px] -mr-4 -mt-4 opacity-50 transaction-transform group-hover:scale-110 duration-500"></div>}
-                    {stat.variant === 'emerald' && <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-[100px] -mr-4 -mt-4 opacity-50 transaction-transform group-hover:scale-110 duration-500"></div>}
+                <div key={index} className={`group rounded-3xl p-6 border shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white ${
+                    stat.variant === 'indigo' ? 'border-indigo-100' :
+                    stat.variant === 'purple' ? 'border-purple-100' :
+                    stat.variant === 'pink' ? 'border-pink-100' :
+                    'border-emerald-100'
+                }`}>
+                    {/* Decorative Gradients */}
+                    {stat.variant === 'indigo' && <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'purple' && <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'pink' && <div className="absolute top-0 right-0 w-32 h-32 bg-pink-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'emerald' && <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
 
                     <div className="relative z-10">
                         <div className="flex justify-between items-start mb-4">
@@ -49,13 +118,12 @@ const StatsModule = () => {
                             </div>
                         </div>
                         <div>
-                            <h3 className={`text-4xl font-bold tracking-tight mb-1 ${stat.variant === 'dark' ? 'text-white' : 'text-black'
-                                }`}>{stat.value}</h3>
-                            <p className={`font-medium ${stat.variant === 'dark' ? 'text-slate-400' :
-                                stat.variant === 'blue' ? 'text-blue-600/80' :
-                                    stat.variant === 'violet' ? 'text-violet-600/80' :
-                                        'text-emerald-600/80'
-                                }`}>{stat.title}</p>
+                            {stat.loading ? (
+                                <div className="h-9 w-24 bg-gray-100 rounded-lg animate-pulse mb-1"></div>
+                            ) : (
+                                <h3 className="text-4xl font-bold tracking-tight text-slate-900 mb-1">{stat.value}</h3>
+                            )}
+                            <p className="font-medium text-slate-500">{stat.title}</p>
                         </div>
                     </div>
                 </div>

@@ -120,6 +120,7 @@ const StudentList = ({
                             pagination={true}
                             paginationPageSize={10}
                             paginationPageSizeSelector={[10, 20, 50]}
+                            theme="legacy"
                             overlayNoRowsTemplate='<span class="p-4">No students found</span>'
                         />
                     </div>
