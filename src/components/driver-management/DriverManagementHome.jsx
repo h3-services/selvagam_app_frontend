@@ -188,56 +188,61 @@ const DriverManagementHome = () => {
     };
 
     return (
-        <div className="p-4 md:p-6 lg:p-8 h-full flex flex-col">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <div>
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold ml-20 lg:ml-0">Driver Management</h2>
-                    <p className="text-sm text-gray-500 mt-1 ml-20 lg:ml-0">Manage school bus drivers and status</p>
-                </div>
-                <div className="w-full sm:w-auto relative sm:min-w-[300px] lg:hidden">
-                    <input
-                        type="text"
-                        placeholder="Search drivers..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full px-4 py-2 pl-10 rounded-xl bg-white border border-purple-100 focus:border-purple-400 focus:bg-white transition-all text-sm outline-none shadow-sm"
-                    />
-                    <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className='ml-20 lg:ml-0'>
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                            {selectedDriver ? 'Driver Profile' : 'Driver Management'}
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            {selectedDriver ? `Viewing details for ${selectedDriver.name}` : 'Manage school bus drivers and status'}
+                        </p>
+                    </div>
+
+                    {!selectedDriver && (
+                        <div className="flex items-center gap-3">
+                            <div className="relative group">
+                                <input
+                                    type="text"
+                                    placeholder="Search drivers..."
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="pl-10 pr-4 py-2.5 w-96 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                />
+                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
+                            </div>
+                        </div>
+                    )}
+
+                    {selectedDriver && (
+                        <button 
+                            onClick={() => setSelectedDriver(null)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 rounded-xl transition-all"
+                        >
+                            <FontAwesomeIcon icon={faArrowLeft} />
+                            Back to List
+                        </button>
+                    )}
                 </div>
             </div>
 
-            {!selectedDriver && (
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-2">
-                    <div className="flex flex-col items-start gap-2 w-full lg:w-auto pl-6">
-                        <div className="relative w-full lg:w-96 hidden lg:block">
-                            <input
-                                type="text"
-                                placeholder="Search drivers..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full px-4 py-2 pl-10 rounded-xl bg-white border border-purple-100 focus:border-purple-400 focus:bg-white transition-all text-sm outline-none shadow-sm"
-                            />
-                            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            {/* Grid Content */}
+            <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">
+                {loading ? (
+                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-gray-100">
+                        <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+                            <FontAwesomeIcon icon={faSpinner} spin className="text-2xl text-indigo-600" />
                         </div>
-                    </div>
-                </div>
-            )}
-
-            {loading ? (
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-3">
-                        <FontAwesomeIcon icon={faSpinner} className="text-4xl text-purple-600 animate-spin" />
                         <p className="text-gray-500 font-medium">Loading drivers...</p>
                     </div>
-                </div>
-            ) : error ? (
-                <div className="flex-1 flex items-center justify-center text-red-500">
-                    {error} <button onClick={fetchDrivers} className="ml-2 underline hover:text-red-700">Retry</button>
-                </div>
-            ) : null}
-
-            {!loading && !error && (
-                selectedDriver ? (
+                ) : error ? (
+                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-red-100">
+                         <p className="text-red-500 font-bold mb-4">{error}</p>
+                         <button onClick={fetchDrivers} className="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-95">Retry</button>
+                    </div>
+                ) : selectedDriver ? (
                     <DriverDetail
                         selectedDriver={selectedDriver}
                         onBack={() => setSelectedDriver(null)}
@@ -252,8 +257,8 @@ const DriverManagementHome = () => {
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
                     />
-                )
-            )}
+                )}
+            </div>
 
             {!selectedDriver && !loading && (
                 <button

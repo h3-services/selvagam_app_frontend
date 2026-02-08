@@ -93,9 +93,10 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
     ];
 
     return (
-        <div className="flex-1 p-8 overflow-hidden" onClick={() => setActiveStatusId(null)}>
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden p-6 h-full flex flex-col">
-                <div className="ag-theme-quartz w-full h-full custom-ag-grid" style={{
+        <div className="flex-1 px-8 pt-2 pb-8 flex flex-col min-h-0 overflow-hidden" onClick={() => setActiveStatusId(null)}>
+            <div className="bg-white rounded-3xl shadow-xl overflow-hidden p-6 flex-1 flex flex-col min-h-0">
+                <div className="ag-theme-quartz w-full custom-ag-grid" style={{
+                    height: 'calc(100vh - 140px)',
                     '--ag-header-background-color': '#f8f5ff',
                     '--ag-header-foreground-color': '#40189d',
                     '--ag-font-family': 'inherit',

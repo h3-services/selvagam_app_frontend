@@ -144,33 +144,35 @@ const SuperAdminHome = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <div className="max-w-7xl mx-auto p-6 lg:p-10 space-y-10">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-6">
-                    <div className="flex items-center gap-4">
-                        <div className="ml-20 lg:ml-0">
-                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">System Administration</h1>
-                            <p className="text-gray-500 text-sm">Control access and system configurations</p>
-                        </div>
+        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className='ml-20 lg:ml-0'>
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">System Administration</h1>
+                        <p className="text-sm text-gray-500 mt-1">Control access and system configurations</p>
                     </div>
                 </div>
+            </div>
 
-                {/* Modules */}
-                <AdminTeam
-                    admins={admins}
-                    onAddAdmin={handleAddAdmin}
-                    onUpdateAdmin={handleUpdateAdmin}
-                    onDeleteAdmin={handleDeleteAdminRequest}
-                    onToggleStatus={handleToggleAdminStatus}
-                />
+            {/* Content area */}
+            <div className="flex-1 p-8 overflow-y-auto">
+                <div className="max-w-7xl mx-auto space-y-10">
+                    <AdminTeam
+                        admins={admins}
+                        onAddAdmin={handleAddAdmin}
+                        onUpdateAdmin={handleUpdateAdmin}
+                        onDeleteAdmin={handleDeleteAdminRequest}
+                        onToggleStatus={handleToggleAdminStatus}
+                    />
 
-                <SchoolLocations
-                    locations={locations}
-                    onAddLocation={handleAddLocation}
-                    onUpdateLocation={handleUpdateLocation}
-                    onDeleteLocation={handleDeleteLocationRequest}
-                />
+                    <SchoolLocations
+                        locations={locations}
+                        onAddLocation={handleAddLocation}
+                        onUpdateLocation={handleUpdateLocation}
+                        onDeleteLocation={handleDeleteLocationRequest}
+                    />
+                </div>
             </div>
 
             {/* Modals */}

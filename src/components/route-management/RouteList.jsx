@@ -13,11 +13,11 @@ const RouteList = ({
     COLORS
 }) => {
     return (
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Desktop Table View */}
-            <div className="hidden lg:block w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6">
-                <div className="ag-theme-quartz w-full" style={{
-                    height: 'calc(100vh - 220px)',
+            <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+                <div className="ag-theme-quartz w-full custom-ag-grid" style={{
+                    height: 'calc(100vh - 140px)',
                     '--ag-header-background-color': '#f8f5ff',
                     '--ag-header-foreground-color': '#40189d',
                     '--ag-font-family': 'inherit',
@@ -136,8 +136,8 @@ const RouteList = ({
                         rowHeight={80}
                         headerHeight={50}
                         pagination={true}
-                        paginationPageSize={5}
-                        paginationPageSizeSelector={[5, 10, 20, 50]}
+                        paginationPageSize={10}
+                        paginationPageSizeSelector={[10, 20, 50]}
                         overlayNoRowsTemplate='<span class="p-4">No routes found</span>'
                     />
                 </div>

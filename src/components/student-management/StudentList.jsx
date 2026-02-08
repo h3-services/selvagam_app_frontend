@@ -11,12 +11,12 @@ const StudentList = ({
     setActiveMenuId
 }) => {
     return (
-        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
-            <div className="flex-1 overflow-hidden h-full flex flex-col">
+        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Desktop/Tablet Table View */}
-                <div className="hidden lg:flex lg:flex-col w-full bg-white rounded-3xl shadow-xl overflow-hidden p-6 h-full">
-                    <div className="ag-theme-quartz w-full flex-1" style={{
-                        minHeight: 0,
+                <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+                    <div className="ag-theme-quartz w-full custom-ag-grid" style={{
+                        height: 'calc(100vh - 140px)',
                         '--ag-header-background-color': '#f8f5ff',
                         '--ag-header-foreground-color': '#40189d',
                         '--ag-font-family': 'inherit',
@@ -37,10 +37,10 @@ const StudentList = ({
                                             onClick={() => { setSelectedStudent(params.data); setShowForm(false); }}
                                         >
                                             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
-                                                {params.value.charAt(0)}
+                                                {params.value ? params.value.charAt(0) : '?'}
                                             </div>
                                             <div className="flex flex-col">
-                                                <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value}</p>
+                                                <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value || 'Unknown'}</p>
                                                 <div className="flex items-center gap-1 -mt-1">
                                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">View Details</span>
                                                     <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
@@ -118,8 +118,8 @@ const StudentList = ({
                             rowHeight={80}
                             headerHeight={50}
                             pagination={true}
-                            paginationPageSize={5}
-                            paginationPageSizeSelector={[5, 10, 20, 50]}
+                            paginationPageSize={10}
+                            paginationPageSizeSelector={[10, 20, 50]}
                             overlayNoRowsTemplate='<span class="p-4">No students found</span>'
                         />
                     </div>
