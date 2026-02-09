@@ -117,6 +117,7 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                                     field: 'name',
                                     flex: 1.5,
                                     filter: false,
+                                    cellDataType: false,
                                     cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                     cellRenderer: params => (
                                         <div className="flex items-center gap-3 w-full cursor-pointer group">
@@ -135,6 +136,7 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                                     field: 'phone', // Changed to phone
                                     flex: 1.2, // Adjusted flex
                                     filter: false,
+                                    cellDataType: false,
                                     cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                     cellRenderer: params => (
                                         <div className="flex flex-col justify-center">
@@ -147,6 +149,7 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                                     field: 'linkedStudents',
                                     flex: 1.5,
                                     filter: false,
+                                    cellDataType: false,
                                     cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                     cellRenderer: params => (
                                         <div className="flex flex-col justify-center gap-1">
@@ -170,6 +173,7 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                                     field: 'street',
                                     flex: 1.5,
                                     filter: false,
+                                    cellDataType: false,
                                     cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                     cellRenderer: params => (
                                         <div className="flex flex-col justify-center">
@@ -183,6 +187,7 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                                     field: 'parents_active_status',
                                     width: 120,
                                     filter: false,
+                                    cellDataType: false,
                                     cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
                                     cellRenderer: params => (
                                         <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${
@@ -200,6 +205,7 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                                     width: 100,
                                     sortable: false,
                                     filter: false,
+                                    cellDataType: false,
                                     cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
                                     cellRenderer: params => (
                                         <button
@@ -220,10 +226,11 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                             }}
                             pagination={true}
                             paginationPageSize={10}
+                            paginationPageSizeSelector={[10, 20, 50]}
                             rowHeight={80}
                             headerHeight={50}
                             animateRows={true}
-                            rowSelection="single"
+                            rowSelection={{ mode: "singleRow" }}
                             suppressCellFocus={true}
                             theme="legacy"
                             overlayNoRowsTemplate='<span class="p-4">No parents found</span>'

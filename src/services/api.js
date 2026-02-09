@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with config from environment variables
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },

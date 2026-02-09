@@ -90,13 +90,16 @@ const BusList = ({
                                     const { activeMenuId, setActiveMenuId } = params.context;
                                     const isOpen = activeMenuId === params.data.id;
                                     
-                                    const statusOptions = ['Active', 'Maintenance', 'Inactive'];
+                                    
+                                    const statusOptions = ['Active', 'Maintenance', 'Inactive', 'Spare', 'Scrap'];
 
                                     const getStatusGradient = (s) => {
                                         switch(s) {
                                             case 'Active': return 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200';
                                             case 'Maintenance': return 'bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-200';
                                             case 'Inactive': return 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-200';
+                                            case 'Spare': return 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-orange-200';
+                                            case 'Scrap': return 'bg-gradient-to-r from-gray-500 to-gray-700 shadow-gray-200';
                                             default: return 'bg-gray-500';
                                         }
                                     };
@@ -106,6 +109,8 @@ const BusList = ({
                                             case 'Active': return faCheck;
                                             case 'Maintenance': return faWrench;
                                             case 'Inactive': return faTimes;
+                                            case 'Spare': return faBus;
+                                            case 'Scrap': return faTrash;
                                             default: return faBus;
                                         }
                                     };
@@ -159,7 +164,10 @@ const BusList = ({
                                                             >
                                                                 <div className={`w-6 h-6 rounded-md flex items-center justify-center ${
                                                                     option === 'Active' ? 'bg-green-100 text-green-600' : 
-                                                                    option === 'Maintenance' ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'
+                                                                    option === 'Maintenance' ? 'bg-blue-100 text-blue-600' : 
+                                                                    option === 'Spare' ? 'bg-orange-100 text-orange-600' : 
+                                                                    option === 'Scrap' ? 'bg-gray-100 text-gray-600' :
+                                                                    'bg-red-100 text-red-600'
                                                                 }`}>
                                                                     <FontAwesomeIcon icon={getStatusIcon(option)} className="text-[10px]" />
                                                                 </div>
@@ -215,6 +223,7 @@ const BusList = ({
                         paginationPageSize={10}
                         paginationPageSizeSelector={[10, 20, 50]}
                         overlayNoRowsTemplate='<span class="p-4">No buses found</span>'
+                        theme="legacy"
                     />
                 </div>
             </div>

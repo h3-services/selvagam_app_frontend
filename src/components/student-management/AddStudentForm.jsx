@@ -205,12 +205,6 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             return;
         }
 
-        // Validate: pickup and drop stops cannot be the same
-        if (formData.pickup_stop_id && formData.drop_stop_id && 
-            formData.pickup_stop_id === formData.drop_stop_id) {
-            alert("Pickup stop and Drop stop cannot be the same. Please select different stops.");
-            return;
-        }
 
         // Build payload matching the working Swagger example exactly
         const payload = {

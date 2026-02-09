@@ -118,6 +118,7 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                         paginationPageSizeSelector={[5, 10, 20, 50]}
                         overlayNoRowsTemplate='<span class="p-4">No trips found</span>'
                         animateRows={true}
+                        theme="legacy"
                         getRowStyle={params => {
                             if (params.data.id === activeStatusId) {
                                 return { zIndex: 999, overflow: 'visible' };

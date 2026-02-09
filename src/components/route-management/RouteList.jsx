@@ -139,6 +139,7 @@ const RouteList = ({
                         paginationPageSize={10}
                         paginationPageSizeSelector={[10, 20, 50]}
                         overlayNoRowsTemplate='<span class="p-4">No routes found</span>'
+                        theme="legacy"
                     />
                 </div>
             </div>
