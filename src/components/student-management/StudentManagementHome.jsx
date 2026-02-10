@@ -8,6 +8,7 @@ import StudentDetail from './StudentDetail';
 import AddStudentForm from './AddStudentForm';
 import { studentService } from '../../services/studentService';
 import { parentService } from '../../services/parentService';
+import { classService } from '../../services/classService';
 
 const StudentManagementHome = () => {
     const navigate = useNavigate();
@@ -36,21 +37,24 @@ const StudentManagementHome = () => {
     const fetchAllData = async () => {
         setLoading(true);
         try {
-            const [studentData, parentData] = await Promise.all([
+            const [studentData, parentData, classData] = await Promise.all([
                 studentService.getAllStudents(),
-                parentService.getAllParents()
+                parentService.getAllParents(),
+                classService.getAllClasses()
             ]);
             
             setParents(parentData);
 
-            // Map API data to UI structure, linking parents
+            // Map API data to UI structure, linking parents and classes
             const mappedStudents = studentData.map(s => {
                 const parent1 = parentData.find(p => p.parent_id === s.parent_id);
                 const parent2 = s.s_parent_id ? parentData.find(p => p.parent_id === s.s_parent_id) : null;
+                const studentClass = classData.find(c => c.class_id === s.class_id);
                 
                 return {
                     id: s.student_id,
                     name: s.name,
+                    className: studentClass ? `${studentClass.class_name} - ${studentClass.section}` : 'N/A',
                     primaryParent: parent1 ? parent1.name : (s.parent_id || 'Unknown'),
                     parent1Name: parent1 ? parent1.name : (s.parent_id || 'Unknown'),
                     parent2Name: parent2 ? parent2.name : '',
@@ -87,8 +91,9 @@ const StudentManagementHome = () => {
             const lowerQuery = searchQuery.toLowerCase();
             result = result.filter(
                 (student) =>
-                    student.name.toLowerCase().includes(lowerQuery) ||
-                    student.primaryParent.toLowerCase().includes(lowerQuery)
+                    (student.name || "").toLowerCase().includes(lowerQuery) ||
+                    (student.primaryParent || "").toLowerCase().includes(lowerQuery) ||
+                    (student.className || "").toLowerCase().includes(lowerQuery)
             );
         }
         return result;
@@ -190,13 +195,6 @@ const StudentManagementHome = () => {
 
                     {!selectedStudent && (
                         <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => navigate('/parents')}
-                                className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 hover:border-indigo-200 hover:text-indigo-600 transition-all shadow-sm active:scale-95 flex items-center gap-2"
-                            >
-                                <FontAwesomeIcon icon={faUser} />
-                                Manage Parents
-                            </button>
                             <div className="relative group">
                                 <input
                                     type="text"
@@ -210,15 +208,6 @@ const StudentManagementHome = () => {
                         </div>
                     )}
 
-                    {selectedStudent && (
-                        <button 
-                            onClick={() => setSelectedStudent(null)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 rounded-xl transition-all"
-                        >
-                            <FontAwesomeIcon icon={faArrowLeft} />
-                            Back to List
-                        </button>
-                    )}
                 </div>
             </div>
 

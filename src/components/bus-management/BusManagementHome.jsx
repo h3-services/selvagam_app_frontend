@@ -73,12 +73,22 @@ const BusManagementHome = () => {
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);
 
+    const [activeTab, setActiveTab] = useState('All');
+
     const filteredBuses = useMemo(() => {
-        return buses.filter(b =>
+        let result = buses;
+        if (activeTab === 'Scrap') {
+            result = result.filter(b => b.status === 'Scrap');
+        } else {
+            // 'All' tab should exclude 'Scrap' buses
+            result = result.filter(b => b.status !== 'Scrap');
+        }
+
+        return result.filter(b =>
             (b.busNumber && b.busNumber.toLowerCase().includes(search.toLowerCase())) ||
             (b.driverName && b.driverName.toLowerCase().includes(search.toLowerCase()))
         );
-    }, [buses, search]);
+    }, [buses, search, activeTab]);
 
     const handleAdd = async (newBusData) => {
         setLoading(true);
@@ -135,18 +145,30 @@ const BusManagementHome = () => {
         setBuses(buses.map(b => b.id === id ? { ...b, status: newStatus } : b));
 
         try {
-            // API expects uppercase status usually, but let's check `AddBusForm`.
-            // User instruction text implies consistent enum.
-            // Let's send it as is or uppercased? 
-            // In `handleUpdate`, it sends `(updatedData.status || 'ACTIVE').toUpperCase()`.
-            // So we should verify. The API doc snippet for bus status PATCH doesn't specify values but likely same as others.
-            // I will default to sending UPPERCASE.
             await busService.updateBusStatus(id, newStatus.toUpperCase());
         } catch (err) {
             console.error("Failed to update bus status:", err);
             // Revert on error
             setBuses(previousBuses);
-            // Optional: alert or toast
+        }
+    };
+
+    const handleDriverChange = async (busId, driverId) => {
+        // Store previous state for rollback
+        const previousBuses = [...buses];
+        
+        // Find driver name for optimistic update
+        const driverName = driverId ? (drivers.find(d => d.driver_id === driverId)?.name || 'Assigned') : 'Unassigned';
+
+        // Optimistic update
+        setBuses(buses.map(b => b.id === busId ? { ...b, driver_id: driverId, driverName: driverName } : b));
+
+        try {
+            await busService.assignDriver(busId, driverId);
+        } catch (err) {
+            console.error("Failed to assign driver:", err);
+            // Revert on error
+            setBuses(previousBuses);
         }
     };
 
@@ -198,6 +220,7 @@ const BusManagementHome = () => {
         }
     };
 
+
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header */}
@@ -214,13 +237,27 @@ const BusManagementHome = () => {
 
                     {!selectedBus && (
                         <div className="flex items-center gap-3">
+                            <div className="flex bg-gray-100 p-1 rounded-xl">
+                                <button
+                                    onClick={() => setActiveTab('All')}
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'All' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    All Buses
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('Scrap')}
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'Scrap' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Scrap Buses
+                                </button>
+                            </div>
                             <div className="relative group">
                                 <input
                                     type="text"
                                     placeholder="Search buses..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-96 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-64 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
                             </div>
@@ -233,7 +270,6 @@ const BusManagementHome = () => {
                             className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 rounded-xl transition-all"
                         >
                             <FontAwesomeIcon icon={faArrowLeft} />
-                            Back to List
                         </button>
                     )}
                 </div>
@@ -256,6 +292,7 @@ const BusManagementHome = () => {
                 ) : selectedBus ? (
                     <BusDetail
                         selectedBus={selectedBus}
+                        drivers={drivers}
                         onBack={() => setSelectedBus(null)}
                         onUpdate={handleUpdate}
                         getStatusColor={getStatusColor}
@@ -263,8 +300,10 @@ const BusManagementHome = () => {
                 ) : (
                     <BusList
                         filteredBuses={filteredBuses}
+                        drivers={drivers}
                         setSelectedBus={setSelectedBus}
                         handleStatusChange={handleStatusChange}
+                        handleDriverChange={handleDriverChange}
                         handleDelete={handleDelete}
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}

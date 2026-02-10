@@ -5,8 +5,10 @@ import { CiMenuKebab } from "react-icons/ci";
 
 const BusList = ({
     filteredBuses,
+    drivers,
     setSelectedBus,
     handleStatusChange,
+    handleDriverChange,
     handleDelete,
     activeMenuId,
     setActiveMenuId,
@@ -54,7 +56,79 @@ const BusList = ({
                                 headerName: "Driver Name",
                                 field: "driverName",
                                 flex: 1.2,
-                                cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500' }
+                                cellStyle: { overflow: 'visible' },
+                                cellRenderer: (params) => {
+                                    const { activeMenuId, setActiveMenuId, drivers, handleDriverChange } = params.context;
+                                    const menuKey = `driver-${params.data.id}`;
+                                    const isOpen = activeMenuId === menuKey;
+                                    const currentDriverName = params.value || 'Unassigned';
+
+                                    return (
+                                        <div className="flex items-center h-full relative">
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveMenuId(isOpen ? null : menuKey);
+                                                }}
+                                                className="group flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-indigo-50 transition-all cursor-pointer border border-transparent hover:border-indigo-100"
+                                            >
+                                                <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                                    <FontAwesomeIcon icon={faUser} className="text-indigo-600 text-[10px]" />
+                                                </div>
+                                                <span className="text-gray-900 font-bold text-xs truncate max-w-[100px]">{currentDriverName}</span>
+                                                <FontAwesomeIcon icon={faChevronDown} className="text-gray-400 text-[10px] group-hover:text-indigo-600 transition-colors" />
+                                            </button>
+
+                                            {isOpen && (
+                                                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 z-[1000] overflow-hidden animate-in fade-in zoom-in duration-200 ring-1 ring-black/5">
+                                                    <div className="px-3 py-2 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assign Driver</p>
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDriverChange(params.data.id, null);
+                                                                setActiveMenuId(null);
+                                                            }}
+                                                            className="text-[10px] font-bold text-red-500 hover:text-red-700"
+                                                        >
+                                                            Unassign
+                                                        </button>
+                                                    </div>
+                                                    <div className="max-h-60 overflow-y-auto p-1 custom-scrollbar">
+                                                        {drivers.length === 0 ? (
+                                                            <div className="p-3 text-center text-xs text-gray-400 italic">No drivers available</div>
+                                                        ) : (
+                                                            drivers.map(driver => (
+                                                                <button
+                                                                    key={driver.driver_id}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleDriverChange(params.data.id, driver.driver_id);
+                                                                        setActiveMenuId(null);
+                                                                    }}
+                                                                    className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-3 rounded-lg transition-all ${
+                                                                        driver.driver_id === params.data.driver_id 
+                                                                        ? 'bg-indigo-50 text-indigo-700' 
+                                                                        : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+                                                                    }`}
+                                                                >
+                                                                    <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500">
+                                                                        {driver.name ? driver.name.charAt(0) : '?'}
+                                                                    </div>
+                                                                    <div className="flex flex-col">
+                                                                        <span>{driver.name}</span>
+                                                                        <span className="text-[9px] text-gray-400 font-medium">{driver.phone}</span>
+                                                                    </div>
+                                                                    {driver.driver_id === params.data.driver_id && <FontAwesomeIcon icon={faCheck} className="ml-auto text-indigo-600" />}
+                                                                </button>
+                                                            ))
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }
                             },
                             {
                                 headerName: "Seating Capacity",
@@ -87,8 +161,9 @@ const BusList = ({
                                 cellStyle: { overflow: 'visible' },
                                 cellRenderer: (params) => {
                                     const status = params.value;
-                                    const { activeMenuId, setActiveMenuId } = params.context;
-                                    const isOpen = activeMenuId === params.data.id;
+                                    const { activeMenuId, setActiveMenuId, handleStatusChange } = params.context;
+                                    const menuKey = `status-${params.data.id}`;
+                                    const isOpen = activeMenuId === menuKey;
                                     
                                     
                                     const statusOptions = ['Active', 'Maintenance', 'Inactive', 'Spare', 'Scrap'];
@@ -120,7 +195,7 @@ const BusList = ({
                                             <button 
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setActiveMenuId(isOpen ? null : params.data.id);
+                                                    setActiveMenuId(isOpen ? null : menuKey);
                                                 }}
                                                 className={`group flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer ${getStatusGradient(status)}`}
                                             >
@@ -194,10 +269,10 @@ const BusList = ({
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleDelete(params.data.id);
+                                                handleStatusChange(params.data.id, 'Scrap');
                                             }}
                                             className="w-8 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
-                                            title="Delete Bus"
+                                            title="Move to Scrap"
                                         >
                                             <FontAwesomeIcon icon={faTrash} className="text-sm" />
                                         </button>
@@ -205,9 +280,9 @@ const BusList = ({
                                 )
                             }
                         ]}
-                        context={{ activeMenuId, setActiveMenuId }}
+                        context={{ activeMenuId, setActiveMenuId, drivers, handleDriverChange, handleStatusChange }}
                         getRowStyle={params => {
-                            if (params.data.id === activeMenuId) {
+                            if (activeMenuId && activeMenuId.includes(params.data.id)) {
                                 return { zIndex: 999, overflow: 'visible' };
                             }
                             return { zIndex: 1 };
@@ -247,7 +322,7 @@ const BusList = ({
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => handleDelete(bus.id)}
+                                    onClick={() => handleStatusChange(bus.id, 'Scrap')}
                                     className="w-10 h-10 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-all flex items-center justify-center"
                                 >
                                     <FontAwesomeIcon icon={faTrash} className="text-sm" />

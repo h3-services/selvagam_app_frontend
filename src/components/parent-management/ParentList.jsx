@@ -230,7 +230,6 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                             rowHeight={80}
                             headerHeight={50}
                             animateRows={true}
-                            rowSelection={{ mode: "singleRow" }}
                             suppressCellFocus={true}
                             theme="legacy"
                             overlayNoRowsTemplate='<span class="p-4">No parents found</span>'

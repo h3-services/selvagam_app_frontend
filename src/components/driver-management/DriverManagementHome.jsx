@@ -216,15 +216,6 @@ const DriverManagementHome = () => {
                         </div>
                     )}
 
-                    {selectedDriver && (
-                        <button 
-                            onClick={() => setSelectedDriver(null)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 rounded-xl transition-all"
-                        >
-                            <FontAwesomeIcon icon={faArrowLeft} />
-                            Back to List
-                        </button>
-                    )}
                 </div>
             </div>
 

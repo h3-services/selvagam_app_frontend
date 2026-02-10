@@ -205,7 +205,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                 </div>
                                 <div className="p-5 rounded-3xl bg-gray-50 border border-gray-100">
                                     <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Grade / Class</p>
-                                    <p className="text-lg font-black text-gray-900">{selectedStudent.originalData?.grade || 'Grade 7-B'}</p>
+                                    <p className="text-lg font-black text-gray-900">{selectedStudent.className || 'N/A'}</p>
                                 </div>
                                 <div className="p-5 rounded-3xl bg-gray-50 border border-gray-100">
                                     <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Joining Date</p>

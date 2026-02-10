@@ -60,16 +60,16 @@ const ParentManagementHome = () => {
         const lowerQuery = searchQuery.toLowerCase();
         return parents.filter(
             (parent) =>
-                parent.name.toLowerCase().includes(lowerQuery) ||
-                parent.phone.includes(lowerQuery) ||
-                parent.linkedStudents.some(s => s.toLowerCase().includes(lowerQuery))
+                (parent.name || "").toLowerCase().includes(lowerQuery) ||
+                String(parent.phone || "").includes(lowerQuery) ||
+                parent.linkedStudents.some(s => (s || "").toLowerCase().includes(lowerQuery))
         );
     }, [parents, searchQuery]);
 
     const handleAddParent = async (newParentData) => {
         try {
             await parentService.createParent(newParentData);
-            await fetchParents();
+            await fetchData();
             setShowForm(false);
         } catch (error) {
             console.error("Error adding parent:", error);
@@ -107,13 +107,6 @@ const ParentManagementHome = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => navigate('/students')}
-                            className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 hover:border-indigo-200 hover:text-indigo-600 transition-all shadow-sm active:scale-95 flex items-center gap-2"
-                        >
-                            <FontAwesomeIcon icon={faUserGraduate} />
-                            Manage Students
-                        </button>
                         <div className="relative group">
                             <input
                                 type="text"

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faCheck, faEdit, faArrowLeft, faBus, faUser, faIndustry, faCogs, faCalendarCheck, faIdCard, faShieldAlt, faRoute, faChair, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 
-const BusDetail = ({ selectedBus, onBack, onUpdate }) => {
+const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
 
@@ -170,8 +170,26 @@ const BusDetail = ({ selectedBus, onBack, onUpdate }) => {
                                     <div className="flex-1 min-w-0">
                                         <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Assigned Driver</p>
                                         <div className="flex items-center gap-2 mt-1">
-                                            {/* In future, this could be a dropdown in edit mode */}
-                                            <p className="text-sm font-bold text-gray-700 truncate">{selectedBus.driverName || 'Unassigned'}</p>
+                                            {isEditing ? (
+                                                <select
+                                                    value={editData.driver_id || ''}
+                                                    onChange={(e) => {
+                                                        const driverId = e.target.value || null;
+                                                        const driverName = driverId ? (drivers.find(d => d.driver_id === driverId)?.name || 'Assigned') : 'Unassigned';
+                                                        setEditData({ ...editData, driver_id: driverId, driverName: driverName });
+                                                    }}
+                                                    className="w-full text-sm border-b border-purple-200 focus:border-[#40189d] outline-none bg-transparent font-medium text-gray-900"
+                                                >
+                                                    <option value="">Unassigned</option>
+                                                    {drivers.map(driver => (
+                                                        <option key={driver.driver_id} value={driver.driver_id}>
+                                                            {driver.name} ({driver.phone})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <p className="text-sm font-bold text-gray-700 truncate">{selectedBus.driverName || 'Unassigned'}</p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

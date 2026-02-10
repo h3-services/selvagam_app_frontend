@@ -50,6 +50,17 @@ const StudentList = ({
                                     )
                                 },
                                 {
+                                    headerName: "Class",
+                                    field: "className",
+                                    width: 120,
+                                    cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start' },
+                                    cellRenderer: (params) => (
+                                        <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg font-bold text-xs border border-purple-100 shadow-sm uppercase tracking-wide">
+                                            {params.value}
+                                        </span>
+                                    )
+                                },
+                                {
                                     headerName: "Parents",
                                     flex: 1.5,
                                     cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500', color: '#374151' },
@@ -60,7 +71,7 @@ const StudentList = ({
                                     }
                                 },
                                 {
-                                    headerName: "Mobile",
+                                    headerName: "Parent Mobile",
                                     field: "mobile",
                                     flex: 1,
                                     cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '500' }
@@ -162,9 +173,16 @@ const StudentList = ({
                                     <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                         <div className="flex items-center gap-2 mb-1">
                                             <FontAwesomeIcon icon={faPhone} className="text-xs" style={{ color: '#40189d' }} />
-                                            <p className="text-xs text-gray-500 font-medium">Mobile</p>
+                                            <p className="text-xs text-gray-500 font-medium">Parent Mobile</p>
                                         </div>
                                         <p className="text-sm text-gray-900 font-bold truncate">{student.mobile}</p>
+                                    </div>
+                                    <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f8f5ff' }}>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <FontAwesomeIcon icon={faChild} className="text-xs" style={{ color: '#40189d' }} />
+                                            <p className="text-xs text-gray-500 font-medium">Class / Section</p>
+                                        </div>
+                                        <p className="text-sm text-gray-900 font-bold">{student.className}</p>
                                     </div>
                                 </div>
 

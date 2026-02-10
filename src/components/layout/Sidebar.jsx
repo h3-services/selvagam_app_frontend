@@ -11,7 +11,9 @@ import {
   faSignOutAlt,
   faCode,
   faCalendarCheck,
-  faChartBar
+  faChartBar,
+  faUserGraduate,
+  faUserGroup
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../../constants/colors';
@@ -27,14 +29,14 @@ const Sidebar = () => {
   // Helper to check if a path is active
   const isActive = (path) => {
     if (path === '/dashboard' && location.pathname === '/dashboard') return true;
-    if (path === '/students' && (location.pathname.startsWith('/students') || location.pathname.startsWith('/parents'))) return true;
     if (path !== '/dashboard' && location.pathname.startsWith(path)) return true;
     return false;
   };
 
   const menuItems = [
     { icon: faDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: faUserFriends, label: 'Student & Parent', path: '/students' },
+    { icon: faUserGraduate, label: 'Student Management', path: '/students' },
+    { icon: faUserGroup, label: 'Parent Management', path: '/parents' },
     { icon: faCar, label: 'Driver Management', path: '/drivers' },
     { icon: faBus, label: 'Bus Management', path: '/buses' },
     { icon: faMapLocationDot, label: 'Route Management', path: '/routes' },
