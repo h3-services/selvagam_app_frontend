@@ -12,6 +12,7 @@ import {
   faCode,
   faCalendarCheck,
   faChartBar,
+  faSchool,
   faUserGraduate,
   faUserGroup
 } from '@fortawesome/free-solid-svg-icons';
@@ -20,6 +21,7 @@ import { COLORS } from '../../constants/colors';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../../config/firebase';
 import { signOut } from 'firebase/auth';
+import Logo from '../../assets/Logo.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -34,9 +36,9 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { icon: faDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: faUserGraduate, label: 'Student Management', path: '/students' },
     { icon: faUserGroup, label: 'Parent Management', path: '/parents' },
+    { icon: faSchool, label: 'Class Management', path: '/classes' },
     { icon: faCar, label: 'Driver Management', path: '/drivers' },
     { icon: faBus, label: 'Bus Management', path: '/buses' },
     { icon: faMapLocationDot, label: 'Route Management', path: '/routes' },
@@ -83,8 +85,16 @@ const Sidebar = () => {
             <RiCloseFill size={28} />
           </button>
         )}
-        <div className="p-5 border-b border-white/10">
-          <h2 className=" text-2xl m-0">School Management</h2>
+        <div 
+          className="p-5 border-b border-white/10 cursor-pointer hover:bg-white/5 transition-colors"
+          onClick={() => handleNavigation('/dashboard')}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden bg-white shadow-xl p-1 mb-1`}>
+              <img src={Logo} alt="Selvagam Logo" className="w-full h-full object-contain" />
+            </div>
+            <h2 className="text-2xl m-0 tracking-[2px] uppercase font-black" style={{ fontFamily: "'Outfit', sans-serif" }}>Selvagam</h2>
+          </div>
         </div>
 
         <nav className="flex-1 py-5">

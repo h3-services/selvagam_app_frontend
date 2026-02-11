@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faTrash, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faTrash, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { useRef } from 'react';
 import { COLORS } from '../../constants/colors';
 import StudentList from './StudentList';
 import StudentDetail from './StudentDetail';
@@ -20,6 +21,10 @@ const StudentManagementHome = () => {
     const [activeTab, setActiveTab] = useState("All");
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const [classFilter, setClassFilter] = useState("All Classes");
+    const [classList, setClassList] = useState([]);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const filterRef = useRef(null);
 
     // Actions State
     const [activeMenuId, setActiveMenuId] = useState(null);
@@ -44,6 +49,10 @@ const StudentManagementHome = () => {
             ]);
             
             setParents(parentData);
+            
+            // Extract unique class names for filter
+            const uniqueClasses = [...new Set(classData.map(c => `${c.class_name} - ${c.section}`))].sort();
+            setClassList(uniqueClasses);
 
             // Map API data to UI structure, linking parents and classes
             const mappedStudents = studentData.map(s => {
@@ -75,17 +84,25 @@ const StudentManagementHome = () => {
         }
     };
 
-    // Close menu when clicking outside
+    // Close menus when clicking outside
     useEffect(() => {
-        const handleClickOutside = () => setActiveMenuId(null);
-        window.addEventListener('click', handleClickOutside);
-        return () => window.removeEventListener('click', handleClickOutside);
-    }, []);
+        const handleClickOutside = (event) => {
+            if (activeMenuId) setActiveMenuId(null);
+            if (isFilterOpen && filterRef.current && !filterRef.current.contains(event.target)) {
+                setIsFilterOpen(false);
+            }
+        };
+        window.addEventListener('mousedown', handleClickOutside);
+        return () => window.removeEventListener('mousedown', handleClickOutside);
+    }, [activeMenuId, isFilterOpen]);
 
     const filteredStudents = useMemo(() => {
         let result = students;
         if (activeTab !== "All") {
             result = result.filter(student => student.status === activeTab);
+        }
+        if (classFilter !== "All Classes") {
+            result = result.filter(student => student.className === classFilter);
         }
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
@@ -97,7 +114,7 @@ const StudentManagementHome = () => {
             );
         }
         return result;
-    }, [students, searchQuery, activeTab]);
+    }, [students, searchQuery, activeTab, classFilter]);
 
     const handleAddStudent = async (newStudentData) => {
         try {
@@ -194,7 +211,58 @@ const StudentManagementHome = () => {
                     </div>
 
                     {!selectedStudent && (
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
+                            {/* Premium Class Filter Dropdown */}
+                            <div className="relative" ref={filterRef}>
+                                <button
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border transition-all duration-300 font-bold text-sm ${
+                                        isFilterOpen 
+                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' 
+                                        : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+                                    }`}
+                                >
+                                    <FontAwesomeIcon icon={faFilter} className={isFilterOpen ? 'text-white' : 'text-indigo-400'} />
+                                    <span>{classFilter}</span>
+                                    <FontAwesomeIcon icon={faChevronDown} className={`text-xs transition-transform duration-300 ${isFilterOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {isFilterOpen && (
+                                    <div className="absolute top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                                            <p className="text-[10px] uppercase font-black tracking-widest text-gray-400">Filter by Grade</p>
+                                        </div>
+                                        <button
+                                            onClick={() => { setClassFilter("All Classes"); setIsFilterOpen(false); }}
+                                            className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
+                                                classFilter === "All Classes" ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <FontAwesomeIcon icon={faGraduationCap} className="text-xs opacity-50" />
+                                                All Classes
+                                            </div>
+                                            {classFilter === "All Classes" && <FontAwesomeIcon icon={faCheck} className="text-xs" />}
+                                        </button>
+                                        {classList.map(c => (
+                                            <button
+                                                key={c}
+                                                onClick={() => { setClassFilter(c); setIsFilterOpen(false); }}
+                                                className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
+                                                    classFilter === c ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                                                    {c}
+                                                </div>
+                                                {classFilter === c && <FontAwesomeIcon icon={faCheck} className="text-xs" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="relative group">
                                 <input
                                     type="text"

@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faUserPlus, faArrowLeft, faCircleNotch, faTrash, faUserGraduate } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faUserPlus, faArrowLeft, faCircleNotch, faTrash, faUserGraduate, faFilter, faChevronDown, faGraduationCap, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { useRef } from 'react';
 import { parentService } from '../../services/parentService';
 import { studentService } from '../../services/studentService';
+import { classService } from '../../services/classService';
 import ParentList from './ParentList';
 import AddParentForm from './AddParentForm';
 import { COLORS } from '../../constants/colors';
@@ -16,34 +18,61 @@ const ParentManagementHome = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [selectedParent, setSelectedParent] = useState(null);
+    const [classFilter, setClassFilter] = useState("All Classes");
+    const [classList, setClassList] = useState([]);
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const filterRef = useRef(null);
 
     // Actions State
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
 
-    // Fetch parents on mount
+    // Fetch data on mount
     useEffect(() => {
         fetchData();
     }, []);
 
+    // Close filter when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isFilterOpen && filterRef.current && !filterRef.current.contains(event.target)) {
+                setIsFilterOpen(false);
+            }
+        };
+        window.addEventListener('mousedown', handleClickOutside);
+        return () => window.removeEventListener('mousedown', handleClickOutside);
+    }, [isFilterOpen]);
+
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [parentsData, studentsData] = await Promise.all([
+            const [parentsData, studentsData, classData] = await Promise.all([
                 parentService.getAllParents(),
-                studentService.getAllStudents()
+                studentService.getAllStudents(),
+                classService.getAllClasses()
             ]);
 
-            // Map students to parents
+            // Extract unique class names for filter
+            const uniqueClasses = [...new Set(classData.map(c => `${c.class_name} - ${c.section}`))].sort();
+            setClassList(uniqueClasses);
+
+            // Map students and classes to parents
             const parentsWithStudents = parentsData.map(parent => {
-                const parentStudents = studentsData.filter(student => 
+                const parentChildren = studentsData.filter(student => 
                     student.parent_id === parent.parent_id || 
                     student.s_parent_id === parent.parent_id
-                ).map(s => s.name);
+                );
+                
+                const studentNames = parentChildren.map(s => s.name);
+                const classNames = parentChildren.map(s => {
+                    const studentClass = classData.find(c => c.class_id === s.class_id);
+                    return studentClass ? `${studentClass.class_name} - ${studentClass.section}` : null;
+                }).filter(Boolean);
                 
                 return {
                     ...parent,
-                    linkedStudents: parentStudents.length > 0 ? parentStudents : ['No children linked']
+                    linkedStudents: studentNames.length > 0 ? studentNames : ['No children linked'],
+                    childClasses: classNames
                 };
             });
 
@@ -56,15 +85,24 @@ const ParentManagementHome = () => {
     };
 
     const filteredParents = useMemo(() => {
-        if (!searchQuery) return parents;
-        const lowerQuery = searchQuery.toLowerCase();
-        return parents.filter(
-            (parent) =>
-                (parent.name || "").toLowerCase().includes(lowerQuery) ||
-                String(parent.phone || "").includes(lowerQuery) ||
-                parent.linkedStudents.some(s => (s || "").toLowerCase().includes(lowerQuery))
-        );
-    }, [parents, searchQuery]);
+        let result = parents;
+        
+        if (classFilter !== "All Classes") {
+            result = result.filter(parent => parent.childClasses && parent.childClasses.includes(classFilter));
+        }
+        
+        if (searchQuery) {
+            const lowerQuery = searchQuery.toLowerCase();
+            result = result.filter(
+                (parent) =>
+                    (parent.name || "").toLowerCase().includes(lowerQuery) ||
+                    String(parent.phone || "").includes(lowerQuery) ||
+                    (parent.linkedStudents || []).some(s => (s || "").toLowerCase().includes(lowerQuery))
+            );
+        }
+        
+        return result;
+    }, [parents, searchQuery, classFilter]);
 
     const handleAddParent = async (newParentData) => {
         try {
@@ -106,14 +144,65 @@ const ParentManagementHome = () => {
                         <p className="text-sm text-gray-500 mt-1">Manage parent accounts and details</p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
+                        {/* Premium Class Filter Dropdown */}
+                        <div className="relative" ref={filterRef}>
+                            <button
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border transition-all duration-300 font-bold text-sm ${
+                                    isFilterOpen 
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' 
+                                    : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+                                }`}
+                            >
+                                <FontAwesomeIcon icon={faFilter} className={isFilterOpen ? 'text-white' : 'text-indigo-400'} />
+                                <span>{classFilter}</span>
+                                <FontAwesomeIcon icon={faChevronDown} className={`text-xs transition-transform duration-300 ${isFilterOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            {isFilterOpen && (
+                                <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[100] overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                                        <p className="text-[10px] uppercase font-black tracking-widest text-gray-400">Filter by Child's Class</p>
+                                    </div>
+                                    <button
+                                        onClick={() => { setClassFilter("All Classes"); setIsFilterOpen(false); }}
+                                        className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
+                                            classFilter === "All Classes" ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <FontAwesomeIcon icon={faGraduationCap} className="text-xs opacity-50" />
+                                            All Classes
+                                        </div>
+                                        {classFilter === "All Classes" && <FontAwesomeIcon icon={faCheck} className="text-xs" />}
+                                    </button>
+                                    {classList.map(c => (
+                                        <button
+                                            key={c}
+                                            onClick={() => { setClassFilter(c); setIsFilterOpen(false); }}
+                                            className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
+                                                classFilter === c ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                                                {c}
+                                            </div>
+                                            {classFilter === c && <FontAwesomeIcon icon={faCheck} className="text-xs" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
                         <div className="relative group">
                             <input
                                 type="text"
                                 placeholder="Search parents..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-96 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                className="pl-10 pr-4 py-2.5 w-72 lg:w-96 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                             />
                             <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
                         </div>

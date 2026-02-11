@@ -5,6 +5,7 @@ import { COLORS } from '../../constants/colors';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../../config/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import Logo from '../../assets/Logo.png';
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -53,11 +54,11 @@ const LoginForm = () => {
         <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 h-full overflow-y-auto">
             <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-8 sm:p-10 max-w-md w-full border border-gray-100">
                 <div className="text-center mb-8">
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-105 duration-300" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
-                        <FontAwesomeIcon icon={faUserShield} className="text-white text-3xl" />
+                    <div className="w-32 h-32 mx-auto mb-6 rounded-[2.5rem] flex items-center justify-center shadow-xl transition-transform hover:scale-105 duration-300 bg-white p-3 border border-gray-100">
+                        <img src={Logo} alt="Selvagam Logo" className="w-full h-full object-contain" />
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900 tracking-tight">Welcome Back</h1>
-                    <p className="text-sm sm:text-base text-gray-500 font-medium">Sign in to School Management Portal</p>
+                    <p className="text-sm sm:text-base text-gray-400 font-bold uppercase tracking-[1px]" style={{ fontFamily: "'Outfit', sans-serif" }}>Sign in to <span className="text-purple-600">Selvagam</span> Portal</p>
                 </div>
 
                 {error && (
