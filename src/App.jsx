@@ -4,6 +4,7 @@ import Dashboard from './components/layout/DashboardLayout'
 import DashboardOverview from './components/dashboard/DashboardHome'
 import StudentManagement from './components/student-management/StudentManagementHome'
 import ParentManagement from './components/parent-management/ParentManagementHome'
+import InactiveParentManagement from './components/parent-management/InactiveParentManagement'
 import ClassManagement from './components/class-management/ClassManagementHome'
 import DriverManagement from './components/driver-management/DriverManagementHome'
 import BusManagement from './components/bus-management/BusManagementHome'
@@ -26,6 +27,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardOverview />} />
           <Route path="/students" element={<StudentManagement />} />
           <Route path="/parents" element={<ParentManagement />} />
+          <Route path="/parents/inactive" element={<InactiveParentManagement />} />
           <Route path="/classes" element={<ClassManagement />} />
           <Route path="/drivers" element={<DriverManagement />} />
           <Route path="/buses" element={<BusManagement />} />

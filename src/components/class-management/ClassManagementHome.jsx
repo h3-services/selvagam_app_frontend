@@ -72,10 +72,10 @@ const ClassManagementHome = () => {
                                 <FontAwesomeIcon icon={faShapes} className="text-xl" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                                <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">
                                     Structure <span className="text-indigo-600">Sync</span>
                                 </h1>
-                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1.5 opacity-70">Academic Hierarchy Management</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1.5 opacity-70">Academic Hierarchy Management</p>
                             </div>
                         </div>
                     </div>
@@ -87,7 +87,7 @@ const ClassManagementHome = () => {
                                 placeholder="Locate class..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-12 pr-6 py-3.5 w-[320px] bg-slate-100/50 border border-slate-200/50 rounded-2xl text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-slate-400"
+                                className="pl-12 pr-6 py-3 bg-slate-100/50 border border-slate-200/50 rounded-2xl text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-slate-400"
                             />
                             <FontAwesomeIcon icon={faSearch} className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
                         </div>
@@ -95,14 +95,14 @@ const ClassManagementHome = () => {
                         <div className="h-10 w-[1px] bg-slate-200 mx-2 hidden lg:block"></div>
 
                         <button 
-                            className="bg-white hover:bg-slate-50 text-slate-700 px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest border border-slate-200 shadow-sm transition-all active:scale-95 flex items-center gap-3"
+                            className="bg-white hover:bg-slate-50 text-slate-700 px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider border border-slate-200 shadow-sm transition-all active:scale-95 flex items-center gap-3"
                             onClick={() => setShowPromoteModal(true)}
                         >
                             <FontAwesomeIcon icon={faArrowTrendUp} className="text-indigo-500" /> Promote
                         </button>
 
                         <button 
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-7 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-200 transition-all active:scale-95 flex items-center gap-3"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-7 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-xl shadow-indigo-100 transition-all active:scale-95 flex items-center gap-3"
                             onClick={() => setShowAddModal(true)}
                         >
                             <FontAwesomeIcon icon={faPlus} /> New Class
@@ -122,8 +122,8 @@ const ClassManagementHome = () => {
                                 <FontAwesomeIcon icon={faSchool} />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[2px] mb-1">Total Hubs</p>
-                                <p className="text-3xl font-black text-slate-900 leading-none">{stats.total}</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Hubs</p>
+                                <p className="text-3xl font-bold text-slate-900 leading-none">{stats.total}</p>
                             </div>
                         </div>
                         <div className="bg-white p-7 rounded-[35px] border border-slate-100 shadow-sm flex items-center gap-6 group hover:border-blue-200 transition-all duration-500">
@@ -131,8 +131,8 @@ const ClassManagementHome = () => {
                                 <FontAwesomeIcon icon={faCalendarAlt} />
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[2px] mb-1">Session</p>
-                                <p className="text-2xl font-black text-slate-900 leading-none">25-26 FY</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Session</p>
+                                <p className="text-2xl font-bold text-slate-900 leading-none">25-26 FY</p>
                             </div>
                         </div>
                     </div>
@@ -140,7 +140,7 @@ const ClassManagementHome = () => {
                     {/* Content Section */}
                     <div className="space-y-8">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-[11px] font-black text-slate-400 uppercase tracking-[2px]">
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                                 System Synchronized
                             </div>

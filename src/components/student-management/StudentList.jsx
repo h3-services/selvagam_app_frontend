@@ -1,12 +1,13 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faChevronRight, faEye, faPhone, faChild, faRoute, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faChevronRight, faEye, faPhone, faChild, faRoute, faUserTie, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan } from '@fortawesome/free-solid-svg-icons';
 
 const StudentList = ({
     filteredStudents,
     setSelectedStudent,
     setShowForm,
     handleDelete,
+    handleStatusUpdate,
     activeMenuId,
     setActiveMenuId
 }) => {
@@ -29,7 +30,8 @@ const StudentList = ({
                                 {
                                     headerName: "Student Name",
                                     field: "name",
-                                    flex: 1.5,
+                                    flex: 1.0,
+                                    minWidth: 150,
                                     cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                     cellRenderer: (params) => (
                                         <div
@@ -39,8 +41,8 @@ const StudentList = ({
                                             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
                                                 {params.value ? params.value.charAt(0) : '?'}
                                             </div>
-                                            <div className="flex flex-col">
-                                                <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value || 'Unknown'}</p>
+                                            <div className="flex flex-col overflow-hidden">
+                                                <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors truncate">{params.value || 'Unknown'}</p>
                                                 <div className="flex items-center gap-1 -mt-1">
                                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">View Details</span>
                                                     <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
@@ -52,17 +54,19 @@ const StudentList = ({
                                 {
                                     headerName: "Class",
                                     field: "className",
-                                    width: 120,
+                                    width: 110,
+                                    minWidth: 110,
                                     cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start' },
                                     cellRenderer: (params) => (
-                                        <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg font-bold text-xs border border-purple-100 shadow-sm uppercase tracking-wide">
+                                        <span className="px-2 py-1 bg-purple-50 text-purple-700 rounded-lg font-bold text-xs border border-purple-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
                                             {params.value}
                                         </span>
                                     )
                                 },
                                 {
                                     headerName: "Parents",
-                                    flex: 1.5,
+                                    flex: 0.7,
+                                    minWidth: 100,
                                     cellStyle: { display: 'flex', alignItems: 'center', fontWeight: '500', color: '#374151' },
                                     valueGetter: (params) => {
                                         const p1 = params.data.parent1Name;
@@ -73,16 +77,18 @@ const StudentList = ({
                                 {
                                     headerName: "Parent Mobile",
                                     field: "mobile",
-                                    flex: 1,
+                                    width: 140,
+                                    minWidth: 140,
                                     cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '500' }
                                 },
                                 {
                                     headerName: "Location",
                                     field: "location",
                                     flex: 1.5,
+                                    minWidth: 180,
                                     cellStyle: { display: 'flex', alignItems: 'center' },
                                     cellRenderer: (params) => (
-                                        <div className="flex items-center gap-2 truncate" title={params.value}>
+                                        <div className="flex items-center gap-2 w-full" title={params.value}>
                                             <FontAwesomeIcon icon={faRoute} className="text-purple-400 text-xs shrink-0" />
                                             <span className="text-sm text-gray-600 truncate">{params.value}</span>
                                         </div>
@@ -91,23 +97,72 @@ const StudentList = ({
                                 {
                                     headerName: "ACTIONS",
                                     field: "id",
-                                    width: 100,
+                                    width: 90,
+                                    minWidth: 90,
                                     sortable: false,
                                     filter: false,
+                                    pinned: 'right',
                                     cellStyle: { overflow: 'visible' },
                                     cellRenderer: (params) => {
+                                        const isOpen = activeMenuId === params.data.id;
                                         return (
-                                            <div className="flex items-center justify-center h-full relative">
+                                            <div className="relative flex items-center justify-center h-full">
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        handleDelete(params.data.id);
+                                                        setActiveMenuId(isOpen ? null : params.data.id);
                                                     }}
-                                                    className="w-8 h-8 rounded-full text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center text-sm"
-                                                    title="Recycle Bin"
+                                                    className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-sm ${
+                                                        isOpen ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:bg-gray-100'
+                                                    }`}
                                                 >
-                                                    <FontAwesomeIcon icon={faTrash} />
+                                                    <FontAwesomeIcon icon={faEllipsisV} />
                                                 </button>
+
+                                                {isOpen && (
+                                                    <div className="absolute right-0 top-10 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                                                        <div className="p-1">
+                                                            <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
+                                                                Status Updates
+                                                            </div>
+                                                            {[
+                                                                { label: 'Current Student', value: 'CURRENT', icon: faUserCheck, color: 'text-emerald-600' },
+                                                                { label: 'Alumni', value: 'ALUMNI', icon: faUserClock, color: 'text-blue-600' },
+                                                                { label: 'Discontinued', value: 'DISCONTINUED', icon: faBan, color: 'text-amber-600' },
+                                                                { label: 'Long Absent', value: 'LONG_ABSENT', icon: faUserSlash, color: 'text-red-500' },
+                                                            ]
+                                                            .filter(option => option.value !== params.data.originalData.student_status)
+                                                            .map((option) => (
+                                                                <button
+                                                                    key={option.value}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleStatusUpdate(params.data.id, option.value);
+                                                                        setActiveMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-indigo-50 rounded-lg flex items-center gap-2 transition-colors"
+                                                                >
+                                                                    <FontAwesomeIcon icon={option.icon} className={`w-4 ${option.color}`} />
+                                                                    {option.label}
+                                                                </button>
+                                                            ))}
+                                                            
+                                                            <div className="h-px bg-gray-100 my-1" />
+                                                            
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDelete(params.data.id);
+                                                                    setActiveMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2 transition-colors"
+                                                            >
+                                                                <FontAwesomeIcon icon={faTrash} className="w-4" />
+                                                                Delete Student
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         );
                                     }

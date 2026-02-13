@@ -45,6 +45,17 @@ export const parentService = {
         }
     },
 
+    // Update parent status
+    updateParentStatus: async (parentId, status) => {
+        try {
+            const response = await api.put(`/parents/${parentId}/status`, { status });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating parent status for ${parentId}:`, error);
+            throw error;
+        }
+    },
+
     // Delete parent
     deleteParent: async (parentId) => {
         try {

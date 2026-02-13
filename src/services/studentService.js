@@ -45,6 +45,17 @@ export const studentService = {
         }
     },
 
+    // Update student status
+    updateStudentStatus: async (studentId, status) => {
+        try {
+            const response = await api.put(`/students/${studentId}/status`, { status });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating student status for ${studentId}:`, error);
+            throw error;
+        }
+    },
+
     // Delete student
     deleteStudent: async (studentId) => {
         try {

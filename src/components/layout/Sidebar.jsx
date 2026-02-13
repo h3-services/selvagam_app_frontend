@@ -86,36 +86,36 @@ const Sidebar = () => {
           </button>
         )}
         <div 
-          className="p-5 border-b border-white/10 cursor-pointer hover:bg-white/5 transition-colors"
+          className="p-6 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/10"
           onClick={() => handleNavigation('/dashboard')}
         >
-          <div className="flex items-center gap-3">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden bg-white shadow-xl p-1 mb-1`}>
-              <img src={Logo} alt="Selvagam Logo" className="w-full h-full object-contain" />
-            </div>
-            <h2 className="text-2xl m-0 tracking-[2px] uppercase font-black" style={{ fontFamily: "'Outfit', sans-serif" }}>Selvagam</h2>
+          <div className="w-12 h-12 flex items-center justify-center">
+             <img src={Logo} alt="Selvagam Logo" className="w-full h-full object-contain drop-shadow-xl" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-white tracking-widest uppercase leading-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
+              Selvagam
+            </h1>
+            <p className="text-[10px] text-indigo-200 font-bold tracking-[3px] uppercase mt-1 opacity-80">Admin Portal</p>
           </div>
         </div>
 
-        <nav className="flex-1 py-5">
+        <nav className="flex-1 py-6 space-y-1 overflow-y-auto custom-scrollbar">
           {menuItems.map((item, index) => {
-            const active = isActive(item.path);
+            const active = location.pathname.startsWith(item.path);
             return (
-              <div key={index} className="relative">
+              <div key={index} className="px-3">
                 <button
                   onClick={() => handleNavigation(item.path)}
-                  className="flex items-center gap-4 px-5 py-4 font-medium w-full text-left"
-                  style={{
-                    backgroundColor: active ? COLORS.SIDEBAR_ACTIVE : 'transparent',
-                    color: active ? 'black' : 'white',
-                    borderTopRightRadius: active ? '25px' : '0',
-                    borderBottomRightRadius: active ? '25px' : '0',
-                    border: 'none',
-                    cursor: 'pointer'
-                  }}
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 font-bold text-sm group ${
+                    active 
+                      ? 'bg-white text-indigo-900 shadow-lg shadow-indigo-900/20 translate-x-1' 
+                      : 'text-indigo-100 hover:bg-white/10 hover:text-white hover:translate-x-1'
+                  }`}
                 >
-                  <FontAwesomeIcon icon={item.icon} className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <FontAwesomeIcon icon={item.icon} className={`text-lg transition-transform duration-300 ${active ? 'scale-110 text-indigo-600' : 'opacity-70 group-hover:scale-110'}`} />
+                  <span className="tracking-wide">{item.label}</span>
+                  {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></div>}
                 </button>
               </div>
             )

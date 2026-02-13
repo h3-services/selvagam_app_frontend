@@ -146,6 +146,21 @@ const StudentManagementHome = () => {
             // Don't close the form - let user fix the errors
         }
     };
+    
+    // Status update handler
+    const handleStatusUpdate = async (studentId, newStatus) => {
+        try {
+            await studentService.updateStudentStatus(studentId, newStatus);
+            // Optimistic update
+            setStudents(prev => prev.map(s => 
+                s.id === studentId ? { ...s, studentStatus: newStatus } : s
+            ));
+            await fetchAllData(); // Refresh to be sure
+        } catch (error) {
+            console.error("Failed to update status:", error);
+            alert("Failed to update student status");
+        }
+    };
 
     const handleUpdateStudent = async (updatedStudent) => {
         try {
@@ -300,6 +315,7 @@ const StudentManagementHome = () => {
                         setSelectedStudent={setSelectedStudent}
                         setShowForm={setShowForm}
                         handleDelete={handleDelete}
+                        handleStatusUpdate={handleStatusUpdate}
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
                     />

@@ -2,92 +2,136 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faEllipsisV, faChild } from '@fortawesome/free-solid-svg-icons';
-import { useState, useRef, useEffect } from 'react';
+import { faEdit, faTrash, faEllipsisV, faChild, faCheckCircle, faBan } from '@fortawesome/free-solid-svg-icons';
+import { useState, useRef, useMemo } from 'react';
 
-const ParentList = ({ filteredParents, handleDelete }) => {
+const ParentList = ({ 
+    filteredParents, 
+    handleDelete,
+    isInactiveView = false
+}) => {
     const gridRef = useRef();
 
     // Column Definitions
-    const [colDefs] = useState([
+    // Column Definitions
+    const columnDefs = useMemo(() => [
         {
-            headerName: 'Name',
+            headerName: 'Parent Name',
             field: 'name',
-            sortable: true,
-            filter: true,
             flex: 1.5,
+            filter: false,
+            cellDataType: false,
+            cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
-                <div className="flex items-center gap-3 h-full">
-                    <div className="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center text-pink-600 font-bold text-xs ring-2 ring-white shadow-sm">
-                        {params.value.charAt(0)}
+                <div className="flex items-center gap-3 w-full cursor-pointer group" onClick={() => {
+                   // Handle view details
+                }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
+                        {params.value ? params.value.charAt(0) : '?'}
                     </div>
-                    <div>
-                        <span className="font-semibold text-gray-900 block leading-tight">{params.value}</span>
-                         <span className="text-[10px] text-gray-400 font-medium tracking-wide">Parent ID: {params.data.parent_id?.substring(0,6)}</span>
+                    <div className="flex flex-col">
+                        <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value || 'Unknown'}</p>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors mt-0.5">ID: {params.data.parent_id?.substring(0, 6)}</span>
                     </div>
                 </div>
             )
         },
         {
-            headerName: 'Contact',
-            field: 'email',
-            sortable: true,
-            filter: true,
-            flex: 1.5,
+            headerName: 'Mobile',
+            field: 'phone',
+            flex: 1.2,
+            filter: false,
+            cellDataType: false,
+            cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
-                <div className="flex flex-col justify-center h-full text-xs">
-                    <span className="text-gray-700 font-medium">{params.value}</span>
-                    <span className="text-gray-400">{params.data.phone}</span>
+                <div className="flex flex-col justify-center">
+                    <span className="text-gray-900 font-bold text-xs">{params.value}</span>
+                </div>
+            )
+        },
+        {
+            headerName: 'Student',
+            field: 'linkedStudents',
+            flex: 1.5,
+            filter: false,
+            cellDataType: false,
+            cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
+            cellRenderer: params => (
+                <div className="flex flex-col justify-center gap-1">
+                    {params.value && params.value.map((studentName, idx) => {
+                        if (studentName === 'No children linked') return null;
+                        return (
+                            <span key={idx} className="text-indigo-600 font-bold text-xs truncate flex items-center">
+                                <FontAwesomeIcon icon={faChild} className="mr-1.5 opacity-70 w-3" />
+                                {studentName}
+                            </span>
+                        );
+                    })}
+                    {(!params.value || params.value.length === 0 || params.value[0] === 'No children linked') && 
+                        <span className="text-gray-400 text-[10px] italic">No students linked</span>
+                    }
                 </div>
             )
         },
         {
             headerName: 'Address',
             field: 'street',
-            sortable: true,
-            filter: true,
-            flex: 1.2,
+            flex: 1.5,
+            filter: false,
+            cellDataType: false,
+            cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
-                 <div className="flex items-center h-full text-xs text-gray-600">
-                    {params.data.street}, {params.data.city}
-                 </div>
+                <div className="flex flex-col justify-center">
+                    <span className="text-gray-700 font-medium text-xs truncate">{params.data.street}</span>
+                    <span className="text-gray-400 text-[10px]">{params.data.city}</span>
+                </div>
             )
         },
         {
             headerName: 'Status',
             field: 'parents_active_status',
-            sortable: true,
-            filter: true,
             width: 120,
+            filter: false,
+            cellDataType: false,
+            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
             cellRenderer: params => (
-                 <div className="flex items-center h-full">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        params.value === 'ACTIVE' 
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
-                            : 'bg-slate-50 text-slate-500 border border-slate-100'
-                    }`}>
-                        {params.value || 'Inactive'}
-                    </span>
-                </div>
+                <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${
+                    params.value === 'ACTIVE'
+                        ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
+                        : 'bg-slate-50 text-slate-500 ring-1 ring-slate-100'
+                }`}>
+                    {params.value || 'Inactive'}
+                </span>
             )
         },
-        // Actions
         {
-            headerName: '',
-            field: 'actions',
-            width: 80,
+            headerName: 'ACTIONS',
+            field: 'parent_id',
+            width: 100,
+            pinned: 'right',
+            sortable: false,
+            filter: false,
+            cellStyle: { overflow: 'visible' },
             cellRenderer: params => (
-                <div className="flex items-center justify-end gap-2 h-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center justify-center h-full">
                     <button
-                        onClick={() => handleDelete(params.data.parent_id)}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(params.data.parent_id);
+                        }}
+                        className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-sm ${
+                            isInactiveView 
+                            ? 'text-gray-400 hover:bg-emerald-50 hover:text-emerald-600' 
+                            : 'text-gray-400 hover:bg-red-50 hover:text-red-600'
+                        }`}
+                        title={isInactiveView ? "Activate Parent" : "Deactivate Parent"}
                     >
-                        <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                        <FontAwesomeIcon icon={isInactiveView ? faCheckCircle : faTrash} />
                     </button>
                 </div>
             )
         }
-    ]);
+    ], [handleDelete]);
 
     const defaultColDef = {
         resizable: true,
@@ -111,113 +155,9 @@ const ParentList = ({ filteredParents, handleDelete }) => {
                         <AgGridReact
                             ref={gridRef}
                             rowData={filteredParents}
-                            columnDefs={[
-                                {
-                                    headerName: 'Parent Name',
-                                    field: 'name',
-                                    flex: 1.5,
-                                    filter: false,
-                                    cellDataType: false,
-                                    cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
-                                    cellRenderer: params => (
-                                        <div className="flex items-center gap-3 w-full cursor-pointer group">
-                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
-                                                {params.value ? params.value.charAt(0) : '?'}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value || 'Unknown'}</p>
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors mt-0.5">ID: {params.data.parent_id?.substring(0, 6)}</span>
-                                            </div>
-                                        </div>
-                                    )
-                                },
-                                {
-                                    headerName: 'Mobile',
-                                    field: 'phone', // Changed to phone
-                                    flex: 1.2, // Adjusted flex
-                                    filter: false,
-                                    cellDataType: false,
-                                    cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
-                                    cellRenderer: params => (
-                                        <div className="flex flex-col justify-center">
-                                            <span className="text-gray-900 font-bold text-xs">{params.value}</span>
-                                        </div>
-                                    )
-                                },
-                                {
-                                    headerName: 'Student',
-                                    field: 'linkedStudents',
-                                    flex: 1.5,
-                                    filter: false,
-                                    cellDataType: false,
-                                    cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
-                                    cellRenderer: params => (
-                                        <div className="flex flex-col justify-center gap-1">
-                                            {params.value && params.value.map((studentName, idx) => {
-                                                if (studentName === 'No children linked') return null;
-                                                return (
-                                                    <span key={idx} className="text-indigo-600 font-bold text-xs truncate flex items-center">
-                                                        <FontAwesomeIcon icon={faChild} className="mr-1.5 opacity-70 w-3" />
-                                                        {studentName}
-                                                    </span>
-                                                );
-                                            })}
-                                            {(!params.value || params.value.length === 0 || params.value[0] === 'No children linked') && 
-                                                <span className="text-gray-400 text-[10px] italic">No students linked</span>
-                                            }
-                                        </div>
-                                    )
-                                },
-                                {
-                                    headerName: 'Address',
-                                    field: 'street',
-                                    flex: 1.5,
-                                    filter: false,
-                                    cellDataType: false,
-                                    cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
-                                    cellRenderer: params => (
-                                        <div className="flex flex-col justify-center">
-                                            <span className="text-gray-700 font-medium text-xs truncate">{params.data.street}</span>
-                                            <span className="text-gray-400 text-[10px]">{params.data.city}</span>
-                                        </div>
-                                    )
-                                },
-                                {
-                                    headerName: 'Status',
-                                    field: 'parents_active_status',
-                                    width: 120,
-                                    filter: false,
-                                    cellDataType: false,
-                                    cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
-                                    cellRenderer: params => (
-                                        <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${
-                                            params.value === 'ACTIVE'
-                                                ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
-                                                : 'bg-slate-50 text-slate-500 ring-1 ring-slate-100'
-                                        }`}>
-                                            {params.value || 'Inactive'}
-                                        </span>
-                                    )
-                                },
-                                {
-                                    headerName: 'ACTIONS',
-                                    field: 'parent_id',
-                                    width: 100,
-                                    sortable: false,
-                                    filter: false,
-                                    cellDataType: false,
-                                    cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
-                                    cellRenderer: params => (
-                                        <button
-                                            onClick={() => handleDelete(params.data.parent_id)}
-                                            className="w-8 h-8 rounded-full text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center text-sm"
-                                            title="Delete Parent"
-                                        >
-                                            <FontAwesomeIcon icon={faTrash} />
-                                        </button>
-                                    )
-                                }
-                            ]}
+                            columnDefs={columnDefs}
+                            // Removed inline columnDefs
+
                             defaultColDef={{
                                 sortable: true,
                                 filter: true,
