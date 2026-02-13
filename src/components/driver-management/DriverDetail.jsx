@@ -160,7 +160,11 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                                     </div>
                                 ) : (
                                     <>
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${selectedDriver.status === 'Active' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-gray-50 text-gray-500 border-gray-200'}`}>
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                                            selectedDriver.status === 'Active' ? 'bg-green-50 text-green-600 border-green-200' : 
+                                            selectedDriver.status === 'Resigned' ? 'bg-red-50 text-red-600 border-red-100' :
+                                            'bg-amber-50 text-amber-600 border-amber-100'
+                                        }`}>
                                             {selectedDriver.status}
                                         </span>
                                         {selectedDriver.kyc_verified === 1 && (

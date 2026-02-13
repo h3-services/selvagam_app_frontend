@@ -1,6 +1,6 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faTrash, faEllipsisV, faUserCheck, faUserClock, faBan, faUserSlash } from '@fortawesome/free-solid-svg-icons';
 
 const DriverList = ({
     filteredDrivers,
@@ -8,7 +8,8 @@ const DriverList = ({
     handleToggleStatus,
     handleDelete,
     activeMenuId,
-    setActiveMenuId
+    setActiveMenuId,
+    viewMode
 }) => {
     return (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -75,16 +76,21 @@ const DriverList = ({
                                 field: "status",
                                 flex: 1,
                                 filter: false, // Disabled filter
-                                cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
-                                cellRenderer: (params) => (
-                                    <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${
-                                        params.value === 'Active'
-                                            ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
-                                            : 'bg-slate-50 text-slate-500 ring-1 ring-slate-100'
-                                    }`}>
-                                        {params.value || 'Inactive'}
-                                    </span>
-                                )
+                                cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', height: '100%' },
+                                cellRenderer: (params) => {
+                                    const statusColors = {
+                                        'Active': 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+                                        'Inactive': 'bg-amber-50 text-amber-600 ring-amber-100',
+                                        'Suspended': 'bg-amber-50 text-amber-600 ring-amber-100',
+                                        'Resigned': 'bg-red-50 text-red-600 ring-red-100'
+                                    };
+                                    const colorClass = statusColors[params.value] || statusColors['Inactive'];
+                                    return (
+                                        <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ring-1 ${colorClass}`}>
+                                            {params.value || 'Inactive'}
+                                        </span>
+                                    );
+                                }
                             },
                             {
                                 headerName: "Actions",
@@ -93,20 +99,70 @@ const DriverList = ({
                                 sortable: false,
                                 filter: false,
                                 cellStyle: { overflow: 'visible' },
-                                cellRenderer: (params) => (
-                                    <div className="flex items-center justify-center h-full">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDelete(params.data.id);
-                                            }}
-                                            className="w-8 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
-                                            title="Delete Driver"
-                                        >
-                                            <FontAwesomeIcon icon={faTrash} className="text-sm" />
-                                        </button>
-                                    </div>
-                                )
+                                cellRenderer: (params) => {
+                                    const isOpen = activeMenuId === params.data.id;
+                                    return (
+                                        <div className="relative flex items-center justify-center h-full">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveMenuId(isOpen ? null : params.data.id);
+                                                }}
+                                                className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-sm ${
+                                                    isOpen ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <FontAwesomeIcon icon={faEllipsisV} />
+                                            </button>
+
+                                            {isOpen && (
+                                                <div className="absolute right-0 top-10 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                                                    <div className="p-1">
+                                                        <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
+                                                            Status Updates
+                                                        </div>
+                                                        {[
+                                                            { label: 'Active', value: 'ACTIVE', icon: faUserCheck, color: 'text-emerald-600' },
+                                                            { label: 'Inactive', value: 'INACTIVE', icon: faUserClock, color: 'text-amber-600' },
+                                                        ]
+                                                        .filter(option => option.value !== (params.data.status || '').toUpperCase())
+                                                        .map((option) => (
+                                                            <button
+                                                                key={option.value}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleToggleStatus(params.data.id, option.value);
+                                                                    setActiveMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-indigo-50 rounded-lg flex items-center gap-2 transition-colors"
+                                                            >
+                                                                <FontAwesomeIcon icon={option.icon} className={`w-4 ${option.color}`} />
+                                                                {option.label}
+                                                            </button>
+                                                        ))}
+                                                        
+                                                        {viewMode === 'active' && (
+                                                            <>
+                                                                <div className="h-px bg-gray-100 my-1" />
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleDelete(params.data.id);
+                                                                        setActiveMenuId(null);
+                                                                    }}
+                                                                    className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2 transition-colors"
+                                                                >
+                                                                    <FontAwesomeIcon icon={faTrash} className="w-4" />
+                                                                    Delete Driver
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }
                             }
                         ]}
                         defaultColDef={{
@@ -141,12 +197,14 @@ const DriverList = ({
                                         <p className="text-xs font-medium text-gray-500">{driver.email}</p>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => handleDelete(driver.id)}
-                                    className="w-10 h-10 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center"
-                                >
-                                    <FontAwesomeIcon icon={faTrash} className="text-sm" />
-                                </button>
+                                {viewMode === 'active' && (
+                                    <button
+                                        onClick={() => handleDelete(driver.id)}
+                                        className="w-10 h-10 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center"
+                                    >
+                                        <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                                    </button>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-2">
@@ -161,7 +219,9 @@ const DriverList = ({
                                 <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                     <p className="text-xs text-gray-500 font-medium mb-1">Status</p>
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                        driver.status === 'Active' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-50'
+                                        driver.status === 'Active' ? 'text-emerald-600 bg-emerald-50' : 
+                                        driver.status === 'Resigned' ? 'text-red-600 bg-red-50' :
+                                        'text-amber-600 bg-amber-50'
                                     }`}>
                                         {driver.status || 'Inactive'}
                                     </span>

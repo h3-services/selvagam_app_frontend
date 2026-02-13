@@ -21,6 +21,7 @@ const DriverManagementHome = () => {
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
+    const [viewMode, setViewMode] = useState('active'); // 'active' or 'resigned'
 
 
     // Fetch Drivers, Buses & Routes to map vehicles and routes
@@ -62,7 +63,7 @@ const DriverManagementHome = () => {
                     id: d.driver_id,
                     mobile: d.phone, // UI uses mobile, API uses phone
                     licenseNumber: d.licence_number, // Note spelling
-                    status: d.status.charAt(0).toUpperCase() + d.status.slice(1).toLowerCase(), // "ACTIVE" -> "Active"
+                    status: d.status ? (d.status.charAt(0).toUpperCase() + d.status.slice(1).toLowerCase()) : 'Inactive', // "ACTIVE" -> "Active"
                     date: d.created_at ? d.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
                     vehicleNumber: busNumber,
                     route: routeName
@@ -89,12 +90,11 @@ const DriverManagementHome = () => {
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);
 
-    const handleToggleStatus = async (id) => {
+    const handleToggleStatus = async (id, newStatus) => {
         const driver = drivers.find(d => d.id === id);
         if (!driver) return;
 
-        const newStatus = driver.status === 'Active' ? 'INACTIVE' : 'ACTIVE';
-        const newStatusUI = driver.status === 'Active' ? 'Inactive' : 'Active';
+        const newStatusUI = newStatus.charAt(0).toUpperCase() + newStatus.slice(1).toLowerCase();
 
         // Optimistic update
         setDrivers(drivers.map(d =>
@@ -112,10 +112,15 @@ const DriverManagementHome = () => {
         }
     };
 
-    const filteredDrivers = drivers.filter(d =>
-        d.name?.toLowerCase().includes(search.toLowerCase()) ||
-        d.email?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredDrivers = drivers.filter(d => {
+        const matchesSearch = d.name?.toLowerCase().includes(search.toLowerCase()) || d.email?.toLowerCase().includes(search.toLowerCase());
+        const isResignedStatus = d.status === 'Resigned';
+        
+        if (viewMode === 'resigned') {
+            return matchesSearch && isResignedStatus;
+        }
+        return matchesSearch && !isResignedStatus;
+    });
 
     const handleAdd = async (newDriver) => {
         setLoading(true);
@@ -139,14 +144,23 @@ const DriverManagementHome = () => {
     const confirmDelete = async () => {
         if (itemToDelete) {
             try {
-                await driverService.deleteDriver(itemToDelete);
-                // Optimistic notification or just refresh
-                await fetchDrivers();
+                // Instead of permanent deletion, update status to RESIGNED
+                await driverService.updateDriverStatus(itemToDelete, 'RESIGNED');
+                
+                // Update local state immediately
+                setDrivers(prev => prev.map(d => 
+                    d.id === itemToDelete ? { ...d, status: 'Resigned' } : d
+                ));
+                
+                // Optionally remove from the visible list if needed, 
+                // but since handleToggleStatus keeps them in list, we'll keep them but updated.
+                // If the user wants them GONE from the list, we would filter them:
+                // setDrivers(prev => prev.filter(d => d.id !== itemToDelete));
+
                 setShowDeleteConfirm(false);
                 setItemToDelete(null);
             } catch (err) {
-                console.error(err);
-                // alert("Failed to delete driver: " + (err.response?.data?.message || err.message));
+                console.error("Error setting driver as Resigned:", err);
             }
         }
     };
@@ -202,14 +216,38 @@ const DriverManagementHome = () => {
                     </div>
 
                     {!selectedDriver && (
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col md:flex-row items-center gap-6">
+                            {/* View Mode Toggle (Segmented Control) */}
+                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
+                                <button
+                                    onClick={() => setViewMode('active')}
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                        viewMode === 'active' 
+                                        ? 'bg-white text-indigo-600 shadow-md transform scale-[1.02]' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Active Drivers
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('resigned')}
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                        viewMode === 'resigned' 
+                                        ? 'bg-white text-red-600 shadow-md transform scale-[1.02]' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Archived Records
+                                </button>
+                            </div>
+
                             <div className="relative group">
                                 <input
                                     type="text"
                                     placeholder="Search drivers..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-96 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-64 md:w-80 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
                             </div>
@@ -247,11 +285,12 @@ const DriverManagementHome = () => {
                         handleDelete={handleDelete}
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
+                        viewMode={viewMode}
                     />
                 )}
             </div>
 
-            {!selectedDriver && !loading && (
+            {!selectedDriver && !loading && viewMode === 'active' && (
                 <button
                     onClick={() => setShowModal(true)}
                     className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
@@ -279,9 +318,9 @@ const DriverManagementHome = () => {
                             <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
                                 <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Mark as Resigned</h3>
                             <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                                Are you sure you want to delete this driver record? This action cannot be undone and will remove all associated data.
+                                Are you sure you want to mark this driver as <span className="font-bold text-red-600">Resigned</span>? This will archive their profile and stop active duty assignments.
                             </p>
                             <div className="flex gap-3 w-full">
                                 <button

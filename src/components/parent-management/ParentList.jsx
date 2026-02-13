@@ -93,12 +93,12 @@ const ParentList = ({
             width: 120,
             filter: false,
             cellDataType: false,
-            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
+            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', height: '100%' },
             cellRenderer: params => (
                 <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${
                     params.value === 'ACTIVE'
                         ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
-                        : 'bg-slate-50 text-slate-500 ring-1 ring-slate-100'
+                        : 'bg-amber-50 text-amber-600 ring-1 ring-amber-100'
                 }`}>
                     {params.value || 'Inactive'}
                 </span>
@@ -225,7 +225,7 @@ const ParentList = ({
                                     <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
                                         <p className="text-xs text-gray-500 font-medium mb-1">Status</p>
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                            parent.parents_active_status === 'ACTIVE' ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-50'
+                                            parent.parents_active_status === 'ACTIVE' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'
                                         }`}>
                                             {parent.parents_active_status || 'Inactive'}
                                         </span>
