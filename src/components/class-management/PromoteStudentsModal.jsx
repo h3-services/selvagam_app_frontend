@@ -165,10 +165,10 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
 
                             <div className="space-y-4">
                                 <div className="grid grid-cols-12 px-6 py-2">
-                                    <div className="col-span-1 text-[10px] font-black text-gray-400 uppercase tracking-widest">#</div>
-                                    <div className="col-span-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Current Class</div>
+                                    <div className="col-span-1 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">#</div>
+                                    <div className="col-span-5 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Current Class</div>
                                     <div className="col-span-1"></div>
-                                    <div className="col-span-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Next Class (Target)</div>
+                                    <div className="col-span-5 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Next Class (Target)</div>
                                 </div>
 
                                 <div className="space-y-2">
@@ -193,7 +193,7 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
                                                 <select
                                                     value={promotionMapping[sourceClass.class_id] || ""}
                                                     onChange={(e) => setPromotionMapping({...promotionMapping, [sourceClass.class_id]: e.target.value})}
-                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-300 outline-none transition-all cursor-pointer appearance-none"
+                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-300 outline-none transition-all cursor-pointer appearance-none"
                                                 >
                                                     <option value="">-- Graduated / None --</option>
                                                     {classes.map(target => (
@@ -216,7 +216,7 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
                     <div className="flex gap-4">
                         {promoting && (
                             <div className="flex items-center gap-3">
-                                <div className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black border border-emerald-100">
+                                <div className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold border border-emerald-100">
                                     Done: {successCount}
                                 </div>
                             </div>

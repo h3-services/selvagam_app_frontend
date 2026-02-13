@@ -1,38 +1,40 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import RecentMessages from './RecentMessages';
+import { faBroadcastTower, faUsers } from '@fortawesome/free-solid-svg-icons';
 import ComposeMessage from './ComposeMessage';
 
 const CommunicationHome = () => {
-    // Mock Recent Messages
-    const recentMessages = [
-        { id: 2, to: 'All Parents', type: 'audio', content: 'Voice Message: School Annual Day Update', time: '1 hour ago', recipient: 'Parents' },
-        { id: 3, to: 'All Parents', type: 'text', content: 'School will be closed tomorrow due to heavy rain.', time: 'Yesterday', recipient: 'Parents' },
-    ];
-
     return (
-        <div className="h-full p-6 lg:p-8 flex flex-col">
-            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800 ml-20 lg:ml-0">Communication Hub</h1>
-                    <p className="text-gray-500 text-sm mt-1 ml-20 lg:ml-0">Broadcast updates and emergency notifications.</p>
-                </div>
-                
-                <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-pink-100 shadow-sm self-start md:self-auto">
-                    <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600">
-                        <FontAwesomeIcon icon={faUser} className="text-lg" />
+        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in overflow-hidden">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className='ml-20 lg:ml-0'>
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                            <FontAwesomeIcon icon={faBroadcastTower} className="text-indigo-600 text-xl" />
+                            Communication Hub
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">Broadcast updates and emergency notifications to parents</p>
                     </div>
-                    <div>
-                        <p className="text-[10px] font-bold text-pink-400 uppercase tracking-widest leading-none mb-1">Target Recipient Group</p>
-                        <p className="text-sm font-bold text-gray-800">All Registered Parents</p>
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 bg-indigo-50 px-5 py-2.5 rounded-xl border border-indigo-100 shadow-sm transition-all hover:bg-indigo-100/50">
+                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-50">
+                                <FontAwesomeIcon icon={faUsers} className="text-sm" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest leading-none mb-0.5">Recipient Group</p>
+                                <p className="text-sm font-bold text-gray-800">All Registered Parents</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="ml-2 w-2 h-2 bg-pink-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(236,72,153,0.5)]"></div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-                <RecentMessages messages={recentMessages} />
-                <ComposeMessage />
+            {/* Content Section */}
+            <div className="flex-1 px-8 py-8 overflow-y-auto custom-scrollbar">
+                <div className="max-w-6xl mx-auto">
+                    <ComposeMessage />
+                </div>
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
-// Backend server URL - hosted on Hostinger
-const FCM_SERVER_URL = 'http://72.62.196.30:3001';
+// Local server URL for FCM notifications
+const FCM_SERVER_URL = 'http://localhost:3001';
 const ADMIN_API_KEY = 'selvagam-admin-key-2024';
 
 export const sendNotification = async (title, body, recipientType, messageType, fcmToken) => {

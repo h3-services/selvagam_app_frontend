@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faMicrophone, faCommentDots, faUser, faSpinner, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faMicrophone, faCommentDots, faUser, faSpinner, faUsers, faChevronDown, faBroadcastTower, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import { sendNotification } from '../../services/notificationService';
 import { parentService } from '../../services/parentService';
 
@@ -16,13 +16,14 @@ const ComposeMessage = () => {
     useEffect(() => {
         const fetchParentTokens = async () => {
             try {
-                const data = await parentService.getAllParentFcmTokens();
-                // Take only id, fcm, status as requested
+                const response = await parentService.getAllParentFcmTokens();
+                const data = response.parents || [];
+                
                 const mappedParents = data.map(p => ({
                     id: p.parent_id,
                     fcm: p.fcm_token,
                     status: p.parents_active_status,
-                    name: p.name // Keeping name for the dropdown label
+                    name: p.name || 'Unknown Parent'
                 }));
                 setParents(mappedParents);
             } catch (error) {
@@ -36,34 +37,27 @@ const ComposeMessage = () => {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-
-        if (!title.trim() || !messageText.trim()) {
-            console.error('Please fill in required fields');
-            return;
-        }
-
+        if (!title.trim() || !messageText.trim()) return;
         setIsSending(true);
 
         try {
             if (selectedParentId === 'all') {
-                // Broadcast to all ACTIVE parents
                 const activeParents = parents.filter(p => p.status === 'ACTIVE' && p.fcm);
-                
-                if (activeParents.length === 0) {
-                    throw new Error('No active parents with valid tokens found');
-                }
+                if (activeParents.length === 0) throw new Error('No active parents found');
 
-                // Send notifications in parallel
                 await Promise.all(activeParents.map(parent => 
                     sendNotification(title.trim(), messageText.trim(), 'parent', messageType, parent.fcm)
                 ));
             } else {
-                // Send to specific parent
-                const targetParent = parents.find(p => p.id === selectedParentId);
-                if (!targetParent || !targetParent.fcm) {
-                    throw new Error('Selected parent does not have a valid token');
-                }
-                await sendNotification(title.trim(), messageText.trim(), 'parent', messageType, targetParent.fcm);
+                const targetTokens = parents
+                    .filter(p => p.id === selectedParentId && p.fcm)
+                    .map(p => p.fcm);
+
+                if (targetTokens.length === 0) throw new Error('No valid tokens found');
+
+                await Promise.all(targetTokens.map(token => 
+                    sendNotification(title.trim(), messageText.trim(), 'parent', messageType, token)
+                ));
             }
             
             setTitle('');
@@ -75,74 +69,125 @@ const ComposeMessage = () => {
         }
     };
 
+    const uniqueParents = parents.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) return acc.concat([current]);
+        return acc;
+    }, []);
+
     return (
-        <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100/50 p-6 flex flex-col overflow-y-auto">
-            <h2 className="font-bold text-gray-800 text-lg mb-6">Compose New Message</h2>
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col">
+            <div className="bg-slate-50 border-b border-gray-100 px-8 py-6">
+                <h2 className="text-xl font-bold text-gray-900 leading-none">Compose Notification</h2>
+                <p className="text-sm text-gray-500 mt-2">Create and broadcast push alerts to parent devices</p>
+            </div>
 
-            <form onSubmit={handleSendMessage} className="flex flex-col gap-6 h-full">
+            <form onSubmit={handleSendMessage} className="p-8 lg:p-10 flex flex-col gap-8">
+                {/* Configuration Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Recipient Selector */}
+                    <div className="flex flex-col gap-2.5">
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Target Audience</label>
+                        <div className="relative group">
+                            <select
+                                value={selectedParentId}
+                                onChange={(e) => setSelectedParentId(e.target.value)}
+                                className="w-full pl-5 pr-10 py-3.5 rounded-2xl border border-gray-200 bg-slate-50/50 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-400 focus:bg-white transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="all">Broadcast to All Parents</option>
+                                <optgroup label="Direct Message">
+                                    {uniqueParents.map(parent => (
+                                        <option key={parent.id} value={parent.id}>
+                                            {parent.name} ({parent.status})
+                                        </option>
+                                    ))}
+                                </optgroup>
+                            </select>
+                            <FontAwesomeIcon icon={faChevronDown} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none" />
+                        </div>
+                    </div>
 
-                {/* 1. Message Type */}
-                <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">1. Message Type</label>
-                    <div className="flex bg-gray-50 p-1.5 rounded-xl w-fit">
-                        <button
-                            type="button"
-                            onClick={() => setMessageType('text')}
-                            className={`px-6 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${messageType === 'text' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            <FontAwesomeIcon icon={faCommentDots} /> Text
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setMessageType('audio')}
-                            className={`px-6 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${messageType === 'audio' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            <FontAwesomeIcon icon={faMicrophone} /> Audio
-                        </button>
+                    {/* Message Type Selector */}
+                    <div className="flex flex-col gap-2.5">
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Delivery Mechanism</label>
+                        <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 w-full lg:w-fit">
+                            <button
+                                type="button"
+                                onClick={() => setMessageType('text')}
+                                className={`flex-1 lg:flex-none px-8 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2.5 ${messageType === 'text' ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <FontAwesomeIcon icon={faCommentDots} className="text-xs" /> Text Notification
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMessageType('audio')}
+                                className={`flex-1 lg:flex-none px-8 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2.5 ${messageType === 'audio' ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                <FontAwesomeIcon icon={faMicrophone} className="text-xs" /> Voice Message
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* 2. Message Title */}
-                <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">2. Message Title</label>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Enter notification title..."
-                        className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 bg-gray-50/50 transition-shadow"
-                        required
-                    />
-                </div>
+                {/* Content Section */}
+                <div className="flex flex-col gap-6 pt-4 border-t border-slate-50">
+                    <div className="flex flex-col gap-2.5">
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Message Heading</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="Enter a brief, catchy title..."
+                            className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 bg-slate-50/50 text-sm font-semibold text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-400 focus:bg-white transition-all shadow-sm"
+                            required
+                        />
+                    </div>
 
-                {/* 3. Message Content */}
-                <div className="flex-1 flex flex-col">
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 block">3. Message Content</label>
-                    <div className="flex-1 min-h-[200px]">
-                        <textarea
-                            value={messageText}
-                            onChange={(e) => setMessageText(e.target.value)}
-                            placeholder={messageType === 'text' ? "Write your message to all parents here..." : "Write your voice message to all parents here..."}
-                            className="w-full h-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 transition-shadow"
-                        ></textarea>
+                    <div className="flex flex-col gap-2.5">
+                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Detailed Payload</label>
+                        <div className="relative">
+                            <textarea
+                                value={messageText}
+                                onChange={(e) => setMessageText(e.target.value)}
+                                placeholder={messageType === 'text' ? "Write your announcement details here..." : "Describe the voice message content..."}
+                                className="w-full min-h-[180px] p-6 rounded-2xl border border-gray-200 bg-slate-50/50 text-sm font-semibold text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-400 focus:bg-white transition-all resize-none shadow-sm custom-scrollbar"
+                                required
+                            ></textarea>
+                            <div className="absolute bottom-4 right-4 text-[10px] font-bold text-slate-400 bg-white px-2.5 py-1 rounded-full border border-slate-100 shadow-sm">
+                                {messageText.length} Characters
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Send Button */}
-                <div className="flex justify-end pt-4 border-t border-gray-100">
+                {/* Footer Action */}
+                <div className="flex items-center justify-between pt-6 mt-2 border-t border-slate-50">
+                    <div className="flex items-center gap-3 px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                        <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Network Secure</span>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={isSending || !title.trim() || !messageText.trim() || parents.length === 0}
-                        className={`px-8 py-3 rounded-xl font-bold shadow-lg transition-all text-sm flex items-center gap-2 transform active:scale-95 ${isSending || !title.trim() || !messageText.trim() || parents.length === 0
-                            ? 'bg-gray-400 cursor-not-allowed'
-                            : 'bg-purple-600 hover:bg-purple-700 shadow-purple-200'
-                            } text-white`}
+                        className={`px-10 py-3.5 rounded-2xl font-bold text-sm shadow-lg transition-all flex items-center gap-3 transform active:scale-95 ${isSending || !title.trim() || !messageText.trim() || parents.length === 0
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200'
+                            }`}
                     >
-                        <FontAwesomeIcon icon={faPaperPlane} className={isSending ? 'animate-pulse' : ''} />
-                        {isSending ? 'Sending...' : 'Send Notification'}
+                        {isSending ? (
+                            <>
+                                <FontAwesomeIcon icon={faSpinner} spin className="text-sm" />
+                                Sending Notification...
+                            </>
+                        ) : (
+                            <>
+                                <FontAwesomeIcon icon={faPaperPlane} className="text-xs" />
+                                Broadcast Now
+                            </>
+                        )}
                     </button>
                 </div>
-
             </form>
         </div>
     );
