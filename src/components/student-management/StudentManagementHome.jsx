@@ -21,10 +21,6 @@ const StudentManagementHome = () => {
     const [activeTab, setActiveTab] = useState("Active");
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showForm, setShowForm] = useState(false);
-    const [classFilter, setClassFilter] = useState("All Classes");
-    const [classList, setClassList] = useState([]);
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const filterRef = useRef(null);
 
     // Actions State
     const [activeMenuId, setActiveMenuId] = useState(null);
@@ -47,10 +43,6 @@ const StudentManagementHome = () => {
             ]);
             
             setParents(parentData);
-            
-            // Extract unique class names for filter
-            const uniqueClasses = [...new Set(classData.map(c => `${c.class_name} - ${c.section}`))].sort();
-            setClassList(uniqueClasses);
 
             // Map API data to UI structure, linking parents and classes
             const mappedStudents = studentData.map(s => {
@@ -70,6 +62,7 @@ const StudentManagementHome = () => {
                     location: parent1 ? `${parent1.street}, ${parent1.city}, ${parent1.district}` : 'Route: ' + (s.pickup_route_id ? s.pickup_route_id.substring(0, 8) : 'None'),
                     date: s.created_at ? s.created_at.split('T')[0] : 'N/A',
                     status: s.transport_status === 'ACTIVE' ? 'Approved' : 'Inactive',
+                    studentStatus: s.status || s.student_status || 'CURRENT',
                     originalData: s, // Keep reference to original data
                     parentData: parent1 // Keep reference to primary parent data
                 };
@@ -91,24 +84,17 @@ const StudentManagementHome = () => {
             if (!isActionMenuClick && !isActionMenuTrigger) {
                 if (activeMenuId) setActiveMenuId(null);
             }
-            
-            if (isFilterOpen && filterRef.current && !filterRef.current.contains(event.target)) {
-                setIsFilterOpen(false);
-            }
         };
         window.addEventListener('mousedown', handleClickOutside);
         return () => window.removeEventListener('mousedown', handleClickOutside);
-    }, [activeMenuId, isFilterOpen]);
+    }, [activeMenuId]);
 
     const filteredStudents = useMemo(() => {
         let result = students;
         if (activeTab === "Active") {
-            result = result.filter(student => student.originalData?.status === 'CURRENT' || !student.originalData?.status);
+            result = result.filter(student => student.studentStatus === 'CURRENT' || !student.studentStatus);
         } else if (activeTab === "Archive") {
-            result = result.filter(student => student.originalData?.status && student.originalData?.status !== 'CURRENT');
-        }
-        if (classFilter !== "All Classes") {
-            result = result.filter(student => student.className === classFilter);
+            result = result.filter(student => student.studentStatus && student.studentStatus !== 'CURRENT');
         }
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
@@ -120,7 +106,7 @@ const StudentManagementHome = () => {
             );
         }
         return result;
-    }, [students, searchQuery, activeTab, classFilter]);
+    }, [students, searchQuery, activeTab]);
 
     const handleAddStudent = async (newStudentData) => {
         try {
@@ -155,15 +141,14 @@ const StudentManagementHome = () => {
     
     // Status update handler
     const handleStatusUpdate = async (studentId, newStatus) => {
-        console.log(`[StatusUpdate] Triggering status update for ID: ${studentId}, New Status: ${newStatus}`);
         try {
             await studentService.updateStudentStatus(studentId, newStatus);
-            console.log(`[StatusUpdate] API call successful for ${studentId}`);
             // Update local state immediately so filtering (Active/Archive) reacts
             setStudents(prev => prev.map(s => 
                 s.id === studentId ? { 
                     ...s, 
-                    originalData: { ...s.originalData, status: newStatus }
+                    studentStatus: newStatus,
+                    originalData: { ...s.originalData, status: newStatus } 
                 } : s
             ));
             await fetchAllData(); // Then sync with server
@@ -220,83 +205,29 @@ const StudentManagementHome = () => {
                     </div>
 
                     {!selectedStudent && (
-                        <div className="flex bg-gray-100/50 p-1.5 rounded-[20px] border border-gray-200 shadow-sm">
-                            <button
-                                onClick={() => setActiveTab('Active')}
-                                className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
-                                    activeTab === 'Active' 
-                                    ? 'bg-white text-blue-600 shadow-lg scale-[1.02]' 
-                                    : 'text-gray-400 hover:text-gray-600'
-                                }`}
-                            >
-                                <FontAwesomeIcon icon={faUsers} className={activeTab === 'Active' ? 'text-blue-600' : 'text-gray-400'} />
-                                Active
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('Archive')}
-                                className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
-                                    activeTab === 'Archive' 
-                                    ? 'bg-white text-blue-600 shadow-lg scale-[1.02]' 
-                                    : 'text-gray-400 hover:text-gray-600'
-                                }`}
-                            >
-                                <FontAwesomeIcon icon={faArchive} className={activeTab === 'Archive' ? 'text-blue-600' : 'text-gray-400'} />
-                                Archive
-                            </button>
-                        </div>
-                    )}
-
-                    {!selectedStudent && (
-                        <div className="flex items-center gap-4">
-                            {/* Premium Class Filter Dropdown */}
-                            <div className="relative" ref={filterRef}>
+                        <div className="flex flex-col md:flex-row items-center gap-6">
+                            {/* View Mode Toggle (Segmented Control) */}
+                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
                                 <button
-                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                    className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border transition-all duration-300 font-bold text-sm ${
-                                        isFilterOpen 
-                                        ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-indigo-100' 
-                                        : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-blue-600'
+                                    onClick={() => setActiveTab('Active')}
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                        activeTab === 'Active' 
+                                        ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                                        : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
-                                    <FontAwesomeIcon icon={faFilter} className={isFilterOpen ? 'text-white' : 'text-indigo-400'} />
-                                    <span>{classFilter}</span>
-                                    <FontAwesomeIcon icon={faChevronDown} className={`text-xs transition-transform duration-300 ${isFilterOpen ? 'rotate-180' : ''}`} />
+                                    Active Students
                                 </button>
-
-                                {isFilterOpen && (
-                                    <div className="absolute top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                                            <p className="text-[10px] uppercase font-black tracking-widest text-gray-400">Filter by Grade</p>
-                                        </div>
-                                        <button
-                                            onClick={() => { setClassFilter("All Classes"); setIsFilterOpen(false); }}
-                                            className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
-                                                classFilter === "All Classes" ? 'bg-blue-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
-                                            }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <FontAwesomeIcon icon={faGraduationCap} className="text-xs opacity-50" />
-                                                All Classes
-                                            </div>
-                                            {classFilter === "All Classes" && <FontAwesomeIcon icon={faCheck} className="text-xs" />}
-                                        </button>
-                                        {classList.map(c => (
-                                            <button
-                                                key={c}
-                                                onClick={() => { setClassFilter(c); setIsFilterOpen(false); }}
-                                                className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
-                                                    classFilter === c ? 'bg-blue-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
-                                                }`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                                                    {c}
-                                                </div>
-                                                {classFilter === c && <FontAwesomeIcon icon={faCheck} className="text-xs" />}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
+                                <button
+                                    onClick={() => setActiveTab('Archive')}
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                        activeTab === 'Archive' 
+                                        ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Archived Records
+                                </button>
                             </div>
 
                             <div className="relative group">
@@ -305,7 +236,7 @@ const StudentManagementHome = () => {
                                     placeholder="Search students..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-96 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-64 md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>

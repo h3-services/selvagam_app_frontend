@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
@@ -8,9 +8,9 @@ import { classService } from '../../services/classService';
 
 const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false }) => (
     <div className="relative group">
-        <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-xl border border-gray-200 transition-all duration-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${disabled ? 'bg-gray-50' : 'hover:border-purple-300'}`}>
-            <div className="w-10 h-full flex items-center justify-center text-gray-400 absolute left-0 top-0 pointer-events-none">
+        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest ml-1">{label}</label>
+        <div className={`relative flex items-center bg-white rounded-xl border border-slate-200 transition-all duration-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${disabled ? 'bg-slate-50' : 'hover:border-blue-300'}`}>
+            <div className="w-11 h-full flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-colors group-focus-within:text-blue-500">
                 <FontAwesomeIcon icon={icon} className="text-sm" />
             </div>
             <input
@@ -18,37 +18,149 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className="w-full pl-10 pr-4 py-3 bg-transparent rounded-xl text-sm font-medium text-gray-800 placeholder-gray-400 focus:outline-none disabled:text-gray-500"
+                className="w-full pl-11 pr-4 py-3.5 bg-transparent rounded-xl text-sm font-semibold text-slate-700 placeholder-slate-400 focus:outline-none disabled:text-slate-400"
                 placeholder={placeholder}
             />
         </div>
     </div>
 );
 
-const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false, renderOption }) => (
+const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false }) => (
     <div className="relative group">
-        <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-xl border border-gray-200 transition-all duration-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${disabled ? 'bg-gray-50' : 'hover:border-purple-300'}`}>
-            <div className="w-10 h-full flex items-center justify-center text-gray-400 absolute left-0 top-0 pointer-events-none">
+        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest ml-1">{label}</label>
+        <div className={`relative flex items-center bg-white rounded-xl border border-slate-200 transition-all duration-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${disabled ? 'bg-slate-50' : 'hover:border-blue-300'}`}>
+            <div className="w-11 h-full flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-colors group-focus-within:text-blue-500">
                 <FontAwesomeIcon icon={icon} className="text-sm" />
             </div>
             <select
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className="w-full pl-10 pr-4 py-3 bg-transparent rounded-xl text-sm font-medium text-gray-800 focus:outline-none appearance-none disabled:text-gray-500 cursor-pointer"
+                className="w-full pl-11 pr-10 py-3.5 bg-transparent rounded-xl text-sm font-semibold text-slate-700 focus:outline-none appearance-none disabled:text-slate-400 cursor-pointer"
             >
                 <option value="">{placeholder}</option>
                 {options.map((opt, idx) => (
                     <option key={idx} value={opt.value}>{opt.label}</option>
                 ))}
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs text-center">
                 <FontAwesomeIcon icon={faChevronDown} />
             </div>
         </div>
     </div>
 );
+
+const YearRangePicker = ({ label, start, end, onStartChange, onEndChange }) => {
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({length: 31}, (_, i) => (currentYear + i - 15).toString());
+    
+    return (
+        <div className="relative group">
+            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest ml-1">{label}</label>
+            <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-[20px] shadow-inner border border-slate-200">
+                <div className="flex-1 relative">
+                    <select 
+                        value={start} 
+                        onChange={(e) => onStartChange(e.target.value)}
+                        className="w-full h-10 bg-white rounded-xl text-center text-sm font-black text-blue-600 shadow-sm appearance-none cursor-pointer hover:bg-blue-50 transition-all border border-transparent focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 outline-none"
+                    >
+                        {years.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                </div>
+                <div className="flex-shrink-0 w-6 h-10 flex items-center justify-center text-slate-400 font-black opacity-40">-</div>
+                <div className="flex-1 relative">
+                    <select 
+                        value={end} 
+                        onChange={(e) => onEndChange(e.target.value)}
+                        className="w-full h-10 bg-white rounded-xl text-center text-sm font-black text-blue-600 shadow-sm appearance-none cursor-pointer hover:bg-blue-50 transition-all border border-transparent focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 outline-none"
+                    >
+                        {years.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ClassSelector = ({ label, value, options, onChange, placeholder }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(opt => opt.value == value);
+
+    return (
+        <div className="relative group" ref={containerRef}>
+            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest ml-1">{label}</label>
+            <div 
+                onClick={() => setIsOpen(!isOpen)}
+                className={`relative flex items-center justify-between bg-white rounded-2xl border border-slate-200 p-4 cursor-pointer transition-all duration-300 hover:border-blue-300 ${isOpen ? 'ring-4 ring-blue-500/10 border-blue-500 shadow-xl shadow-blue-900/5' : ''}`}
+            >
+                <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${selectedOption ? 'bg-blue-600 text-white scale-110 shadow-lg shadow-blue-200' : 'bg-slate-100 text-slate-400'}`}>
+                        <FontAwesomeIcon icon={faSchool} className="text-sm" />
+                    </div>
+                    <div>
+                        {selectedOption ? (
+                            <div className="flex flex-col">
+                                <span className="text-sm font-black text-slate-800">Class {selectedOption.className}</span>
+                                <span className="text-[10px] text-blue-600 font-black uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1">Section {selectedOption.section}</span>
+                            </div>
+                        ) : (
+                            <span className="text-sm font-semibold text-slate-400">{placeholder}</span>
+                        )}
+                    </div>
+                </div>
+                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-400 text-[10px] transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
+            </div>
+
+            {isOpen && (
+                <div className="absolute top-full left-0 right-0 mt-3 p-3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 z-[3000] max-h-80 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="grid grid-cols-1 gap-2">
+                        {options.length > 0 ? options.map((opt) => (
+                            <div 
+                                key={opt.value}
+                                onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                                className={`group/item flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all duration-300 ${value == opt.value ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/20 translate-x-1' : 'hover:bg-slate-50 text-slate-600 hover:translate-x-1'}`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-lg transition-all ${value == opt.value ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover/item:bg-blue-100 group-hover/item:text-blue-600'}`}>
+                                        {opt.className.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <div className={`text-sm font-black ${value == opt.value ? 'text-white' : 'text-slate-800 group-hover/item:text-blue-600'}`}>Class {opt.className}</div>
+                                        <div className={`text-[10px] font-bold uppercase tracking-widest ${value == opt.value ? 'text-blue-100' : 'text-slate-400'}`}>Section {opt.section} • {opt.year}</div>
+                                    </div>
+                                </div>
+                                {value == opt.value && (
+                                    <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
+                                        <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                                    </div>
+                                )}
+                            </div>
+                        )) : (
+                            <div className="py-12 text-center">
+                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-200">
+                                    <FontAwesomeIcon icon={faSchool} className="text-xl" />
+                                </div>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">No Active Classes</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
     const defaultStudentState = {
@@ -64,6 +176,8 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
         emergency_contact: '',
         student_photo_url: '',
         study_year: '',
+        yearStart: new Date().getFullYear().toString(),
+        yearEnd: (new Date().getFullYear() + 1).toString(),
         is_transport_user: true
     };
 
@@ -214,6 +328,8 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             }
         }
 
+        const combinedStudyYear = formData.yearStart && formData.yearEnd ? `${formData.yearStart}-${formData.yearEnd}` : '';
+
         // Build payload matching the working Swagger example exactly
         const payload = {
             name: formData.name,
@@ -221,7 +337,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             dob: formData.dob,
             s_parent_id: formData.s_parent_id || null, 
             is_transport_user: formData.is_transport_user,
-            study_year: formData.study_year || '',
+            study_year: combinedStudyYear,
             emergency_contact: formData.emergency_contact ? Number(formData.emergency_contact) : 0
         };
 
@@ -309,7 +425,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[1999] transition-opacity duration-300" onClick={handleClose} />
             
             <div className={`fixed right-0 top-0 h-full bg-slate-50 shadow-2xl z-[2000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
-                (isAddingNewParent || isSearchingParent) ? 'w-full sm:w-[1100px]' : 'w-full sm:w-[500px]'
+                (isAddingNewParent || isSearchingParent) ? 'w-full lg:w-[1300px]' : 'w-full md:w-[600px]'
             }`}>
                 
                 {/* Modern Header */}
@@ -349,86 +465,79 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                         
                         {/* LEFT PANEL: Student Form */}
                         <div className="overflow-y-auto overflow-x-hidden custom-scrollbar h-full">
-                            <div className="p-6 md:p-8 space-y-8 bg-slate-50 min-h-full">
+                            <div className="p-10 space-y-10 bg-slate-50 min-h-full">
                                 
                                 {/* Section: Personal Details */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden hover:shadow-md transition-shadow duration-300">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                                            <FontAwesomeIcon icon={faChild} className="text-lg" />
+                                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                                    <div className="flex items-center gap-4 mb-8">
+                                        <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                            <FontAwesomeIcon icon={faChild} className="text-xl" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-gray-900 text-lg">Student Information</h4>
-                                            <p className="text-xs text-gray-500 font-medium">Personal details and identification</p>
+                                            <h4 className="font-bold text-slate-900 text-xl tracking-tight">Student Information</h4>
+                                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Basic Identity Profile</p>
                                         </div>
                                     </div>
                                     
-                                    <div className="space-y-5">
+                                    <div className="space-y-6">
                                         <InputField 
                                             label="Full Name" 
                                             icon={faUser} 
                                             value={formData.name} 
                                             onChange={(e) => handleChange('name', e.target.value)} 
-                                            placeholder="e.g. Michael Scott" 
+                                            placeholder="Enter student's full name" 
                                         />
 
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <InputField 
-                                                    label="Date of Birth" 
-                                                    icon={faCalendar} 
-                                                    type="date"
-                                                    value={formData.dob} 
-                                                    onChange={(e) => handleChange('dob', e.target.value)} 
-                                                />
-                                                <InputField 
-                                                    label="Study Year" 
-                                                    icon={faCalendar} 
-                                                    value={formData.study_year}
-                                                    onChange={(e) => handleChange('study_year', e.target.value)}
-                                                    placeholder="2024-2025" 
-                                                />
-                                            </div>
-
-                                            <SelectField 
-                                                label="Class" 
-                                                icon={faSchool} 
-                                                value={formData.class_id} 
-                                                onChange={(e) => handleChange('class_id', e.target.value)} 
-                                                placeholder="Select Class"
-                                                options={classes.filter(c => c.status === 'ACTIVE').map(c => ({
-                                                    value: c.class_id, 
-                                                    label: `Class ${c.class_name} - Section ${c.section} (${c.academic_year})`
-                                                }))} 
-                                            />
-                                            
+                                        <div className="grid grid-cols-2 gap-5">
                                             <InputField 
-                                                label="Emergency Contact" 
-                                                icon={faPhone} 
-                                                type="number"
-                                                value={formData.emergency_contact}
-                                                onChange={(e) => handleChange('emergency_contact', e.target.value)}
-                                                placeholder="Emergency Mobile Number" 
+                                                label="Date of Birth" 
+                                                icon={faCalendar} 
+                                                type="date"
+                                                value={formData.dob} 
+                                                onChange={(e) => handleChange('dob', e.target.value)} 
                                             />
+                                            <YearRangePicker 
+                                                label="Academic Tenure"
+                                                start={formData.yearStart}
+                                                end={formData.yearEnd}
+                                                onStartChange={(val) => handleChange('yearStart', val)}
+                                                onEndChange={(val) => handleChange('yearEnd', val)}
+                                            />
+                                        </div>
+
+                                        <ClassSelector 
+                                            label="Class & Section Assignment" 
+                                            value={formData.class_id} 
+                                            onChange={(val) => handleChange('class_id', val)} 
+                                            placeholder="Search & Select Class"
+                                            options={classes.filter(c => c.status === 'ACTIVE').map(c => ({
+                                                value: c.class_id, 
+                                                className: c.class_name,
+                                                section: c.section,
+                                                year: c.academic_year
+                                            }))} 
+                                        />
                                         
                                         <InputField 
-                                            label="Photo URL (Optional)" 
-                                            icon={faImage} 
-                                            value={formData.student_photo_url} 
-                                            onChange={(e) => handleChange('student_photo_url', e.target.value)} 
-                                            placeholder="https://..." 
+                                            label="Emergency Contact" 
+                                            icon={faPhone} 
+                                            type="number"
+                                            value={formData.emergency_contact}
+                                            onChange={(e) => handleChange('emergency_contact', e.target.value)}
+                                            placeholder="Guardian contact for emergency" 
                                         />
                                     </div>
                                 </div>
 
                                 {/* Section: Parent/Guardian Link */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden hover:shadow-md transition-shadow duration-300">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                                            <FontAwesomeIcon icon={faUserTie} className="text-lg" />
+                                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                                    <div className="flex items-center gap-4 mb-8">
+                                        <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                            <FontAwesomeIcon icon={faUserTie} className="text-xl" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-gray-900 text-lg">Parent Association</h4>
-                                            <p className="text-xs text-gray-500 font-medium">Link a guardian to this student</p>
+                                            <h4 className="font-bold text-slate-900 text-xl tracking-tight">Parental Linkage</h4>
+                                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Primary Guardian Association</p>
                                         </div>
                                     </div>
 
@@ -436,35 +545,35 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                         {formData.parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.parent_id);
                                             return selectedParent ? (
-                                                <div className="bg-gradient-to-r from-blue-50 to-white border border-blue-100 rounded-2xl p-5 relative group">
+                                                <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 relative group/card transition-all duration-300 hover:border-blue-300">
                                                     <div className="flex items-start justify-between">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-16 h-16 rounded-full bg-white border-4 border-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl shadow-sm">
+                                                        <div className="flex items-center gap-5">
+                                                            <div className="w-16 h-16 rounded-full bg-white border-4 border-white flex items-center justify-center text-blue-600 font-bold text-2xl shadow-md group-hover/card:scale-105 transition-transform duration-300">
                                                                 {selectedParent.name.charAt(0)}
                                                             </div>
                                                             <div>
-                                                                <div className="font-bold text-xl text-gray-900 mb-1">{selectedParent.name}</div>
+                                                                <div className="font-bold text-xl text-slate-900 mb-1">{selectedParent.name}</div>
                                                                 <div className="flex flex-wrap gap-2">
-                                                                    <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-purple-200">
+                                                                    <span className="bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
                                                                         {selectedParent.parent_role || 'GUARDIAN'}
                                                                     </span>
-                                                                    <span className="bg-white text-gray-600 text-xs font-medium px-2.5 py-1 rounded-lg border border-gray-200 flex items-center gap-2">
-                                                                        <FontAwesomeIcon icon={faPhone} className="text-[10px]" /> {selectedParent.phone}
+                                                                    <span className="bg-white text-slate-500 text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-slate-100 flex items-center gap-2">
+                                                                        <FontAwesomeIcon icon={faPhone} className="text-[10px] text-blue-400" /> {selectedParent.phone}
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="h-10 w-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-200">
+                                                        <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-200">
                                                             <FontAwesomeIcon icon={faCheck} />
                                                         </div>
                                                     </div>
                                                     
-                                                    <div className="mt-5 pt-4 border-t border-blue-100 flex justify-end">
+                                                    <div className="mt-6 pt-5 border-t border-slate-200 flex justify-end">
                                                         <button 
                                                             onClick={() => { handleChange('parent_id', ''); }}
-                                                            className="text-xs font-bold text-red-500 hover:text-red-700 hover:underline transition-all"
+                                                            className="text-xs font-bold text-slate-400 hover:text-red-500 transition-all flex items-center gap-2"
                                                         >
-                                                            Unlink / Change Parent
+                                                            <FontAwesomeIcon icon={faTimes} className="text-[10px]" /> Clear Association
                                                         </button>
                                                     </div>
                                                 </div>
@@ -473,24 +582,24 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <button 
                                                     onClick={() => { setTargetParentField('parent_id'); setIsAddingNewParent(false); setIsSearchingParent(true); }}
-                                                    className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-purple-200 bg-blue-50/50 hover:bg-blue-50 hover:border-purple-300 hover:scale-[1.02] transition-all duration-300 group text-center"
+                                                    className="flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-500 group text-center"
                                                 >
-                                                    <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
-                                                        <FontAwesomeIcon icon={faSearch} className="text-lg" />
+                                                    <div className="w-14 h-14 rounded-2xl bg-white text-slate-400 flex items-center justify-center mb-4 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                                        <FontAwesomeIcon icon={faSearch} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-bold text-gray-900 text-sm">Search Database</h5>
-                                                    <p className="text-xs text-gray-500 mt-1">Find existing parent</p>
+                                                    <h5 className="font-bold text-slate-800 text-sm">Find Existing</h5>
+                                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">Search Database</p>
                                                 </button>
 
                                                 <button 
                                                     onClick={() => { setTargetParentField('parent_id'); setIsSearchingParent(false); setIsAddingNewParent(true); }}
-                                                    className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 hover:scale-[1.02] transition-all duration-300 group text-center"
+                                                    className="flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-500 group text-center"
                                                 >
-                                                    <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
-                                                        <FontAwesomeIcon icon={faUserPlus} className="text-lg" />
+                                                    <div className="w-14 h-14 rounded-2xl bg-white text-slate-400 flex items-center justify-center mb-4 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                                        <FontAwesomeIcon icon={faUserPlus} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-bold text-gray-900 text-sm">Register New</h5>
-                                                    <p className="text-xs text-gray-500 mt-1">Create parent account</p>
+                                                    <h5 className="font-bold text-slate-800 text-sm">Add New</h5>
+                                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">Create Profile</p>
                                                 </button>
                                             </div>
                                         )}
@@ -575,30 +684,30 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                 </div>
 
                                 {/* Section: Transport */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden hover:shadow-md transition-shadow duration-300">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-                                                <FontAwesomeIcon icon={faBus} className="text-lg" />
+                                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                                <FontAwesomeIcon icon={faBus} className="text-xl" />
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-gray-900 text-lg">Transport Route</h4>
-                                                <p className="text-xs text-gray-500 font-medium">Bus pickup and drop assignment</p>
+                                                <h4 className="font-bold text-slate-900 text-xl tracking-tight">Transport Access</h4>
+                                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Route & Logistics Setup</p>
                                             </div>
                                         </div>
                                         
-                                        <div className="flex items-center gap-3 bg-gray-50 p-1 rounded-xl">
+                                        <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-2xl shadow-inner border border-slate-200">
                                             <button
                                                 onClick={() => handleChange('is_transport_user', true)}
-                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.is_transport_user ? 'bg-teal-600 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${formData.is_transport_user ? 'bg-white text-blue-600 shadow-md transform scale-[1.05]' : 'text-slate-400 hover:text-slate-600'}`}
                                             >
-                                                Required
+                                                Active
                                             </button>
                                             <button
                                                 onClick={() => handleChange('is_transport_user', false)}
-                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${!formData.is_transport_user ? 'bg-gray-400 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${!formData.is_transport_user ? 'bg-white text-slate-600 shadow-md transform scale-[1.05]' : 'text-slate-400 hover:text-slate-600'}`}
                                             >
-                                                Not Required
+                                                Bypassed
                                             </button>
                                         </div>
                                     </div>
@@ -841,14 +950,16 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="p-5 border-t border-gray-200 bg-white/90 backdrop-blur-md flex-shrink-0 z-20">
+                <div className="px-8 py-6 border-t border-slate-200 bg-white/95 backdrop-blur-xl flex-shrink-0 z-20">
                     <button
                         onClick={handleSaveStudent}
-                        className="w-full py-4 rounded-2xl font-bold text-white shadow-xl shadow-gray-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-base flex items-center justify-center gap-3"
-                        style={{ backgroundColor: COLORS.SIDEBAR_BG }}
+                        className="w-full py-5 rounded-[22px] font-black uppercase tracking-widest text-sm text-white shadow-2xl shadow-blue-900/20 hover:shadow-blue-900/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-4 group"
+                        style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}
                     >
-                        <span>Confirm & Create Student Profile</span>
-                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><FontAwesomeIcon icon={faCheck} className="text-sm" /></div>
+                        <span>Confirm Registration</span>
+                        <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform duration-500">
+                            <FontAwesomeIcon icon={faCheck} className="text-sm" />
+                        </div>
                     </button>
                 </div>
             </div>

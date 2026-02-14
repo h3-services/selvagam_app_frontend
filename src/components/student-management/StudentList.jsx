@@ -147,13 +147,12 @@ const StudentList = ({
                                                                 { label: 'Discontinued', value: 'DISCONTINUED', icon: faBan, color: 'text-amber-600' },
                                                                 { label: 'Long Absent', value: 'LONG_ABSENT', icon: faUserSlash, color: 'text-red-500' },
                                                             ]
-                                                            .filter(option => option.value !== params.data.originalData.status)
+                                                            .filter(option => option.value !== params.data.studentStatus)
                                                             .map((option) => (
                                                                 <button
                                                                     key={option.value}
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        console.log(`Updating status for student ${params.data.id} to: ${option.value}`);
                                                                         handleStatusUpdate(params.data.id, option.value);
                                                                         setActiveMenuId(null);
                                                                     }}

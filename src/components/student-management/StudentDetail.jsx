@@ -31,30 +31,39 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                 fetchParentInfo(parentId);
             }
 
-            // Geocode logic
-            // Geocode logic
+            // Improved Geocoding logic with fallback
             const geocodeLocation = async () => {
-                // If no location provided or it's a dummy placeholder, skip
                 if (!selectedStudent.location || selectedStudent.location.includes("CityA")) return;
 
+                const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedStudent.location)}&limit=1`;
+                
                 try {
-                    // unexpected 522 from allorigins, trying codetabs
-                    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedStudent.location)}&limit=1`;
-                    // CodeTabs proxy is another alternative
-                    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(nominatimUrl)}`;
-                    
+                    // Try with corsproxy.io first (more reliable than codetabs)
+                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(nominatimUrl)}`;
                     const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error('Geocoding failed');
                     
-                    const data = await response.json(); // CodeTabs returns direct JSON, no wrapping
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data.length > 0) {
+                            const { lat, lon } = data[0];
+                            setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
+                            setMapCenter([parseFloat(lat), parseFloat(lon)]);
+                            return; // Success
+                        }
+                    }
 
-                    if (data && data.length > 0) {
-                        const { lat, lon } = data[0];
-                        setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
-                        setMapCenter([parseFloat(lat), parseFloat(lon)]);
+                    // Fallback to direct fetch if proxy fails (Nominatim sometimes allows direct browser CORS)
+                    const directResponse = await fetch(nominatimUrl);
+                    if (directResponse.ok) {
+                        const data = await directResponse.json();
+                        if (data && data.length > 0) {
+                            const { lat, lon } = data[0];
+                            setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
+                            setMapCenter([parseFloat(lat), parseFloat(lon)]);
+                        }
                     }
                 } catch (error) {
-                    console.warn('Geocoding error (likely CORS/Proxy):', error.message);
+                    // Fail silently to avoid cluttering logs, map will stay at default center
                 }
             };
             geocodeLocation();
@@ -283,16 +292,15 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                                     setMarkerPosition([lat, lng]);
                                                     try {
                                                         const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-                                                        const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(nominatimUrl)}`;
+                                                        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(nominatimUrl)}`;
                                                         
                                                         const response = await fetch(proxyUrl);
-                                                        const data = await response.json(); // CodeTabs direct JSON
+                                                        const data = await response.json();
 
                                                         const locationName = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
                                                         setMapSearchQuery(locationName);
                                                         setEditData({ ...editData, location: locationName });
                                                     } catch (error) {
-                                                        // Suppress error - fallback to coords
                                                         const locationName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
                                                         setMapSearchQuery(locationName);
                                                         setEditData({ ...editData, location: locationName });
@@ -313,15 +321,15 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                                             if (query.length > 2) {
                                                                 try {
                                                                     const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
-                                                                    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(nominatimUrl)}`;
+                                                                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(nominatimUrl)}`;
                                                                     
                                                                     const resp = await fetch(proxyUrl);
-                                                                    const data = await resp.json(); // CodeTabs direct JSON
+                                                                    const data = await resp.json();
                                                                     
                                                                     setLocationSuggestions(data);
                                                                     setShowSuggestions(true);
                                                                 } catch (err) {
-                                                                    // Suppress error
+                                                                    // Silent fail
                                                                 }
                                                             }
                                                         }}
