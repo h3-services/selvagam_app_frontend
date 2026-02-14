@@ -15,6 +15,7 @@ import {
   faSchool,
   faUserGraduate,
   faUserGroup,
+  faUsers,
   faChevronDown,
   faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
@@ -77,6 +78,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: faUserGraduate, label: 'Students', path: '/students' },
+    { icon: faUsers, label: 'Directory', path: '/student-directory' },
     { icon: faUserGroup, label: 'Parents', path: '/parents' },
     { icon: faSchool, label: 'Classes', path: '/classes' },
     { 

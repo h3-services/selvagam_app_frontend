@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers, faBus, faWalking, faUserCheck, faUserSlash } from '@fortawesome/free-solid-svg-icons';
 import { useRef } from 'react';
 import { COLORS } from '../../constants/colors';
 import StudentList from './StudentList';
@@ -90,10 +90,13 @@ const StudentManagementHome = () => {
     }, [activeMenuId]);
 
     const filteredStudents = useMemo(() => {
-        let result = students;
+        // Exclude ALUMNI from both Active and Archive views
+        let result = students.filter(student => student.studentStatus !== 'ALUMNI');
+        
         if (activeTab === "Active") {
             result = result.filter(student => student.studentStatus === 'CURRENT' || !student.studentStatus);
         } else if (activeTab === "Archive") {
+            // Only show other non-current statuses, excluding ALUMNI
             result = result.filter(student => student.studentStatus && student.studentStatus !== 'CURRENT');
         }
         if (searchQuery) {
