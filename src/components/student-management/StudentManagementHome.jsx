@@ -161,6 +161,33 @@ const StudentManagementHome = () => {
         }
     };
 
+    const handleTransportStatusUpdate = async (studentId, newStatus) => {
+        try {
+            await studentService.updateTransportStatus(studentId, newStatus);
+            setStudents(prev => prev.map(s => 
+                s.id === studentId ? { 
+                    ...s, 
+                    status: newStatus === 'ACTIVE' ? 'Approved' : 'Inactive',
+                    originalData: { ...s.originalData, is_transport_user: newStatus === 'ACTIVE' } 
+                } : s
+            ));
+            
+            // If the selected student is the one being updated, refresh it too
+            if (selectedStudent && selectedStudent.id === studentId) {
+                setSelectedStudent(prev => ({
+                    ...prev,
+                    status: newStatus === 'ACTIVE' ? 'Approved' : 'Inactive',
+                    originalData: { ...prev.originalData, is_transport_user: newStatus === 'ACTIVE' }
+                }));
+            }
+            
+            await fetchAllData();
+        } catch (error) {
+            console.error("Failed to update transport status:", error);
+            alert("Failed to update transport status");
+        }
+    };
+
     const handleUpdateStudent = async (updatedStudent) => {
         try {
             const apiData = {
@@ -259,6 +286,7 @@ const StudentManagementHome = () => {
                         selectedStudent={selectedStudent}
                         onBack={() => setSelectedStudent(null)}
                         onUpdate={handleUpdateStudent}
+                        onTransportStatusUpdate={handleTransportStatusUpdate}
                     />
                 ) : (
                     <StudentList
@@ -266,6 +294,7 @@ const StudentManagementHome = () => {
                         setSelectedStudent={setSelectedStudent}
                         setShowForm={setShowForm}
                         handleStatusUpdate={handleStatusUpdate}
+                        handleTransportStatusUpdate={handleTransportStatusUpdate}
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
                     />

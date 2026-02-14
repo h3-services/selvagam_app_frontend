@@ -1,12 +1,13 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faEye, faPhone, faChild, faRoute, faUserTie, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faEye, faPhone, faChild, faRoute, faUserTie, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking } from '@fortawesome/free-solid-svg-icons';
 
 const StudentList = ({
     filteredStudents,
     setSelectedStudent,
     setShowForm,
     handleStatusUpdate,
+    handleTransportStatusUpdate,
     activeMenuId,
     setActiveMenuId
 }) => {
@@ -98,6 +99,25 @@ const StudentList = ({
                                     cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '500' }
                                 },
                                 {
+                                    headerName: "Transport",
+                                    field: "originalData.is_transport_user",
+                                    width: 130,
+                                    minWidth: 130,
+                                    cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+                                    cellRenderer: (params) => (
+                                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+                                            params.value 
+                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                                            : 'bg-slate-50 text-slate-400 border-slate-100'
+                                        }`}>
+                                            <FontAwesomeIcon icon={params.value ? faBus : faWalking} className="text-[10px]" />
+                                            <span className="text-[10px] font-bold uppercase tracking-wider">
+                                                {params.value ? 'Bus' : 'None'}
+                                            </span>
+                                        </div>
+                                    )
+                                },
+                                {
                                     headerName: "Location",
                                     field: "location",
                                     flex: 1.5,
@@ -162,6 +182,28 @@ const StudentList = ({
                                                                     {option.label}
                                                                 </button>
                                                             ))}
+                                                            
+                                                            <div className="h-px bg-gray-100 my-1" />
+                                                            <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
+                                                                Transport Service
+                                                            </div>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleTransportStatusUpdate(
+                                                                        params.data.id, 
+                                                                        params.data.originalData?.is_transport_user ? 'INACTIVE' : 'ACTIVE'
+                                                                    );
+                                                                    setActiveMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors"
+                                                            >
+                                                                <FontAwesomeIcon 
+                                                                    icon={params.data.originalData?.is_transport_user ? faWalking : faBus} 
+                                                                    className={`w-4 ${params.data.originalData?.is_transport_user ? 'text-amber-600' : 'text-emerald-600'}`} 
+                                                                />
+                                                                {params.data.originalData?.is_transport_user ? 'Disable Transport' : 'Enable Transport'}
+                                                            </button>
                                                             
                                                             <div className="h-px bg-gray-100 my-1" />
                                                         </div>
