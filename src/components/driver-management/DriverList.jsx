@@ -17,11 +17,11 @@ const DriverList = ({
             <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
-                    '--ag-header-background-color': '#f8f5ff',
-                    '--ag-header-foreground-color': '#40189d',
+                    '--ag-header-background-color': '#f0f4ff',
+                    '--ag-header-foreground-color': '#3A7BFF',
                     '--ag-font-family': 'inherit',
                     '--ag-border-radius': '16px',
-                    '--ag-row-hover-color': '#faf5ff',
+                    '--ag-row-hover-color': '#f5f8ff',
                 }}>
                     <AgGridReact
                         rowData={filteredDrivers}
@@ -37,14 +37,14 @@ const DriverList = ({
                                         className="flex items-start gap-3 w-full cursor-pointer group"
                                         onClick={() => setSelectedDriver(params.data)}
                                     >
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110 flex-shrink-0" style={{ backgroundColor: '#40189d' }}>
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110 flex-shrink-0" style={{ backgroundColor: '#3A7BFF' }}>
                                             {params.value ? params.value.charAt(0) : '?'}
                                         </div>
                                         <div className="flex flex-col">
-                                            <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value || 'Unknown'}</p>
+                                            <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors">{params.value || 'Unknown'}</p>
                                             <div className="flex items-center gap-1 -mt-0.5">
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">View Details</span>
-                                                <FontAwesomeIcon icon={faChevronRight} className="text--[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
+                                                <FontAwesomeIcon icon={faChevronRight} className="text--[8px] text-gray-300 group-hover:text-blue-600 transition-colors" />
                                             </div>
                                         </div>
                                     </div>
@@ -109,7 +109,7 @@ const DriverList = ({
                                                     setActiveMenuId(isOpen ? null : params.data.id);
                                                 }}
                                                 className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-sm ${
-                                                    isOpen ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400 hover:bg-gray-100'
+                                                    isOpen ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-100'
                                                 }`}
                                             >
                                                 <FontAwesomeIcon icon={faEllipsisV} />
@@ -134,7 +134,7 @@ const DriverList = ({
                                                                     handleToggleStatus(params.data.id, option.value);
                                                                     setActiveMenuId(null);
                                                                 }}
-                                                                className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-indigo-50 rounded-lg flex items-center gap-2 transition-colors"
+                                                                className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors"
                                                             >
                                                                 <FontAwesomeIcon icon={option.icon} className={`w-4 ${option.color}`} />
                                                                 {option.label}
@@ -185,11 +185,11 @@ const DriverList = ({
             <div className="lg:hidden p-1 space-y-4 pb-24">
                 {filteredDrivers.map((driver) => (
                     <div key={driver.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
-                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#40189d' }}></div>
+                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#3A7BFF' }}></div>
                         <div className="relative p-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#40189d' }}>
+                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
                                         {driver.name.charAt(0)}
                                     </div>
                                     <div>
@@ -208,15 +208,15 @@ const DriverList = ({
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-2">
-                                <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f0f4ff' }}>
                                     <p className="text-xs text-gray-500 font-medium mb-1">Mobile</p>
                                     <p className="text-sm text-gray-900 font-bold truncate">{driver.mobile}</p>
                                 </div>
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <p className="text-xs text-gray-500 font-medium mb-1">License</p>
                                     <p className="text-sm text-gray-900 font-bold truncate">{driver.licenseNumber}</p>
                                 </div>
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <p className="text-xs text-gray-500 font-medium mb-1">Status</p>
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                         driver.status === 'Active' ? 'text-emerald-600 bg-emerald-50' : 
@@ -228,16 +228,16 @@ const DriverList = ({
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <p className="text-xs text-gray-500 font-medium mb-1">Vehicle</p>
                                     <p className="text-xs text-gray-900 font-medium truncate">{driver.vehicleNumber}</p>
                                 </div>
                                 <div 
-                                    className="p-3 rounded-xl flex items-center justify-center cursor-pointer hover:bg-indigo-50 transition-colors"
+                                    className="p-3 rounded-xl flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
                                     style={{ border: '1px solid #e0e7ff', backgroundColor: 'white' }}
                                     onClick={() => setSelectedDriver(driver)}
                                 >
-                                    <span className="text-xs font-bold text-indigo-600 flex items-center">
+                                    <span className="text-xs font-bold text-blue-600 flex items-center">
                                         View Details <FontAwesomeIcon icon={faChevronRight} className="ml-2 text-[10px]" />
                                     </span>
                                 </div>

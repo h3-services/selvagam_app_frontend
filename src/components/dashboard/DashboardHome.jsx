@@ -21,7 +21,7 @@ const DashboardHome = () => {
                 <div className="flex gap-3 ml-20 lg:ml-0">
                     <button 
                         onClick={() => navigate('/students')}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
                     >
                         <FontAwesomeIcon icon={faUserGraduate} />
                         Manage Students

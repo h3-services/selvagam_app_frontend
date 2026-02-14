@@ -13,7 +13,7 @@ const ParentViewDrawer = ({ show, onClose, parentData }) => {
             {/* Side Drawer */}
             <div className="fixed right-0 top-0 h-screen w-full sm:w-[500px] bg-white shadow-2xl z-[3001] flex flex-col p-0 transition-transform duration-300 animate-slide-in overflow-hidden rounded-l-[40px]">
                 {/* Header */}
-                <div className="relative p-8 text-white min-h-[180px] flex flex-col justify-end" style={{ backgroundColor: '#40189d' }}>
+                <div className="relative p-8 text-white min-h-[180px] flex flex-col justify-end" style={{ backgroundColor: '#3A7BFF' }}>
                     <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24"></div>
                     <button
                         onClick={onClose}
@@ -46,7 +46,7 @@ const ParentViewDrawer = ({ show, onClose, parentData }) => {
                         <h4 className="text-[11px] font-extrabold text-gray-400 uppercase tracking-[2px] mb-4">Contact Information</h4>
                         <div className="grid grid-cols-1 gap-4">
                             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 group hover:border-purple-200 transition-all">
-                                <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+                                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
                                     <FontAwesomeIcon icon={faPhone} />
                                 </div>
                                 <div className="flex flex-col">
@@ -55,7 +55,7 @@ const ParentViewDrawer = ({ show, onClose, parentData }) => {
                                 </div>
                             </div>
                             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 group hover:border-purple-200 transition-all">
-                                <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+                                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
                                     <FontAwesomeIcon icon={faEnvelope} />
                                 </div>
                                 <div className="flex (lex-col">
@@ -90,7 +90,7 @@ const ParentViewDrawer = ({ show, onClose, parentData }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                             <div className="flex items-center gap-3 mb-3">
-                                <FontAwesomeIcon icon={faCalendarAlt} className="text-purple-400 text-sm" />
+                                <FontAwesomeIcon icon={faCalendarAlt} className="text-blue-400 text-sm" />
                                 <span className="text-[10px] font-bold text-gray-400 uppercase">Joined On</span>
                             </div>
                             <p className="text-sm font-bold text-gray-800">
@@ -99,7 +99,7 @@ const ParentViewDrawer = ({ show, onClose, parentData }) => {
                         </div>
                         <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                             <div className="flex items-center gap-3 mb-3">
-                                <FontAwesomeIcon icon={faShieldAlt} className="text-purple-400 text-sm" />
+                                <FontAwesomeIcon icon={faShieldAlt} className="text-blue-400 text-sm" />
                                 <span className="text-[10px] font-bold text-gray-400 uppercase">Parent ID</span>
                             </div>
                             <p className="text-[10px] font-mono font-bold text-gray-800 break-all uppercase">

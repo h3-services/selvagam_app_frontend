@@ -43,7 +43,7 @@ export const LocationMarker = ({ setPosition, position }) => {
 export const createSchoolIcon = () => {
     return L.divIcon({
         className: 'custom-school-icon',
-        html: `<div style="background: linear-gradient(135deg, #40189d, #6b21a8); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 12px rgba(64,24,157,0.4);">
+        html: `<div style="background: linear-gradient(135deg, #3A7BFF, #6b21a8); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 12px rgba(64,24,157,0.4);">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" width="18" height="18" fill="white">
                 <path d="M337.8 5.4C327-1.8 313-1.8 302.2 5.4L166.3 96H48C21.5 96 0 117.5 0 144V464c0 26.5 21.5 48 48 48H256V320c0-17.7 14.3-32 32-32h64c17.7 0 32 14.3 32 32V512H592c26.5 0 48-21.5 48-48V144c0-26.5-21.5-48-48-48H473.7L337.8 5.4zM96 192h32c17.7 0 32 14.3 32 32V256c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V224c0-17.7 14.3-32 32-32zm400 32c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H528c-17.7 0-32-14.3-32-32V224zM96 352h32c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V384c0-17.7 14.3-32 32-32zm400 32c0-17.7 14.3-32 32-32h32c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H528c-17.7 0-32-14.3-32-32V384z"/>
             </svg>

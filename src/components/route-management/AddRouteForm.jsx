@@ -104,11 +104,11 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
     return (
         <div className="fixed inset-0 z-[1500]">
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
-            <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-purple-50 to-white shadow-2xl z-[1501] flex flex-col transition-all">
-                <div className="relative p-6 sm:p-8 border-b border-purple-100 flex-shrink-0">
+            <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-blue-50 to-white shadow-2xl z-[1501] flex flex-col transition-all">
+                <div className="relative p-6 sm:p-8 border-b border-blue-100 flex-shrink-0">
                     <button
                         onClick={onClose}
-                        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-purple-100 transition"
+                        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-blue-100 transition"
                         style={{ color: COLORS.SIDEBAR_BG }}
                     >
                         <FontAwesomeIcon icon={faTimes} className="text-xl" />
@@ -127,7 +127,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                 <div className="flex-1 overflow-hidden p-6 sm:p-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
                         {/* Left Column: Map */}
-                        <div className="flex flex-col h-full rounded-2xl overflow-hidden shadow-md border-2 border-purple-100 relative">
+                        <div className="flex flex-col h-full rounded-2xl overflow-hidden shadow-md border-2 border-blue-100 relative">
                             <div className="absolute top-4 left-16 right-4 z-[9999] flex flex-col gap-1">
                                 <div className="flex gap-2">
                                     <input
@@ -135,20 +135,20 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                         placeholder="Search location..."
                                         value={locationSearchQuery}
                                         onChange={(e) => setLocationSearchQuery(e.target.value)}
-                                        className="flex-1 px-4 py-2 rounded-xl border border-purple-200 shadow-lg focus:outline-none focus:border-purple-500 text-sm bg-white/90 backdrop-blur-sm"
+                                        className="flex-1 px-4 py-2 rounded-xl border border-purple-200 shadow-lg focus:outline-none focus:border-blue-500 text-sm bg-white/90 backdrop-blur-sm"
                                     />
-                                    <div className="w-10 h-10 bg-purple-600 text-white rounded-xl shadow-lg flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center">
                                         <FontAwesomeIcon icon={isSearchingLocation ? faSpinner : faSearch} className={isSearchingLocation ? "animate-spin" : ""} />
                                     </div>
                                 </div>
                                 {/* Suggestions Dropdown */}
                                 {searchSuggestions.length > 0 && (
-                                    <div className="bg-white rounded-xl shadow-xl border border-purple-100 overflow-hidden max-h-48 overflow-y-auto">
+                                    <div className="bg-white rounded-xl shadow-xl border border-blue-100 overflow-hidden max-h-48 overflow-y-auto">
                                         {searchSuggestions.map((suggestion, idx) => (
                                             <div
                                                 key={idx}
                                                 onClick={() => handleSelectSuggestion(suggestion)}
-                                                className="px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-0 truncate"
+                                                className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 truncate"
                                             >
                                                 {suggestion.display_name}
                                             </div>
@@ -193,7 +193,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                     >
                                         <Popup>
                                             <div className="text-center">
-                                                <span className="font-bold text-purple-700">Stop #{index + 1}</span>
+                                                <span className="font-bold text-blue-700">Stop #{index + 1}</span>
                                                 <br />
                                                 <span className="text-sm font-medium">{stop.name}</span>
                                             </div>
@@ -216,8 +216,8 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                         <div className="flex flex-col h-full overflow-y-auto pr-2">
                             {/* Route Details */}
                             <div className="space-y-4 mb-6">
-                                <h4 className="font-bold text-lg text-gray-800 border-b border-purple-100 pb-2 flex items-center gap-2">
-                                    <FontAwesomeIcon icon={faRoute} className="text-purple-600" />
+                                <h4 className="font-bold text-lg text-gray-800 border-b border-blue-100 pb-2 flex items-center gap-2">
+                                    <FontAwesomeIcon icon={faRoute} className="text-blue-600" />
                                     Route Details
                                 </h4>
 
@@ -227,7 +227,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                         <select
                                             value={selectedCampus}
                                             onChange={(e) => setSelectedCampus(e.target.value)}
-                                            className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm appearance-none font-bold text-gray-700"
+                                            className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm appearance-none font-bold text-gray-700"
                                         >
                                             {(schoolLocations || []).map(loc => (
                                                 <option key={loc.id} value={loc.id}>
@@ -235,7 +235,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                                 </option>
                                             ))}
                                         </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-600 pointer-events-none">
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none">
                                             <FontAwesomeIcon icon={faChevronDown} />
                                         </div>
                                     </div>
@@ -249,7 +249,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                         placeholder="e.g. Route A - Downtown"
                                         value={newRoute.routeName}
                                         onChange={(e) => setNewRoute({ ...newRoute, routeName: e.target.value })}
-                                        className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                        className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm"
                                     />
                                 </div>
 
@@ -260,15 +260,15 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                         placeholder="e.g. BUS-101"
                                         value={newRoute.assignedBus}
                                         onChange={(e) => setNewRoute({ ...newRoute, assignedBus: e.target.value })}
-                                        className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                        className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm"
                                     />
                                 </div>
                             </div>
 
                             {/* Stop Points Management */}
                             <div className="flex flex-col flex-1">
-                                <h4 className="font-bold text-lg text-gray-800 border-b border-purple-100 pb-2 mb-4 flex items-center gap-2">
-                                    <FontAwesomeIcon icon={faLocationDot} className="text-purple-600" />
+                                <h4 className="font-bold text-lg text-gray-800 border-b border-blue-100 pb-2 mb-4 flex items-center gap-2">
+                                    <FontAwesomeIcon icon={faLocationDot} className="text-blue-600" />
                                     Stops
                                 </h4>
 
@@ -278,7 +278,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                         placeholder={selectedPosition ? "Enter stop name..." : "Select location on map ->"}
                                         value={currentStopName}
                                         onChange={(e) => setCurrentStopName(e.target.value)}
-                                        className="flex-1 bg-white border-2 border-purple-100 rounded-xl px-4 py-3 text-sm focus:border-purple-400 focus:outline-none transition shadow-sm"
+                                        className="flex-1 bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm"
                                         onKeyDown={(e) => e.key === 'Enter' && handleAddStop()}
                                         disabled={!selectedPosition}
                                     />
@@ -293,13 +293,13 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                 </div>
 
                                 {/* List of added stops */}
-                                <div className="flex-1 overflow-y-auto bg-purple-50/50 rounded-xl p-3 border border-purple-100 min-h-[150px]">
+                                <div className="flex-1 overflow-y-auto bg-blue-50/50 rounded-xl p-3 border border-blue-100 min-h-[150px]">
                                     {newRoute.stopPoints && newRoute.stopPoints.length > 0 ? (
                                         <div className="space-y-2">
                                             {newRoute.stopPoints.map((stop, index) => (
-                                                <div key={index} className="flex items-center justify-between bg-white px-3 py-3 rounded-lg border border-purple-100 shadow-sm cursor-pointer hover:border-purple-300 transition-all select-none">
+                                                <div key={index} className="flex items-center justify-between bg-white px-3 py-3 rounded-lg border border-blue-100 shadow-sm cursor-pointer hover:border-purple-300 transition-all select-none">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">
+                                                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">
                                                             {index + 1}
                                                         </div>
                                                         <span className="text-sm font-bold text-gray-700">{stop.name}</span>
@@ -325,7 +325,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                     </div>
                 </div>
 
-                <div className="p-6 sm:p-8 border-t border-purple-100 bg-white flex-shrink-0">
+                <div className="p-6 sm:p-8 border-t border-blue-100 bg-white flex-shrink-0">
                     <button
                         onClick={handleAddRoute}
                         className="w-full py-4 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all text-base"

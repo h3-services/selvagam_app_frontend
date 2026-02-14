@@ -308,9 +308,9 @@ const RouteManagementHome = () => {
                                     placeholder="Search routes..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-96 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-96 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
-                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
+                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>
                         </div>
                     )}
@@ -318,7 +318,7 @@ const RouteManagementHome = () => {
                     {selectedRoute && (
                         <button 
                             onClick={() => setSelectedRoute(null)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 rounded-xl transition-all"
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-blue-600 bg-gray-100 hover:bg-blue-50 rounded-xl transition-all"
                         >
                             <FontAwesomeIcon icon={faArrowLeft} />
                             Back to List
@@ -333,8 +333,8 @@ const RouteManagementHome = () => {
             <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">
                 {loading ? (
                     <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-gray-100">
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
-                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-indigo-600" />
+                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
                         </div>
                         <p className="text-gray-500 font-medium">Loading routes...</p>
                     </div>

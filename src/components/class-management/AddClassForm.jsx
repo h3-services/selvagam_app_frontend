@@ -58,7 +58,7 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg">
+                        <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg">
                             <FontAwesomeIcon icon={faSchool} className="text-xl" />
                         </div>
                         <div>
@@ -77,12 +77,12 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                         <div className="relative group">
                             <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-widest ml-1">Class Name / Grade</label>
                             <div className="relative flex items-center">
-                                <FontAwesomeIcon icon={faSchool} className="absolute left-4 text-gray-300 group-focus-within:text-indigo-600 transition-colors" />
+                                <FontAwesomeIcon icon={faSchool} className="absolute left-4 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
                                 <input
                                     type="text"
                                     required
                                     placeholder="e.g. 10, 12, Grade 7"
-                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-semibold text-gray-800"
+                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-semibold text-gray-800"
                                     value={formData.class_name || ""}
                                     onChange={(e) => setFormData({...formData, class_name: e.target.value})}
                                 />
@@ -92,12 +92,12 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                         <div className="relative group">
                             <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-widest ml-1">Section</label>
                             <div className="relative flex items-center">
-                                <FontAwesomeIcon icon={faLayerGroup} className="absolute left-4 text-gray-300 group-focus-within:text-indigo-600 transition-colors" />
+                                <FontAwesomeIcon icon={faLayerGroup} className="absolute left-4 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
                                 <input
                                     type="text"
                                     required
                                     placeholder="e.g. A, B, Ruby, Emerald"
-                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-semibold text-gray-800"
+                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-semibold text-gray-800"
                                     value={formData.section || ""}
                                     onChange={(e) => setFormData({...formData, section: e.target.value})}
                                 />
@@ -107,12 +107,12 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                         <div className="relative group">
                             <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-widest ml-1">Academic Year</label>
                             <div className="relative flex items-center">
-                                <FontAwesomeIcon icon={faCalendarAlt} className="absolute left-4 text-gray-300 group-focus-within:text-indigo-600 transition-colors" />
+                                <FontAwesomeIcon icon={faCalendarAlt} className="absolute left-4 text-gray-300 group-focus-within:text-blue-600 transition-colors" />
                                 <input
                                     type="text"
                                     required
                                     placeholder="e.g. 2025-2026"
-                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-semibold text-gray-800"
+                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-semibold text-gray-800"
                                     value={formData.academic_year || ""}
                                     onChange={(e) => setFormData({...formData, academic_year: e.target.value})}
                                 />
@@ -122,7 +122,7 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                         <div className="relative group">
                             <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-widest ml-1">Initial Status</label>
                             <select
-                                className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-semibold text-gray-800 appearance-none cursor-pointer"
+                                className="w-full px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-indigo-300 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-semibold text-gray-800 appearance-none cursor-pointer"
                                 value={formData.status}
                                 onChange={(e) => setFormData({...formData, status: e.target.value})}
                             >
@@ -132,9 +132,9 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                         </div>
                     </div>
 
-                    <div className="p-5 bg-indigo-50 rounded-2xl border border-indigo-100">
+                    <div className="p-5 bg-blue-50 rounded-2xl border border-indigo-100">
                         <div className="flex gap-4">
-                            <FontAwesomeIcon icon={faMagic} className="text-indigo-600 mt-1" />
+                            <FontAwesomeIcon icon={faMagic} className="text-blue-600 mt-1" />
                             <div>
                                 <p className="text-sm font-bold text-indigo-900 mb-1">Definition Tip</p>
                                 <p className="text-xs text-indigo-700 leading-relaxed font-medium">Defining classes correctly helps in organizing student lists and bus routes more efficiently.</p>

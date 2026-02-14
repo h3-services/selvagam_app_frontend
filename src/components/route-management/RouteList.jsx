@@ -18,11 +18,11 @@ const RouteList = ({
             <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
-                    '--ag-header-background-color': '#f8f5ff',
-                    '--ag-header-foreground-color': '#40189d',
+                    '--ag-header-background-color': '#f0f4ff',
+                    '--ag-header-foreground-color': '#3A7BFF',
                     '--ag-font-family': 'inherit',
                     '--ag-border-radius': '16px',
-                    '--ag-row-hover-color': '#faf5ff',
+                    '--ag-row-hover-color': '#f5f8ff',
                 }}>
                     <AgGridReact
                         rowData={filteredRoutes}
@@ -37,14 +37,14 @@ const RouteList = ({
                                         className="flex items-center gap-3 w-full cursor-pointer group"
                                         onClick={() => setSelectedRoute(params.data)}
                                     >
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
                                             <FontAwesomeIcon icon={faRoute} />
                                         </div>
                                         <div className="flex flex-col">
-                                            <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value}</p>
+                                            <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors">{params.value}</p>
                                             <div className="flex items-center gap-1">
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">View Details</span>
-                                                <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
+                                                <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-blue-600 transition-colors" />
                                             </div>
                                         </div>
                                     </div>
@@ -69,7 +69,7 @@ const RouteList = ({
                                 flex: 0.6,
                                 cellRenderer: (params) => (
                                     <div className="flex items-center h-full">
-                                        <span className="bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md font-bold text-xs border border-purple-100">
+                                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold text-xs border border-blue-100">
                                             {params.value} Stops
                                         </span>
                                     </div>
@@ -83,7 +83,7 @@ const RouteList = ({
                                     <div className="flex items-center h-full">
                                         <button
                                             onClick={(e) => openBusReassignModal(params.data.id, e)}
-                                            className="group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer"
+                                            className="group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer"
                                             title="Click to reassign bus"
                                         >
                                             <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
@@ -151,7 +151,7 @@ const RouteList = ({
                         <div className="relative p-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#40189d' }}>
+                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
                                         <FontAwesomeIcon icon={faRoute} />
                                     </div>
                                     <div>
@@ -168,15 +168,15 @@ const RouteList = ({
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <p className="text-xs text-gray-500 font-medium">No. of Students</p>
                                     <p className="text-sm text-gray-900 font-bold truncate">{route.studentCount} Students</p>
                                 </div>
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <p className="text-xs text-gray-500 font-medium mb-2">Assigned Bus</p>
                                     <button
                                         onClick={(e) => openBusReassignModal(route.id, e)}
-                                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-600 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-blue-600 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
                                     >
                                         <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
                                             <FontAwesomeIcon icon={faBus} className="text-white text-sm" />
@@ -187,7 +187,7 @@ const RouteList = ({
                                         <FontAwesomeIcon icon={faExchangeAlt} className="text-white/70 text-xs" />
                                     </button>
                                 </div>
-                                <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f0f4ff' }}>
                                     <p className="text-xs text-gray-500 font-medium">Total Stops</p>
                                     <p className="text-sm text-gray-900 font-bold truncate">{route.stops} Stops</p>
                                 </div>
@@ -196,7 +196,7 @@ const RouteList = ({
                             <button
                                 onClick={() => setSelectedRoute(route)}
                                 className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all"
-                                style={{ backgroundColor: '#40189d' }}
+                                style={{ backgroundColor: '#3A7BFF' }}
                             >
                                 <FontAwesomeIcon icon={faEye} className="mr-2" /> View Details
                             </button>

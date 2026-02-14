@@ -152,9 +152,9 @@ const ParentManagementHome = () => {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => navigate('/parents/inactive')}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:bg-slate-50 hover:text-indigo-600 transition-all shadow-sm"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm"
                         >
-                            <FontAwesomeIcon icon={faBan} className="text-slate-400 group-hover:text-indigo-500" />
+                            <FontAwesomeIcon icon={faBan} className="text-slate-400 group-hover:text-blue-500" />
                             View Inactive
                         </button>
 
@@ -163,8 +163,8 @@ const ParentManagementHome = () => {
                                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                                 className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border transition-all duration-300 font-bold text-sm ${
                                     isFilterOpen 
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' 
-                                    : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+                                    ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-indigo-100' 
+                                    : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-blue-600'
                                 }`}
                             >
                                 <FontAwesomeIcon icon={faFilter} className={isFilterOpen ? 'text-white' : 'text-indigo-400'} />
@@ -180,7 +180,7 @@ const ParentManagementHome = () => {
                                     <button
                                         onClick={() => { setClassFilter("All Classes"); setIsFilterOpen(false); }}
                                         className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
-                                            classFilter === "All Classes" ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+                                            classFilter === "All Classes" ? 'bg-blue-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3">
@@ -194,7 +194,7 @@ const ParentManagementHome = () => {
                                             key={c}
                                             onClick={() => { setClassFilter(c); setIsFilterOpen(false); }}
                                             className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
-                                                classFilter === c ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+                                                classFilter === c ? 'bg-blue-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
                                             }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -214,9 +214,9 @@ const ParentManagementHome = () => {
                                 placeholder="Search parents..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-72 lg:w-96 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                className="pl-10 pr-4 py-2.5 w-72 lg:w-96 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                             />
-                            <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
+                            <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                         </div>
                     </div>
                 </div>
@@ -226,8 +226,8 @@ const ParentManagementHome = () => {
             <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">
                 {loading ? (
                     <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-gray-100">
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
-                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-indigo-600" />
+                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
                         </div>
                         <p className="text-gray-500 font-medium">Loading parents...</p>
                     </div>
@@ -273,7 +273,7 @@ const ParentManagementHome = () => {
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">Deactivate Parent</h3>
                             <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                                Are you sure you want to deactivate this parent? They will be moved to the <span className="font-bold text-indigo-600">Inactive Parents</span> list.
+                                Are you sure you want to deactivate this parent? They will be moved to the <span className="font-bold text-blue-600">Inactive Parents</span> list.
                             </p>
                             <div className="flex gap-3 w-full">
                                 <button

@@ -83,25 +83,25 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
         <div className="flex-1 overflow-hidden h-full flex flex-col">
             <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
                 {/* Header Section */}
-                <div className="relative p-8 border-b border-purple-100 bg-gradient-to-br from-purple-50 to-white">
+                <div className="relative p-8 border-b border-blue-100 bg-gradient-to-br from-blue-50 to-white">
                     <div className="relative flex flex-col md:flex-row items-center md:items-center justify-between gap-6">
                         <div className="flex items-center gap-6">
                             <button
                                 onClick={onBack}
-                                className="w-12 h-12 rounded-2xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 hover:bg-purple-50 transition-all shadow-md"
+                                className="w-12 h-12 rounded-2xl bg-white border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-all shadow-md"
                             >
                                 <FontAwesomeIcon icon={faArrowLeft} />
                             </button>
                             <div className="relative">
-                                <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-3xl font-bold shadow-xl" style={{ backgroundColor: '#40189d' }}>
+                                <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-3xl font-bold shadow-xl" style={{ backgroundColor: '#3A7BFF' }}>
                                     {selectedStudent.name.charAt(0)}
                                 </div>
-                                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-lg border-2 border-purple-100">
-                                    <FontAwesomeIcon icon={faChild} className="text-xs text-purple-600" />
+                                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-lg border-2 border-blue-100">
+                                    <FontAwesomeIcon icon={faChild} className="text-xs text-blue-600" />
                                 </div>
                             </div>
                             <div>
-                                <h2 className="text-3xl font-bold tracking-tight" style={{ color: '#40189d' }}>{selectedStudent.name}</h2>
+                                <h2 className="text-3xl font-bold tracking-tight" style={{ color: '#3A7BFF' }}>{selectedStudent.name}</h2>
 
                             </div>
                         </div>
@@ -110,12 +110,12 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                 <button onClick={() => { setIsEditing(false); setEditData(selectedStudent); }} className="px-6 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-all text-sm font-bold shadow-sm">
                                     <FontAwesomeIcon icon={faTimes} className="mr-2" />Cancel
                                 </button>
-                                <button onClick={handleSaveEdit} className="px-6 py-2.5 text-white rounded-xl hover:shadow-xl transition-all text-sm font-bold flex items-center gap-2" style={{ backgroundColor: '#40189d' }}>
+                                <button onClick={handleSaveEdit} className="px-6 py-2.5 text-white rounded-xl hover:shadow-xl transition-all text-sm font-bold flex items-center gap-2" style={{ backgroundColor: '#3A7BFF' }}>
                                     <FontAwesomeIcon icon={faCheck} />Save Changes
                                 </button>
                             </div>
                         ) : (
-                            <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 text-white rounded-xl hover:shadow-lg transition-all text-sm font-bold" style={{ backgroundColor: '#40189d' }}>
+                            <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 text-white rounded-xl hover:shadow-lg transition-all text-sm font-bold" style={{ backgroundColor: '#3A7BFF' }}>
                                 <FontAwesomeIcon icon={faEdit} className="mr-2" />Edit Profile
                             </button>
                         )}
@@ -128,14 +128,14 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                         {/* Left Side: Parent Detail Block */}
                         <div 
                             onClick={() => !isEditing && setShowParentDrawer(true)}
-                            className={`group relative p-8 rounded-[32px] bg-white border-2 transition-all duration-300 shadow-sm ${!isEditing ? 'cursor-pointer hover:shadow-2xl hover:border-purple-400 border-gray-100' : 'border-purple-100'}`}
+                            className={`group relative p-8 rounded-[32px] bg-white border-2 transition-all duration-300 shadow-sm ${!isEditing ? 'cursor-pointer hover:shadow-2xl hover:border-blue-400 border-gray-100' : 'border-blue-100'}`}
                         >
                             <div className="flex items-center justify-between mb-8">
-                                <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-[#40189d] shadow-inner group-hover:scale-110 transition-transform duration-300">
+                                <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-[#3A7BFF] shadow-inner group-hover:scale-110 transition-transform duration-300">
                                     <FontAwesomeIcon icon={faUserTie} className="text-2xl" />
                                 </div>
                                 {!isEditing && (
-                                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#40189d] border border-gray-100 shadow-sm">
+                                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#3A7BFF] border border-gray-100 shadow-sm">
                                         <span className="text-[10px] font-black uppercase tracking-wider">Expand Details</span>
                                         <FontAwesomeIcon icon={faEye} className="text-[10px]" />
                                     </div>
@@ -145,19 +145,26 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                             <h3 className="text-[11px] font-black uppercase tracking-[2.5px] text-gray-400 mb-3">Guardian Information</h3>
                             <div className="flex flex-col">
                                 <div className="flex flex-wrap items-center gap-3 mb-6">
-                                    <p className="text-3xl font-black text-gray-900 tracking-tight group-hover:text-[#40189d] transition-colors">
-                                        {selectedStudent.primaryParent}
-                                    </p>
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-2xl font-black text-gray-900 tracking-tight leading-none truncate">
+                                            {selectedStudent.parent1Name}
+                                        </p>
+                                        {selectedStudent.parent2Name && (
+                                            <p className="text-2xl font-black text-gray-600 tracking-tight leading-none truncate overflow-hidden">
+                                                {selectedStudent.parent2Name}
+                                            </p>
+                                        )}
+                                    </div>
                                     {parentDetail?.parent_role && (
-                                        <span className="px-3 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-widest shadow-md" style={{ backgroundColor: '#40189d' }}>
+                                        <span className="px-3 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-widest shadow-md" style={{ backgroundColor: '#3A7BFF' }}>
                                             {parentDetail.parent_role}
                                         </span>
                                     )}
                                 </div>
                                 
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group-hover:bg-purple-50/10 group-hover:border-purple-100 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#40189d] shadow-sm">
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50/10 group-hover:border-blue-100 transition-all">
+                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#3A7BFF] shadow-sm">
                                             <FontAwesomeIcon icon={faEnvelope} />
                                         </div>
                                         <div>
@@ -165,8 +172,8 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                             <p className="text-sm font-bold text-gray-700">{selectedStudent.parentEmail || 'Not Provided'}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group-hover:bg-purple-50/10 group-hover:border-purple-100 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#40189d] shadow-sm">
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50/10 group-hover:border-blue-100 transition-all">
+                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#3A7BFF] shadow-sm">
                                             <FontAwesomeIcon icon={faPhone} />
                                         </div>
                                         <div>
@@ -181,12 +188,12 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                         {/* Right Side: Student Detail Block */}
                         <div className="p-8 rounded-[32px] bg-white border-2 border-gray-100 shadow-sm flex flex-col">
                             <div className="flex items-center justify-between mb-8">
-                                <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-[#40189d] shadow-inner">
+                                <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-[#3A7BFF] shadow-inner">
                                     <FontAwesomeIcon icon={faChild} className="text-2xl" />
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</p>
-                                    <span className="px-4 py-1 rounded-full text-[10px] font-black uppercase text-white" style={{ backgroundColor: '#40189d' }}>
+                                    <span className="px-4 py-1 rounded-full text-[10px] font-black uppercase text-white" style={{ backgroundColor: '#3A7BFF' }}>
                                         {selectedStudent.status}
                                     </span>
                                 </div>
@@ -223,7 +230,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                     <div className="flex-1 space-y-6">
                                         <div>
                                             <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-[#40189d] shadow-inner">
+                                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-[#3A7BFF] shadow-inner">
                                                     <FontAwesomeIcon icon={faMapMarkerAlt} className="text-lg" />
                                                 </div>
                                                 <div>
@@ -238,7 +245,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                                         value={editData.location}
                                                         onChange={(e) => setEditData({ ...editData, location: e.target.value })}
                                                         placeholder="Update address..."
-                                                        className="w-full bg-white border-2 border-gray-100 rounded-2xl px-5 py-4 text-base font-bold outline-none focus:border-[#40189d] transition-all shadow-inner"
+                                                        className="w-full bg-white border-2 border-gray-100 rounded-2xl px-5 py-4 text-base font-bold outline-none focus:border-[#3A7BFF] transition-all shadow-inner"
                                                     />
                                                     <FontAwesomeIcon icon={faSearch} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300" />
                                                 </div>
@@ -251,11 +258,11 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                             )}
                                         </div>
 
-                                        <div className="p-6 rounded-3xl text-white shadow-xl relative overflow-hidden" style={{ backgroundColor: '#40189d' }}>
+                                        <div className="p-6 rounded-3xl text-white shadow-xl relative overflow-hidden" style={{ backgroundColor: '#3A7BFF' }}>
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                                             <div className="relative flex items-center justify-between">
                                                 <div>
-                                                    <p className="text-purple-100 text-[10px] font-bold uppercase tracking-widest mb-1">Route Distance</p>
+                                                    <p className="text-blue-100 text-[10px] font-bold uppercase tracking-widest mb-1">Route Distance</p>
                                                     <p className="text-4xl font-black">{selectedStudent.distance || '4.2 km'}</p>
                                                 </div>
                                                 <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
@@ -319,7 +326,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
                                                             }
                                                         }}
                                                         placeholder="Search on map..."
-                                                        className="w-full bg-white border-2 border-purple-100 rounded-xl px-4 py-2 text-xs shadow-xl outline-none focus:border-purple-500"
+                                                        className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-2 text-xs shadow-xl outline-none focus:border-blue-500"
                                                     />
                                                 </div>
                                             </div>

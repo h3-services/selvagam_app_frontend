@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faTrash, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { useRef } from 'react';
 import { COLORS } from '../../constants/colors';
 import StudentList from './StudentList';
@@ -18,7 +18,7 @@ const StudentManagementHome = () => {
     const [parents, setParents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-    const [activeTab, setActiveTab] = useState("All");
+    const [activeTab, setActiveTab] = useState("Active");
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [classFilter, setClassFilter] = useState("All Classes");
@@ -28,8 +28,6 @@ const StudentManagementHome = () => {
 
     // Actions State
     const [activeMenuId, setActiveMenuId] = useState(null);
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState(null);
     const [showDeactivateModal, setShowDeactivateModal] = useState(false);
     const [deactivatingItemId, setDeactivatingItemId] = useState(null);
     const [deactivationReason, setDeactivationReason] = useState("");
@@ -84,10 +82,16 @@ const StudentManagementHome = () => {
         }
     };
 
-    // Close menus when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (activeMenuId) setActiveMenuId(null);
+            // Only handle click outside if its NOT a menu button or menu item
+            const isActionMenuClick = event.target.closest('.action-menu-container');
+            const isActionMenuTrigger = event.target.closest('.action-menu-trigger');
+
+            if (!isActionMenuClick && !isActionMenuTrigger) {
+                if (activeMenuId) setActiveMenuId(null);
+            }
+            
             if (isFilterOpen && filterRef.current && !filterRef.current.contains(event.target)) {
                 setIsFilterOpen(false);
             }
@@ -98,8 +102,10 @@ const StudentManagementHome = () => {
 
     const filteredStudents = useMemo(() => {
         let result = students;
-        if (activeTab !== "All") {
-            result = result.filter(student => student.status === activeTab);
+        if (activeTab === "Active") {
+            result = result.filter(student => student.originalData?.status === 'CURRENT' || !student.originalData?.status);
+        } else if (activeTab === "Archive") {
+            result = result.filter(student => student.originalData?.status && student.originalData?.status !== 'CURRENT');
         }
         if (classFilter !== "All Classes") {
             result = result.filter(student => student.className === classFilter);
@@ -149,13 +155,18 @@ const StudentManagementHome = () => {
     
     // Status update handler
     const handleStatusUpdate = async (studentId, newStatus) => {
+        console.log(`[StatusUpdate] Triggering status update for ID: ${studentId}, New Status: ${newStatus}`);
         try {
             await studentService.updateStudentStatus(studentId, newStatus);
-            // Optimistic update
+            console.log(`[StatusUpdate] API call successful for ${studentId}`);
+            // Update local state immediately so filtering (Active/Archive) reacts
             setStudents(prev => prev.map(s => 
-                s.id === studentId ? { ...s, studentStatus: newStatus } : s
+                s.id === studentId ? { 
+                    ...s, 
+                    originalData: { ...s.originalData, status: newStatus }
+                } : s
             ));
-            await fetchAllData(); // Refresh to be sure
+            await fetchAllData(); // Then sync with server
         } catch (error) {
             console.error("Failed to update status:", error);
             alert("Failed to update student status");
@@ -178,23 +189,6 @@ const StudentManagementHome = () => {
         }
     };
 
-    const handleDelete = (id) => {
-        setItemToDelete(id);
-        setShowDeleteConfirm(true);
-    };
-
-    const confirmDelete = async () => {
-        if (itemToDelete) {
-            try {
-                await studentService.deleteStudent(itemToDelete);
-                setStudents(students.filter(s => s.id !== itemToDelete));
-                setItemToDelete(null);
-                setShowDeleteConfirm(false);
-            } catch (error) {
-                console.error("Error deleting student:", error);
-            }
-        }
-    };
 
     const handleDeactivate = (id) => {
         setDeactivatingItemId(id);
@@ -221,9 +215,36 @@ const StudentManagementHome = () => {
                             {selectedStudent ? 'Student Profile' : 'Student Management'}
                         </h1>
                         <p className="text-sm text-gray-500 mt-1">
-                            {selectedStudent ? `Viewing details for ${selectedStudent.name}` : 'Authorize and manage student accounts'}
+                            {selectedStudent ? `Viewing details for ${selectedStudent.name}` : ''}
                         </p>
                     </div>
+
+                    {!selectedStudent && (
+                        <div className="flex bg-gray-100/50 p-1.5 rounded-[20px] border border-gray-200 shadow-sm">
+                            <button
+                                onClick={() => setActiveTab('Active')}
+                                className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
+                                    activeTab === 'Active' 
+                                    ? 'bg-white text-blue-600 shadow-lg scale-[1.02]' 
+                                    : 'text-gray-400 hover:text-gray-600'
+                                }`}
+                            >
+                                <FontAwesomeIcon icon={faUsers} className={activeTab === 'Active' ? 'text-blue-600' : 'text-gray-400'} />
+                                Active
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('Archive')}
+                                className={`px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
+                                    activeTab === 'Archive' 
+                                    ? 'bg-white text-blue-600 shadow-lg scale-[1.02]' 
+                                    : 'text-gray-400 hover:text-gray-600'
+                                }`}
+                            >
+                                <FontAwesomeIcon icon={faArchive} className={activeTab === 'Archive' ? 'text-blue-600' : 'text-gray-400'} />
+                                Archive
+                            </button>
+                        </div>
+                    )}
 
                     {!selectedStudent && (
                         <div className="flex items-center gap-4">
@@ -233,8 +254,8 @@ const StudentManagementHome = () => {
                                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                                     className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border transition-all duration-300 font-bold text-sm ${
                                         isFilterOpen 
-                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' 
-                                        : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-indigo-600'
+                                        ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-indigo-100' 
+                                        : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:text-blue-600'
                                     }`}
                                 >
                                     <FontAwesomeIcon icon={faFilter} className={isFilterOpen ? 'text-white' : 'text-indigo-400'} />
@@ -250,7 +271,7 @@ const StudentManagementHome = () => {
                                         <button
                                             onClick={() => { setClassFilter("All Classes"); setIsFilterOpen(false); }}
                                             className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
-                                                classFilter === "All Classes" ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+                                                classFilter === "All Classes" ? 'bg-blue-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
                                             }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -264,7 +285,7 @@ const StudentManagementHome = () => {
                                                 key={c}
                                                 onClick={() => { setClassFilter(c); setIsFilterOpen(false); }}
                                                 className={`w-full text-left px-4 py-3 text-sm font-bold flex items-center justify-between transition-colors ${
-                                                    classFilter === c ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
+                                                    classFilter === c ? 'bg-blue-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'
                                                 }`}
                                             >
                                                 <div className="flex items-center gap-3">
@@ -284,9 +305,9 @@ const StudentManagementHome = () => {
                                     placeholder="Search students..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-96 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-96 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
-                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
+                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>
                         </div>
                     )}
@@ -298,8 +319,8 @@ const StudentManagementHome = () => {
             <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">
                 {loading ? (
                     <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-gray-100">
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
-                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-indigo-600" />
+                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
                         </div>
                         <p className="text-gray-500 font-medium">Loading students...</p>
                     </div>
@@ -314,7 +335,6 @@ const StudentManagementHome = () => {
                         filteredStudents={filteredStudents}
                         setSelectedStudent={setSelectedStudent}
                         setShowForm={setShowForm}
-                        handleDelete={handleDelete}
                         handleStatusUpdate={handleStatusUpdate}
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
@@ -341,40 +361,6 @@ const StudentManagementHome = () => {
                 </button>
             )}
 
-            {/* Delete Confirmation Modal */}
-            {showDeleteConfirm && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
-                        onClick={() => setShowDeleteConfirm(false)}
-                    />
-                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
-                        <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
-                            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                                Are you sure you want to delete this student record? This action cannot be undone and will remove all associated data.
-                            </p>
-                            <div className="flex gap-3 w-full">
-                                <button
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={confirmDelete}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Deactivation Reason Modal */}
             {showDeactivateModal && (
@@ -395,7 +381,7 @@ const StudentManagementHome = () => {
                             value={deactivationReason}
                             onChange={(e) => setDeactivationReason(e.target.value)}
                             placeholder="Enter reason here..."
-                            className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 mb-6 min-h-[100px]"
+                            className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 resize-none bg-gray-50/50 mb-6 min-h-[100px]"
                             autoFocus
                         />
                         <div className="flex gap-3 w-full">

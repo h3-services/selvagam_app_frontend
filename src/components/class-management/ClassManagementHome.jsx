@@ -62,7 +62,7 @@ const ClassManagementHome = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className='ml-20 lg:ml-0'>
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-                            <FontAwesomeIcon icon={faShapes} className="text-indigo-600 text-xl" />
+                            <FontAwesomeIcon icon={faShapes} className="text-blue-600 text-xl" />
                             Class Management
                         </h1>
                         <p className="text-sm text-gray-500 mt-1">Manage academic classes, sections, and student promotion</p>
@@ -71,9 +71,9 @@ const ClassManagementHome = () => {
                     <div className="flex items-center gap-4">
                         <button 
                             onClick={() => setShowPromoteModal(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:bg-slate-50 hover:text-indigo-600 transition-all shadow-sm"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-sm hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm"
                         >
-                            <FontAwesomeIcon icon={faArrowTrendUp} className="text-indigo-400 group-hover:text-indigo-500" />
+                            <FontAwesomeIcon icon={faArrowTrendUp} className="text-indigo-400 group-hover:text-blue-500" />
                             Promote Students
                         </button>
 
@@ -83,9 +83,9 @@ const ClassManagementHome = () => {
                                 placeholder="Search classes..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-64 lg:w-80 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none"
+                                className="pl-10 pr-4 py-2.5 w-64 lg:w-80 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none"
                             />
-                            <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                            <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                         </div>
                     </div>
                 </div>
@@ -96,8 +96,8 @@ const ClassManagementHome = () => {
                 <div className="max-w-[1600px] mx-auto">
                     {loading ? (
                         <div className="h-[400px] flex flex-col items-center justify-center bg-white rounded-3xl shadow-xl border border-slate-50">
-                            <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
-                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-indigo-600" />
+                            <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
                             </div>
                             <p className="text-slate-400 font-semibold uppercase tracking-wider text-xs">Loading Class Structure...</p>
                         </div>
@@ -105,7 +105,7 @@ const ClassManagementHome = () => {
                         <div className="space-y-6">
                             <div className="flex items-center justify-between px-2">
                                 <div className="flex items-center gap-3">
-                                    <div className="px-3 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-indigo-100">
+                                    <div className="px-3 py-1 bg-blue-50 text-indigo-700 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-indigo-100">
                                         {classes.length} Total Hubs
                                     </div>
                                     <div className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-emerald-100 flex items-center gap-2">

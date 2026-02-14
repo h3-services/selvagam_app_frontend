@@ -16,7 +16,7 @@ const MaintenanceModule = () => {
 
             <div className="flex-1 flex flex-col gap-6">
                 {busStatus.map((status, index) => (
-                    <div key={index} className="group p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition-all duration-300">
+                    <div key={index} className="group p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-100 hover:bg-blue-50/30 transition-all duration-300">
                         <div className="flex justify-between items-start mb-3">
                             <div className="flex items-center gap-3">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${status.color === 'emerald' ? 'bg-emerald-100 text-emerald-600' :
@@ -53,7 +53,7 @@ const MaintenanceModule = () => {
                         </div>
                     </div>
                     {/* Decorative circles */}
-                    <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-indigo-500 opacity-20 blur-2xl"></div>
+                    <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-blue-500 opacity-20 blur-2xl"></div>
                     <div className="absolute bottom-0 left-0 -ml-6 -mb-6 w-20 h-20 rounded-full bg-emerald-500 opacity-20 blur-2xl"></div>
                 </div>
             </div>

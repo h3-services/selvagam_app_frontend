@@ -27,7 +27,7 @@ const ClassCard = ({ classData, onRefresh, allClasses = [] }) => {
             <div className="flex flex-col h-full">
                 {/* Header: Grade & Status */}
                 <div className="flex items-start justify-between mb-6">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm transition-transform duration-300 group-hover:scale-105 ${isActive ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm transition-transform duration-300 group-hover:scale-105 ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
                         {classData.class_name}
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -60,23 +60,23 @@ const ClassCard = ({ classData, onRefresh, allClasses = [] }) => {
                         <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 transition-colors group-hover:bg-white">
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Academic Year</p>
                             <div className="flex items-center gap-2 text-gray-700">
-                                <FontAwesomeIcon icon={faCalendarAlt} className="text-indigo-500 text-[10px]" />
+                                <FontAwesomeIcon icon={faCalendarAlt} className="text-blue-500 text-[10px]" />
                                 <span className="text-sm font-bold">{classData.academic_year}</span>
                             </div>
                         </div>
                         <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 transition-colors group-hover:bg-white">
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Updated</p>
                             <div className="flex items-center gap-2 text-gray-700">
-                                <FontAwesomeIcon icon={faClock} className="text-indigo-500 text-[10px]" />
+                                <FontAwesomeIcon icon={faClock} className="text-blue-500 text-[10px]" />
                                 <span className="text-sm font-bold">{new Date(classData.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                             </div>
                         </div>
                     </div>
 
                     {nextClass && (
-                        <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center justify-between group/next transition-all hover:bg-indigo-600 hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-100">
+                        <div className="p-4 bg-blue-50 rounded-2xl border border-indigo-100 flex items-center justify-between group/next transition-all hover:bg-blue-600 hover:border-blue-600 hover:shadow-lg hover:shadow-indigo-100">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-50 transition-colors group-hover/next:bg-white/20 group-hover/next:text-white group-hover/next:border-transparent">
+                                <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-blue-600 shadow-sm border border-blue-50 transition-colors group-hover/next:bg-white/20 group-hover/next:text-white group-hover/next:border-transparent">
                                     <FontAwesomeIcon icon={faArrowUpRightDots} className="text-xs" />
                                 </div>
                                 <div className="flex flex-col">

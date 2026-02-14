@@ -240,13 +240,13 @@ const BusManagementHome = () => {
                             <div className="flex bg-gray-100 p-1 rounded-xl">
                                 <button
                                     onClick={() => setActiveTab('All')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'All' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'All' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                                 >
                                     All Buses
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('Scrap')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'Scrap' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'Scrap' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                                 >
                                     Scrap Buses
                                 </button>
@@ -257,9 +257,9 @@ const BusManagementHome = () => {
                                     placeholder="Search buses..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-64 bg-indigo-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-64 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
-                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors" />
+                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>
                         </div>
                     )}
@@ -267,7 +267,7 @@ const BusManagementHome = () => {
                     {selectedBus && (
                         <button 
                             onClick={() => setSelectedBus(null)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-indigo-600 bg-gray-100 hover:bg-indigo-50 rounded-xl transition-all"
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-blue-600 bg-gray-100 hover:bg-blue-50 rounded-xl transition-all"
                         >
                             <FontAwesomeIcon icon={faArrowLeft} />
                         </button>
@@ -279,15 +279,15 @@ const BusManagementHome = () => {
             <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">
                 {loading ? (
                     <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-gray-100">
-                        <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
-                            <FontAwesomeIcon icon={faSpinner} spin className="text-2xl text-indigo-600" />
+                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+                            <FontAwesomeIcon icon={faSpinner} spin className="text-2xl text-blue-600" />
                         </div>
                         <p className="text-gray-500 font-medium">Loading fleet data...</p>
                     </div>
                 ) : error ? (
                     <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-red-100">
                          <p className="text-red-500 font-bold mb-4">{error}</p>
-                         <button onClick={fetchData} className="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-95">Retry</button>
+                         <button onClick={fetchData} className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-95">Retry</button>
                     </div>
                 ) : selectedBus ? (
                     <BusDetail

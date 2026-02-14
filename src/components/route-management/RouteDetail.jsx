@@ -169,7 +169,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
 
     return (
         <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-            <div className="relative p-5 shrink-0" style={{ backgroundColor: '#40189d' }}>
+            <div className="relative p-5 shrink-0" style={{ backgroundColor: '#3A7BFF' }}>
                 <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <button
@@ -236,13 +236,13 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                                         placeholder={selectedPosition ? "Stop name..." : "Select on map"}
                                         value={currentStopName}
                                         onChange={(e) => setCurrentStopName(e.target.value)}
-                                        className="flex-1 bg-white border border-purple-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500"
+                                        className="flex-1 bg-white border border-purple-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
                                         disabled={!selectedPosition}
                                     />
                                     <button
                                         onClick={handleEditAddStop}
                                         disabled={!currentStopName.trim() || !selectedPosition || isAddingStop}
-                                        className={`px-3 rounded-lg text-white shadow-sm transition-all ${(!currentStopName.trim() || !selectedPosition || isAddingStop) ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 hover:shadow-md'}`}
+                                        className={`px-3 rounded-lg text-white shadow-sm transition-all ${(!currentStopName.trim() || !selectedPosition || isAddingStop) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md'}`}
                                     >
                                         <FontAwesomeIcon icon={isAddingStop ? faSpinner : faPlus} className={isAddingStop ? "animate-spin" : ""} />
                                     </button>
@@ -260,7 +260,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                                 (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
                                     <div key={index} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <div className="flex items-center gap-3 flex-1">
-                                            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
+                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
                                                 {index + 1}
                                             </div>
                                             {editingStopIndex === index ? (
@@ -270,14 +270,14 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                                                             type="text" 
                                                             value={editingStopName}
                                                             onChange={(e) => setEditingStopName(e.target.value)}
-                                                            className="flex-1 bg-gray-50 border border-purple-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
+                                                            className="flex-1 bg-gray-50 border border-purple-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
                                                             autoFocus
                                                         />
                                                         <button onClick={() => handleSaveStopEdit(index)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors">
                                                             <FontAwesomeIcon icon={faCheck} />
                                                         </button>
                                                     </div>
-                                                    <span className="text-[10px] text-purple-600 font-medium ml-1 animate-pulse">
+                                                    <span className="text-[10px] text-blue-600 font-medium ml-1 animate-pulse">
                                                         * Click map to update location
                                                     </span>
                                                 </div>
@@ -290,7 +290,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                                                 {editingStopIndex !== index && (
                                                     <button
                                                         onClick={() => handleStartStopEdit(index, stop.name)}
-                                                        className="text-gray-400 hover:text-purple-600 transition-colors"
+                                                        className="text-gray-400 hover:text-blue-600 transition-colors"
                                                     >
                                                         <FontAwesomeIcon icon={faEdit} />
                                                     </button>
@@ -321,20 +321,20 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                                         placeholder="Search location..."
                                         value={locationSearchQuery}
                                         onChange={(e) => setLocationSearchQuery(e.target.value)}
-                                        className="flex-1 px-4 py-2 rounded-xl border border-purple-200 shadow-lg focus:outline-none focus:border-purple-500 text-sm bg-white/90 backdrop-blur-sm"
+                                        className="flex-1 px-4 py-2 rounded-xl border border-purple-200 shadow-lg focus:outline-none focus:border-blue-500 text-sm bg-white/90 backdrop-blur-sm"
                                     />
-                                    <div className="w-10 h-10 bg-purple-600 text-white rounded-xl shadow-lg flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center">
                                         <FontAwesomeIcon icon={isSearchingLocation ? faSpinner : faSearch} className={isSearchingLocation ? "animate-spin" : ""} />
                                     </div>
                                 </div>
                                 {/* Suggestions Dropdown */}
                                 {searchSuggestions.length > 0 && (
-                                    <div className="bg-white rounded-xl shadow-xl border border-purple-100 overflow-hidden max-h-48 overflow-y-auto">
+                                    <div className="bg-white rounded-xl shadow-xl border border-blue-100 overflow-hidden max-h-48 overflow-y-auto">
                                         {searchSuggestions.map((suggestion, idx) => (
                                             <div
                                                 key={idx}
                                                 onClick={() => handleSelectSuggestion(suggestion)}
-                                                className="px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-0 truncate"
+                                                className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 truncate"
                                             >
                                                 {suggestion.display_name}
                                             </div>

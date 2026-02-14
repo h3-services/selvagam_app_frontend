@@ -9,7 +9,7 @@ import { classService } from '../../services/classService';
 const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false }) => (
     <div className="relative group">
         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-xl border border-gray-200 transition-all duration-200 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-500/10 ${disabled ? 'bg-gray-50' : 'hover:border-purple-300'}`}>
+        <div className={`relative flex items-center bg-white rounded-xl border border-gray-200 transition-all duration-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${disabled ? 'bg-gray-50' : 'hover:border-purple-300'}`}>
             <div className="w-10 h-full flex items-center justify-center text-gray-400 absolute left-0 top-0 pointer-events-none">
                 <FontAwesomeIcon icon={icon} className="text-sm" />
             </div>
@@ -28,7 +28,7 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
 const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false, renderOption }) => (
     <div className="relative group">
         <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-xl border border-gray-200 transition-all duration-200 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-500/10 ${disabled ? 'bg-gray-50' : 'hover:border-purple-300'}`}>
+        <div className={`relative flex items-center bg-white rounded-xl border border-gray-200 transition-all duration-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${disabled ? 'bg-gray-50' : 'hover:border-purple-300'}`}>
             <div className="w-10 h-full flex items-center justify-center text-gray-400 absolute left-0 top-0 pointer-events-none">
                 <FontAwesomeIcon icon={icon} className="text-sm" />
             </div>
@@ -63,6 +63,8 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
         drop_stop_id: '',
         emergency_contact: '',
         student_photo_url: '',
+        study_year: '',
+        is_transport_user: true
     };
 
     const defaultParentState = {
@@ -205,22 +207,35 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             return;
         }
 
+        if (formData.is_transport_user) {
+            if (!formData.pickup_route_id || !formData.pickup_stop_id || !formData.drop_route_id || !formData.drop_stop_id) {
+                alert("For Transport Users, please select both Pickup and Drop routes/stops.");
+                return;
+            }
+        }
 
         // Build payload matching the working Swagger example exactly
         const payload = {
             name: formData.name,
             parent_id: formData.parent_id,
             dob: formData.dob,
-            s_parent_id: formData.s_parent_id || null, // Backend requires this field (even as null)
+            s_parent_id: formData.s_parent_id || null, 
+            is_transport_user: formData.is_transport_user,
+            study_year: formData.study_year || '',
+            emergency_contact: formData.emergency_contact ? Number(formData.emergency_contact) : 0
         };
 
         // Add optional fields only if they have actual values
         if (formData.class_id) payload.class_id = formData.class_id;
-        if (formData.pickup_route_id) payload.pickup_route_id = formData.pickup_route_id;
-        if (formData.drop_route_id) payload.drop_route_id = formData.drop_route_id;
-        if (formData.pickup_stop_id) payload.pickup_stop_id = formData.pickup_stop_id;
-        if (formData.drop_stop_id) payload.drop_stop_id = formData.drop_stop_id;
-        if (formData.emergency_contact) payload.emergency_contact = Number(formData.emergency_contact);
+        
+        // Only include transport details if transport user is true
+        if (formData.is_transport_user) {
+            payload.pickup_route_id = formData.pickup_route_id;
+            payload.drop_route_id = formData.drop_route_id;
+            payload.pickup_stop_id = formData.pickup_stop_id;
+            payload.drop_stop_id = formData.drop_stop_id;
+        }
+
         if (formData.student_photo_url) payload.student_photo_url = formData.student_photo_url;
 
         console.log("Student Payload:", JSON.stringify(payload, null, 2));
@@ -250,7 +265,9 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             pickup_stop_id: stops[0]?.stop_id || "", 
             drop_route_id: routes[0]?.route_id || "",
             drop_stop_id: stops[0]?.stop_id || "",
-            student_photo_url: "https://randomuser.me/api/portraits/lego/1.jpg"
+            student_photo_url: "https://randomuser.me/api/portraits/lego/1.jpg",
+            study_year: "2024-2025",
+            is_transport_user: true
         };
         setFormData(prev => ({ ...prev, ...dummyStudent }));
         
@@ -299,7 +316,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                 <div className="relative px-8 py-6 bg-white/80 backdrop-blur-md border-b border-gray-100 flex-shrink-0 z-10 flex justify-between items-center">
                     <div className="flex items-center gap-5">
                        <div className="relative">
-                            <div className="absolute inset-0 bg-purple-600 blur-lg opacity-20 rounded-full"></div>
+                            <div className="absolute inset-0 bg-blue-600 blur-lg opacity-20 rounded-full"></div>
                             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center shadow-xl relative z-10 text-white">
                                 <FontAwesomeIcon icon={faUserPlus} className="text-lg" />
                             </div>
@@ -312,7 +329,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                     <div className="flex items-center gap-3">
                         <button 
                             onClick={handleAutoFill}
-                            className="h-10 px-4 rounded-full bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs gap-2 transition-colors duration-200"
+                            className="h-10 px-4 rounded-full bg-blue-50 hover:bg-indigo-100 flex items-center justify-center text-blue-600 font-bold text-xs gap-2 transition-colors duration-200"
                             title="Auto Fill Demo Data"
                         >
                             <FontAwesomeIcon icon={faMagic} /> Auto Fill
@@ -355,13 +372,23 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                             placeholder="e.g. Michael Scott" 
                                         />
 
-                                            <InputField 
-                                                label="Date of Birth" 
-                                                icon={faCalendar} 
-                                                type="date"
-                                                value={formData.dob} 
-                                                onChange={(e) => handleChange('dob', e.target.value)} 
-                                            />
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <InputField 
+                                                    label="Date of Birth" 
+                                                    icon={faCalendar} 
+                                                    type="date"
+                                                    value={formData.dob} 
+                                                    onChange={(e) => handleChange('dob', e.target.value)} 
+                                                />
+                                                <InputField 
+                                                    label="Study Year" 
+                                                    icon={faCalendar} 
+                                                    value={formData.study_year}
+                                                    onChange={(e) => handleChange('study_year', e.target.value)}
+                                                    placeholder="2024-2025" 
+                                                />
+                                            </div>
+
                                             <SelectField 
                                                 label="Class" 
                                                 icon={faSchool} 
@@ -372,6 +399,15 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                     value: c.class_id, 
                                                     label: `Class ${c.class_name} - Section ${c.section} (${c.academic_year})`
                                                 }))} 
+                                            />
+                                            
+                                            <InputField 
+                                                label="Emergency Contact" 
+                                                icon={faPhone} 
+                                                type="number"
+                                                value={formData.emergency_contact}
+                                                onChange={(e) => handleChange('emergency_contact', e.target.value)}
+                                                placeholder="Emergency Mobile Number" 
                                             />
                                         
                                         <InputField 
@@ -387,7 +423,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                 {/* Section: Parent/Guardian Link */}
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden hover:shadow-md transition-shadow duration-300">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                                             <FontAwesomeIcon icon={faUserTie} className="text-lg" />
                                         </div>
                                         <div>
@@ -400,16 +436,16 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                         {formData.parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.parent_id);
                                             return selectedParent ? (
-                                                <div className="bg-gradient-to-r from-purple-50 to-white border border-purple-100 rounded-2xl p-5 relative group">
+                                                <div className="bg-gradient-to-r from-blue-50 to-white border border-blue-100 rounded-2xl p-5 relative group">
                                                     <div className="flex items-start justify-between">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="w-16 h-16 rounded-full bg-white border-4 border-purple-100 flex items-center justify-center text-purple-600 font-bold text-2xl shadow-sm">
+                                                            <div className="w-16 h-16 rounded-full bg-white border-4 border-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl shadow-sm">
                                                                 {selectedParent.name.charAt(0)}
                                                             </div>
                                                             <div>
                                                                 <div className="font-bold text-xl text-gray-900 mb-1">{selectedParent.name}</div>
                                                                 <div className="flex flex-wrap gap-2">
-                                                                    <span className="bg-purple-100 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-purple-200">
+                                                                    <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-purple-200">
                                                                         {selectedParent.parent_role || 'GUARDIAN'}
                                                                     </span>
                                                                     <span className="bg-white text-gray-600 text-xs font-medium px-2.5 py-1 rounded-lg border border-gray-200 flex items-center gap-2">
@@ -423,7 +459,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                         </div>
                                                     </div>
                                                     
-                                                    <div className="mt-5 pt-4 border-t border-purple-100 flex justify-end">
+                                                    <div className="mt-5 pt-4 border-t border-blue-100 flex justify-end">
                                                         <button 
                                                             onClick={() => { handleChange('parent_id', ''); }}
                                                             className="text-xs font-bold text-red-500 hover:text-red-700 hover:underline transition-all"
@@ -437,9 +473,9 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <button 
                                                     onClick={() => { setTargetParentField('parent_id'); setIsAddingNewParent(false); setIsSearchingParent(true); }}
-                                                    className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-purple-200 bg-purple-50/50 hover:bg-purple-50 hover:border-purple-300 hover:scale-[1.02] transition-all duration-300 group text-center"
+                                                    className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-purple-200 bg-blue-50/50 hover:bg-blue-50 hover:border-purple-300 hover:scale-[1.02] transition-all duration-300 group text-center"
                                                 >
-                                                    <div className="w-12 h-12 rounded-full bg-white text-purple-600 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
+                                                    <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
                                                         <FontAwesomeIcon icon={faSearch} className="text-lg" />
                                                     </div>
                                                     <h5 className="font-bold text-gray-900 text-sm">Search Database</h5>
@@ -464,7 +500,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                 {/* Section: Secondary Parent (Optional) */}
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden hover:shadow-md transition-shadow duration-300">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                                             <FontAwesomeIcon icon={faUserTie} className="text-lg" />
                                         </div>
                                         <div>
@@ -477,10 +513,10 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                         {formData.s_parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.s_parent_id);
                                             return selectedParent ? (
-                                                <div className="bg-gradient-to-r from-indigo-50 to-white border border-indigo-100 rounded-2xl p-5 relative group">
+                                                <div className="bg-gradient-to-r from-blue-50 to-white border border-indigo-100 rounded-2xl p-5 relative group">
                                                     <div className="flex items-start justify-between">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="w-16 h-16 rounded-full bg-white border-4 border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl shadow-sm">
+                                                            <div className="w-16 h-16 rounded-full bg-white border-4 border-indigo-100 flex items-center justify-center text-blue-600 font-bold text-2xl shadow-sm">
                                                                 {selectedParent.name.charAt(0)}
                                                             </div>
                                                             <div>
@@ -514,9 +550,9 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <button 
                                                     onClick={() => { setTargetParentField('s_parent_id'); setIsAddingNewParent(false); setIsSearchingParent(true); }}
-                                                    className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 hover:border-indigo-300 hover:scale-[1.02] transition-all duration-300 group text-center"
+                                                    className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-indigo-200 bg-blue-50/50 hover:bg-blue-50 hover:border-indigo-300 hover:scale-[1.02] transition-all duration-300 group text-center"
                                                 >
-                                                    <div className="w-12 h-12 rounded-full bg-white text-indigo-600 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
+                                                    <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
                                                         <FontAwesomeIcon icon={faSearch} className="text-lg" />
                                                     </div>
                                                     <h5 className="font-bold text-gray-900 text-sm">Search Database</h5>
@@ -540,72 +576,96 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
 
                                 {/* Section: Transport */}
                                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden hover:shadow-md transition-shadow duration-300">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-                                            <FontAwesomeIcon icon={faBus} className="text-lg" />
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+                                                <FontAwesomeIcon icon={faBus} className="text-lg" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-gray-900 text-lg">Transport Route</h4>
+                                                <p className="text-xs text-gray-500 font-medium">Bus pickup and drop assignment</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-gray-900 text-lg">Transport Route</h4>
-                                            <p className="text-xs text-gray-500 font-medium">Bus pickup and drop assignment</p>
+                                        
+                                        <div className="flex items-center gap-3 bg-gray-50 p-1 rounded-xl">
+                                            <button
+                                                onClick={() => handleChange('is_transport_user', true)}
+                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.is_transport_user ? 'bg-teal-600 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                                            >
+                                                Required
+                                            </button>
+                                            <button
+                                                onClick={() => handleChange('is_transport_user', false)}
+                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${!formData.is_transport_user ? 'bg-gray-400 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'}`}
+                                            >
+                                                Not Required
+                                            </button>
                                         </div>
                                     </div>
                                     
-                                    <div className="space-y-6">
-                                        {/* Pickup Sub-Section */}
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 text-teal-700 font-bold text-xs uppercase tracking-wider">
-                                                <FontAwesomeIcon icon={faArrowRight} /> Pickup Details
+                                    {formData.is_transport_user ? (
+                                        <div className="space-y-6 animate-fade-in-down">
+                                            {/* Pickup Sub-Section */}
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-2 text-teal-700 font-bold text-xs uppercase tracking-wider">
+                                                    <FontAwesomeIcon icon={faArrowRight} /> Pickup Details
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <SelectField 
+                                                        label="Route" 
+                                                        icon={faBus} 
+                                                        value={formData.pickup_route_id} 
+                                                        onChange={(e) => handleChange('pickup_route_id', e.target.value)} 
+                                                        placeholder="Select Route"
+                                                        options={routes.map(r => ({value: r.route_id, label: r.name}))} 
+                                                    />
+                                                    <SelectField 
+                                                        label="Stop Content" 
+                                                        icon={faMapMarkerAlt} 
+                                                        value={formData.pickup_stop_id} 
+                                                        onChange={(e) => handleChange('pickup_stop_id', e.target.value)} 
+                                                        placeholder={formData.pickup_route_id ? "Select Stop" : "Select Route First"}
+                                                        disabled={!formData.pickup_route_id}
+                                                        options={filteredPickupStops.map(s => ({value: s.stop_id, label: `${s.stop_name} (Order: ${s.pickup_stop_order})`}))} 
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <SelectField 
-                                                    label="Route" 
-                                                    icon={faBus} 
-                                                    value={formData.pickup_route_id} 
-                                                    onChange={(e) => handleChange('pickup_route_id', e.target.value)} 
-                                                    placeholder="Select Route"
-                                                    options={routes.map(r => ({value: r.route_id, label: r.name}))} 
-                                                />
-                                                <SelectField 
-                                                    label="Stop Content" 
-                                                    icon={faMapMarkerAlt} 
-                                                    value={formData.pickup_stop_id} 
-                                                    onChange={(e) => handleChange('pickup_stop_id', e.target.value)} 
-                                                    placeholder={formData.pickup_route_id ? "Select Stop" : "Select Route First"}
-                                                    disabled={!formData.pickup_route_id}
-                                                    options={filteredPickupStops.map(s => ({value: s.stop_id, label: `${s.stop_name} (Order: ${s.pickup_stop_order})`}))} 
-                                                />
+
+                                            <div className="border-t border-dashed border-gray-200"></div>
+
+                                            {/* Drop Sub-Section */}
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-2 text-orange-700 font-bold text-xs uppercase tracking-wider">
+                                                    <FontAwesomeIcon icon={faHome} /> Drop Details
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <SelectField 
+                                                        label="Route" 
+                                                        icon={faBus} 
+                                                        value={formData.drop_route_id} 
+                                                        onChange={(e) => handleChange('drop_route_id', e.target.value)} 
+                                                        placeholder="Select Route"
+                                                        options={routes.map(r => ({value: r.route_id, label: r.name}))} 
+                                                    />
+                                                    <SelectField 
+                                                        label="Stop Point" 
+                                                        icon={faMapMarkerAlt} 
+                                                        value={formData.drop_stop_id} 
+                                                        onChange={(e) => handleChange('drop_stop_id', e.target.value)} 
+                                                        placeholder={formData.drop_route_id ? "Select Stop" : "Select Route First"}
+                                                        disabled={!formData.drop_route_id}
+                                                        options={filteredDropStops.map(s => ({value: s.stop_id, label: `${s.stop_name} (Order: ${s.drop_stop_order})`}))} 
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <div className="border-t border-dashed border-gray-200"></div>
-
-                                        {/* Drop Sub-Section */}
-                                        <div className="space-y-3">
-                                            <div className="flex items-center gap-2 text-orange-700 font-bold text-xs uppercase tracking-wider">
-                                                <FontAwesomeIcon icon={faHome} /> Drop Details
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <SelectField 
-                                                    label="Route" 
-                                                    icon={faBus} 
-                                                    value={formData.drop_route_id} 
-                                                    onChange={(e) => handleChange('drop_route_id', e.target.value)} 
-                                                    placeholder="Select Route"
-                                                    options={routes.map(r => ({value: r.route_id, label: r.name}))} 
-                                                />
-                                                <SelectField 
-                                                    label="Stop Point" 
-                                                    icon={faMapMarkerAlt} 
-                                                    value={formData.drop_stop_id} 
-                                                    onChange={(e) => handleChange('drop_stop_id', e.target.value)} 
-                                                    placeholder={formData.drop_route_id ? "Select Stop" : "Select Route First"}
-                                                    disabled={!formData.drop_route_id}
-                                                    options={filteredDropStops.map(s => ({value: s.stop_id, label: `${s.stop_name} (Order: ${s.drop_stop_order})`}))} 
-                                                />
-                                            </div>
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <p className="text-sm text-gray-400 font-medium">Transport services are disabled for this student.</p>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
+
                                 
                                 <div className="h-6"></div> {/* Bottom Spacer */}
                             </div>
@@ -673,7 +733,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                         <div className="max-w-xl mx-auto w-full flex flex-col flex-1 min-h-0 mt-4">
                                             <div className="relative mb-6 shrink-0 group">
                                                 <div className="absolute inset-0 bg-purple-200 blur-xl opacity-20 rounded-3xl group-focus-within:opacity-40 transition-opacity"></div>
-                                                <div className="relative bg-white rounded-xl shadow-lg shadow-purple-900/5 flex items-center border border-gray-100 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-500/10 transition-all">
+                                                <div className="relative bg-white rounded-xl shadow-lg shadow-purple-900/5 flex items-center border border-gray-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
                                                     <div className="pl-4 text-gray-400 text-sm">
                                                         <FontAwesomeIcon icon={faSearch} />
                                                     </div>
@@ -702,12 +762,12 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                                 onClick={() => { handleChange(targetParentField, p.parent_id); setIsSearchingParent(false); }}
                                                                 className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer relative group overflow-hidden
                                                                     ${isSelected 
-                                                                        ? 'bg-purple-50 border-purple-500 ring-1 ring-purple-500 shadow-md' 
+                                                                        ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500 shadow-md' 
                                                                         : 'bg-white border-gray-100 hover:border-purple-300 hover:shadow-lg hover:-translate-y-0.5'}`}
                                                             >
                                                                 <div className="flex items-start gap-4 z-10 relative">
                                                                     <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shadow-sm shrink-0
-                                                                        ${isSelected ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors'}`}>
+                                                                        ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors'}`}>
                                                                         {p.name.charAt(0)}
                                                                     </div>
                                                                     
@@ -717,14 +777,14 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                                                 {p.name}
                                                                             </h5>
                                                                             {isSelected && (
-                                                                                <span className="bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                                                                <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                                                                                     Selected
                                                                                 </span>
                                                                             )}
                                                                         </div>
                                                                         
                                                                         <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-gray-500">
-                                                                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border ${isSelected ? 'bg-white border-purple-200 text-purple-700' : 'bg-gray-50 border-gray-100 text-gray-600'}`}>
+                                                                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border ${isSelected ? 'bg-white border-purple-200 text-blue-700' : 'bg-gray-50 border-gray-100 text-gray-600'}`}>
                                                                                 <FontAwesomeIcon icon={faUser} className="text-xs opacity-70" /> {p.parent_role || 'Parent'}
                                                                             </span>
                                                                             <span className="inline-flex items-center gap-1.5">
@@ -739,14 +799,14 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                                     </div>
                                                                     
                                                                     <div className={`self-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isSelected ? 'opacity-100' : ''}`}>
-                                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isSelected ? 'bg-green-500 text-white' : 'bg-purple-100 text-purple-600'}`}>
+                                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isSelected ? 'bg-green-500 text-white' : 'bg-blue-100 text-blue-600'}`}>
                                                                             <FontAwesomeIcon icon={isSelected ? faCheck : faArrowRight} />
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 
                                                                 {/* Decorative highlight on hover */}
-                                                                {!isSelected && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-purple-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>}
+                                                                {!isSelected && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>}
                                                             </div>
                                                         );
                                                     })}
@@ -764,7 +824,7 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                             <p className="text-gray-500 text-sm">We couldn't find any parents matching "{parentSearchQuery}".</p>
                                                             <button 
                                                                 onClick={() => { setIsSearchingParent(false); setIsAddingNewParent(true); }}
-                                                                className="mt-6 text-purple-600 font-bold hover:underline"
+                                                                className="mt-6 text-blue-600 font-bold hover:underline"
                                                             >
                                                                 Create a new parent instead?
                                                             </button>

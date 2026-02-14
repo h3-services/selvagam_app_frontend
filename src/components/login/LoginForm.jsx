@@ -58,7 +58,7 @@ const LoginForm = () => {
                         <img src={Logo} alt="Selvagam Logo" className="w-full h-full object-contain" />
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900 tracking-tight">Welcome Back</h1>
-                    <p className="text-sm sm:text-base text-gray-400 font-bold uppercase tracking-[1px]" style={{ fontFamily: "'Outfit', sans-serif" }}>Sign in to <span className="text-purple-600">Selvagam</span> Portal</p>
+                    <p className="text-sm sm:text-base text-gray-400 font-bold uppercase tracking-[1px]" style={{ fontFamily: "'Outfit', sans-serif" }}>Sign in to <span className="text-blue-600">Selvagam</span> Portal</p>
                 </div>
 
                 {error && (
@@ -72,7 +72,7 @@ const LoginForm = () => {
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Mobile Number</label>
                         <div className="relative group">
-                            <FontAwesomeIcon icon={faPhone} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors" />
+                            <FontAwesomeIcon icon={faPhone} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                             <input
                                 type="tel"
                                 value={mobile}
@@ -87,7 +87,7 @@ const LoginForm = () => {
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Password</label>
                         <div className="relative group">
-                            <FontAwesomeIcon icon={faLock} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors" />
+                            <FontAwesomeIcon icon={faLock} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                             <input
                                 type="password"
                                 value={password}
@@ -100,7 +100,7 @@ const LoginForm = () => {
                     </div>
 
                     <div className="flex justify-end">
-                        <button type="button" className="text-xs font-bold text-purple-600 hover:underline">
+                        <button type="button" className="text-xs font-bold text-blue-600 hover:underline">
                             Forgot password?
                         </button>
                     </div>

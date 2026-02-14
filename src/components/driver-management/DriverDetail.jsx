@@ -42,8 +42,8 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
     if (!selectedDriver) return null;
 
     const InfoRow = ({ icon, label, value, isEditing, field, type = "text" }) => (
-        <div className="flex items-center gap-3 p-3 hover:bg-purple-50 rounded-lg transition-colors border-b border-gray-100 last:border-0">
-            <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-[#40189d] shrink-0">
+        <div className="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg transition-colors border-b border-gray-100 last:border-0">
+            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#3A7BFF] shrink-0">
                 <FontAwesomeIcon icon={icon} className="text-xs" />
             </div>
             <div className="flex-1 min-w-0">
@@ -53,7 +53,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                         type={type}
                         value={editData?.[field] || ''}
                         onChange={(e) => setEditData({ ...editData, [field]: e.target.value })}
-                        className="w-full mt-1 px-2 py-1 text-sm border-b border-purple-200 focus:border-[#40189d] outline-none bg-transparent font-medium text-gray-900"
+                        className="w-full mt-1 px-2 py-1 text-sm border-b border-purple-200 focus:border-[#3A7BFF] outline-none bg-transparent font-medium text-gray-900"
                     />
                 ) : (
                     <p className="text-sm font-bold text-gray-700 truncate">{value || 'N/A'}</p>
@@ -65,17 +65,17 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
     return (
         <div className="h-full bg-white rounded-3xl overflow-hidden flex flex-col shadow-2xl">
             {/* Header Toolbar */}
-            <div className="relative p-8 border-b border-purple-100 bg-gradient-to-br from-purple-50 to-white">
+            <div className="relative p-8 border-b border-blue-100 bg-gradient-to-br from-blue-50 to-white">
                 <div className="flex items-center justify-between gap-6">
                     <div className="flex items-center gap-6">
                         <button
                             onClick={onBack}
-                            className="w-12 h-12 rounded-2xl bg-white border border-purple-100 flex items-center justify-center text-purple-600 hover:bg-purple-50 transition-all shadow-md"
+                            className="w-12 h-12 rounded-2xl bg-white border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-all shadow-md"
                         >
                             <FontAwesomeIcon icon={faArrowLeft} />
                         </button>
                         <div>
-                            <h2 className="text-3xl font-bold tracking-tight" style={{ color: '#40189d' }}>Driver Profile</h2>
+                            <h2 className="text-3xl font-bold tracking-tight" style={{ color: '#3A7BFF' }}>Driver Profile</h2>
                             <p className="text-gray-500 text-sm font-medium mt-1">Manage driver details & documents</p>
                         </div>
                     </div>
@@ -85,12 +85,12 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                                 <button onClick={() => setIsEditing(false)} className="px-6 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-all text-sm font-bold shadow-sm">
                                     <FontAwesomeIcon icon={faTimes} className="mr-2" />Cancel
                                 </button>
-                                <button onClick={handleSaveEdit} className="px-6 py-2.5 text-white rounded-xl hover:shadow-xl transition-all text-sm font-bold flex items-center gap-2" style={{ backgroundColor: '#40189d' }}>
+                                <button onClick={handleSaveEdit} className="px-6 py-2.5 text-white rounded-xl hover:shadow-xl transition-all text-sm font-bold flex items-center gap-2" style={{ backgroundColor: '#3A7BFF' }}>
                                     <FontAwesomeIcon icon={faCheck} /> Save Changes
                                 </button>
                             </>
                         ) : (
-                            <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 text-white rounded-xl hover:shadow-lg transition-all text-sm font-bold flex items-center gap-2" style={{ backgroundColor: '#40189d' }}>
+                            <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 text-white rounded-xl hover:shadow-lg transition-all text-sm font-bold flex items-center gap-2" style={{ backgroundColor: '#3A7BFF' }}>
                                 <FontAwesomeIcon icon={faEdit} /> Edit Profile
                             </button>
                         )}
@@ -105,24 +105,24 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                     {/* Left Column - Profile Summary */}
                     <div className="w-full lg:w-1/3 flex flex-col gap-8">
                         {/* Profile Card */}
-                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-purple-50 p-8 flex flex-col items-center text-center relative overflow-hidden group hover:border-purple-100 transition-all">
+                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-blue-50 p-8 flex flex-col items-center text-center relative overflow-hidden group hover:border-blue-100 transition-all">
                             
-                            <div className="relative z-10 w-28 h-28 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-purple-50 mb-6 flex items-center justify-center">
+                            <div className="relative z-10 w-28 h-28 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-blue-50 mb-6 flex items-center justify-center">
                                 {isEditing ? (
-                                    <div className="flex flex-col justify-center h-full w-full bg-purple-50 p-2">
+                                    <div className="flex flex-col justify-center h-full w-full bg-blue-50 p-2">
                                         <input
                                             type="text"
                                             placeholder="Photo URL"
                                             value={editData?.photo_url || ''}
                                             onChange={(e) => setEditData({ ...editData, photo_url: e.target.value })}
-                                            className="text-xs p-2 text-center bg-white rounded-lg outline-none w-full border border-purple-100"
+                                            className="text-xs p-2 text-center bg-white rounded-lg outline-none w-full border border-blue-100"
                                         />
                                     </div>
                                 ) : (
                                     selectedDriver.photo_url ? (
                                         <img src={selectedDriver.photo_url} alt={selectedDriver.name} className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-[#40189d]">
+                                        <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-[#3A7BFF]">
                                             {selectedDriver.name ? selectedDriver.name.charAt(0) : 'U'}
                                         </div>
                                     )
@@ -134,10 +134,10 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                                     type="text"
                                     value={editData.name}
                                     onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                                    className="text-xl font-bold text-gray-900 mb-2 text-center bg-transparent border-b border-purple-200 focus:border-[#40189d] outline-none relative z-10"
+                                    className="text-xl font-bold text-gray-900 mb-2 text-center bg-transparent border-b border-purple-200 focus:border-[#3A7BFF] outline-none relative z-10"
                                 />
                             ) : (
-                                <h3 className="text-2xl font-black text-[#40189d] mb-2 relative z-10">{selectedDriver.name}</h3>
+                                <h3 className="text-2xl font-black text-[#3A7BFF] mb-2 relative z-10">{selectedDriver.name}</h3>
                             )}
 
                             <div className="flex items-center gap-3 mb-8 relative z-10 flex-wrap justify-center">
@@ -146,7 +146,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                                         <select
                                             value={editData.status}
                                             onChange={(e) => setEditData({ ...editData, status: e.target.value })}
-                                            className="px-3 py-1.5 text-xs rounded-lg border border-purple-200 bg-white font-bold text-gray-700 outline-none focus:border-[#40189d]"
+                                            className="px-3 py-1.5 text-xs rounded-lg border border-purple-200 bg-white font-bold text-gray-700 outline-none focus:border-[#3A7BFF]"
                                         >
                                             <option value="Active">Active</option>
                                             <option value="Inactive">Inactive</option>
@@ -184,7 +184,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                         </div>
 
                         {/* Availability Card */}
-                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-purple-50 p-8">
+                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-blue-50 p-8">
                             <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Current Status</h4>
                             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-purple-200 transition-all">
                                 <div className="flex items-center gap-4">
@@ -199,7 +199,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                                     </div>
                                 </div>
                                 {isEditing && (
-                                    <div className="cursor-pointer text-3xl text-[#40189d] hover:scale-110 transition-transform" onClick={() => setEditData({ ...editData, is_available: !editData.is_available })}>
+                                    <div className="cursor-pointer text-3xl text-[#3A7BFF] hover:scale-110 transition-transform" onClick={() => setEditData({ ...editData, is_available: !editData.is_available })}>
                                         <FontAwesomeIcon icon={editData?.is_available ? faToggleOn : faToggleOff} />
                                     </div>
                                 )}
@@ -210,11 +210,11 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                     {/* Right Column - Details */}
                     <div className="w-full lg:w-2/3 flex flex-col gap-8">
                         {/* Professional Info */}
-                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-purple-50 p-8 relative overflow-hidden">
-                             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-bl-[100px] -mr-8 -mt-8 opacity-50"></div>
+                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-blue-50 p-8 relative overflow-hidden">
+                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[100px] -mr-8 -mt-8 opacity-50"></div>
                             
-                            <h3 className="text-lg font-black text-[#40189d] mb-8 flex items-center gap-3">
-                                <span className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-[#40189d] border border-purple-100">
+                            <h3 className="text-lg font-black text-[#3A7BFF] mb-8 flex items-center gap-3">
+                                <span className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#3A7BFF] border border-blue-100">
                                     <FontAwesomeIcon icon={faIdCard} />
                                 </span>
                                 Professional Details
@@ -222,8 +222,8 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                                 <InfoRow icon={faIdCard} label="License Number" value={selectedDriver.licenseNumber || selectedDriver.licence_number} isEditing={isEditing} field="licence_number" />
-                                <div className="flex items-center gap-3 p-3 border-b border-gray-100 last:border-0 md:border-0 hover:bg-purple-50 rounded-lg transition-colors">
-                                    <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-[#40189d] shrink-0">
+                                <div className="flex items-center gap-3 p-3 border-b border-gray-100 last:border-0 md:border-0 hover:bg-blue-50 rounded-lg transition-colors">
+                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#3A7BFF] shrink-0">
                                         <FontAwesomeIcon icon={faClock} className="text-xs" />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -233,7 +233,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                                                 type="date"
                                                 value={editData?.licence_expiry || ''}
                                                 onChange={(e) => setEditData({ ...editData, licence_expiry: e.target.value })}
-                                                className="w-full mt-1 px-2 py-1 text-sm border-b border-purple-200 focus:border-[#40189d] outline-none bg-transparent"
+                                                className="w-full mt-1 px-2 py-1 text-sm border-b border-purple-200 focus:border-[#3A7BFF] outline-none bg-transparent"
                                             />
                                         ) : (
                                             <p className={`text-sm font-bold truncate ${new Date(selectedDriver.licence_expiry) < new Date() ? 'text-red-500' : 'text-gray-700'}`}>
@@ -243,8 +243,8 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                                     </div>
                                 </div>
                                 <InfoRow icon={faPassport} label="Aadhar Number" value={selectedDriver.aadhar_number} isEditing={isEditing} field="aadhar_number" />
-                                <div className="flex items-center gap-3 p-3 hover:bg-purple-50 rounded-lg transition-colors border-b border-gray-100 md:border-b-0">
-                                    <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-[#40189d] shrink-0">
+                                <div className="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg transition-colors border-b border-gray-100 md:border-b-0">
+                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#3A7BFF] shrink-0">
                                         <FontAwesomeIcon icon={faCar} className="text-xs" />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -256,9 +256,9 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                         </div>
 
                         {/* Documents Section */}
-                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-purple-50 p-8 flex-1">
-                            <h3 className="text-lg font-black text-[#40189d] mb-8 flex items-center gap-3">
-                                <span className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-[#40189d] border border-purple-100">
+                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-blue-50 p-8 flex-1">
+                            <h3 className="text-lg font-black text-[#3A7BFF] mb-8 flex items-center gap-3">
+                                <span className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#3A7BFF] border border-blue-100">
                                     <FontAwesomeIcon icon={faLink} />
                                 </span>
                                 Legal Documents
@@ -273,14 +273,14 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 {/* License Card */}
                                 <div className="group relative rounded-3xl overflow-hidden border-2 border-gray-100 hover:border-purple-200 hover:shadow-xl transition-all bg-gray-50 h-[220px]">
-                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-[#40189d] text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full z-10 shadow-sm">
+                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-[#3A7BFF] text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full z-10 shadow-sm">
                                         Driving License
                                     </div>
                                     {selectedDriver.licence_url ? (
                                         <>
                                             <img src={selectedDriver.licence_url} alt="License" className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
-                                            <div className="absolute inset-0 bg-[#40189d]/0 group-hover:bg-[#40189d]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 backdrop-blur-[2px]">
-                                                <button className="bg-white text-[#40189d] px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wide shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all">View Document</button>
+                                            <div className="absolute inset-0 bg-[#3A7BFF]/0 group-hover:bg-[#3A7BFF]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 backdrop-blur-[2px]">
+                                                <button className="bg-white text-[#3A7BFF] px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wide shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all">View Document</button>
                                             </div>
                                         </>
                                     ) : (
@@ -293,14 +293,14 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
 
                                 {/* Aadhar Card */}
                                 <div className="group relative rounded-3xl overflow-hidden border-2 border-gray-100 hover:border-purple-200 hover:shadow-xl transition-all bg-gray-50 h-[220px]">
-                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-[#40189d] text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full z-10 shadow-sm">
+                                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-[#3A7BFF] text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full z-10 shadow-sm">
                                         Aadhar Card
                                     </div>
                                     {selectedDriver.aadhar_url ? (
                                         <>
                                             <img src={selectedDriver.aadhar_url} alt="Aadhar" className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
-                                            <div className="absolute inset-0 bg-[#40189d]/0 group-hover:bg-[#40189d]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 backdrop-blur-[2px]">
-                                                <button className="bg-white text-[#40189d] px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wide shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all">View Document</button>
+                                            <div className="absolute inset-0 bg-[#3A7BFF]/0 group-hover:bg-[#3A7BFF]/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 backdrop-blur-[2px]">
+                                                <button className="bg-white text-[#3A7BFF] px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wide shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all">View Document</button>
                                             </div>
                                         </>
                                     ) : (

@@ -43,12 +43,12 @@ const SchoolLocations = ({
         <section>
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <FontAwesomeIcon icon={faBuilding} className="text-indigo-600" />
+                    <FontAwesomeIcon icon={faBuilding} className="text-blue-600" />
                     School Locations
                 </h2>
                 <button
                     onClick={() => setIsAddingLocation(!isAddingLocation)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition-all flex items-center gap-2"
+                    className="bg-blue-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition-all flex items-center gap-2"
                 >
                     <FontAwesomeIcon icon={isAddingLocation ? faTimes : faPlus} />
                     {isAddingLocation ? 'Cancel Adding' : 'Add New Location'}
@@ -63,28 +63,28 @@ const SchoolLocations = ({
 
                         {/* Add New Location Form */}
                         {isAddingLocation && (
-                            <div className="p-6 border-b border-indigo-100 bg-indigo-50/30 animate-fade-in-down">
+                            <div className="p-6 border-b border-indigo-100 bg-blue-50/30 animate-fade-in-down">
                                 <h3 className="text-sm font-bold text-indigo-900 mb-4 uppercase tracking-wide">Add New Campus</h3>
                                 <div className="space-y-4">
                                     <input
-                                        className="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:border-indigo-500 outline-none"
+                                        className="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:border-blue-500 outline-none"
                                         placeholder="Location Name (e.g. Sports Complex)"
                                         value={newLocation.name}
                                         onChange={(e) => setNewLocation({ ...newLocation, name: e.target.value })}
                                     />
                                     <textarea
-                                        className="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:border-indigo-500 outline-none resize-none"
+                                        className="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:border-blue-500 outline-none resize-none"
                                         placeholder="Full Address"
                                         rows={2}
                                         value={newLocation.address}
                                         onChange={(e) => setNewLocation({ ...newLocation, address: e.target.value })}
                                     />
-                                    <div className="text-xs text-indigo-600 font-medium flex items-center gap-2">
+                                    <div className="text-xs text-blue-600 font-medium flex items-center gap-2">
                                         <FontAwesomeIcon icon={faLocationDot} /> Click map to set coordinates
                                     </div>
                                     <button
                                         onClick={handleAdd}
-                                        className="w-full py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-sm"
+                                        className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-sm"
                                     >
                                         Save Location
                                     </button>
@@ -101,7 +101,7 @@ const SchoolLocations = ({
                             {locations.map((loc) => (
                                 <div
                                     key={loc.id}
-                                    className={`p-5 border-b border-gray-100 transition-colors ${editingLocationId === loc.id ? 'bg-white shadow-inner border-l-4 border-l-indigo-500' : 'hover:bg-white hover:border-l-4 hover:border-l-gray-300 border-l-4 border-l-transparent'}`}
+                                    className={`p-5 border-b border-gray-100 transition-colors ${editingLocationId === loc.id ? 'bg-white shadow-inner border-l-4 border-l-blue-500' : 'hover:bg-white hover:border-l-4 hover:border-l-gray-300 border-l-4 border-l-transparent'}`}
                                     onClick={() => !editingLocationId && startEdit(loc)}
                                 >
                                     {editingLocationId === loc.id ? (
@@ -126,7 +126,7 @@ const SchoolLocations = ({
                                                     <button onClick={() => onDeleteLocation(loc.id)} className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-bold">Delete</button>
                                                 </div>
                                             </div>
-                                            <div className="text-xs text-indigo-500 mt-1">
+                                            <div className="text-xs text-blue-500 mt-1">
                                                 * Click map to update pin
                                             </div>
                                         </div>

@@ -15,7 +15,7 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             cellStyle: { display: 'flex', alignItems: 'center' },
             cellRenderer: params => (
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                         <FontAwesomeIcon icon={faRoute} />
                     </div>
                     <span>{params.value}</span>
@@ -97,11 +97,11 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden p-6 flex-1 flex flex-col min-h-0">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
-                    '--ag-header-background-color': '#f8f5ff',
-                    '--ag-header-foreground-color': '#40189d',
+                    '--ag-header-background-color': '#f0f4ff',
+                    '--ag-header-foreground-color': '#3A7BFF',
                     '--ag-font-family': 'inherit',
                     '--ag-border-radius': '16px',
-                    '--ag-row-hover-color': '#faf5ff',
+                    '--ag-row-hover-color': '#f5f8ff',
                 }}>
                     <AgGridReact
                         rowData={filteredTrips}

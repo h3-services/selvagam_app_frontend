@@ -12,7 +12,7 @@ const TripStatusBadge = ({ status }) => {
         colorClass = 'bg-blue-100 text-blue-700 border-blue-200';
         icon = faSpinner; // Or a moving icon
     } else if (status === 'Scheduled') {
-        colorClass = 'bg-purple-100 text-purple-700 border-purple-200';
+        colorClass = 'bg-blue-100 text-blue-700 border-purple-200';
         icon = faClock;
     } else if (status === 'Cancelled') {
         colorClass = 'bg-red-100 text-red-700 border-red-200';

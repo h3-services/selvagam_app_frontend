@@ -129,7 +129,7 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg">
+                        <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg">
                             <FontAwesomeIcon icon={faArrowTrendUp} className="text-xl" />
                         </div>
                         <div>
@@ -146,13 +146,13 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
                 <div className="flex-1 p-8 overflow-y-auto custom-scrollbar space-y-6">
                     {loading ? (
                         <div className="h-64 flex flex-col items-center justify-center">
-                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-3xl text-indigo-600 mb-4" />
+                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-3xl text-blue-600 mb-4" />
                             <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Preparing Student Records...</p>
                         </div>
                     ) : (
                         <>
-                            <div className="bg-indigo-50 rounded-2xl p-6 border border-indigo-100 border-dashed flex gap-5 items-center">
-                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-indigo-600 shadow-sm shrink-0 border border-indigo-100">
+                            <div className="bg-blue-50 rounded-2xl p-6 border border-indigo-100 border-dashed flex gap-5 items-center">
+                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-blue-600 shadow-sm shrink-0 border border-indigo-100">
                                     <FontAwesomeIcon icon={faCogs} className="text-xl" />
                                 </div>
                                 <div>
@@ -193,7 +193,7 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
                                                 <select
                                                     value={promotionMapping[sourceClass.class_id] || ""}
                                                     onChange={(e) => setPromotionMapping({...promotionMapping, [sourceClass.class_id]: e.target.value})}
-                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-300 outline-none transition-all cursor-pointer appearance-none"
+                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-300 outline-none transition-all cursor-pointer appearance-none"
                                                 >
                                                     <option value="">-- Graduated / None --</option>
                                                     {classes.map(target => (

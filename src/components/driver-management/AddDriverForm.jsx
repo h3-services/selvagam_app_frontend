@@ -197,7 +197,7 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
                     <div className="flex items-center gap-3">
                          <button 
                             onClick={generateRandomDriver}
-                            className="h-10 px-4 rounded-full bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs gap-2 transition-colors duration-200"
+                            className="h-10 px-4 rounded-full bg-blue-50 hover:bg-indigo-100 flex items-center justify-center text-blue-600 font-bold text-xs gap-2 transition-colors duration-200"
                             title="Auto Fill Demo Data"
                         >
                             <FontAwesomeIcon icon={faMagic} /> Auto Fill

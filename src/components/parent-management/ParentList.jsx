@@ -26,12 +26,12 @@ const ParentList = ({
                 <div className="flex items-center gap-3 w-full cursor-pointer group" onClick={() => {
                    // Handle view details
                 }}>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
                         {params.value ? params.value.charAt(0) : '?'}
                     </div>
                     <div className="flex flex-col">
-                        <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value || 'Unknown'}</p>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors mt-0.5">ID: {params.data.parent_id?.substring(0, 6)}</span>
+                        <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors">{params.value || 'Unknown'}</p>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors mt-0.5">ID: {params.data.parent_id?.substring(0, 6)}</span>
                     </div>
                 </div>
             )
@@ -61,7 +61,7 @@ const ParentList = ({
                     {params.value && params.value.map((studentName, idx) => {
                         if (studentName === 'No children linked') return null;
                         return (
-                            <span key={idx} className="text-indigo-600 font-bold text-xs truncate flex items-center">
+                            <span key={idx} className="text-blue-600 font-bold text-xs truncate flex items-center">
                                 <FontAwesomeIcon icon={faChild} className="mr-1.5 opacity-70 w-3" />
                                 {studentName}
                             </span>
@@ -146,11 +146,11 @@ const ParentList = ({
                 <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
                     <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                         height: 'calc(100vh - 140px)',
-                        '--ag-header-background-color': '#f8f5ff',
-                        '--ag-header-foreground-color': '#40189d',
+                        '--ag-header-background-color': '#f0f4ff',
+                        '--ag-header-foreground-color': '#3A7BFF',
                         '--ag-font-family': 'inherit',
                         '--ag-border-radius': '16px',
-                        '--ag-row-hover-color': '#faf5ff',
+                        '--ag-row-hover-color': '#f5f8ff',
                     }}>
                         <AgGridReact
                             ref={gridRef}
@@ -181,11 +181,11 @@ const ParentList = ({
                 <div className="lg:hidden p-4 space-y-4">
                     {filteredParents.map((parent) => (
                         <div key={parent.parent_id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
-                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#40189d' }}></div>
+                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#3A7BFF' }}></div>
                             <div className="relative p-5">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#40189d' }}>
+                                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
                                             {parent.name.charAt(0)}
                                         </div>
                                         <div>
@@ -201,13 +201,13 @@ const ParentList = ({
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3 mb-2">
-                                    <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f8f5ff' }}>
+                                    <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f0f4ff' }}>
                                         <p className="text-xs text-gray-500 font-medium mb-1">Student</p>
                                         <div className="flex flex-wrap gap-2">
                                             {parent.linkedStudents && parent.linkedStudents.map((studentName, idx) => {
                                                 if (studentName === 'No children linked') return <span key={idx} className="text-gray-400 text-[10px] italic">No students linked</span>;
                                                 return (
-                                                    <span key={idx} className="text-indigo-600 font-bold text-xs truncate flex items-center bg-white px-2 py-1 rounded-lg border border-indigo-100 shadow-sm">
+                                                    <span key={idx} className="text-blue-600 font-bold text-xs truncate flex items-center bg-white px-2 py-1 rounded-lg border border-indigo-100 shadow-sm">
                                                         <FontAwesomeIcon icon={faChild} className="mr-1.5 opacity-70 w-3" />
                                                         {studentName}
                                                     </span>
@@ -218,11 +218,11 @@ const ParentList = ({
                                             }
                                         </div>
                                     </div>
-                                    <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                    <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                         <p className="text-xs text-gray-500 font-medium mb-1">Phone</p>
                                         <p className="text-sm text-gray-900 font-bold truncate">{parent.phone}</p>
                                     </div>
-                                    <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                    <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                         <p className="text-xs text-gray-500 font-medium mb-1">Status</p>
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                             parent.parents_active_status === 'ACTIVE' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'
@@ -231,7 +231,7 @@ const ParentList = ({
                                         </span>
                                     </div>
                                 </div>
-                                <div className="p-3 rounded-xl mt-2" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl mt-2" style={{ backgroundColor: '#f0f4ff' }}>
                                     <p className="text-xs text-gray-500 font-medium mb-1">Address</p>
                                     <p className="text-xs text-gray-900 font-medium truncate">{parent.street}, {parent.city}</p>
                                 </div>

@@ -12,7 +12,7 @@ const StatsModule = () => {
             title: 'Total Students',
             value: '-',
             icon: faGraduationCap,
-            iconBg: 'bg-indigo-100 text-indigo-600',
+            iconBg: 'bg-indigo-100 text-blue-600',
             variant: 'indigo',
             loading: true
         },
@@ -20,7 +20,7 @@ const StatsModule = () => {
             title: 'Total Drivers',
             value: '-',
             icon: faCar,
-            iconBg: 'bg-purple-100 text-purple-600',
+            iconBg: 'bg-blue-100 text-blue-600',
             variant: 'purple',
             loading: true
         },
@@ -57,7 +57,7 @@ const StatsModule = () => {
                         title: 'Total Students',
                         value: students.length,
                         icon: faGraduationCap,
-                        iconBg: 'bg-indigo-100 text-indigo-600',
+                        iconBg: 'bg-indigo-100 text-blue-600',
                         variant: 'indigo',
                         loading: false
                     },
@@ -65,7 +65,7 @@ const StatsModule = () => {
                         title: 'Total Drivers',
                         value: drivers.length,
                         icon: faCar,
-                        iconBg: 'bg-purple-100 text-purple-600',
+                        iconBg: 'bg-blue-100 text-blue-600',
                         variant: 'purple',
                         loading: false
                     },
@@ -101,13 +101,13 @@ const StatsModule = () => {
             {stats.map((stat, index) => (
                 <div key={index} className={`group rounded-3xl p-6 border shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white ${
                     stat.variant === 'indigo' ? 'border-indigo-100' :
-                    stat.variant === 'purple' ? 'border-purple-100' :
+                    stat.variant === 'purple' ? 'border-blue-100' :
                     stat.variant === 'pink' ? 'border-pink-100' :
                     'border-emerald-100'
                 }`}>
                     {/* Decorative Gradients */}
-                    {stat.variant === 'indigo' && <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
-                    {stat.variant === 'purple' && <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'indigo' && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'purple' && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
                     {stat.variant === 'pink' && <div className="absolute top-0 right-0 w-32 h-32 bg-pink-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
                     {stat.variant === 'emerald' && <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
 

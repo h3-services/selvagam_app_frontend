@@ -4,7 +4,7 @@ import { faTimes, faBus, faCheck, faMagic, faExclamationCircle, faHashtag, faTru
 
 const InputField = ({ label, icon, type = "text", placeholder, value, onChange, className = "", error, errorMessage }) => {
     let borderColor = "border-gray-100";
-    let focusColor = "focus:border-purple-400 focus:ring-purple-50";
+    let focusColor = "focus:border-blue-400 focus:ring-blue-50";
     let iconColor = "bg-gray-100 text-gray-500";
     let textColor = "text-gray-700";
 
@@ -52,7 +52,7 @@ const SelectField = ({ label, icon, value, onChange, options, className = "", pl
                 <select
                     value={value}
                     onChange={onChange}
-                    className="w-full bg-white border-2 border-gray-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-purple-400 focus:ring-4 focus:ring-purple-50 focus:outline-none transition-all shadow-sm font-medium text-gray-700 appearance-none"
+                    className="w-full bg-white border-2 border-gray-100 rounded-xl pl-16 pr-4 py-3.5 text-sm focus:border-blue-400 focus:ring-4 focus:ring-blue-50 focus:outline-none transition-all shadow-sm font-medium text-gray-700 appearance-none"
                 >
                     <option value="" disabled>{placeholder}</option>
                     {options.map((opt, idx) => (
@@ -168,8 +168,8 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                 <div className="relative px-8 py-6 bg-white/80 backdrop-blur-md border-b border-gray-100 flex-shrink-0 z-10 flex justify-between items-center">
                     <div className="flex items-center gap-5">
                        <div className="relative">
-                            <div className="absolute inset-0 bg-purple-600 blur-lg opacity-20 rounded-full"></div>
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-xl relative z-10 text-white">
+                            <div className="absolute inset-0 bg-blue-600 blur-lg opacity-20 rounded-full"></div>
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-600 flex items-center justify-center shadow-xl relative z-10 text-white">
                                 <FontAwesomeIcon icon={faBus} className="text-lg" />
                             </div>
                        </div>
@@ -181,7 +181,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                     <div className="flex items-center gap-3">
                          <button 
                             onClick={generateRandomBus}
-                            className="h-10 px-4 rounded-full bg-indigo-50 hover:bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs gap-2 transition-colors duration-200"
+                            className="h-10 px-4 rounded-full bg-blue-50 hover:bg-indigo-100 flex items-center justify-center text-blue-600 font-bold text-xs gap-2 transition-colors duration-200"
                             title="Auto Fill Demo Data"
                         >
                             <FontAwesomeIcon icon={faMagic} /> Auto Fill
@@ -202,7 +202,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                         {/* Vehicle Information */}
                         <div>
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                                <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
                                 Vehicle Information
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -246,7 +246,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                         {/* Status & Capacity */}
                         <div>
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                                <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
                                 Configuration
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -275,7 +275,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                          {/* Assignment */}
                          <div>
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                                <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
                                 Operations
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -301,7 +301,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                         {/* Documents & Expiry */}
                         <div>
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
-                                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
+                                <span className="w-1 h-4 bg-blue-600 rounded-full"></span>
                                 Documents & Compliance
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -346,7 +346,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                         className={`w-full py-4 rounded-2xl font-bold text-white shadow-xl shadow-purple-900/20 hover:shadow-2xl hover:-translate-y-1 transition-all text-base flex items-center justify-center gap-3 ${
                             !isValid
                                 ? 'bg-gray-800 opacity-50 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-xl hover:scale-[1.01]'
+                                : 'bg-gradient-to-r from-blue-600 to-blue-600 hover:shadow-xl hover:scale-[1.01]'
                         }`}
                         disabled={!isValid}
                     >

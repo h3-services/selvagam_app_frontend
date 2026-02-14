@@ -18,7 +18,7 @@ const MapModule = () => {
                     <h3 className="font-bold text-lg text-slate-900">Live Fleet Tracking</h3>
                     <p className="text-slate-400 text-sm">Real-time bus locations (3D)</p>
                 </div>
-                <button className="text-slate-400 hover:text-indigo-600 transition-colors">
+                <button className="text-slate-400 hover:text-blue-600 transition-colors">
                     <FontAwesomeIcon icon={faEllipsisH} />
                 </button>
             </div>

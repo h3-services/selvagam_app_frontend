@@ -5,7 +5,7 @@ const ReportCard = ({ report }) => {
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:border-indigo-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
             <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-xl shadow-inner group-hover:scale-110 transition-transform duration-300">
                     <FontAwesomeIcon icon={faChartPie} />
                 </div>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${report.status === 'Generated' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-amber-50 text-amber-700 border border-amber-100'
@@ -14,7 +14,7 @@ const ReportCard = ({ report }) => {
                 </span>
             </div>
 
-            <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">{report.name}</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{report.name}</h3>
             <p className="text-sm text-gray-500 font-medium mb-4">{report.type} Report</p>
 
             <div className="space-y-3 mb-6">

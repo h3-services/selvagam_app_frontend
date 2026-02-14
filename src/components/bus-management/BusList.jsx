@@ -20,11 +20,11 @@ const BusList = ({
             <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
-                    '--ag-header-background-color': '#f8f5ff',
-                    '--ag-header-foreground-color': '#40189d',
+                    '--ag-header-background-color': '#f0f4ff',
+                    '--ag-header-foreground-color': '#3A7BFF',
                     '--ag-font-family': 'inherit',
                     '--ag-border-radius': '16px',
-                    '--ag-row-hover-color': '#faf5ff',
+                    '--ag-row-hover-color': '#f5f8ff',
                 }}>
                     <AgGridReact
                         rowData={filteredBuses}
@@ -39,14 +39,14 @@ const BusList = ({
                                         className="flex items-center gap-3 w-full cursor-pointer group"
                                         onClick={() => setSelectedBus(params.data)}
                                     >
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#40189d' }}>
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
                                             <FontAwesomeIcon icon={faBus} />
                                         </div>
                                         <div className="flex flex-col">
-                                            <p className="font-bold text-gray-900 leading-none group-hover:text-purple-700 transition-colors">{params.value}</p>
+                                            <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors">{params.value}</p>
                                             <div className="flex items-center gap-1">
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">View Details</span>
-                                                <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-purple-600 transition-colors" />
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
+                                                <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-blue-600 transition-colors" />
                                             </div>
                                         </div>
                                     </div>
@@ -70,13 +70,13 @@ const BusList = ({
                                                     e.stopPropagation();
                                                     setActiveMenuId(isOpen ? null : menuKey);
                                                 }}
-                                                className="group flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-indigo-50 transition-all cursor-pointer border border-transparent hover:border-indigo-100"
+                                                className="group flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-blue-50 transition-all cursor-pointer border border-transparent hover:border-indigo-100"
                                             >
                                                 <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center">
-                                                    <FontAwesomeIcon icon={faUser} className="text-indigo-600 text-[10px]" />
+                                                    <FontAwesomeIcon icon={faUser} className="text-blue-600 text-[10px]" />
                                                 </div>
                                                 <span className="text-gray-900 font-bold text-xs truncate max-w-[100px]">{currentDriverName}</span>
-                                                <FontAwesomeIcon icon={faChevronDown} className="text-gray-400 text-[10px] group-hover:text-indigo-600 transition-colors" />
+                                                <FontAwesomeIcon icon={faChevronDown} className="text-gray-400 text-[10px] group-hover:text-blue-600 transition-colors" />
                                             </button>
 
                                             {isOpen && (
@@ -108,7 +108,7 @@ const BusList = ({
                                                                     }}
                                                                     className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-3 rounded-lg transition-all ${
                                                                         driver.driver_id === params.data.driver_id 
-                                                                        ? 'bg-indigo-50 text-indigo-700' 
+                                                                        ? 'bg-blue-50 text-indigo-700' 
                                                                         : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
                                                                     }`}
                                                                 >
@@ -119,7 +119,7 @@ const BusList = ({
                                                                         <span>{driver.name}</span>
                                                                         <span className="text-[9px] text-gray-400 font-medium">{driver.phone}</span>
                                                                     </div>
-                                                                    {driver.driver_id === params.data.driver_id && <FontAwesomeIcon icon={faCheck} className="ml-auto text-indigo-600" />}
+                                                                    {driver.driver_id === params.data.driver_id && <FontAwesomeIcon icon={faCheck} className="ml-auto text-blue-600" />}
                                                                 </button>
                                                             ))
                                                         )}
@@ -137,7 +137,7 @@ const BusList = ({
                                 cellStyle: { display: 'flex', alignItems: 'center' },
                                 cellRenderer: (params) => (
                                     <div className="flex items-center gap-2">
-                                        <FontAwesomeIcon icon={faUserFriends} className="text-purple-400 text-xs shrink-0" />
+                                        <FontAwesomeIcon icon={faUserFriends} className="text-blue-400 text-xs shrink-0" />
                                         <span className="text-sm font-medium text-gray-700">{params.value} Seats</span>
                                     </div>
                                 )
@@ -149,7 +149,7 @@ const BusList = ({
                                 cellStyle: { display: 'flex', alignItems: 'center' },
                                 cellRenderer: (params) => (
                                     <div className="flex items-center gap-2 truncate" title={params.value}>
-                                        <FontAwesomeIcon icon={faRoute} className="text-purple-400 text-xs shrink-0" />
+                                        <FontAwesomeIcon icon={faRoute} className="text-blue-400 text-xs shrink-0" />
                                         <span className="text-sm text-gray-600 truncate">{params.value}</span>
                                     </div>
                                 )
@@ -171,7 +171,7 @@ const BusList = ({
                                     const getStatusGradient = (s) => {
                                         switch(s) {
                                             case 'Active': return 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200';
-                                            case 'Maintenance': return 'bg-gradient-to-r from-blue-500 to-indigo-600 shadow-blue-200';
+                                            case 'Maintenance': return 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-blue-200';
                                             case 'Inactive': return 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-200';
                                             case 'Spare': return 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-orange-200';
                                             case 'Scrap': return 'bg-gradient-to-r from-gray-500 to-gray-700 shadow-gray-200';
@@ -233,7 +233,7 @@ const BusList = ({
                                                                 }}
                                                                 className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-3 rounded-lg transition-all ${
                                                                     option === status 
-                                                                    ? 'bg-purple-50 text-purple-700' 
+                                                                    ? 'bg-blue-50 text-blue-700' 
                                                                     : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
                                                                 }`}
                                                             >
@@ -247,7 +247,7 @@ const BusList = ({
                                                                     <FontAwesomeIcon icon={getStatusIcon(option)} className="text-[10px]" />
                                                                 </div>
                                                                 {option}
-                                                                {status === option && <FontAwesomeIcon icon={faCheck} className="ml-auto text-purple-600" />}
+                                                                {status === option && <FontAwesomeIcon icon={faCheck} className="ml-auto text-blue-600" />}
                                                             </button>
                                                         ))}
                                                     </div>
@@ -306,12 +306,12 @@ const BusList = ({
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden p-1 space-y-4 pb-24">
                 {filteredBuses.map((bus) => (
-                    <div key={bus.id} className="relative bg-white rounded-3xl shadow-lg border border-purple-100 overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-5" style={{ backgroundColor: '#40189d' }}></div>
+                    <div key={bus.id} className="relative bg-white rounded-3xl shadow-lg border border-blue-100 overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-5" style={{ backgroundColor: '#3A7BFF' }}></div>
                         <div className="relative p-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#40189d' }}>
+                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
                                         <FontAwesomeIcon icon={faBus} />
                                     </div>
                                     <div>
@@ -330,25 +330,25 @@ const BusList = ({
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <div className="flex items-center gap-2 mb-1">
-                                        <FontAwesomeIcon icon={faUser} className="text-xs" style={{ color: '#40189d' }} />
+                                        <FontAwesomeIcon icon={faUser} className="text-xs" style={{ color: '#3A7BFF' }} />
                                         <p className="text-xs text-gray-500 font-medium">Driver</p>
                                     </div>
                                     <p className="text-sm text-gray-900 font-bold truncate">{bus.driverName}</p>
                                 </div>
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f8f5ff' }}>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <div className="flex items-center gap-2 mb-1">
-                                        <FontAwesomeIcon icon={faUserFriends} className="text-xs" style={{ color: '#40189d' }} />
+                                        <FontAwesomeIcon icon={faUserFriends} className="text-xs" style={{ color: '#3A7BFF' }} />
                                         <p className="text-xs text-gray-500 font-medium">Capacity</p>
                                     </div>
                                     <p className="text-sm text-gray-900 font-bold">{bus.capacity} Seats</p>
                                 </div>
                             </div>
 
-                            <div className="p-3 rounded-xl mb-4" style={{ backgroundColor: '#f8f5ff' }}>
+                            <div className="p-3 rounded-xl mb-4" style={{ backgroundColor: '#f0f4ff' }}>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <FontAwesomeIcon icon={faPhone} className="text-xs" style={{ color: '#40189d' }} />
+                                    <FontAwesomeIcon icon={faPhone} className="text-xs" style={{ color: '#3A7BFF' }} />
                                     <p className="text-xs text-gray-500 font-medium">Contact</p>
                                 </div>
                                 <p className="text-sm text-gray-900 font-semibold">{bus.contactNumber}</p>
@@ -357,7 +357,7 @@ const BusList = ({
                             <button
                                 onClick={() => setSelectedBus(bus)}
                                 className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all"
-                                style={{ backgroundColor: '#40189d' }}
+                                style={{ backgroundColor: '#3A7BFF' }}
                             >
                                 <FontAwesomeIcon icon={faEye} className="mr-2" /> View Details
                             </button>

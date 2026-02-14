@@ -123,20 +123,20 @@ const ComposeMessage = () => {
                 <div className="relative z-10 flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
-                            <span className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-100 italic">H</span>
+                            <span className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-100 italic">H</span>
                             Communication Hub
                         </h2>
                         <p className="text-slate-500 font-medium text-sm mt-1.5 ml-1">Compose and broadcast secure push alerts across the network</p>
                     </div>
                     <div className="hidden md:flex items-center gap-4">
-                        <div className="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center gap-2.5">
-                            <FontAwesomeIcon icon={faShieldHalved} className="text-indigo-600 text-xs" />
+                        <div className="px-4 py-2 bg-blue-50 border border-indigo-100 rounded-2xl flex items-center gap-2.5">
+                            <FontAwesomeIcon icon={faShieldHalved} className="text-blue-600 text-xs" />
                             <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-widest">TLS 1.3 Secure</span>
                         </div>
                     </div>
                 </div>
                 {/* Abstract Design Element */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/30 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/30 rounded-full blur-3xl -mr-32 -mt-32"></div>
             </div>
 
             <form onSubmit={handleSendMessage} className="p-10 lg:p-12 flex flex-col gap-10">
@@ -148,13 +148,13 @@ const ComposeMessage = () => {
                             Target Audience
                         </label>
                         <div className="relative group">
-                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors pointer-events-none">
+                            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors pointer-events-none">
                                 <FontAwesomeIcon icon={getTargetIcon()} />
                             </div>
                             <select
                                 value={selectedTarget}
                                 onChange={(e) => setSelectedTarget(e.target.value)}
-                                className="w-full pl-12 pr-10 py-4 rounded-2xl border border-slate-200 bg-slate-50/50 text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 focus:bg-white transition-all appearance-none cursor-pointer shadow-sm"
+                                className="w-full pl-12 pr-10 py-4 rounded-2xl border border-slate-200 bg-slate-50/50 text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-400 focus:bg-white transition-all appearance-none cursor-pointer shadow-sm"
                                 disabled={loadingData}
                             >
                                 <optgroup label="System Broadcasts">
@@ -194,14 +194,14 @@ const ComposeMessage = () => {
                             <button
                                 type="button"
                                 onClick={() => setMessageType('text')}
-                                className={`flex-1 px-8 py-3 rounded-[0.9rem] text-xs font-black transition-all flex items-center justify-center gap-2.5 tracking-wider ${messageType === 'text' ? 'bg-white text-indigo-600 shadow-md border border-slate-100 ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`flex-1 px-8 py-3 rounded-[0.9rem] text-xs font-black transition-all flex items-center justify-center gap-2.5 tracking-wider ${messageType === 'text' ? 'bg-white text-blue-600 shadow-md border border-slate-100 ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
                             >
                                 <FontAwesomeIcon icon={faCommentDots} /> TEXT ALERT
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setMessageType('audio')}
-                                className={`flex-1 px-8 py-3 rounded-[0.9rem] text-xs font-black transition-all flex items-center justify-center gap-2.5 tracking-wider ${messageType === 'audio' ? 'bg-white text-indigo-600 shadow-md border border-slate-100 ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`flex-1 px-8 py-3 rounded-[0.9rem] text-xs font-black transition-all flex items-center justify-center gap-2.5 tracking-wider ${messageType === 'audio' ? 'bg-white text-blue-600 shadow-md border border-slate-100 ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
                             >
                                 <FontAwesomeIcon icon={faMicrophone} /> VOICE NOTE
                             </button>
@@ -218,7 +218,7 @@ const ComposeMessage = () => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="e.g. Weather Alert - Route Delay"
-                            className="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50/50 text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 focus:bg-white transition-all shadow-sm"
+                            className="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50/50 text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-400 focus:bg-white transition-all shadow-sm"
                             required
                         />
                     </div>
@@ -230,11 +230,11 @@ const ComposeMessage = () => {
                                 value={messageText}
                                 onChange={(e) => setMessageText(e.target.value)}
                                 placeholder={messageType === 'text' ? "Compose your critical announcement..." : "Describe the voice message contents..."}
-                                className="w-full min-h-[160px] p-8 rounded-3xl border border-slate-200 bg-slate-50/50 text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 focus:bg-white transition-all resize-none shadow-sm custom-scrollbar leading-relaxed"
+                                className="w-full min-h-[160px] p-8 rounded-3xl border border-slate-200 bg-slate-50/50 text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-400 focus:bg-white transition-all resize-none shadow-sm custom-scrollbar leading-relaxed"
                                 required
                             ></textarea>
                             <div className="absolute bottom-6 right-6 flex items-center gap-2">
-                                <div className={`w-1.5 h-1.5 rounded-full ${messageText.length > 0 ? 'bg-indigo-500 animate-pulse' : 'bg-slate-200'}`}></div>
+                                <div className={`w-1.5 h-1.5 rounded-full ${messageText.length > 0 ? 'bg-blue-500 animate-pulse' : 'bg-slate-200'}`}></div>
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{messageText.length} Chars</span>
                             </div>
                         </div>
@@ -243,7 +243,7 @@ const ComposeMessage = () => {
 
                 {/* Footer Actions */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-10 border-t border-slate-100">
-                    <div className="flex items-center gap-4 px-6 py-3 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
+                    <div className="flex items-center gap-4 px-6 py-3 bg-blue-50/50 rounded-2xl border border-indigo-100/50">
                         <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse"></div>
                         <div className="flex flex-col">
                             <span className="text-[10px] font-black text-indigo-900 uppercase tracking-widest leading-none mb-1">Encrypted Gateway</span>
@@ -257,7 +257,7 @@ const ComposeMessage = () => {
                         className={`group relative overflow-hidden px-12 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center gap-4 active:scale-95 shadow-2xl ${
                             isSending || !title.trim() || !messageText.trim() || loadingData
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none'
-                            : 'bg-indigo-600 text-white hover:bg-slate-900 hover:shadow-indigo-200 hover:-translate-y-1'
+                            : 'bg-blue-600 text-white hover:bg-slate-900 hover:shadow-indigo-200 hover:-translate-y-1'
                         }`}
                     >
                         {isSending ? (

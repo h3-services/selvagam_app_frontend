@@ -41,12 +41,12 @@ const AdminTeam = ({
         <section>
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <FontAwesomeIcon icon={faUser} className="text-indigo-600" />
+                    <FontAwesomeIcon icon={faUser} className="text-blue-600" />
                     School Management Team
                 </h2>
                 <button
                     onClick={() => setIsAddOpen(!isAddOpen)}
-                    className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                    className="text-sm font-semibold text-blue-600 hover:text-indigo-800 transition-colors"
                 >
                     {isAddOpen ? 'Close Form' : '+ Add New Admin'}
                 </button>
@@ -56,38 +56,38 @@ const AdminTeam = ({
                 {/* Add New Admin Card */}
                 {isAddOpen && (
                     <div className="bg-white rounded-xl shadow-lg border border-indigo-100 overflow-hidden relative group animate-fade-in-up">
-                        <div className="h-1 bg-indigo-500 w-full absolute top-0 left-0"></div>
+                        <div className="h-1 bg-blue-500 w-full absolute top-0 left-0"></div>
                         <div className="p-6">
                             <h3 className="text-lg font-bold text-gray-900 mb-4">New School Admin</h3>
                             <div className="space-y-4">
                                 <input
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 outline-none"
                                     placeholder="Full Name"
                                     value={newAdmin.name}
                                     onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })}
                                 />
                                 <input
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 outline-none"
                                     placeholder="Email Address"
                                     value={newAdmin.email}
                                     onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
                                 />
                                 <input
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 outline-none"
                                     placeholder="Phone Number"
                                     value={newAdmin.phone}
                                     onChange={(e) => setNewAdmin({ ...newAdmin, phone: e.target.value })}
                                 />
                                 <input
                                     type="password"
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-indigo-500 outline-none"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 outline-none"
                                     placeholder="Password"
                                     value={newAdmin.password}
                                     onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
                                 />
                                 <button
                                     onClick={handleAdd}
-                                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-sm shadow-md mt-2"
+                                    className="w-full py-2.5 bg-blue-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-sm shadow-md mt-2"
                                 >
                                     Create Account
                                 </button>
@@ -128,7 +128,7 @@ const AdminTeam = ({
                                         </>
                                     ) : (
                                         <>
-                                            <button onClick={() => startEdit(admin)} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faPen} size="sm" /></button>
+                                            <button onClick={() => startEdit(admin)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faPen} size="sm" /></button>
                                             <button onClick={() => onDeleteAdmin(admin.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faTrash} size="sm" /></button>
                                         </>
                                     )}
@@ -139,7 +139,7 @@ const AdminTeam = ({
                                 <div className="flex items-center gap-3 text-gray-600">
                                     <FontAwesomeIcon icon={faEnvelope} className="text-gray-400 w-4" />
                                     {editingId === admin.id ? (
-                                        <input value={editData.email} onChange={(e) => setEditData({ ...editData, email: e.target.value })} className="flex-1 border-b border-gray-200 focus:border-indigo-500 outline-none" />
+                                        <input value={editData.email} onChange={(e) => setEditData({ ...editData, email: e.target.value })} className="flex-1 border-b border-gray-200 focus:border-blue-500 outline-none" />
                                     ) : (
                                         <span className="truncate">{admin.email}</span>
                                     )}
@@ -147,7 +147,7 @@ const AdminTeam = ({
                                 <div className="flex items-center gap-3 text-gray-600">
                                     <FontAwesomeIcon icon={faPhone} className="text-gray-400 w-4" />
                                     {editingId === admin.id ? (
-                                        <input value={editData.phone} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} className="flex-1 border-b border-gray-200 focus:border-indigo-500 outline-none" />
+                                        <input value={editData.phone} onChange={(e) => setEditData({ ...editData, phone: e.target.value })} className="flex-1 border-b border-gray-200 focus:border-blue-500 outline-none" />
                                     ) : (
                                         <span>{admin.phone}</span>
                                     )}
@@ -171,7 +171,7 @@ const AdminTeam = ({
                 {!isAddOpen && (
                     <button
                         onClick={() => setIsAddOpen(true)}
-                        className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-6 text-gray-400 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all min-h-[250px]"
+                        className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-6 text-gray-400 hover:border-indigo-400 hover:text-blue-600 hover:bg-blue-50/50 transition-all min-h-[250px]"
                     >
                         <div className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
                             <FontAwesomeIcon icon={faPlus} />

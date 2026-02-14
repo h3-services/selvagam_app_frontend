@@ -36,7 +36,7 @@ const DeactivationReasonModal = ({ show, onClose, onConfirm }) => {
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Enter reason here..."
-                    className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-50 resize-none bg-gray-50/50 mb-6 min-h-[100px]"
+                    className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 resize-none bg-gray-50/50 mb-6 min-h-[100px]"
                     autoFocus
                 />
                 <div className="flex gap-3 w-full">
