@@ -78,7 +78,6 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: faUserGraduate, label: 'Students', path: '/students' },
-    { icon: faUsers, label: 'Directory', path: '/student-directory' },
     { icon: faUserGroup, label: 'Parents', path: '/parents' },
     { icon: faSchool, label: 'Classes', path: '/classes' },
     { 
@@ -92,6 +91,7 @@ const Sidebar = () => {
         { icon: faCalendarCheck, label: 'Trips', path: '/trips' },
       ]
     },
+    { icon: faUsers, label: 'Directory', path: '/student-directory' },
     { icon: faChartBar, label: 'Reports', path: '/reports' },
     { icon: faComments, label: 'Inbox', path: '/communication' },
     { icon: faUserShield, label: 'Settings', path: '/admin' },

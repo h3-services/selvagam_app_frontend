@@ -195,19 +195,16 @@ const StudentManagementHome = () => {
 
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className='ml-20 lg:ml-0'>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                            {selectedStudent ? 'Student Profile' : 'Student Management'}
-                        </h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {selectedStudent ? `Viewing details for ${selectedStudent.name}` : ''}
-                        </p>
-                    </div>
+            {/* Header - Hidden when viewing details to save space */}
+            {!selectedStudent && (
+                <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className='ml-20 lg:ml-0'>
+                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                                Student Management
+                            </h1>
+                        </div>
 
-                    {!selectedStudent && (
                         <div className="flex flex-col md:flex-row items-center gap-6">
                             {/* View Mode Toggle (Segmented Control) */}
                             <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
@@ -244,10 +241,9 @@ const StudentManagementHome = () => {
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>
                         </div>
-                    )}
-
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Grid Content */}
             <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">

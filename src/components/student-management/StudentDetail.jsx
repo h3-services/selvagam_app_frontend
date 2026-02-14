@@ -1,358 +1,273 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faTimes, faCheck, faEdit, faChild, faPhone, faSearch, faArrowLeft, faUserTie, faEnvelope, faMapMarkerAlt, faInfoCircle, faEye, faRoute } from '@fortawesome/free-solid-svg-icons';
-import LocationMap from './LocationMap';
+import { 
+    faUser, faTimes, faCheck, faEdit, faChild, faPhone, 
+    faSearch, faArrowLeft, faUserTie, faEnvelope, 
+    faMapMarkerAlt, faInfoCircle, faEye, faRoute, 
+    faBus, faMapPin, faLocationDot, faClock, 
+    faShieldHalved, faCalendarDay, faIdCard, faVenusMars,
+    faChevronLeft, faEllipsisVertical, faBuilding,
+    faFingerprint, faCircleCheck, faArrowUpRightFromSquare,
+    faGraduationCap, faMap, faPaperclip, faHistory
+} from '@fortawesome/free-solid-svg-icons';
 import ParentViewDrawer from './ParentViewDrawer';
 import { parentService } from '../../services/parentService';
+import { routeService } from '../../services/routeService';
 
 const StudentDetail = ({ selectedStudent, onBack, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
-    const [parentDetail, setParentDetail] = useState(null);
-    const [loadingParent, setLoadingParent] = useState(false);
+    const [parent1, setParent1] = useState(null);
+    const [parent2, setParent2] = useState(null);
+    const [loadingParents, setLoadingParents] = useState(false);
+    const [activeParentForDrawer, setActiveParentForDrawer] = useState(null);
     const [showParentDrawer, setShowParentDrawer] = useState(false);
-    // ... rest of state ...
-    const [mapSearchQuery, setMapSearchQuery] = useState('');
-    const [markerPosition, setMarkerPosition] = useState([12.6074, 80.0463]);
-    const [mapCenter, setMapCenter] = useState([12.6074, 80.0463]);
-    const [locationSuggestions, setLocationSuggestions] = useState([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const mapRef = useRef(null);
+    
+    const [transportData, setTransportData] = useState({
+        pickupRoute: null,
+        dropRoute: null,
+        pickupStop: null,
+        dropStop: null
+    });
+    const [loadingTransport, setLoadingTransport] = useState(false);
 
-    // Initial load and Geocode
     useEffect(() => {
         if (selectedStudent) {
             setEditData({ ...selectedStudent });
-            setMapSearchQuery(selectedStudent.location);
+            const p1Id = selectedStudent.originalData?.parent_id;
+            const p2Id = selectedStudent.originalData?.s_parent_id;
             
-            // Fetch detailed parent info if parent_id exists
-            const parentId = selectedStudent.originalData?.parent_id;
-            if (parentId) {
-                fetchParentInfo(parentId);
+            fetchParents(p1Id, p2Id);
+            
+            if (selectedStudent.originalData?.is_transport_user) {
+                fetchTransportInfo(selectedStudent.originalData);
             }
-
-            // Improved Geocoding logic with fallback
-            const geocodeLocation = async () => {
-                if (!selectedStudent.location || selectedStudent.location.includes("CityA")) return;
-
-                const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(selectedStudent.location)}&limit=1`;
-                
-                try {
-                    // Try with corsproxy.io first (more reliable than codetabs)
-                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(nominatimUrl)}`;
-                    const response = await fetch(proxyUrl);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data && data.length > 0) {
-                            const { lat, lon } = data[0];
-                            setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
-                            setMapCenter([parseFloat(lat), parseFloat(lon)]);
-                            return; // Success
-                        }
-                    }
-
-                    // Fallback to direct fetch if proxy fails (Nominatim sometimes allows direct browser CORS)
-                    const directResponse = await fetch(nominatimUrl);
-                    if (directResponse.ok) {
-                        const data = await directResponse.json();
-                        if (data && data.length > 0) {
-                            const { lat, lon } = data[0];
-                            setMarkerPosition([parseFloat(lat), parseFloat(lon)]);
-                            setMapCenter([parseFloat(lat), parseFloat(lon)]);
-                        }
-                    }
-                } catch (error) {
-                    // Fail silently to avoid cluttering logs, map will stay at default center
-                }
-            };
-            geocodeLocation();
         }
     }, [selectedStudent]);
 
-    const fetchParentInfo = async (id) => {
-        setLoadingParent(true);
+    const fetchParents = async (p1Id, p2Id) => {
+        setLoadingParents(true);
         try {
-            const data = await parentService.getParentById(id);
-            setParentDetail(data);
+            const [data1, data2] = await Promise.all([
+                p1Id ? parentService.getParentById(p1Id) : Promise.resolve(null),
+                p2Id ? parentService.getParentById(p2Id) : Promise.resolve(null)
+            ]);
+            setParent1(data1);
+            setParent2(data2);
         } catch (error) {
-            console.error("Error fetching parent details:", error);
+            console.error("Error fetching parents:", error);
         } finally {
-            setLoadingParent(false);
+            setLoadingParents(false);
         }
     };
 
-    const handleSaveEdit = () => {
-        const updatedData = { ...editData, date: new Date().toISOString().split('T')[0] };
-        onUpdate(updatedData);
-        setIsEditing(false);
+    const fetchTransportInfo = async (student) => {
+        setLoadingTransport(true);
+        try {
+            const [routes, stops] = await Promise.all([
+                routeService.getAllRoutes(),
+                routeService.getAllRouteStops()
+            ]);
+            setTransportData({
+                pickupRoute: routes.find(r => r.route_id === student.pickup_route_id),
+                dropRoute: routes.find(r => r.route_id === student.drop_route_id),
+                pickupStop: stops.find(s => s.stop_id === student.pickup_stop_id),
+                dropStop: stops.find(s => s.stop_id === student.drop_stop_id)
+            });
+        } catch (error) {
+            console.error("Error fetching transport:", error);
+        } finally {
+            setLoadingTransport(false);
+        }
     };
 
-    return (
-        <div className="flex-1 overflow-hidden h-full flex flex-col">
-            <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-                {/* Header Section */}
-                <div className="relative p-8 border-b border-blue-100 bg-gradient-to-br from-blue-50 to-white">
-                    <div className="relative flex flex-col md:flex-row items-center md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-6">
-                            <button
-                                onClick={onBack}
-                                className="w-12 h-12 rounded-2xl bg-white border border-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-50 transition-all shadow-md"
-                            >
-                                <FontAwesomeIcon icon={faArrowLeft} />
-                            </button>
-                            <div className="relative">
-                                <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-white text-3xl font-bold shadow-xl" style={{ backgroundColor: '#3A7BFF' }}>
-                                    {selectedStudent.name.charAt(0)}
-                                </div>
-                                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-lg border-2 border-blue-100">
-                                    <FontAwesomeIcon icon={faChild} className="text-xs text-blue-600" />
-                                </div>
-                            </div>
-                            <div>
-                                <h2 className="text-3xl font-bold tracking-tight" style={{ color: '#3A7BFF' }}>{selectedStudent.name}</h2>
+    if (!selectedStudent) return null;
 
-                            </div>
+    const CompactSectionHeader = ({ icon, title, color = "indigo" }) => (
+        <div className="flex items-center gap-3 mb-4">
+            <div className={`w-8 h-8 rounded-lg bg-${color}-50 flex items-center justify-center text-${color}-600`}>
+                <FontAwesomeIcon icon={icon} className="text-xs" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{title}</h3>
+        </div>
+    );
+
+    const CompactDataRow = ({ label, value, isFullWidth = false }) => (
+        <div className={`${isFullWidth ? 'col-span-2' : ''}`}>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+            <p className="text-xs font-bold text-slate-700 truncate">{value || 'N/A'}</p>
+        </div>
+    );
+
+    return (
+        <div className="flex-1 h-full flex flex-col bg-white overflow-hidden font-outfit">
+            {/* Ultra-Compact Sticky Header */}
+            <div className="bg-white border-b border-slate-100 px-6 h-16 flex items-center justify-between flex-shrink-0 z-30">
+                <div className="flex items-center gap-4">
+                    <button onClick={onBack} className="w-10 h-10 hover:bg-slate-50 rounded-xl text-slate-400 flex items-center justify-center transition-colors">
+                        <FontAwesomeIcon icon={faArrowLeft} />
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white text-lg font-bold">
+                            {selectedStudent.name.charAt(0)}
                         </div>
-                        {isEditing ? (
-                            <div className="flex gap-3">
-                                <button onClick={() => { setIsEditing(false); setEditData(selectedStudent); }} className="px-6 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-all text-sm font-bold shadow-sm">
-                                    <FontAwesomeIcon icon={faTimes} className="mr-2" />Cancel
-                                </button>
-                                <button onClick={handleSaveEdit} className="px-6 py-2.5 text-white rounded-xl hover:shadow-xl transition-all text-sm font-bold flex items-center gap-2" style={{ backgroundColor: '#3A7BFF' }}>
-                                    <FontAwesomeIcon icon={faCheck} />Save Changes
-                                </button>
-                            </div>
-                        ) : (
-                            <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 text-white rounded-xl hover:shadow-lg transition-all text-sm font-bold" style={{ backgroundColor: '#3A7BFF' }}>
-                                <FontAwesomeIcon icon={faEdit} className="mr-2" />Edit Profile
-                            </button>
-                        )}
+                        <div>
+                            <h1 className="text-lg font-bold text-slate-900 leading-none">{selectedStudent.name}</h1>
+                            <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-widest">
+                                {selectedStudent.className} • ID: #STU-{selectedStudent.id?.toString().slice(-4)}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Content Section */}
-                <div className="p-8 overflow-y-auto flex-1 bg-white">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                        {/* Left Side: Parent Detail Block */}
-                        <div 
-                            onClick={() => !isEditing && setShowParentDrawer(true)}
-                            className={`group relative p-8 rounded-[32px] bg-white border-2 transition-all duration-300 shadow-sm ${!isEditing ? 'cursor-pointer hover:shadow-2xl hover:border-blue-400 border-gray-100' : 'border-blue-100'}`}
-                        >
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-[#3A7BFF] shadow-inner group-hover:scale-110 transition-transform duration-300">
-                                    <FontAwesomeIcon icon={faUserTie} className="text-2xl" />
-                                </div>
-                                {!isEditing && (
-                                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#3A7BFF] border border-gray-100 shadow-sm">
-                                        <span className="text-[10px] font-black uppercase tracking-wider">Expand Details</span>
-                                        <FontAwesomeIcon icon={faEye} className="text-[10px]" />
-                                    </div>
-                                )}
-                            </div>
-                            
-                            <h3 className="text-[11px] font-black uppercase tracking-[2.5px] text-gray-400 mb-3">Guardian Information</h3>
-                            <div className="flex flex-col">
-                                <div className="flex flex-wrap items-center gap-3 mb-6">
-                                    <div className="flex flex-col gap-2">
-                                        <p className="text-2xl font-black text-gray-900 tracking-tight leading-none truncate">
-                                            {selectedStudent.parent1Name}
-                                        </p>
-                                        {selectedStudent.parent2Name && (
-                                            <p className="text-2xl font-black text-gray-600 tracking-tight leading-none truncate overflow-hidden">
-                                                {selectedStudent.parent2Name}
-                                            </p>
-                                        )}
-                                    </div>
-                                    {parentDetail?.parent_role && (
-                                        <span className="px-3 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-widest shadow-md" style={{ backgroundColor: '#3A7BFF' }}>
-                                            {parentDetail.parent_role}
-                                        </span>
-                                    )}
-                                </div>
-                                
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50/10 group-hover:border-blue-100 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#3A7BFF] shadow-sm">
-                                            <FontAwesomeIcon icon={faEnvelope} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Email Address</p>
-                                            <p className="text-sm font-bold text-gray-700">{selectedStudent.parentEmail || 'Not Provided'}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100 group-hover:bg-blue-50/10 group-hover:border-blue-100 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#3A7BFF] shadow-sm">
-                                            <FontAwesomeIcon icon={faPhone} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Mobile Network</p>
-                                            <p className="text-sm font-bold text-gray-700">{selectedStudent.mobile || 'Not Linked'}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Right Side: Student Detail Block */}
-                        <div className="p-8 rounded-[32px] bg-white border-2 border-gray-100 shadow-sm flex flex-col">
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-[#3A7BFF] shadow-inner">
-                                    <FontAwesomeIcon icon={faChild} className="text-2xl" />
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</p>
-                                    <span className="px-4 py-1 rounded-full text-[10px] font-black uppercase text-white" style={{ backgroundColor: '#3A7BFF' }}>
-                                        {selectedStudent.status}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <h3 className="text-[11px] font-black uppercase tracking-[2.5px] text-gray-400 mb-6">Student Records</h3>
-                            
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="p-5 rounded-3xl bg-gray-50 border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Date of Birth</p>
-                                    <p className="text-lg font-black text-gray-900">{selectedStudent.originalData?.dob || '14 Oct 2012'}</p>
-                                </div>
-                                <div className="p-5 rounded-3xl bg-gray-50 border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Gender</p>
-                                    <p className="text-lg font-black text-gray-900">{selectedStudent.originalData?.gender || 'Male'}</p>
-                                </div>
-                                <div className="p-5 rounded-3xl bg-gray-50 border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Grade / Class</p>
-                                    <p className="text-lg font-black text-gray-900">{selectedStudent.className || 'N/A'}</p>
-                                </div>
-                                <div className="p-5 rounded-3xl bg-gray-50 border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Joining Date</p>
-                                    <p className="text-lg font-black text-gray-900">{selectedStudent.date}</p>
-                                </div>
-                            </div>
-
-
-                        </div>
-
-                        {/* Address & Map Section - Bottom Full Width */}
-                        <div className="lg:col-span-2 space-y-6">
-                            <div className="p-8 rounded-[40px] bg-white border-2 border-gray-100 shadow-xl">
-                                <div className="flex flex-col md:flex-row gap-8">
-                                    <div className="flex-1 space-y-6">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-[#3A7BFF] shadow-inner">
-                                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="text-lg" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-lg font-bold text-gray-800">Home Location</h3>
-                                                    <p className="text-xs text-gray-400">Primary pickup-drop address</p>
-                                                </div>
-                                            </div>
-                                            {isEditing ? (
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        value={editData.location}
-                                                        onChange={(e) => setEditData({ ...editData, location: e.target.value })}
-                                                        placeholder="Update address..."
-                                                        className="w-full bg-white border-2 border-gray-100 rounded-2xl px-5 py-4 text-base font-bold outline-none focus:border-[#3A7BFF] transition-all shadow-inner"
-                                                    />
-                                                    <FontAwesomeIcon icon={faSearch} className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-300" />
-                                                </div>
-                                            ) : (
-                                                <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100">
-                                                    <p className="text-lg font-bold text-gray-900 leading-relaxed italic">
-                                                        "{selectedStudent.location}"
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="p-6 rounded-3xl text-white shadow-xl relative overflow-hidden" style={{ backgroundColor: '#3A7BFF' }}>
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                                            <div className="relative flex items-center justify-between">
-                                                <div>
-                                                    <p className="text-blue-100 text-[10px] font-bold uppercase tracking-widest mb-1">Route Distance</p>
-                                                    <p className="text-4xl font-black">{selectedStudent.distance || '4.2 km'}</p>
-                                                </div>
-                                                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
-                                                    <FontAwesomeIcon icon={faRoute} className="text-2xl" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Mini Map View */}
-                                    <div className="w-full md:w-96 h-80 rounded-[32px] overflow-hidden border-4 border-white shadow-2xl relative bg-gray-100">
-                                        <LocationMap
-                                            center={mapCenter}
-                                            markerPosition={markerPosition}
-                                            isEditing={isEditing}
-                                            onLocationSelect={async (lat, lng) => {
-                                                if (isEditing) {
-                                                    setMarkerPosition([lat, lng]);
-                                                    try {
-                                                        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-                                                        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(nominatimUrl)}`;
-                                                        
-                                                        const response = await fetch(proxyUrl);
-                                                        const data = await response.json();
-
-                                                        const locationName = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                                                        setMapSearchQuery(locationName);
-                                                        setEditData({ ...editData, location: locationName });
-                                                    } catch (error) {
-                                                        const locationName = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                                                        setMapSearchQuery(locationName);
-                                                        setEditData({ ...editData, location: locationName });
-                                                    }
-                                                }
-                                            }}
-                                            mapRef={mapRef}
-                                        />
-                                        {isEditing && (
-                                            <div className="absolute top-4 left-4 right-4 z-[400]">
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        value={mapSearchQuery}
-                                                        onChange={async (e) => {
-                                                            const query = e.target.value;
-                                                            setMapSearchQuery(query);
-                                                            if (query.length > 2) {
-                                                                try {
-                                                                    const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
-                                                                    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(nominatimUrl)}`;
-                                                                    
-                                                                    const resp = await fetch(proxyUrl);
-                                                                    const data = await resp.json();
-                                                                    
-                                                                    setLocationSuggestions(data);
-                                                                    setShowSuggestions(true);
-                                                                } catch (err) {
-                                                                    // Silent fail
-                                                                }
-                                                            }
-                                                        }}
-                                                        placeholder="Search on map..."
-                                                        className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-2 text-xs shadow-xl outline-none focus:border-blue-500"
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-bold uppercase tracking-wider border border-emerald-100">
+                        {selectedStudent.studentStatus || 'Active'}
+                    </span>
+                    <button 
+                        onClick={() => setIsEditing(!isEditing)}
+                        className="h-10 px-6 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-2"
+                    >
+                        <FontAwesomeIcon icon={isEditing ? faCheck : faEdit} className="text-[10px]" />
+                        {isEditing ? 'SYNC' : 'MANAGE'}
+                    </button>
                 </div>
             </div>
-            
-            {/* Parent Details Side Drawer */}
+
+            {/* High-Density Grid Content */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 h-full divide-x divide-slate-100">
+                    
+                    {/* Panel 1: Core Record (Left) */}
+                    <div className="col-span-1 p-6 space-y-8 bg-slate-50/30">
+                        <div>
+                            <CompactSectionHeader icon={faIdCard} title="Identity" />
+                            <div className="grid grid-cols-1 gap-5">
+                                <CompactDataRow label="Admission Date" value={new Date(selectedStudent.date).toLocaleDateString()} />
+                                <CompactDataRow label="D.O.B" value={selectedStudent.originalData?.dob ? new Date(selectedStudent.originalData.dob).toLocaleDateString() : 'N/A'} />
+                                <CompactDataRow label="Gender" value={selectedStudent.originalData?.gender || 'Male'} />
+                                <CompactDataRow label="Blood Group" value="O+ Positive" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <CompactSectionHeader icon={faMapMarkerAlt} title="Residence" />
+                            <div className="p-4 rounded-xl bg-white border border-slate-200/60 shadow-sm">
+                                <p className="text-[11px] font-bold text-slate-800 leading-relaxed italic">
+                                    "{selectedStudent.location || 'Address not synced'}"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Panel 2: Guardian Network (Middle) */}
+                    <div className="col-span-1 lg:col-span-2 p-6 space-y-6">
+                        <CompactSectionHeader icon={faUserTie} title="Guardian Network" color="blue" />
+                        <div className="grid grid-cols-1 gap-4">
+                            {[
+                                { data: parent1, label: "Primary", id: "p1" },
+                                { data: parent2, label: "Secondary", id: "p2" }
+                            ].filter(p => p.data).map((parent) => (
+                                <div key={parent.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-blue-200 transition-all group">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div>
+                                            <p className="text-[8px] font-bold text-blue-500 uppercase tracking-[2px] mb-1">{parent.label}</p>
+                                            <h4 className="text-sm font-bold text-slate-900">{parent.data.name}</h4>
+                                        </div>
+                                        <button 
+                                            onClick={() => {
+                                                setActiveParentForDrawer(parent.data);
+                                                setShowParentDrawer(true);
+                                            }} 
+                                            className="w-8 h-8 rounded-lg text-slate-300 hover:text-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center"
+                                        >
+                                            <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 border-t border-slate-50 pt-4">
+                                        <div className="flex items-center gap-2">
+                                            <FontAwesomeIcon icon={faPhone} className="text-[9px] text-slate-300" />
+                                            <CompactDataRow label="Phone" value={parent.data.phone} />
+                                        </div>
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <FontAwesomeIcon icon={faEnvelope} className="text-[9px] text-slate-300" />
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Email</p>
+                                                <p className="text-[11px] font-bold text-slate-700 truncate">{parent.data.email || 'N/A'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Panel 3: Fleet Logistics (Right) */}
+                    <div className="col-span-1 lg:col-span-2 p-6 bg-slate-50/10">
+                        <div className="flex items-center justify-between mb-6">
+                            <CompactSectionHeader icon={faBus} title="Logistics Hub" color="rose" />
+                            <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border ${selectedStudent.originalData?.is_transport_user ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-slate-100 border-slate-200 text-slate-500'}`}>
+                                {selectedStudent.originalData?.is_transport_user ? 'Fleet Active' : 'Self Transport'}
+                            </div>
+                        </div>
+
+                        {selectedStudent.originalData?.is_transport_user ? (
+                            <div className="grid grid-cols-1 gap-6">
+                                {/* Morning Protocol */}
+                                <div className="p-5 rounded-2xl bg-white border border-slate-200 border-l-4 border-l-blue-500 shadow-sm relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <FontAwesomeIcon icon={faClock} size="3xl" className="text-blue-900" />
+                                    </div>
+                                    <h5 className="text-[10px] font-bold text-blue-600 uppercase tracking-[3px] mb-4 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                        Morning Pickup
+                                    </h5>
+                                    <div className="grid grid-cols-2 gap-6 relative z-10">
+                                        <CompactDataRow label="Fleet Route" value={transportData.pickupRoute?.route_name} />
+                                        <CompactDataRow label="Stop Node" value={transportData.pickupStop?.stop_name} />
+                                    </div>
+                                </div>
+
+                                {/* Evening Protocol */}
+                                <div className="p-5 rounded-2xl bg-white border border-slate-200 border-l-4 border-l-rose-500 shadow-sm relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <FontAwesomeIcon icon={faRoute} size="3xl" className="text-rose-900" />
+                                    </div>
+                                    <h5 className="text-[10px] font-bold text-rose-600 uppercase tracking-[3px] mb-4 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                                        Evening Drop
+                                    </h5>
+                                    <div className="grid grid-cols-2 gap-6 relative z-10">
+                                        <CompactDataRow label="Fleet Route" value={transportData.dropRoute?.route_name} />
+                                        <CompactDataRow label="Stop Node" value={transportData.dropStop?.stop_name} />
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="h-[300px] rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-8 bg-slate-50/50">
+                                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-200 mb-4 shadow-sm">
+                                    <FontAwesomeIcon icon={faBus} size="xl" />
+                                </div>
+                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-[4px]">Private Logistics</h4>
+                            </div>
+                        )}
+                    </div>
+
+                </div>
+            </div>
+
             <ParentViewDrawer 
                 show={showParentDrawer}
-                onClose={() => setShowParentDrawer(false)}
-                parentData={parentDetail}
+                onClose={() => {
+                    setShowParentDrawer(false);
+                    setActiveParentForDrawer(null);
+                }}
+                parentData={activeParentForDrawer}
             />
-            </div>
+
+            <style>{`
+                .custom-scrollbar::-webkit-scrollbar { width: 0px; }
+            `}</style>
         </div>
     );
 };

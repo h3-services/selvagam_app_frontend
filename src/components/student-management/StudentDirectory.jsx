@@ -168,10 +168,15 @@ const StudentDirectory = () => {
                 ) : filteredStudents.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                         {filteredStudents.map((student) => (
-                            <div key={student.id} className="group bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-400 transition-all duration-300 relative overflow-hidden flex flex-col gap-4">
-                                <div className="absolute top-0 right-0 w-20 h-20 bg-slate-50/50 rounded-full -mr-10 -mt-10 group-hover:bg-blue-50 transition-colors"></div>
+                            <div 
+                                key={student.id} 
+                                className={`group bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-400 transition-all duration-300 relative flex flex-col gap-4 ${
+                                    activeMenuId === student.id ? 'z-[50] ring-2 ring-blue-500/20 shadow-2xl scale-[1.01]' : 'z-10'
+                                }`}
+                            >
+                                <div className="absolute top-0 right-0 w-20 h-20 bg-slate-50/50 rounded-full -mr-10 -mt-10 group-hover:bg-blue-50 transition-colors pointer-events-none"></div>
                                 
-                                <div className="flex items-center justify-between relative z-10">
+                                <div className="flex items-center justify-between relative z-20">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-xl bg-[#3A7BFF] text-white flex items-center justify-center text-sm font-black shadow-lg shadow-blue-200 shrink-0">
                                             {student.name.charAt(0)}
@@ -189,16 +194,16 @@ const StudentDirectory = () => {
                                                 setActiveMenuId(activeMenuId === student.id ? null : student.id);
                                             }}
                                             className={`action-menu-trigger w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                                                activeMenuId === student.id ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-100'
+                                                activeMenuId === student.id ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-100'
                                             }`}
                                         >
-                                            <FontAwesomeIcon icon={faEllipsisV} className="text-xs" />
+                                            <FontAwesomeIcon icon={faEllipsisV} className="text-sm" />
                                         </button>
 
                                         {activeMenuId === student.id && (
-                                            <div className="action-menu-container absolute right-0 top-10 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-[50] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                                                <div className="p-1">
-                                                    <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
+                                            <div className="action-menu-container absolute right-0 top-10 w-52 bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-gray-200 z-[100] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                                                <div className="p-1.5">
+                                                    <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50/50 rounded-lg mb-1.5">
                                                         Update Status
                                                     </div>
                                                     {[
