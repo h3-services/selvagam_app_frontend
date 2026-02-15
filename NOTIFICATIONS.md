@@ -9,7 +9,7 @@ All notification endpoints require the following header for security:
 
 | Header Key | Value |
 | :--- | :--- |
-| `x-admin-key` | `selvagam-admin-key-2024` |
+| `x-admin-key` | ``selvagam-admin-key-2024`` |
 
 ---
 
