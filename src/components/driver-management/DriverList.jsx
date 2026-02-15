@@ -20,7 +20,8 @@ const DriverList = ({
     handleDelete,
     activeMenuId,
     setActiveMenuId,
-    viewMode
+    viewMode,
+    onSelectionChanged
 }) => {
     return (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -192,6 +193,21 @@ const DriverList = ({
                                 }
                             }
                         ]}
+                        rowSelection={{ mode: 'multiRow', headerCheckbox: true, enableClickSelection: false }}
+                        selectionColumnDef={{ 
+                            width: 60, 
+                            minWidth: 60, 
+                            maxWidth: 60, 
+                            pinned: 'left',
+                            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+                            headerClass: 'ag-center-header'
+                        }}
+                        onSelectionChanged={(params) => {
+                            const selectedNodes = params.api.getSelectedNodes();
+                            const selectedData = selectedNodes.map(node => node.data);
+                            if (setActiveMenuId) setActiveMenuId(null);
+                            onSelectionChanged(selectedData);
+                        }}
                         defaultColDef={{
                             sortable: true,
                             resizable: true,
@@ -210,6 +226,29 @@ const DriverList = ({
                     />
                 </div>
             </div>
+
+            {/* Selection Overrides */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                .ag-center-header .ag-header-cell-comp-wrapper {
+                    justify-content: center !important;
+                }
+                .ag-selection-checkbox {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    width: 100% !important;
+                }
+                .ag-checkbox-input-wrapper {
+                    transform: scale(1.4) !important;
+                    transition: all 0.2s ease;
+                }
+                .ag-checkbox-input-wrapper.ag-checked {
+                    filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.4));
+                }
+                .ag-checkbox-input-wrapper input:checked + .ag-checkbox-input-wrapper {
+                    background-color: #2563eb !important;
+                }
+            ` }} />
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden p-4 space-y-6 pb-24">

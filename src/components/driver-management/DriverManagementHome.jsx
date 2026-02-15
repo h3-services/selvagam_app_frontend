@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faUserPlus, faTrash, faArrowLeft, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faUserPlus, faTrash, faArrowLeft, faSpinner, faUsers, faChevronDown, faCheck, faUserCheck, faUserClock } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import DriverList from './DriverList';
 import DriverDetail from './DriverDetail';
@@ -22,6 +22,10 @@ const DriverManagementHome = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [viewMode, setViewMode] = useState('active'); // 'active' or 'resigned'
+    
+    // Bulk Actions State
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [showBulkMenu, setShowBulkMenu] = useState(false);
 
 
     // Fetch Drivers, Buses & Routes to map vehicles and routes
@@ -112,6 +116,43 @@ const DriverManagementHome = () => {
         }
     };
 
+    const handleBulkStatusUpdate = async (newStatus) => {
+        if (!selectedRows.length) return;
+        setLoading(true);
+        try {
+            await Promise.all(selectedRows.map(driver => 
+                driverService.updateDriverStatus(driver.id, newStatus)
+            ));
+            setShowBulkMenu(false);
+            setSelectedRows([]);
+            await fetchDrivers();
+        } catch (error) {
+            console.error("Bulk status update failed:", error);
+            // alert("Some updates failed.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!selectedRows.length) return;
+        if (!window.confirm(`Are you sure you want to retire ${selectedRows.length} fleet members?`)) return;
+        
+        setLoading(true);
+        try {
+            await Promise.all(selectedRows.map(driver => 
+                driverService.updateDriverStatus(driver.id, 'RESIGNED')
+            ));
+            setShowBulkMenu(false);
+            setSelectedRows([]);
+            await fetchDrivers();
+        } catch (error) {
+            console.error("Bulk retirement failed:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const filteredDrivers = drivers.filter(d => {
         const matchesSearch = d.name?.toLowerCase().includes(search.toLowerCase()) || d.email?.toLowerCase().includes(search.toLowerCase());
         const isResignedStatus = d.status === 'Resigned';
@@ -130,7 +171,6 @@ const DriverManagementHome = () => {
             setShowModal(false);
         } catch (err) {
             console.error(err);
-            // alert("Failed to create driver: " + (err.response?.data?.message || err.message));
         } finally {
             setLoading(false);
         }
@@ -144,19 +184,10 @@ const DriverManagementHome = () => {
     const confirmDelete = async () => {
         if (itemToDelete) {
             try {
-                // Instead of permanent deletion, update status to RESIGNED
                 await driverService.updateDriverStatus(itemToDelete, 'RESIGNED');
-                
-                // Update local state immediately
                 setDrivers(prev => prev.map(d => 
                     d.id === itemToDelete ? { ...d, status: 'Resigned' } : d
                 ));
-                
-                // Optionally remove from the visible list if needed, 
-                // but since handleToggleStatus keeps them in list, we'll keep them but updated.
-                // If the user wants them GONE from the list, we would filter them:
-                // setDrivers(prev => prev.filter(d => d.id !== itemToDelete));
-
                 setShowDeleteConfirm(false);
                 setItemToDelete(null);
             } catch (err) {
@@ -167,13 +198,12 @@ const DriverManagementHome = () => {
 
     const handleUpdate = async (updatedData) => {
         try {
-            // Map UI fields back to API fields
             const apiPayload = {
                 name: updatedData.name,
                 email: updatedData.email,
-                phone: Number(updatedData.mobile), // Map mobile -> phone
+                phone: Number(updatedData.mobile),
                 dob: updatedData.dob,
-                licence_number: updatedData.licenseNumber, // Map licenseNumber -> licence_number
+                licence_number: updatedData.licenseNumber,
                 licence_expiry: updatedData.licence_expiry,
                 aadhar_number: updatedData.aadhar_number,
                 photo_url: updatedData.photo_url,
@@ -181,23 +211,12 @@ const DriverManagementHome = () => {
                 aadhar_url: updatedData.aadhar_url,
                 is_available: updatedData.is_available,
                 status: updatedData.status
-                // Password is usually not updated here unless a specific change password flow exists
             };
-
             await driverService.updateDriver(updatedData.id, apiPayload);
-
-            // Update local state to reflect changes immediately in Detail view without full reload if possible,
-            // but fetching ensures data consistency.
             await fetchDrivers();
-
-            // Update the selected driver view with the new data (merged with UI mappings)
-            // We can re-find the driver from the new list or manually patch it for speed.
-            // For now, let's just update the local selectedDriver with the UI fields so the view doesn't jump.
             setSelectedDriver(updatedData);
-
         } catch (err) {
             console.error(err);
-            // alert("Failed to update driver: " + (err.response?.data?.message || err.message));
         }
     };
 
@@ -214,7 +233,6 @@ const DriverManagementHome = () => {
 
                     {!selectedDriver && (
                         <div className="flex flex-col md:flex-row items-center gap-6">
-                            {/* View Mode Toggle (Segmented Control) */}
                             <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
                                 <button
                                     onClick={() => setViewMode('active')}
@@ -250,7 +268,6 @@ const DriverManagementHome = () => {
                             </div>
                         </div>
                     )}
-
                 </div>
             </div>
 
@@ -283,9 +300,91 @@ const DriverManagementHome = () => {
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
                         viewMode={viewMode}
+                        onSelectionChanged={setSelectedRows}
                     />
                 )}
             </div>
+
+            {/* Bulk Actions Floating Pill */}
+            {selectedRows.length > 0 && !selectedDriver && (
+                <>
+                    {showBulkMenu && (
+                        <div 
+                            className="fixed inset-0 bg-slate-900/10 backdrop-blur-md z-[2001] animate-in fade-in duration-500"
+                            onClick={() => setShowBulkMenu(false)}
+                        />
+                    )}
+                    
+                    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[2002] flex flex-col items-center gap-4">
+                        {showBulkMenu && (
+                            <div className="bg-white/95 backdrop-blur-2xl border border-white/60 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-2 w-64 animate-in slide-in-from-bottom-8 zoom-in duration-300 origin-bottom">
+                                <div className="px-4 py-3 text-[10px] font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 flex items-center justify-between mb-2">
+                                    <span>Fleet Operations</span>
+                                    <span className="bg-slate-900 text-white px-2 py-0.5 rounded-full text-[9px] shadow-sm">
+                                        {selectedRows.length} Active
+                                    </span>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="px-3 py-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Duty Status</div>
+                                    {[
+                                        { label: 'Activate All', value: 'ACTIVE', icon: faUserCheck, color: 'text-emerald-500', bgColor: 'bg-emerald-50/50' },
+                                        { label: 'Suspend All', value: 'INACTIVE', icon: faUserClock, color: 'text-amber-500', bgColor: 'bg-amber-50/50' }
+                                    ].map(opt => (
+                                        <button 
+                                            key={opt.value}
+                                            onClick={() => handleBulkStatusUpdate(opt.value)}
+                                            className="w-full flex items-center gap-3 px-3 py-2 text-[11px] font-black text-slate-700 hover:bg-slate-50 rounded-xl transition-all group"
+                                        >
+                                            <div className={`w-8 h-8 rounded-lg ${opt.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                                <FontAwesomeIcon icon={opt.icon} className={`text-sm ${opt.color}`} />
+                                            </div>
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                    
+                                    <div className="h-px bg-slate-100 my-2 mx-2" />
+                                    <button 
+                                        onClick={handleBulkDelete}
+                                        className="w-full flex items-center gap-3 px-3 py-2 text-[11px] font-black text-rose-500 hover:bg-rose-50 rounded-xl transition-all group"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-rose-100/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                                        </div>
+                                        Retire Selected
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <button
+                            onClick={() => setShowBulkMenu(!showBulkMenu)}
+                            className={`flex items-center gap-3 px-6 py-4 rounded-full shadow-[0_15px_35px_rgba(0,0,0,0.15)] transition-all active:scale-95 group border-2 ${
+                                showBulkMenu 
+                                ? 'bg-slate-900 border-slate-700 text-white' 
+                                : 'bg-white border-white text-blue-600 hover:shadow-[0_20px_45px_rgba(0,0,0,0.2)]'
+                            }`}
+                        >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                                showBulkMenu ? 'bg-white/10' : 'bg-slate-900 text-white'
+                            }`}>
+                                <FontAwesomeIcon icon={showBulkMenu ? faCheck : faUsers} className="text-[10px]" />
+                            </div>
+                            <div className="flex flex-col items-start leading-none">
+                                <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${showBulkMenu ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    {selectedRows.length} Selected
+                                </span>
+                                <span className={`text-[12px] font-black mt-0.5 ${showBulkMenu ? 'text-white' : 'text-slate-900'}`}>
+                                    {showBulkMenu ? 'Close Protocol' : 'Personnel Actions'}
+                                </span>
+                            </div>
+                            <FontAwesomeIcon 
+                                icon={faChevronDown} 
+                                className={`text-[10px] transition-transform duration-300 ml-2 ${showBulkMenu ? 'rotate-180 text-slate-400' : 'text-slate-300'}`} 
+                            />
+                        </button>
+                    </div>
+                </>
+            )}
 
             {!selectedDriver && !loading && viewMode === 'active' && (
                 <button
@@ -310,35 +409,33 @@ const DriverManagementHome = () => {
                         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setShowDeleteConfirm(false)}
                     />
-                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
+                    <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
+                            <div className="w-20 h-20 rounded-[2rem] bg-rose-50 flex items-center justify-center mb-6">
+                                <FontAwesomeIcon icon={faTrash} className="text-3xl text-rose-600" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Mark as Resigned</h3>
-                            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                                Are you sure you want to mark this driver as <span className="font-bold text-red-600">Resigned</span>? This will archive their profile and stop active duty assignments.
+                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Retire Personnel</h3>
+                            <p className="text-slate-500 text-sm mb-8 leading-relaxed font-medium">
+                                Are you sure you want to mark this driver as <span className="font-black text-rose-600">Resigned</span>? This action will archive their profile.
                             </p>
-                            <div className="flex gap-3 w-full">
+                            <div className="flex gap-4 w-full">
                                 <button
                                     onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                                    className="flex-1 px-6 py-4 rounded-2xl bg-slate-50 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={confirmDelete}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
+                                    className="flex-1 px-6 py-4 rounded-2xl bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-rose-700 shadow-xl shadow-rose-200 transition-all"
                                 >
-                                    Delete
+                                    Confirm
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-
-
         </div>
     );
 };
