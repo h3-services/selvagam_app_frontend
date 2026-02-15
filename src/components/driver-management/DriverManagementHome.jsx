@@ -207,12 +207,9 @@ const DriverManagementHome = () => {
             <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className='ml-20 lg:ml-0'>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">
+                        <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
                             {selectedDriver ? 'Driver Profile' : 'Driver Force'}
                         </h1>
-                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                            {selectedDriver ? `System Identity: ${selectedDriver.name}` : 'Fleet Personnel Orchestration'}
-                        </p>
                     </div>
 
                     {!selectedDriver && (
