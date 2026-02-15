@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import { COLORS } from '../../constants/colors';
 import { LocationMarker, createSchoolIcon, createStopIcon } from './RouteMapUtils';
 
-const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
+const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBuses = [] }) => {
     // Default fallback campus if array is empty
     const defaultCampus = { id: 0, name: 'Default Campus', lat: 12.6083, lng: 80.0528 };
     const initialCampusId = schoolLocations.length > 0 ? schoolLocations[0].id : defaultCampus.id;
@@ -235,14 +235,32 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Bus</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. BUS-101"
-                                        value={newRoute.assignedBus}
-                                        onChange={(e) => setNewRoute({ ...newRoute, assignedBus: e.target.value })}
-                                        className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm"
-                                    />
+                                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Assigned Bus</label>
+                                    <div className="relative">
+                                        <select
+                                            value={newRoute.busId || ''}
+                                            onChange={(e) => {
+                                                const busId = e.target.value;
+                                                const bus = (availableBuses || []).find(b => b.id === busId);
+                                                setNewRoute({ 
+                                                    ...newRoute, 
+                                                    busId: busId, 
+                                                    assignedBus: bus ? bus.busNumber : '' 
+                                                });
+                                            }}
+                                            className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm appearance-none font-bold text-gray-700"
+                                        >
+                                            <option value="">None / Unassigned</option>
+                                            {(availableBuses || []).map(bus => (
+                                                <option key={bus.id} value={bus.id}>
+                                                    {bus.busNumber} ({bus.driverName || 'No Driver'})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none">
+                                            <FontAwesomeIcon icon={faChevronDown} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

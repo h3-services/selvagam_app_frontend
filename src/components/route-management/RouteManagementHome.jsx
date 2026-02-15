@@ -363,6 +363,7 @@ const RouteManagementHome = () => {
                 onClose={() => setShowModal(false)}
                 onAdd={handleAdd}
                 schoolLocations={schoolLocations}
+                availableBuses={activeBuses}
             />
 
             <BusReassignModal
