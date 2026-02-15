@@ -6,9 +6,11 @@ import { CiMenuKebab } from "react-icons/ci";
 const BusList = ({
     filteredBuses,
     drivers,
+    routes,
     setSelectedBus,
     handleStatusChange,
     handleDriverChange,
+    handleRouteChange,
     handleDelete,
     activeMenuId,
     setActiveMenuId,
@@ -146,14 +148,80 @@ const BusList = ({
                             {
                                 headerName: "Route",
                                 field: "route",
-                                flex: 1.5,
-                                cellStyle: { display: 'flex', alignItems: 'center' },
-                                cellRenderer: (params) => (
-                                    <div className="flex items-center gap-2 truncate" title={params.value}>
-                                        <FontAwesomeIcon icon={faRoute} className="text-blue-400 text-xs shrink-0" />
-                                        <span className="text-sm text-gray-600 truncate">{params.value}</span>
-                                    </div>
-                                )
+                                flex: 2,
+                                cellStyle: { overflow: 'visible' },
+                                cellRenderer: (params) => {
+                                    const { activeMenuId, setActiveMenuId, routes, handleRouteChange } = params.context;
+                                    const menuKey = `route-${params.data.id}`;
+                                    const isOpen = activeMenuId === menuKey;
+                                    const currentRouteName = params.value || 'Unassigned';
+
+                                    return (
+                                        <div className="flex items-center h-full relative">
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveMenuId(isOpen ? null : menuKey);
+                                                }}
+                                                className="group flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-emerald-50 transition-all cursor-pointer border border-transparent hover:border-emerald-100"
+                                            >
+                                                <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                                    <FontAwesomeIcon icon={faRoute} className="text-emerald-600 text-[10px]" />
+                                                </div>
+                                                <span className="text-gray-900 font-bold text-xs truncate max-w-[150px]">{currentRouteName}</span>
+                                                <FontAwesomeIcon icon={faChevronDown} className="text-gray-400 text-[10px] group-hover:text-emerald-600 transition-colors" />
+                                            </button>
+
+                                            {isOpen && (
+                                                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 z-[1000] overflow-hidden animate-in fade-in zoom-in duration-200 ring-1 ring-black/5">
+                                                    <div className="px-3 py-2 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assign Route</p>
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleRouteChange(params.data.id, null);
+                                                                setActiveMenuId(null);
+                                                            }}
+                                                            className="text-[10px] font-bold text-red-500 hover:text-red-700"
+                                                        >
+                                                            Clear
+                                                        </button>
+                                                    </div>
+                                                    <div className="max-h-60 overflow-y-auto p-1 custom-scrollbar">
+                                                        {routes.length === 0 ? (
+                                                            <div className="p-3 text-center text-xs text-gray-400 italic">No routes available</div>
+                                                        ) : (
+                                                            routes.map(route => (
+                                                                <button
+                                                                    key={route.route_id}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleRouteChange(params.data.id, route.route_id);
+                                                                        setActiveMenuId(null);
+                                                                    }}
+                                                                    className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-3 rounded-lg transition-all ${
+                                                                        route.route_id === params.data.route_id 
+                                                                        ? 'bg-emerald-50 text-emerald-700' 
+                                                                        : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+                                                                    }`}
+                                                                >
+                                                                    <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500">
+                                                                        <FontAwesomeIcon icon={faRoute} />
+                                                                    </div>
+                                                                    <div className="flex flex-col">
+                                                                        <span>{route.name}</span>
+                                                                        <span className="text-[9px] text-gray-400 font-medium">Route ID: {route.route_id.substring(0,8)}...</span>
+                                                                    </div>
+                                                                    {route.route_id === params.data.route_id && <FontAwesomeIcon icon={faCheck} className="ml-auto text-emerald-600" />}
+                                                                </button>
+                                                            ))
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }
                             },
                             {
                                 headerName: "Status",
@@ -281,7 +349,7 @@ const BusList = ({
                                 )
                             }
                         ]}
-                        context={{ activeMenuId, setActiveMenuId, drivers, handleDriverChange, handleStatusChange }}
+                        context={{ activeMenuId, setActiveMenuId, drivers, routes, handleDriverChange, handleStatusChange, handleRouteChange }}
                         getRowStyle={params => {
                             if (activeMenuId && activeMenuId.includes(params.data.id)) {
                                 return { zIndex: 999, overflow: 'visible' };
