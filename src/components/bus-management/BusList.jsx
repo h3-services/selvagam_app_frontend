@@ -243,23 +243,25 @@ const BusList = ({
                                     const statusOptions = ['Active', 'Maintenance', 'Inactive', 'Spare', 'Scrap'];
 
                                     const getStatusGradient = (s) => {
-                                        switch(s) {
-                                            case 'Active': return 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200';
-                                            case 'Maintenance': return 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-blue-200';
-                                            case 'Inactive': return 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-200';
-                                            case 'Spare': return 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-orange-200';
-                                            case 'Scrap': return 'bg-gradient-to-r from-gray-500 to-gray-700 shadow-gray-200';
-                                            default: return 'bg-gray-500';
+                                        const status = (s || '').toLowerCase();
+                                        switch(status) {
+                                            case 'active': return 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-200';
+                                            case 'maintenance': return 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-blue-200';
+                                            case 'inactive': return 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-200';
+                                            case 'spare': return 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-orange-200';
+                                            case 'scrap': return 'bg-gradient-to-r from-gray-500 to-gray-700 shadow-gray-200';
+                                            default: return 'bg-gray-500 shadow-gray-200';
                                         }
                                     };
 
                                     const getStatusIcon = (s) => {
-                                        switch(s) {
-                                            case 'Active': return faCheck;
-                                            case 'Maintenance': return faWrench;
-                                            case 'Inactive': return faTimes;
-                                            case 'Spare': return faBus;
-                                            case 'Scrap': return faTrash;
+                                        const status = (s || '').toLowerCase();
+                                        switch(status) {
+                                            case 'active': return faCheck;
+                                            case 'maintenance': return faWrench;
+                                            case 'inactive': return faTimes;
+                                            case 'spare': return faBus;
+                                            case 'scrap': return faTrash;
                                             default: return faBus;
                                         }
                                     };
@@ -306,7 +308,7 @@ const BusList = ({
                                                                     setActiveMenuId(null);
                                                                 }}
                                                                 className={`w-full text-left px-3 py-2 text-xs font-bold flex items-center gap-3 rounded-lg transition-all ${
-                                                                    option === status 
+                                                                    option === status || option.toUpperCase() === (status || '').toUpperCase()
                                                                     ? 'bg-blue-50 text-blue-700' 
                                                                     : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
                                                                 }`}
@@ -321,7 +323,7 @@ const BusList = ({
                                                                     <FontAwesomeIcon icon={getStatusIcon(option)} className="text-[10px]" />
                                                                 </div>
                                                                 {option}
-                                                                {status === option && <FontAwesomeIcon icon={faCheck} className="ml-auto text-blue-600" />}
+                                                                {(status === option || (status || '').toUpperCase() === option.toUpperCase()) && <FontAwesomeIcon icon={faCheck} className="ml-auto text-blue-600" />}
                                                             </button>
                                                         ))}
                                                     </div>
@@ -337,23 +339,26 @@ const BusList = ({
                                 width: 90,
                                 minWidth: 90,
                                 pinned: 'right',
-                                cellRenderer: (params) => (
-                                    <div className="flex items-center justify-center h-full">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleStatusChange(params.data.id, 'Scrap');
-                                            }}
-                                            className="w-8 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
-                                            title="Move to Scrap"
-                                        >
-                                            <FontAwesomeIcon icon={faTrash} className="text-sm" />
-                                        </button>
-                                    </div>
-                                )
+                                cellRenderer: (params) => {
+                                    const { handleDelete } = params.context;
+                                    return (
+                                        <div className="flex items-center justify-center h-full">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(params.data.id);
+                                                }}
+                                                className="w-8 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
+                                                title="Delete Vehicle"
+                                            >
+                                                <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                                            </button>
+                                        </div>
+                                    );
+                                }
                             }
                         ]}
-                        context={{ activeMenuId, setActiveMenuId, drivers, routes, handleDriverChange, handleStatusChange, handleRouteChange }}
+                        context={{ activeMenuId, setActiveMenuId, drivers, routes, handleDriverChange, handleStatusChange, handleRouteChange, handleDelete }}
                         getRowStyle={params => {
                             if (activeMenuId && activeMenuId.includes(params.data.id)) {
                                 return { zIndex: 999, overflow: 'visible' };
@@ -366,7 +371,6 @@ const BusList = ({
                             enableClickSelection: false,
                             checkboxes: true
                         }}
-                        suppressRowClickSelection={true}
                         selectionColumnDef={{ 
                             width: 50, 
                             minWidth: 50, 

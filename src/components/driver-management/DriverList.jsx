@@ -204,7 +204,6 @@ const DriverList = ({
                             enableClickSelection: false,
                             checkboxes: true
                         }}
-                        suppressRowClickSelection={true}
                         selectionColumnDef={{ 
                             width: 50, 
                             minWidth: 50, 
