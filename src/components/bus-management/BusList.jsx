@@ -240,7 +240,7 @@ const BusList = ({
                                     const isOpen = activeMenuId === menuKey;
                                     
                                     
-                                    const statusOptions = ['Active', 'Maintenance', 'Inactive', 'Spare', 'Scrap'];
+                                    const statusOptions = ['Active', 'Maintenance', 'Inactive', 'Spare'];
 
                                     const getStatusGradient = (s) => {
                                         const status = (s || '').toLowerCase();

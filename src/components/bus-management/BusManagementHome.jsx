@@ -131,10 +131,11 @@ const BusManagementHome = () => {
     const confirmDelete = async () => {
         if (itemToDelete) {
             try {
-                await busService.deleteBus(itemToDelete);
-                setBuses(buses.filter(b => b.id !== itemToDelete));
+                // Change status to Scrap instead of deleting
+                await busService.updateBusStatus(itemToDelete, 'SCRAP');
+                setBuses(buses.map(b => b.id === itemToDelete ? { ...b, status: 'Scrap' } : b));
             } catch (e) {
-                console.error("Failed to delete bus", e);
+                console.error("Failed to move bus to scrap", e);
             }
             setItemToDelete(null);
             setShowDeleteConfirm(false);
@@ -483,12 +484,12 @@ const BusManagementHome = () => {
                     />
                     <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
+                            <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-6">
+                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-amber-600" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Move to Scrap</h3>
                             <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                                Are you sure you want to delete this bus record? This action cannot be undone and will remove all associated data.
+                                Are you sure you want to move this vehicle to scrap? This will decommission it from the active fleet and archive it in the Scrap Registry.
                             </p>
                             <div className="flex gap-3 w-full">
                                 <button
@@ -499,9 +500,9 @@ const BusManagementHome = () => {
                                 </button>
                                 <button
                                     onClick={confirmDelete}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
+                                    className="flex-1 px-4 py-3 rounded-xl bg-amber-600 text-white font-bold text-sm hover:bg-amber-700 shadow-lg shadow-amber-200 transition-all active:scale-95"
                                 >
-                                    Delete
+                                    Confirm Scrap
                                 </button>
                             </div>
                         </div>
