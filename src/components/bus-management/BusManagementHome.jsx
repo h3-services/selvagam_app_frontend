@@ -82,10 +82,10 @@ const BusManagementHome = () => {
     const filteredBuses = useMemo(() => {
         let result = buses;
         if (activeTab === 'Scrap') {
-            result = result.filter(b => b.status === 'Scrap');
+            result = result.filter(b => (b.status || '').toUpperCase() === 'SCRAP');
         } else {
             // 'All' tab should exclude 'Scrap' buses
-            result = result.filter(b => b.status !== 'Scrap');
+            result = result.filter(b => (b.status || '').toUpperCase() !== 'SCRAP');
         }
 
         return result.filter(b =>
@@ -131,7 +131,7 @@ const BusManagementHome = () => {
     const confirmDelete = async () => {
         if (itemToDelete) {
             try {
-                // await busService.deleteBus(itemToDelete);
+                await busService.deleteBus(itemToDelete);
                 setBuses(buses.filter(b => b.id !== itemToDelete));
             } catch (e) {
                 console.error("Failed to delete bus", e);
