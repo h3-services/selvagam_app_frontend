@@ -193,15 +193,22 @@ const DriverList = ({
                                 }
                             }
                         ]}
-                        rowSelection={{ mode: 'multiRow', headerCheckbox: true, enableClickSelection: false }}
+                        rowSelection={{ 
+                            mode: 'multiRow', 
+                            headerCheckbox: true, 
+                            enableClickSelection: false,
+                            checkboxes: true
+                        }}
+                        suppressRowClickSelection={true}
                         selectionColumnDef={{ 
-                            width: 60, 
-                            minWidth: 60, 
-                            maxWidth: 60, 
+                            width: 50, 
+                            minWidth: 50, 
+                            maxWidth: 50, 
                             pinned: 'left',
-                            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+                            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' },
                             headerClass: 'ag-center-header'
                         }}
+                        getRowId={params => params.data.id}
                         onSelectionChanged={(params) => {
                             const selectedNodes = params.api.getSelectedNodes();
                             const selectedData = selectedNodes.map(node => node.data);
@@ -237,16 +244,15 @@ const DriverList = ({
                     align-items: center !important;
                     justify-content: center !important;
                     width: 100% !important;
+                    cursor: pointer !important;
                 }
                 .ag-checkbox-input-wrapper {
-                    transform: scale(1.4) !important;
-                    transition: all 0.2s ease;
+                    cursor: pointer !important;
+                    width: 20px !important;
+                    height: 20px !important;
                 }
-                .ag-checkbox-input-wrapper.ag-checked {
-                    filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.4));
-                }
-                .ag-checkbox-input-wrapper input:checked + .ag-checkbox-input-wrapper {
-                    background-color: #2563eb !important;
+                .ag-checkbox-input-wrapper input {
+                    cursor: pointer !important;
                 }
             ` }} />
 
