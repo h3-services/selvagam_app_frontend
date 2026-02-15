@@ -202,54 +202,54 @@ const DriverManagementHome = () => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
+        <div className="h-full flex flex-col bg-[#f1f5f9] relative animate-fade-in">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className='ml-20 lg:ml-0'>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                            {selectedDriver ? 'Driver Profile' : 'Driver Management'}
+                        <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">
+                            {selectedDriver ? 'Driver Profile' : 'Driver Force'}
                         </h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {selectedDriver ? `Viewing details for ${selectedDriver.name}` : 'Manage school bus drivers and status'}
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                            {selectedDriver ? `System Identity: ${selectedDriver.name}` : 'Fleet Personnel Orchestration'}
                         </p>
                     </div>
 
                     {!selectedDriver && (
                         <div className="flex flex-col md:flex-row items-center gap-6">
                             {/* View Mode Toggle (Segmented Control) */}
-                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
+                            <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
                                 <button
                                     onClick={() => setViewMode('active')}
-                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${
                                         viewMode === 'active' 
-                                        ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
-                                        : 'text-gray-500 hover:text-gray-700'
+                                        ? 'bg-white text-blue-600 shadow-lg transform scale-[1.05]' 
+                                        : 'text-slate-400 hover:text-slate-600'
                                     }`}
                                 >
-                                    Active Drivers
+                                    Active Duty
                                 </button>
                                 <button
                                     onClick={() => setViewMode('resigned')}
-                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${
                                         viewMode === 'resigned' 
-                                        ? 'bg-white text-red-600 shadow-md transform scale-[1.02]' 
-                                        : 'text-gray-500 hover:text-gray-700'
+                                        ? 'bg-white text-red-600 shadow-lg transform scale-[1.05]' 
+                                        : 'text-slate-400 hover:text-slate-600'
                                     }`}
                                 >
-                                    Archived Records
+                                    Archived
                                 </button>
                             </div>
 
                             <div className="relative group">
                                 <input
                                     type="text"
-                                    placeholder="Search drivers..."
+                                    placeholder="Search driver fleet..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-64 md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-64 md:w-80 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-blue-500/10 focus:bg-white focus:border-blue-400 transition-all outline-none placeholder:text-slate-300"
                                 />
-                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
+                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors" />
                             </div>
                         </div>
                     )}
@@ -293,10 +293,10 @@ const DriverManagementHome = () => {
             {!selectedDriver && !loading && viewMode === 'active' && (
                 <button
                     onClick={() => setShowModal(true)}
-                    className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
+                    className="fixed bottom-8 right-8 w-16 h-16 text-white rounded-[2rem] shadow-2xl hover:shadow-blue-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
-                    <FontAwesomeIcon icon={faUserPlus} className="text-xl sm:text-2xl" />
+                    <FontAwesomeIcon icon={faUserPlus} className="text-2xl" />
                 </button>
             )}
 
