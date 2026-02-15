@@ -122,7 +122,8 @@ const DriverList = ({
                             {
                                 headerName: "Actions",
                                 field: "id",
-                                width: 80,
+                                width: 90,
+                                minWidth: 90,
                                 sortable: false,
                                 filter: false,
                                 pinned: 'right',
@@ -228,6 +229,9 @@ const DriverList = ({
                         overlayNoRowsTemplate='<span class="p-4 font-black uppercase text-[10px] tracking-widest text-slate-300">No personnel detected in registry</span>'
                         theme="legacy"
                         onGridReady={(params) => {
+                            params.api.sizeColumnsToFit();
+                        }}
+                        onGridSizeChanged={(params) => {
                             params.api.sizeColumnsToFit();
                         }}
                     />
