@@ -289,18 +289,19 @@ const RouteManagementHome = () => {
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className='ml-20 lg:ml-0'>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                            {selectedRoute ? 'Route Details' : 'Route Management'}
-                        </h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {selectedRoute ? `Viewing details for ${selectedRoute.routeName}` : 'Optimize travel paths and stops'}
-                        </p>
-                    </div>
+            {/* Header - Hidden when viewing details */}
+            {!selectedRoute && (
+                <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className='ml-20 lg:ml-0'>
+                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                                Route Management
+                            </h1>
+                            <p className="text-sm text-gray-500 mt-1">
+                                Optimize travel paths and stops
+                            </p>
+                        </div>
 
-                    {!selectedRoute && (
                         <div className="flex items-center gap-3">
                             <div className="relative group">
                                 <input
@@ -313,19 +314,9 @@ const RouteManagementHome = () => {
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>
                         </div>
-                    )}
-
-                    {selectedRoute && (
-                        <button 
-                            onClick={() => setSelectedRoute(null)}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-blue-600 bg-gray-100 hover:bg-blue-50 rounded-xl transition-all"
-                        >
-                            <FontAwesomeIcon icon={faArrowLeft} />
-                            Back to List
-                        </button>
-                    )}
+                    </div>
                 </div>
-            </div>
+            )}
 
 
 

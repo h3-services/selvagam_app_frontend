@@ -221,26 +221,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [] }) => {
                                     Route Details
                                 </h4>
 
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Select Campus</label>
-                                    <div className="relative">
-                                        <select
-                                            value={selectedCampus}
-                                            onChange={(e) => setSelectedCampus(e.target.value)}
-                                            className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm appearance-none font-bold text-gray-700"
-                                        >
-                                            {(schoolLocations || []).map(loc => (
-                                                <option key={loc.id} value={loc.id}>
-                                                    {loc.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none">
-                                            <FontAwesomeIcon icon={faChevronDown} />
-                                        </div>
-                                    </div>
-                                    <p className="text-[10px] text-gray-500 mt-1 font-medium">Route will start and end at this campus</p>
-                                </div>
+
 
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Route Name</label>
