@@ -130,23 +130,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                             </div>
                         </div>
 
-                        {/* Status/Maintenance Card */}
-                        <div className="bg-white rounded-[32px] shadow-sm border-2 border-blue-50 p-8">
-                            <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-[2px] mb-6">Health Check</h4>
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group hover:border-purple-200 transition-all">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${selectedBus.status === 'Active' ? 'bg-emerald-100 text-emerald-600' : selectedBus.status === 'Maintenance' ? 'bg-blue-100 text-blue-600' : 'bg-rose-100 text-rose-600'}`}>
-                                        <FontAwesomeIcon icon={selectedBus.status === 'Active' ? faCheck : faCircleExclamation} className="text-xl" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-gray-900">Vehicle Status</p>
-                                        <p className={`text-xs font-bold mt-0.5 ${selectedBus.status === 'Active' ? 'text-emerald-600' : selectedBus.status === 'Maintenance' ? 'text-blue-500' : 'text-rose-500'}`}>
-                                            {selectedBus.status === 'Active' ? 'Operational' : 'Attention Needed'}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
 
                     {/* Right Column - Details */}
