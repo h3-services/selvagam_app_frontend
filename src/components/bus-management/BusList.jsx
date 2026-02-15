@@ -35,7 +35,8 @@ const BusList = ({
                             {
                                 headerName: "Bus Number",
                                 field: "busNumber",
-                                flex: 1,
+                                flex: 1.2,
+                                minWidth: 150,
                                 cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                 cellRenderer: (params) => (
                                     <div
@@ -58,7 +59,8 @@ const BusList = ({
                             {
                                 headerName: "Driver Name",
                                 field: "driverName",
-                                flex: 1.2,
+                                flex: 1.8,
+                                minWidth: 180,
                                 cellStyle: { overflow: 'visible' },
                                 cellRenderer: (params) => {
                                     const { activeMenuId, setActiveMenuId, drivers, handleDriverChange } = params.context;
@@ -137,6 +139,7 @@ const BusList = ({
                                 headerName: "Seating Capacity",
                                 field: "capacity",
                                 flex: 1,
+                                minWidth: 140,
                                 cellStyle: { display: 'flex', alignItems: 'center' },
                                 cellRenderer: (params) => (
                                     <div className="flex items-center gap-2">
@@ -148,7 +151,8 @@ const BusList = ({
                             {
                                 headerName: "Route",
                                 field: "route",
-                                flex: 2,
+                                flex: 2.2,
+                                minWidth: 220,
                                 cellStyle: { overflow: 'visible' },
                                 cellRenderer: (params) => {
                                     const { activeMenuId, setActiveMenuId, routes, handleRouteChange } = params.context;
@@ -226,7 +230,8 @@ const BusList = ({
                             {
                                 headerName: "Status",
                                 field: "status",
-                                flex: 1,
+                                flex: 1.5,
+                                minWidth: 160,
                                 cellStyle: { overflow: 'visible' },
                                 cellRenderer: (params) => {
                                     const status = params.value;
@@ -329,10 +334,9 @@ const BusList = ({
                             {
                                 headerName: "Actions",
                                 field: "id",
-                                width: 100,
-                                sortable: false,
-                                filter: false,
-                                cellStyle: { overflow: 'visible' },
+                                width: 90,
+                                minWidth: 90,
+                                pinned: 'right',
                                 cellRenderer: (params) => (
                                     <div className="flex items-center justify-center h-full">
                                         <button
@@ -390,6 +394,12 @@ const BusList = ({
                         paginationPageSizeSelector={[10, 20, 50]}
                         overlayNoRowsTemplate='<span class="p-4">No buses found</span>'
                         theme="legacy"
+                        onGridReady={(params) => {
+                            params.api.sizeColumnsToFit();
+                        }}
+                        onGridSizeChanged={(params) => {
+                            params.api.sizeColumnsToFit();
+                        }}
                     />
                 </div>
             </div>
