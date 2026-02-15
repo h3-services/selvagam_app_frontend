@@ -39,7 +39,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
             
             fetchParents(p1Id, p2Id);
             
-            if (selectedStudent.originalData?.is_transport_user) {
+            if (selectedStudent.originalData?.is_transport_user || selectedStudent.originalData?.transport_status === 'ACTIVE') {
                 fetchTransportInfo(selectedStudent.originalData);
             }
         }
@@ -69,10 +69,10 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
                 routeService.getAllRouteStops()
             ]);
             setTransportData({
-                pickupRoute: routes.find(r => r.route_id === student.pickup_route_id),
-                dropRoute: routes.find(r => r.route_id === student.drop_route_id),
-                pickupStop: stops.find(s => s.stop_id === student.pickup_stop_id),
-                dropStop: stops.find(s => s.stop_id === student.drop_stop_id)
+                pickupRoute: routes.find(r => r.route_id == student.pickup_route_id),
+                dropRoute: routes.find(r => r.route_id == student.drop_route_id),
+                pickupStop: stops.find(s => s.stop_id == student.pickup_stop_id),
+                dropStop: stops.find(s => s.stop_id == student.drop_stop_id)
             });
         } catch (error) {
             console.error("Error fetching transport:", error);
@@ -254,8 +254,8 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
                                                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Morning Pickup</h4>
                                             </div>
                                             <div className="grid grid-cols-2 gap-6">
-                                                <DataRow label="Route" value={transportData.pickupRoute?.route_name || 'Assigned'} />
-                                                <DataRow label="Stop Name" value={transportData.pickupStop?.stop_name || 'Main Gate'} />
+                                                <DataRow label="Route" value={transportData.pickupRoute?.name || transportData.pickupRoute?.route_name} />
+                                                <DataRow label="Stop Name" value={transportData.pickupStop?.stop_name} />
                                             </div>
                                         </div>
                                         <div className="space-y-6">
@@ -264,8 +264,8 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
                                                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Evening Drop</h4>
                                             </div>
                                             <div className="grid grid-cols-2 gap-6">
-                                                <DataRow label="Route" value={transportData.dropRoute?.route_name || 'Assigned'} />
-                                                <DataRow label="Drop Point" value={transportData.dropStop?.stop_name || 'Main Gate'} />
+                                                <DataRow label="Route" value={transportData.dropRoute?.name || transportData.dropRoute?.route_name} />
+                                                <DataRow label="Drop Point" value={transportData.dropStop?.stop_name} />
                                             </div>
                                         </div>
                                     </div>

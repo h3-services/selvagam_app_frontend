@@ -1,16 +1,19 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRoute, faChevronRight, faBuilding, faBus, faCircle, faExchangeAlt, faEye, faTrash, faMapLocationDot, faUserFriends } from '@fortawesome/free-solid-svg-icons';
+import { faRoute, faChevronRight, faBuilding, faBus, faCircle, faExchangeAlt, faEye, faTrash, faMapLocationDot, faUserFriends, faUndo } from '@fortawesome/free-solid-svg-icons';
 import { CiMenuKebab } from "react-icons/ci";
 
 const RouteList = ({
     filteredRoutes,
     setSelectedRoute,
     handleDelete,
+    handleRestore,
     activeMenuId,
     setActiveMenuId,
     openBusReassignModal,
-    COLORS
+    COLORS,
+    activeTab,
+    onSelectionChanged
 }) => {
     return (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -100,28 +103,55 @@ const RouteList = ({
                                 )
                             },
                             {
-                                headerName: "Delete",
+                                headerName: activeTab === 'Archived' ? "Restore" : "Delete",
                                 field: "id",
                                 width: 100,
                                 sortable: false,
                                 filter: false,
                                 cellRenderer: (params) => (
                                     <div className="flex items-center justify-center h-full">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDelete(params.data.id);
-                                            }}
-                                            className="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
-                                            title="Delete Route"
-                                        >
-                                            <FontAwesomeIcon icon={faTrash} className="text-sm" />
-                                        </button>
+                                        {activeTab === 'Archived' ? (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRestore(params.data.id);
+                                                }}
+                                                className="w-9 h-9 rounded-xl bg-green-50 text-green-500 hover:bg-green-100 hover:text-green-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
+                                                title="Restore Route"
+                                            >
+                                                <FontAwesomeIcon icon={faUndo} className="text-sm" />
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(params.data.id);
+                                                }}
+                                                className="w-9 h-9 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
+                                                title="Delete Route"
+                                            >
+                                                <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                                            </button>
+                                        )}
                                     </div>
                                 )
                             }
                         ]}
                         context={{ activeMenuId, setActiveMenuId }}
+                        rowSelection={{ mode: 'multiRow', headerCheckbox: true, enableClickSelection: false }}
+                        selectionColumnDef={{ 
+                            width: 50, 
+                            minWidth: 50, 
+                            maxWidth: 50, 
+                            pinned: 'left',
+                            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+                            headerClass: 'ag-center-header'
+                        }}
+                        onSelectionChanged={(params) => {
+                            const selectedNodes = params.api.getSelectedNodes();
+                            const selectedData = selectedNodes.map(node => node.data);
+                            if (onSelectionChanged) onSelectionChanged(selectedData);
+                        }}
                         getRowStyle={params => {
                             if (params.data.id === activeMenuId) {
                                 return { zIndex: 999, overflow: 'visible' };
@@ -159,12 +189,23 @@ const RouteList = ({
                                         <p className="text-xs font-bold text-gray-500 mt-1">{route.distance}</p>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => handleDelete(route.id)}
-                                    className="w-10 h-10 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-all flex items-center justify-center"
-                                >
-                                    <FontAwesomeIcon icon={faTrash} className="text-sm" />
-                                </button>
+                                {activeTab === 'Archived' ? (
+                                    <button
+                                        onClick={() => handleRestore(route.id)}
+                                        className="w-10 h-10 rounded-xl bg-green-100 text-green-700 hover:bg-green-200 transition-all flex items-center justify-center"
+                                        title="Restore Route"
+                                    >
+                                        <FontAwesomeIcon icon={faUndo} className="text-sm" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => handleDelete(route.id)}
+                                        className="w-10 h-10 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-all flex items-center justify-center"
+                                        title="Delete Route"
+                                    >
+                                        <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                                    </button>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-4">

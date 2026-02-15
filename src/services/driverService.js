@@ -1,4 +1,5 @@
 import api from './api';
+import { securityUtils } from '../utils/security';
 
 export const driverService = {
     // Get all drivers
@@ -26,7 +27,11 @@ export const driverService = {
     // Create a new driver (placeholder for future implementation)
     createDriver: async (driverData) => {
         try {
-            const response = await api.post('/drivers', driverData);
+            const payload = { ...driverData };
+            if (payload.password) {
+                payload.password = securityUtils.encrypt(payload.password);
+            }
+            const response = await api.post('/drivers', payload);
             return response.data;
         } catch (error) {
             console.error("Error creating driver:", error);
@@ -37,7 +42,11 @@ export const driverService = {
     // Update driver
     updateDriver: async (driverId, driverData) => {
         try {
-            const response = await api.put(`/drivers/${driverId}`, driverData);
+            const payload = { ...driverData };
+            if (payload.password) {
+                payload.password = securityUtils.encrypt(payload.password);
+            }
+            const response = await api.put(`/drivers/${driverId}`, payload);
             return response.data;
         } catch (error) {
             console.error(`Error updating driver ${driverId}:`, error);

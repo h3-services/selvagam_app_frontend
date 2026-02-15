@@ -43,7 +43,7 @@ const BusReassignModal = ({
                             return (
                                 <button
                                     key={bus.busNumber}
-                                    onClick={() => onReassign(reassigningRouteId, bus.busNumber)}
+                                    onClick={() => onReassign(reassigningRouteId, bus)}
                                     disabled={bus.status !== 'Active'}
                                     className={`w-full p-4 rounded-xl border-2 transition-all text-left ${isCurrentBus
                                         ? 'border-blue-500 bg-blue-50'

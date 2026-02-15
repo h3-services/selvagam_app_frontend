@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faMapLocationDot, faSearch, faSpinner, faChevronDown, faRoute, faLocationDot, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faMapLocationDot, faSearch, faSpinner, faChevronDown, faRoute, faLocationDot, faPlus, faBus } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { COLORS } from '../../constants/colors';
 import { LocationMarker, createSchoolIcon, createStopIcon } from './RouteMapUtils';
@@ -17,6 +17,14 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
     const [searchSuggestions, setSearchSuggestions] = useState([]);
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
     const [selectedCampus, setSelectedCampus] = useState(initialCampusId);
+    const [showBusDropdown, setShowBusDropdown] = useState(false);
+
+    // Close dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = () => setShowBusDropdown(false);
+        window.addEventListener('click', handleClickOutside);
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, []);
 
     // Debounce search for suggestions
     useEffect(() => {
@@ -237,29 +245,61 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                 <div>
                                     <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Assigned Bus</label>
                                     <div className="relative">
-                                        <select
-                                            value={newRoute.busId || ''}
-                                            onChange={(e) => {
-                                                const busId = e.target.value;
-                                                const bus = (availableBuses || []).find(b => b.id === busId);
-                                                setNewRoute({ 
-                                                    ...newRoute, 
-                                                    busId: busId, 
-                                                    assignedBus: bus ? bus.busNumber : '' 
-                                                });
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowBusDropdown(!showBusDropdown);
                                             }}
-                                            className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm appearance-none font-bold text-gray-700"
+                                            className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm text-left flex items-center justify-between"
                                         >
-                                            <option value="">None / Unassigned</option>
-                                            {(availableBuses || []).map(bus => (
-                                                <option key={bus.id} value={bus.id}>
-                                                    {bus.busNumber} ({bus.driverName || 'No Driver'})
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none">
-                                            <FontAwesomeIcon icon={faChevronDown} />
-                                        </div>
+                                            <div className="flex items-center gap-2">
+                                                <FontAwesomeIcon icon={faBus} className="text-blue-500" />
+                                                <span className="font-bold text-gray-700">
+                                                    {newRoute.assignedBus ? `${newRoute.assignedBus}` : 'Select a Bus'}
+                                                </span>
+                                            </div>
+                                            <FontAwesomeIcon icon={faChevronDown} className={`text-blue-400 transition-transform ${showBusDropdown ? 'rotate-180' : ''}`} />
+                                        </button>
+
+                                        {showBusDropdown && (
+                                            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-blue-100 rounded-2xl shadow-xl z-[2000] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                                <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                                                    <div 
+                                                        onClick={() => {
+                                                            setNewRoute({ ...newRoute, busId: '', assignedBus: '' });
+                                                            setShowBusDropdown(false);
+                                                        }}
+                                                        className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm font-bold text-slate-400 border-b border-slate-50"
+                                                    >
+                                                        None / Unassigned
+                                                    </div>
+                                                    {(availableBuses || []).map(bus => (
+                                                        <div 
+                                                            key={bus.id}
+                                                            onClick={() => {
+                                                                setNewRoute({ 
+                                                                    ...newRoute, 
+                                                                    busId: bus.id, 
+                                                                    assignedBus: bus.busNumber 
+                                                                });
+                                                                setShowBusDropdown(false);
+                                                            }}
+                                                            className="px-4 py-3 hover:bg-blue-50 cursor-pointer group transition-colors border-b border-slate-50 last:border-0"
+                                                        >
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">
+                                                                    {bus.busNumber}
+                                                                </span>
+                                                                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+                                                                    Pilot: {bus.driverName || 'No Driver'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

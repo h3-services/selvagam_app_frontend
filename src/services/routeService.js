@@ -107,5 +107,16 @@ export const routeService = {
             console.error(`Error deleting route ${routeId}:`, error);
             throw error;
         }
+    },
+
+    // Update route status
+    updateRouteStatus: async (routeId, status) => {
+        try {
+            const response = await api.put(`/routes/${routeId}/status`, { status });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating route status ${routeId}:`, error);
+            throw error;
+        }
     }
 };

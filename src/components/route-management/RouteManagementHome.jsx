@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faArrowLeft, faTrash, faMapLocationDot, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faArrowLeft, faTrash, faMapLocationDot, faCircleNotch, faArchive, faRoute, faUndo, faCheck, faChevronDown, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import RouteList from './RouteList';
 import RouteDetail from './RouteDetail';
@@ -10,11 +10,15 @@ import { routeService } from '../../services/routeService';
 
 import { driverService } from '../../services/driverService';
 import { busService } from '../../services/busService';
+import { studentService } from '../../services/studentService';
 
 const RouteManagementHome = () => {
     const [routes, setRoutes] = useState([]);
     const [activeBuses, setActiveBuses] = useState([]); // Renamed to avoid confusion, mapped for modal
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('Active'); // New state for tabs
+    const [selectedRoutes, setSelectedRoutes] = useState([]); // New state for checkboxes
+    const [showBulkMenu, setShowBulkMenu] = useState(false); // New state for bulk menu
 
     useEffect(() => {
         fetchAllData();
@@ -43,15 +47,15 @@ const RouteManagementHome = () => {
 
             if (Array.isArray(busesData)) {
                 busesData.forEach(bus => {
-                    const busNum = bus.registration_number || bus.bus_number || 'Unknown Bus';
+                    const busName = bus.bus_name || bus.name || bus.registration_number || bus.bus_number || 'Unknown Bus';
                     const driverName = bus.driver_name || (bus.driver_id ? driverMap[bus.driver_id] : 'Unassigned');
                     
                     if (bus.route_id) {
-                        routeBusMap[bus.route_id] = busNum;
+                        routeBusMap[bus.route_id] = busName;
                     }
 
                     mappedBuses.push({
-                        busNumber: busNum,
+                        busNumber: busName, // Kept key as busNumber for minimal code change, but value is now name
                         capacity: bus.seating_capacity || 0,
                         status: bus.status ? (bus.status.charAt(0).toUpperCase() + bus.status.slice(1).toLowerCase()) : 'Inactive',
                         driverName: driverName,
@@ -63,7 +67,7 @@ const RouteManagementHome = () => {
             setActiveBuses(mappedBuses);
 
             // Transform and merge data
-            const mappedRoutes = routesData.map(route => {
+            const mappedRoutes = await Promise.all(routesData.map(async (route) => {
                 // Get stops for this route
                 const routeStops = stopsData.filter(stop => stop.route_id === route.route_id);
                 
@@ -81,13 +85,23 @@ const RouteManagementHome = () => {
                 const startCoord = stopPoints.length > 0 ? stopPoints[0].position : [12.6083, 80.0528]; // Default fallback
                 const endCoord = stopPoints.length > 0 ? stopPoints[stopPoints.length - 1].position : [12.6083, 80.0528];
 
+                // Fetch real student count from API
+                let studentCount = 0;
+                try {
+                    const countData = await studentService.getStudentCountByRoute(route.route_id);
+                    // Mapping correct field: API returns "student_count"
+                    studentCount = countData.student_count || 0;
+                } catch (e) {
+                    console.error(`Failed to fetch count for route ${route.route_id}:`, e);
+                }
+
                 return {
                     id: route.route_id,
                     routeName: route.name,
                     distance: 'N/A', // Not in API yet
                     assignedBus: routeBusMap[route.route_id] || 'Unassigned',
                     stops: routeStops.length,
-                    studentCount: Math.floor(Math.random() * 40) + 15, // Mock data for now
+                    studentCount: studentCount,
                     stopPoints: stopPoints,
                     coordinates: {
                         start: startCoord,
@@ -96,7 +110,7 @@ const RouteManagementHome = () => {
                     status: route.routes_active_status,
                     originalData: route
                 };
-            });
+            }));
 
             setRoutes(mappedRoutes);
         } catch (error) {
@@ -138,13 +152,22 @@ const RouteManagementHome = () => {
         }
     };
 
-    const handleReassignBus = (routeId, newBusNumber) => {
-        setRoutes(routes.map(r => r.id === routeId ? { ...r, assignedBus: newBusNumber } : r));
-        if (selectedRoute && selectedRoute.id === routeId) {
-            setSelectedRoute({ ...selectedRoute, assignedBus: newBusNumber });
+    const handleReassignBus = async (routeId, bus) => {
+        try {
+            await busService.assignRoute(bus.id, routeId);
+            const newBusNumber = bus.busNumber;
+            
+            setRoutes(routes.map(r => r.id === routeId ? { ...r, assignedBus: newBusNumber } : r));
+            if (selectedRoute && selectedRoute.id === routeId) {
+                setSelectedRoute({ ...selectedRoute, assignedBus: newBusNumber });
+            }
+        } catch (error) {
+            console.error("Failed to reassign bus:", error);
+            // alert("Failed to reassign bus. Please try again.");
+        } finally {
+            setShowBusReassignModal(false);
+            setReassigningRouteId(null);
         }
-        setShowBusReassignModal(false);
-        setReassigningRouteId(null);
     };
 
     const openBusReassignModal = (routeId, e) => {
@@ -154,10 +177,40 @@ const RouteManagementHome = () => {
     };
 
     const filteredRoutes = useMemo(() => {
-        return routes.filter(r =>
-            r.routeName.toLowerCase().includes(search.toLowerCase())
-        );
-    }, [routes, search]);
+        return routes.filter(r => {
+            const isInactive = (r.status || '').toUpperCase() === 'INACTIVE';
+            const matchesSearch = r.routeName.toLowerCase().includes(search.toLowerCase());
+            
+            if (activeTab === 'Archived') {
+                return isInactive && matchesSearch;
+            } else {
+                return !isInactive && matchesSearch;
+            }
+        });
+    }, [routes, search, activeTab]);
+
+    const handleRestore = async (id) => {
+        try {
+            await routeService.updateRouteStatus(id, 'ACTIVE');
+            await fetchAllData();
+        } catch (error) {
+            console.error("Failed to restore route:", error);
+        }
+    };
+
+    const handleBulkStatusUpdate = async (status) => {
+        if (!selectedRoutes.length) return;
+        try {
+            await Promise.all(selectedRoutes.map(route => 
+                routeService.updateRouteStatus(route.id, status)
+            ));
+            await fetchAllData();
+            setSelectedRoutes([]);
+            setShowBulkMenu(false);
+        } catch (error) {
+            console.error(`Failed to bulk update routes to ${status}:`, error);
+        }
+    };
 
     const handleAdd = async (newRouteData) => {
         try {
@@ -199,13 +252,14 @@ const RouteManagementHome = () => {
     const confirmDelete = async () => {
         if (itemToDelete) {
             try {
-                await routeService.deleteRoute(itemToDelete);
+                // Change status to INACTIVE instead of deleting
+                await routeService.updateRouteStatus(itemToDelete, 'INACTIVE');
                 await fetchAllData();
                 setItemToDelete(null);
                 setShowDeleteConfirm(false);
             } catch (error) {
-                console.error("Failed to delete route:", error);
-                // alert("Failed to delete route.");
+                console.error("Failed to deactivate route:", error);
+                // alert("Failed to deactivate route.");
             }
         }
     };
@@ -303,6 +357,30 @@ const RouteManagementHome = () => {
                         </div>
 
                         <div className="flex items-center gap-3">
+                            {/* Tab Switcher */}
+                            <div className="flex bg-slate-100 p-1 rounded-xl mr-4 shadow-inner">
+                                <button
+                                    onClick={() => setActiveTab('Active')}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'Active'
+                                        ? 'bg-white text-blue-600 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                >
+                                    <FontAwesomeIcon icon={faRoute} />
+                                    Active Routes
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('Archived')}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'Archived'
+                                        ? 'bg-white text-amber-600 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                >
+                                    <FontAwesomeIcon icon={faArchive} />
+                                    Archived
+                                </button>
+                            </div>
+
                             <div className="relative group">
                                 <input
                                     type="text"
@@ -340,10 +418,13 @@ const RouteManagementHome = () => {
                         filteredRoutes={filteredRoutes}
                         setSelectedRoute={setSelectedRoute}
                         handleDelete={handleDelete}
+                        handleRestore={handleRestore}
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
                         openBusReassignModal={openBusReassignModal}
                         COLORS={COLORS}
+                        activeTab={activeTab}
+                        onSelectionChanged={setSelectedRoutes}
                     />
                 )}
             </div>
@@ -385,12 +466,12 @@ const RouteManagementHome = () => {
                     />
                     <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
+                            <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-6">
+                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-amber-600" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Delete</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Deactivate Route</h3>
                             <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                                Are you sure you want to delete this route record? This action cannot be undone and will remove all associated data.
+                                Are you sure you want to deactivate this route? It will be marked as inactive in the registry but the historical data will be preserved.
                             </p>
                             <div className="flex gap-3 w-full">
                                 <button
@@ -401,13 +482,78 @@ const RouteManagementHome = () => {
                                 </button>
                                 <button
                                     onClick={confirmDelete}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
+                                    className="flex-1 px-4 py-3 rounded-xl bg-amber-600 text-white font-bold text-sm hover:bg-amber-700 shadow-lg shadow-amber-200 transition-all active:scale-95"
                                 >
-                                    Delete
+                                    Deactivate
                                 </button>
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+            {/* Bulk Selection Menu */}
+            {selectedRoutes.length > 0 && (
+                <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[2002] flex flex-col items-center gap-4">
+                    {showBulkMenu && (
+                        <div className="bg-white/95 backdrop-blur-2xl border border-white/60 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-2 w-64 animate-in slide-in-from-bottom-8 zoom-in duration-300 origin-bottom">
+                            <div className="px-4 py-3 text-[11px] font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 flex items-center justify-between mb-2">
+                                <span>Bulk Operations</span>
+                                <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[9px] shadow-sm">
+                                    {selectedRoutes.length} Selected
+                                </span>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="px-3 py-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Update Route Status</div>
+                                
+                                <button 
+                                    onClick={() => handleBulkStatusUpdate('ACTIVE')}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-emerald-50 active:bg-emerald-100 rounded-xl transition-all group"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <FontAwesomeIcon icon={faRoute} className="text-sm text-emerald-600" />
+                                    </div>
+                                    Mark as Active
+                                </button>
+
+                                <button 
+                                    onClick={() => handleBulkStatusUpdate('INACTIVE')}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-amber-50 active:bg-amber-100 rounded-xl transition-all group"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <FontAwesomeIcon icon={faArchive} className="text-sm text-amber-600" />
+                                    </div>
+                                    Move to Archive
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <button
+                        onClick={() => setShowBulkMenu(!showBulkMenu)}
+                        className={`flex items-center gap-3 px-6 py-4 rounded-full shadow-[0_15px_35px_rgba(0,0,0,0.15)] transition-all active:scale-95 group border-2 ${
+                            showBulkMenu 
+                            ? 'bg-slate-900 border-slate-700 text-white' 
+                            : 'bg-white border-white text-blue-600 hover:shadow-[0_20px_45px_rgba(0,0,0,0.2)]'
+                        }`}
+                    >
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                            showBulkMenu ? 'bg-white/10' : 'bg-blue-600 text-white'
+                        }`}>
+                            <FontAwesomeIcon icon={showBulkMenu ? faCheck : faUsers} className="text-xs" />
+                        </div>
+                        <div className="flex flex-col items-start leading-none">
+                            <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${showBulkMenu ? 'text-slate-400' : 'text-blue-500'}`}>
+                                {selectedRoutes.length} Routes Selected
+                            </span>
+                            <span className={`text-[13px] font-bold mt-0.5 ${showBulkMenu ? 'text-white' : 'text-slate-900'}`}>
+                                {showBulkMenu ? 'Close Selection Menu' : 'Actions for Selected'}
+                            </span>
+                        </div>
+                        <FontAwesomeIcon 
+                            icon={faChevronDown} 
+                            className={`text-[10px] transition-transform duration-300 ml-2 ${showBulkMenu ? 'rotate-180 text-slate-400' : 'text-blue-300'}`} 
+                        />
+                    </button>
                 </div>
             )}
         </div>

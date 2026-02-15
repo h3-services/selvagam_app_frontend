@@ -76,5 +76,16 @@ export const studentService = {
             console.error(`Error deleting student ${studentId}:`, error);
             throw error;
         }
+    },
+
+    // Get student count by route
+    getStudentCountByRoute: async (routeId) => {
+        try {
+            const response = await api.get(`/students/count/by-route/${routeId}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching student count for route ${routeId}:`, error);
+            throw error;
+        }
     }
 };

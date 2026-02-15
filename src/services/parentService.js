@@ -1,4 +1,5 @@
 import api from './api';
+import { securityUtils } from '../utils/security';
 
 export const parentService = {
     // Get all parents
@@ -26,7 +27,12 @@ export const parentService = {
     // Create a new parent
     createParent: async (parentData) => {
         try {
-            const response = await api.post('/parents', parentData);
+            // Encrypt password if provided
+            const payload = { ...parentData };
+            if (payload.password) {
+                payload.password = securityUtils.encrypt(payload.password);
+            }
+            const response = await api.post('/parents', payload);
             return response.data;
         } catch (error) {
             console.error("Error creating parent:", error);
@@ -37,7 +43,12 @@ export const parentService = {
     // Update parent
     updateParent: async (parentId, parentData) => {
         try {
-            const response = await api.put(`/parents/${parentId}`, parentData);
+            // Encrypt password if provided
+            const payload = { ...parentData };
+            if (payload.password) {
+                payload.password = securityUtils.encrypt(payload.password);
+            }
+            const response = await api.put(`/parents/${parentId}`, payload);
             return response.data;
         } catch (error) {
             console.error(`Error updating parent ${parentId}:`, error);
