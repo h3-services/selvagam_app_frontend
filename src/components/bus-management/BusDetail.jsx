@@ -125,15 +125,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                             <SectionHeader icon={faFingerprint} title="Technical Identity" subtitle="System Specifications" />
                             <div className="space-y-6 pt-2">
-                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-indigo-600">
-                                        <FontAwesomeIcon icon={faIndustry} />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manufacturer</p>
-                                        <p className="text-sm font-bold text-slate-900">{selectedBus.bus_brand}</p>
-                                    </div>
-                                </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <DataRow label="Model Series" value={selectedBus.bus_model} isEditing={isEditing} field="bus_model" />
                                     <DataRow label="Seating Cap." value={`${selectedBus.capacity} Seats`} isEditing={isEditing} field="capacity" type="number" />
