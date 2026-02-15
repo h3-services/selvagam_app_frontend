@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faBus, faArrowLeft, faTrash, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faBus, faArrowLeft, faTrash, faSpinner, faUsers, faChevronDown, faCheck, faWrench, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import BusList from './BusList';
 import BusDetail from './BusDetail';
@@ -22,6 +22,10 @@ const BusManagementHome = () => {
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
+
+    // Bulk Actions State
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [showBulkMenu, setShowBulkMenu] = useState(false);
 
     // Fetch All Data
     const fetchData = async () => {
@@ -150,6 +154,42 @@ const BusManagementHome = () => {
             console.error("Failed to update bus status:", err);
             // Revert on error
             setBuses(previousBuses);
+        }
+    };
+
+    const handleBulkStatusUpdate = async (newStatus) => {
+        if (!selectedRows.length) return;
+        setLoading(true);
+        try {
+            await Promise.all(selectedRows.map(bus => 
+                busService.updateBusStatus(bus.id, newStatus.toUpperCase())
+            ));
+            setShowBulkMenu(false);
+            setSelectedRows([]);
+            await fetchData();
+        } catch (error) {
+            console.error("Bulk status update failed:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleBulkScrap = async () => {
+        if (!selectedRows.length) return;
+        if (!window.confirm(`Are you sure you want to move ${selectedRows.length} vehicles to scrap?`)) return;
+        
+        setLoading(true);
+        try {
+            await Promise.all(selectedRows.map(bus => 
+                busService.updateBusStatus(bus.id, 'SCRAP')
+            ));
+            setShowBulkMenu(false);
+            setSelectedRows([]);
+            await fetchData();
+        } catch (error) {
+            console.error("Bulk scrap failed:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -308,9 +348,92 @@ const BusManagementHome = () => {
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
                         getStatusColor={getStatusColor}
+                        onSelectionChanged={setSelectedRows}
                     />
                 )}
             </div>
+
+            {/* Bulk Actions Floating Pill */}
+            {selectedRows.length > 0 && !selectedBus && (
+                <>
+                    {showBulkMenu && (
+                        <div 
+                            className="fixed inset-0 bg-slate-900/10 backdrop-blur-md z-[2001] animate-in fade-in duration-500"
+                            onClick={() => setShowBulkMenu(false)}
+                        />
+                    )}
+                    
+                    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[2002] flex flex-col items-center gap-4">
+                        {showBulkMenu && (
+                            <div className="bg-white/95 backdrop-blur-2xl border border-white/60 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-2 w-64 animate-in slide-in-from-bottom-8 zoom-in duration-300 origin-bottom">
+                                <div className="px-4 py-3 text-[10px] font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 flex items-center justify-between mb-2">
+                                    <span>Fleet Operations</span>
+                                    <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[9px] shadow-sm">
+                                        {selectedRows.length} Units
+                                    </span>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="px-3 py-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Fleet Status</div>
+                                    {[
+                                        { label: 'Set Active', value: 'Active', icon: faCheck, color: 'text-emerald-500', bgColor: 'bg-emerald-50/50' },
+                                        { label: 'Maintenance', value: 'Maintenance', icon: faWrench, color: 'text-blue-500', bgColor: 'bg-blue-50/50' },
+                                        { label: 'Set Inactive', value: 'Inactive', icon: faTimes, color: 'text-rose-500', bgColor: 'bg-rose-50/50' }
+                                    ].map(opt => (
+                                        <button 
+                                            key={opt.value}
+                                            onClick={() => handleBulkStatusUpdate(opt.value)}
+                                            className="w-full flex items-center gap-3 px-3 py-2 text-[11px] font-black text-slate-700 hover:bg-slate-50 rounded-xl transition-all group"
+                                        >
+                                            <div className={`w-8 h-8 rounded-lg ${opt.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                                <FontAwesomeIcon icon={opt.icon} className={`text-sm ${opt.color}`} />
+                                            </div>
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                    
+                                    <div className="h-px bg-slate-100 my-2 mx-2" />
+                                    <button 
+                                        onClick={handleBulkScrap}
+                                        className="w-full flex items-center gap-3 px-3 py-2 text-[11px] font-black text-rose-600 hover:bg-rose-50 rounded-xl transition-all group"
+                                    >
+                                        <div className="w-8 h-8 rounded-lg bg-rose-100/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <FontAwesomeIcon icon={faTrash} className="text-sm" />
+                                        </div>
+                                        Move to Scrap
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <button
+                            onClick={() => setShowBulkMenu(!showBulkMenu)}
+                            className={`flex items-center gap-3 px-6 py-4 rounded-full shadow-[0_15px_35px_rgba(0,0,0,0.15)] transition-all active:scale-95 group border-2 ${
+                                showBulkMenu 
+                                ? 'bg-slate-900 border-slate-700 text-white' 
+                                : 'bg-white border-white text-blue-600 hover:shadow-[0_20px_45px_rgba(0,0,0,0.2)]'
+                            }`}
+                        >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                                showBulkMenu ? 'bg-white/10' : 'bg-blue-600 text-white'
+                            }`}>
+                                <FontAwesomeIcon icon={showBulkMenu ? faCheck : faUsers} className="text-[10px]" />
+                            </div>
+                            <div className="flex flex-col items-start leading-none">
+                                <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${showBulkMenu ? 'text-slate-400' : 'text-blue-500'}`}>
+                                    {selectedRows.length} Vehicles Selected
+                                </span>
+                                <span className={`text-[12px] font-black mt-0.5 ${showBulkMenu ? 'text-white' : 'text-slate-900'}`}>
+                                    {showBulkMenu ? 'Close Protocol' : 'Fleet Actions'}
+                                </span>
+                            </div>
+                            <FontAwesomeIcon 
+                                icon={faChevronDown} 
+                                className={`text-[10px] transition-transform duration-300 ml-2 ${showBulkMenu ? 'rotate-180 text-slate-400' : 'text-blue-300'}`} 
+                            />
+                        </button>
+                    </div>
+                </>
+            )}
 
             {!selectedBus && !loading && (
                 <button
