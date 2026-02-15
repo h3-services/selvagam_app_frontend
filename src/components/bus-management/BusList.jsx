@@ -12,7 +12,8 @@ const BusList = ({
     handleDelete,
     activeMenuId,
     setActiveMenuId,
-    getStatusColor
+    getStatusColor,
+    onSelectionChanged
 }) => {
     return (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -287,6 +288,28 @@ const BusList = ({
                             }
                             return { zIndex: 1 };
                         }}
+                        rowSelection={{ 
+                            mode: 'multiRow', 
+                            headerCheckbox: true, 
+                            enableClickSelection: false,
+                            checkboxes: true
+                        }}
+                        suppressRowClickSelection={true}
+                        selectionColumnDef={{ 
+                            width: 50, 
+                            minWidth: 50, 
+                            maxWidth: 50, 
+                            pinned: 'left',
+                            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' },
+                            headerClass: 'ag-center-header'
+                        }}
+                        getRowId={params => params.data.id}
+                        onSelectionChanged={(params) => {
+                            const selectedNodes = params.api.getSelectedNodes();
+                            const selectedData = selectedNodes.map(node => node.data);
+                            if (setActiveMenuId) setActiveMenuId(null);
+                            onSelectionChanged(selectedData);
+                        }}
                         defaultColDef={{
                             sortable: true,
                             resizable: true,
@@ -302,6 +325,28 @@ const BusList = ({
                     />
                 </div>
             </div>
+
+            {/* Selection Overrides */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                .ag-center-header .ag-header-cell-comp-wrapper {
+                    justify-content: center !important;
+                }
+                .ag-selection-checkbox {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    width: 100% !important;
+                    cursor: pointer !important;
+                }
+                .ag-checkbox-input-wrapper {
+                    cursor: pointer !important;
+                    width: 20px !important;
+                    height: 20px !important;
+                }
+                .ag-checkbox-input-wrapper input {
+                    cursor: pointer !important;
+                }
+            ` }} />
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden p-1 space-y-4 pb-24">
