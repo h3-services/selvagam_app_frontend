@@ -68,12 +68,19 @@ export const busService = {
     },
 
     // Assign driver to bus
-    assignDriver: async (busId, driverId) => {
-        try {
-            const response = await api.patch(`/buses/${busId}/driver`, { driver_id: driverId });
-            return response.data;
         } catch (error) {
             console.error(`Error assigning driver to bus ${busId}:`, error);
+            throw error;
+        }
+    },
+
+    // Assign route to bus
+    assignRoute: async (busId, routeId) => {
+        try {
+            const response = await api.patch(`/buses/${busId}/route`, { route_id: routeId });
+            return response.data;
+        } catch (error) {
+            console.error(`Error assigning route to bus ${busId}:`, error);
             throw error;
         }
     }
