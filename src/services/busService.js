@@ -68,6 +68,10 @@ export const busService = {
     },
 
     // Assign driver to bus
+    assignDriver: async (busId, driverId) => {
+        try {
+            const response = await api.patch(`/buses/${busId}/driver`, { driver_id: driverId });
+            return response.data;
         } catch (error) {
             console.error(`Error assigning driver to bus ${busId}:`, error);
             throw error;

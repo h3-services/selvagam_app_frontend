@@ -212,6 +212,25 @@ const BusManagementHome = () => {
         }
     };
 
+    const handleRouteChange = async (busId, routeId) => {
+        // Store previous state for rollback
+        const previousBuses = [...buses];
+        
+        // Find route name for optimistic update
+        const routeName = routeId ? (routes.find(r => r.route_id === routeId)?.name || 'Assigned') : 'Unassigned';
+
+        // Optimistic update
+        setBuses(buses.map(b => b.id === busId ? { ...b, route_id: routeId, route: routeName } : b));
+
+        try {
+            await busService.assignRoute(busId, routeId);
+        } catch (err) {
+            console.error("Failed to assign route:", err);
+            // Revert on error
+            setBuses(previousBuses);
+        }
+    };
+
     const handleUpdate = async (updatedData) => {
         setLoading(true);
         try {
@@ -341,9 +360,11 @@ const BusManagementHome = () => {
                     <BusList
                         filteredBuses={filteredBuses}
                         drivers={drivers}
+                        routes={routes}
                         setSelectedBus={setSelectedBus}
                         handleStatusChange={handleStatusChange}
                         handleDriverChange={handleDriverChange}
+                        handleRouteChange={handleRouteChange}
                         handleDelete={handleDelete}
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
