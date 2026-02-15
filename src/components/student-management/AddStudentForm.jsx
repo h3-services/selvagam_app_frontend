@@ -7,10 +7,10 @@ import { parentService } from '../../services/parentService';
 import { classService } from '../../services/classService';
 
 const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false }) => (
-    <div className="relative group">
-        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-xl border border-slate-200 transition-all duration-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${disabled ? 'bg-slate-50' : 'hover:border-blue-300'}`}>
-            <div className="w-11 h-full flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-colors group-focus-within:text-blue-500">
+    <div className="relative group/field">
+        <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
+        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 ${disabled ? 'bg-slate-50 border-slate-100' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/5 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500'}`}>
+            <div className="w-12 h-12 flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:text-blue-600 group-focus-within/field:scale-110">
                 <FontAwesomeIcon icon={icon} className="text-sm" />
             </div>
             <input
@@ -18,7 +18,7 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className="w-full pl-11 pr-4 py-3.5 bg-transparent rounded-xl text-sm font-semibold text-slate-700 placeholder-slate-400 focus:outline-none disabled:text-slate-400"
+                className="w-full pl-12 pr-4 py-4 bg-transparent rounded-2xl text-[13px] font-bold text-slate-700 placeholder-slate-300 focus:outline-none disabled:text-slate-400"
                 placeholder={placeholder}
             />
         </div>
@@ -26,24 +26,24 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
 );
 
 const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false }) => (
-    <div className="relative group">
-        <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-xl border border-slate-200 transition-all duration-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 ${disabled ? 'bg-slate-50' : 'hover:border-blue-300'}`}>
-            <div className="w-11 h-full flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-colors group-focus-within:text-blue-500">
+    <div className="relative group/field">
+        <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
+        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 ${disabled ? 'bg-slate-50 border-slate-100' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/5 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500'}`}>
+            <div className="w-12 h-12 flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:text-blue-600 group-focus-within/field:scale-110">
                 <FontAwesomeIcon icon={icon} className="text-sm" />
             </div>
             <select
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className="w-full pl-11 pr-10 py-3.5 bg-transparent rounded-xl text-sm font-semibold text-slate-700 focus:outline-none appearance-none disabled:text-slate-400 cursor-pointer"
+                className="w-full pl-12 pr-10 py-4 bg-transparent rounded-2xl text-[13px] font-bold text-slate-700 focus:outline-none appearance-none disabled:text-slate-400 cursor-pointer"
             >
                 <option value="">{placeholder}</option>
                 {options.map((opt, idx) => (
                     <option key={idx} value={opt.value}>{opt.label}</option>
                 ))}
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs text-center">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 text-xs">
                 <FontAwesomeIcon icon={faChevronDown} />
             </div>
         </div>
@@ -55,24 +55,24 @@ const YearRangePicker = ({ label, start, end, onStartChange, onEndChange }) => {
     const years = Array.from({length: 31}, (_, i) => (currentYear + i - 15).toString());
     
     return (
-        <div className="relative group">
-            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest ml-1">{label}</label>
-            <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-[20px] shadow-inner border border-slate-200">
-                <div className="flex-1 relative">
+        <div className="relative group/field">
+            <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
+            <div className="flex items-center gap-1.5 bg-slate-50 p-2 rounded-2xl border border-slate-200">
+                <div className="flex-1 relative group/start">
                     <select 
                         value={start} 
                         onChange={(e) => onStartChange(e.target.value)}
-                        className="w-full h-10 bg-white rounded-xl text-center text-sm font-black text-blue-600 shadow-sm appearance-none cursor-pointer hover:bg-blue-50 transition-all border border-transparent focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 outline-none"
+                        className="w-full h-11 bg-white rounded-xl text-center text-[13px] font-black text-blue-600 shadow-sm appearance-none cursor-pointer hover:bg-blue-50 transition-all border border-transparent focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5 outline-none"
                     >
                         {years.map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
                 </div>
-                <div className="flex-shrink-0 w-6 h-10 flex items-center justify-center text-slate-400 font-black opacity-40">-</div>
-                <div className="flex-1 relative">
+                <div className="flex-shrink-0 w-4 font-black text-slate-300 text-[10px] flex justify-center">TO</div>
+                <div className="flex-1 relative group/end">
                     <select 
                         value={end} 
                         onChange={(e) => onEndChange(e.target.value)}
-                        className="w-full h-10 bg-white rounded-xl text-center text-sm font-black text-blue-600 shadow-sm appearance-none cursor-pointer hover:bg-blue-50 transition-all border border-transparent focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 outline-none"
+                        className="w-full h-11 bg-white rounded-xl text-center text-[13px] font-black text-blue-600 shadow-sm appearance-none cursor-pointer hover:bg-blue-50 transition-all border border-transparent focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5 outline-none"
                     >
                         {years.map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
@@ -99,62 +99,55 @@ const ClassSelector = ({ label, value, options, onChange, placeholder }) => {
     const selectedOption = options.find(opt => opt.value == value);
 
     return (
-        <div className="relative group" ref={containerRef}>
-            <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest ml-1">{label}</label>
+        <div className="relative group/field" ref={containerRef}>
+            <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                className={`relative flex items-center justify-between bg-white rounded-2xl border border-slate-200 p-4 cursor-pointer transition-all duration-300 hover:border-blue-300 ${isOpen ? 'ring-4 ring-blue-500/10 border-blue-500 shadow-xl shadow-blue-900/5' : ''}`}
+                className={`relative flex items-center justify-between bg-white rounded-3xl border p-4 cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/5 ${isOpen ? 'ring-4 ring-blue-500/10 border-blue-500 shadow-2xl shadow-blue-900/10' : 'border-slate-200'}`}
             >
-                <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${selectedOption ? 'bg-blue-600 text-white scale-110 shadow-lg shadow-blue-200' : 'bg-slate-100 text-slate-400'}`}>
+                <div className="flex items-center gap-5">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${selectedOption ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 rotate-3' : 'bg-slate-50 text-slate-400'}`}>
                         <FontAwesomeIcon icon={faSchool} className="text-sm" />
                     </div>
                     <div>
                         {selectedOption ? (
                             <div className="flex flex-col">
-                                <span className="text-sm font-black text-slate-800">Class {selectedOption.className}</span>
-                                <span className="text-[10px] text-blue-600 font-black uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-md inline-block mt-1">Section {selectedOption.section}</span>
+                                <span className="text-sm font-black text-slate-900 leading-none">Class {selectedOption.className}</span>
+                                <span className="text-[9px] text-blue-600 font-black uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-lg inline-block mt-1.5 w-fit border border-blue-100">Section {selectedOption.section}</span>
                             </div>
                         ) : (
-                            <span className="text-sm font-semibold text-slate-400">{placeholder}</span>
+                            <span className="text-[13px] font-bold text-slate-400">{placeholder}</span>
                         )}
                     </div>
                 </div>
-                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-400 text-[10px] transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} />
+                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 text-[10px] transition-transform duration-500 mr-2 ${isOpen ? 'rotate-180' : ''}`} />
             </div>
 
             {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-3 p-3 bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 z-[3000] max-h-80 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-4 duration-300">
-                    <div className="grid grid-cols-1 gap-2">
-                        {options.length > 0 ? options.map((opt) => (
+                <div className="absolute top-full left-0 right-0 mt-4 p-4 bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] border border-white/60 z-[3000] max-h-80 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-6 zoom-in duration-300">
+                    <div className="grid grid-cols-1 gap-2.5">
+                        {options.map((opt) => (
                             <div 
                                 key={opt.value}
                                 onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                                className={`group/item flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all duration-300 ${value == opt.value ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/20 translate-x-1' : 'hover:bg-slate-50 text-slate-600 hover:translate-x-1'}`}
+                                className={`group/item flex items-center justify-between p-4 rounded-3xl cursor-pointer transition-all duration-500 ${value == opt.value ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/20 translate-x-2' : 'hover:bg-slate-50 text-slate-600 hover:translate-x-2'}`}
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black text-lg transition-all ${value == opt.value ? 'bg-white/20' : 'bg-slate-100 text-slate-400 group-hover/item:bg-blue-100 group-hover/item:text-blue-600'}`}>
+                                <div className="flex items-center gap-5">
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-all duration-500 ${value == opt.value ? 'bg-white/20' : 'bg-white border border-slate-100 text-slate-400 group-hover/item:text-blue-600 group-hover/item:shadow-lg'}`}>
                                         {opt.className.charAt(0)}
                                     </div>
                                     <div>
-                                        <div className={`text-sm font-black ${value == opt.value ? 'text-white' : 'text-slate-800 group-hover/item:text-blue-600'}`}>Class {opt.className}</div>
-                                        <div className={`text-[10px] font-bold uppercase tracking-widest ${value == opt.value ? 'text-blue-100' : 'text-slate-400'}`}>Section {opt.section} • {opt.year}</div>
+                                        <div className={`text-sm font-black ${value == opt.value ? 'text-white' : 'text-slate-900'}`}>Class {opt.className}</div>
+                                        <div className={`text-[10px] font-black uppercase tracking-widest leading-none mt-1 ${value == opt.value ? 'text-blue-100' : 'text-slate-400'}`}>Section {opt.section} • {opt.year}</div>
                                     </div>
                                 </div>
                                 {value == opt.value && (
-                                    <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
+                                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
                                         <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
                                     </div>
                                 )}
                             </div>
-                        )) : (
-                            <div className="py-12 text-center">
-                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-200">
-                                    <FontAwesomeIcon icon={faSchool} className="text-xl" />
-                                </div>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">No Active Classes</p>
-                            </div>
-                        )}
+                        ))}
                     </div>
                 </div>
             )}
@@ -428,36 +421,6 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                 (isAddingNewParent || isSearchingParent) ? 'w-full lg:w-[1300px]' : 'w-full md:w-[600px]'
             }`}>
                 
-                {/* Modern Header */}
-                <div className="relative px-8 py-6 bg-white/80 backdrop-blur-md border-b border-gray-100 flex-shrink-0 z-10 flex justify-between items-center">
-                    <div className="flex items-center gap-5">
-                       <div className="relative">
-                            <div className="absolute inset-0 bg-blue-600 blur-lg opacity-20 rounded-full"></div>
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center shadow-xl relative z-10 text-white">
-                                <FontAwesomeIcon icon={faUserPlus} className="text-lg" />
-                            </div>
-                       </div>
-                        <div>
-                            <h3 className="font-bold text-2xl text-gray-900 tracking-tight">Add Student</h3>
-                            <p className="text-gray-500 text-sm font-medium">Enter details to register a new student</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <button 
-                            onClick={handleAutoFill}
-                            className="h-10 px-4 rounded-full bg-blue-50 hover:bg-indigo-100 flex items-center justify-center text-blue-600 font-bold text-xs gap-2 transition-colors duration-200"
-                            title="Auto Fill Demo Data"
-                        >
-                            <FontAwesomeIcon icon={faMagic} /> Auto Fill
-                        </button>
-                        <button 
-                            onClick={handleClose} 
-                            className="w-10 h-10 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors duration-200"
-                        >
-                            <FontAwesomeIcon icon={faTimes} className="text-lg" />
-                        </button>
-                    </div>
-                </div>
 
                 {/* Main Scrollable Content */}
                 <div className="flex-1 overflow-hidden relative">
@@ -465,17 +428,52 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                         
                         {/* LEFT PANEL: Student Form */}
                         <div className="overflow-y-auto overflow-x-hidden custom-scrollbar h-full">
-                            <div className="p-10 space-y-10 bg-slate-50 min-h-full">
+                            {/* Modern Header (Moved Inside to be scrollable) */}
+                            <div className="relative px-8 py-8 bg-slate-50 flex justify-between items-center z-10">
+                                <div className="flex items-center gap-6">
+                                    <div className="relative group">
+                                        <div className="absolute -inset-2 bg-blue-600 blur-xl opacity-0 group-hover:opacity-10 rounded-full transition-opacity duration-700"></div>
+                                        <div className="w-14 h-14 rounded-[22px] flex items-center justify-center shadow-[0_10px_25px_rgba(58,123,255,0.25)] relative z-10 text-white transform group-hover:rotate-6 transition-transform duration-500" style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}>
+                                            <FontAwesomeIcon icon={faUserPlus} className="text-lg" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">Register Enrollment</h3>
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
+                                            <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">New Student Onboarding</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <button 
+                                        onClick={handleAutoFill}
+                                        className="h-12 px-6 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center text-blue-600 font-black text-[10px] uppercase tracking-widest gap-2.5 transition-all active:scale-95 shadow-sm"
+                                        title="Auto Pilot Data"
+                                    >
+                                        <FontAwesomeIcon icon={faMagic} className="opacity-70" /> 
+                                        <span>Auto Pilot</span>
+                                    </button>
+                                    <button 
+                                        onClick={handleClose} 
+                                        className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
+                                    >
+                                        <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="px-8 pb-8 space-y-8 bg-slate-50 min-h-full">
                                 
                                 {/* Section: Personal Details */}
-                                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                            <FontAwesomeIcon icon={faChild} className="text-xl" />
+                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                                    <div className="flex items-center gap-5 mb-10">
+                                        <div className="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
+                                            <FontAwesomeIcon icon={faChild} className="text-2xl" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-900 text-xl tracking-tight">Student Information</h4>
-                                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Basic Identity Profile</p>
+                                            <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Student Information</h4>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Personal Identity Data</p>
                                         </div>
                                     </div>
                                     
@@ -530,14 +528,14 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                 </div>
 
                                 {/* Section: Parent/Guardian Link */}
-                                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                            <FontAwesomeIcon icon={faUserTie} className="text-xl" />
+                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                                    <div className="flex items-center gap-5 mb-10">
+                                        <div className="w-14 h-14 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
+                                            <FontAwesomeIcon icon={faUserTie} className="text-2xl" />
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-900 text-xl tracking-tight">Parental Linkage</h4>
-                                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Primary Guardian Association</p>
+                                            <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Primary Linkage</h4>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Guardian Association</p>
                                         </div>
                                     </div>
 
@@ -545,61 +543,64 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                         {formData.parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.parent_id);
                                             return selectedParent ? (
-                                                <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 relative group/card transition-all duration-300 hover:border-blue-300">
-                                                    <div className="flex items-start justify-between">
+                                                <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 relative group/card transition-all duration-500 hover:shadow-2xl hover:shadow-slate-900/20">
+                                                    <div className="flex items-start justify-between mb-8">
                                                         <div className="flex items-center gap-5">
-                                                            <div className="w-16 h-16 rounded-full bg-white border-4 border-white flex items-center justify-center text-blue-600 font-bold text-2xl shadow-md group-hover/card:scale-105 transition-transform duration-300">
-                                                                {selectedParent.name.charAt(0)}
+                                                            <div className="relative">
+                                                                <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full"></div>
+                                                                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-900 font-black text-2xl shadow-xl relative z-10 border-4 border-slate-800">
+                                                                    {selectedParent.name.charAt(0)}
+                                                                </div>
                                                             </div>
                                                             <div>
-                                                                <div className="font-bold text-xl text-slate-900 mb-1">{selectedParent.name}</div>
+                                                                <div className="font-black text-xl text-white mb-2">{selectedParent.name}</div>
                                                                 <div className="flex flex-wrap gap-2">
-                                                                    <span className="bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full">
+                                                                    <span className="bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">
                                                                         {selectedParent.parent_role || 'GUARDIAN'}
                                                                     </span>
-                                                                    <span className="bg-white text-slate-500 text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-slate-100 flex items-center gap-2">
-                                                                        <FontAwesomeIcon icon={faPhone} className="text-[10px] text-blue-400" /> {selectedParent.phone}
+                                                                    <span className="bg-slate-800 text-slate-400 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
+                                                                        <FontAwesomeIcon icon={faPhone} className="text-[9px] text-blue-400" /> {selectedParent.phone}
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-200">
-                                                            <FontAwesomeIcon icon={faCheck} />
+                                                        <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                                            <FontAwesomeIcon icon={faCheck} className="text-xs" />
                                                         </div>
                                                     </div>
                                                     
-                                                    <div className="mt-6 pt-5 border-t border-slate-200 flex justify-end">
+                                                    <div className="flex justify-center">
                                                         <button 
                                                             onClick={() => { handleChange('parent_id', ''); }}
-                                                            className="text-xs font-bold text-slate-400 hover:text-red-500 transition-all flex items-center gap-2"
+                                                            className="text-[10px] font-black text-rose-400/60 hover:text-rose-400 uppercase tracking-widest transition-all hover:tracking-[0.2em] py-2"
                                                         >
-                                                            <FontAwesomeIcon icon={faTimes} className="text-[10px]" /> Clear Association
+                                                            Disconnect Profile
                                                         </button>
                                                     </div>
                                                 </div>
                                             ) : null;
                                         })() : (
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-2 gap-5">
                                                 <button 
                                                     onClick={() => { setTargetParentField('parent_id'); setIsAddingNewParent(false); setIsSearchingParent(true); }}
-                                                    className="flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-500 group text-center"
+                                                    className="flex flex-col items-center justify-center p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 group text-center"
                                                 >
-                                                    <div className="w-14 h-14 rounded-2xl bg-white text-slate-400 flex items-center justify-center mb-4 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                                    <div className="w-16 h-16 rounded-[22px] bg-white border border-slate-100 text-slate-400 flex items-center justify-center mb-5 shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-12 transition-all duration-500">
                                                         <FontAwesomeIcon icon={faSearch} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-bold text-slate-800 text-sm">Find Existing</h5>
-                                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">Search Database</p>
+                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Find Existing</h5>
+                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Database Search</p>
                                                 </button>
 
                                                 <button 
                                                     onClick={() => { setTargetParentField('parent_id'); setIsSearchingParent(false); setIsAddingNewParent(true); }}
-                                                    className="flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-500 group text-center"
+                                                    className="flex flex-col items-center justify-center p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 group text-center"
                                                 >
-                                                    <div className="w-14 h-14 rounded-2xl bg-white text-slate-400 flex items-center justify-center mb-4 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                                                    <div className="w-16 h-16 rounded-[22px] bg-white border border-slate-100 text-slate-400 flex items-center justify-center mb-5 shadow-sm group-hover:bg-indigo-600 group-hover:text-white group-hover:-rotate-12 transition-all duration-500">
                                                         <FontAwesomeIcon icon={faUserPlus} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-bold text-slate-800 text-sm">Add New</h5>
-                                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">Create Profile</p>
+                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Register New</h5>
+                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Creator Wizard</p>
                                                 </button>
                                             </div>
                                         )}
@@ -622,61 +623,64 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                         {formData.s_parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.s_parent_id);
                                             return selectedParent ? (
-                                                <div className="bg-gradient-to-r from-blue-50 to-white border border-indigo-100 rounded-2xl p-5 relative group">
-                                                    <div className="flex items-start justify-between">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-16 h-16 rounded-full bg-white border-4 border-indigo-100 flex items-center justify-center text-blue-600 font-bold text-2xl shadow-sm">
-                                                                {selectedParent.name.charAt(0)}
-                                                            </div>
-                                                            <div>
-                                                                <div className="font-bold text-xl text-gray-900 mb-1">{selectedParent.name}</div>
-                                                                <div className="flex flex-wrap gap-2">
-                                                                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-indigo-200">
-                                                                        {selectedParent.parent_role || 'GUARDIAN'}
-                                                                    </span>
-                                                                    <span className="bg-white text-gray-600 text-xs font-medium px-2.5 py-1 rounded-lg border border-gray-200 flex items-center gap-2">
-                                                                        <FontAwesomeIcon icon={faPhone} className="text-[10px]" /> {selectedParent.phone}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="h-10 w-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-200">
-                                                            <FontAwesomeIcon icon={faCheck} />
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="mt-5 pt-4 border-t border-indigo-100 flex justify-end">
-                                                        <button 
-                                                            onClick={() => { handleChange('s_parent_id', ''); }}
-                                                            className="text-xs font-bold text-red-500 hover:text-red-700 hover:underline transition-all"
-                                                        >
-                                                            Unlink / Change Parent
-                                                        </button>
+                                                 <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 relative group/card transition-all duration-500 hover:shadow-2xl hover:shadow-slate-900/20">
+                                                     <div className="flex items-start justify-between mb-8">
+                                                         <div className="flex items-center gap-5">
+                                                             <div className="relative">
+                                                                 <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 rounded-full"></div>
+                                                                 <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-900 font-black text-2xl shadow-xl relative z-10 border-4 border-slate-800">
+                                                                     {selectedParent.name.charAt(0)}
+                                                                 </div>
+                                                             </div>
+                                                             <div>
+                                                                 <div className="font-black text-xl text-white mb-2">{selectedParent.name}</div>
+                                                                 <div className="flex flex-wrap gap-2">
+                                                                     <span className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">
+                                                                         {selectedParent.parent_role || 'GUARDIAN'}
+                                                                     </span>
+                                                                     <span className="bg-slate-800 text-slate-400 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
+                                                                         <FontAwesomeIcon icon={faPhone} className="text-[9px] text-blue-400" /> {selectedParent.phone}
+                                                                     </span>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+                                                         <div className="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                                                             <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                                                         </div>
+                                                     </div>
+                                                     
+                                                     <div className="flex justify-center">
+                                                         <button 
+                                                             onClick={() => { handleChange('s_parent_id', ''); }}
+                                                             className="text-[10px] font-black text-rose-400/60 hover:text-rose-400 uppercase tracking-widest transition-all hover:tracking-[0.2em] py-2"
+                                                         >
+                                                             Disconnect Profile
+                                                         </button>
                                                     </div>
                                                 </div>
                                             ) : null;
                                         })() : (
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-2 gap-5">
                                                 <button 
                                                     onClick={() => { setTargetParentField('s_parent_id'); setIsAddingNewParent(false); setIsSearchingParent(true); }}
-                                                    className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-indigo-200 bg-blue-50/50 hover:bg-blue-50 hover:border-indigo-300 hover:scale-[1.02] transition-all duration-300 group text-center"
+                                                    className="flex flex-col items-center justify-center p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 group text-center"
                                                 >
-                                                    <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
-                                                        <FontAwesomeIcon icon={faSearch} className="text-lg" />
+                                                    <div className="w-16 h-16 rounded-[22px] bg-white border border-slate-100 text-slate-400 flex items-center justify-center mb-5 shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-12 transition-all duration-500">
+                                                        <FontAwesomeIcon icon={faSearch} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-bold text-gray-900 text-sm">Search Database</h5>
-                                                    <p className="text-xs text-gray-500 mt-1">Find existing parent</p>
+                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Find Existing</h5>
+                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Database Search</p>
                                                 </button>
 
                                                 <button 
                                                     onClick={() => { setTargetParentField('s_parent_id'); setIsSearchingParent(false); setIsAddingNewParent(true); }}
-                                                    className="flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/50 hover:bg-blue-50 hover:border-blue-300 hover:scale-[1.02] transition-all duration-300 group text-center"
+                                                    className="flex flex-col items-center justify-center p-8 rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-slate-50/50 hover:bg-white hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 group text-center"
                                                 >
-                                                    <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">
-                                                        <FontAwesomeIcon icon={faUserPlus} className="text-lg" />
+                                                    <div className="w-16 h-16 rounded-[22px] bg-white border border-slate-100 text-slate-400 flex items-center justify-center mb-5 shadow-sm group-hover:bg-indigo-600 group-hover:text-white group-hover:-rotate-12 transition-all duration-500">
+                                                        <FontAwesomeIcon icon={faUserPlus} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-bold text-gray-900 text-sm">Register New</h5>
-                                                    <p className="text-xs text-gray-500 mt-1">Create parent account</p>
+                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Register New</h5>
+                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Creator Wizard</p>
                                                 </button>
                                             </div>
                                         )}
@@ -684,15 +688,15 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                 </div>
 
                                 {/* Section: Transport */}
-                                <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                                    <div className="flex items-center justify-between mb-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                                <FontAwesomeIcon icon={faBus} className="text-xl" />
+                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                                    <div className="flex items-center justify-between mb-10">
+                                        <div className="flex items-center gap-5">
+                                            <div className="w-14 h-14 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
+                                                <FontAwesomeIcon icon={faBus} className="text-2xl" />
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-slate-900 text-xl tracking-tight">Transport Access</h4>
-                                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Route & Logistics Setup</p>
+                                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Transport Asset</h4>
+                                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Logistics Configuration</p>
                                             </div>
                                         </div>
                                         
@@ -869,53 +873,42 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                                             <div 
                                                                 key={p.parent_id} 
                                                                 onClick={() => { handleChange(targetParentField, p.parent_id); setIsSearchingParent(false); }}
-                                                                className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer relative group overflow-hidden
+                                                                className={`p-6 rounded-[2rem] border transition-all duration-500 cursor-pointer relative group overflow-hidden
                                                                     ${isSelected 
-                                                                        ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500 shadow-md' 
-                                                                        : 'bg-white border-gray-100 hover:border-purple-300 hover:shadow-lg hover:-translate-y-0.5'}`}
+                                                                        ? 'bg-slate-900 border-slate-800 shadow-2xl scale-[1.02] z-10' 
+                                                                        : 'bg-white border-slate-100 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1'}`}
                                                             >
-                                                                <div className="flex items-start gap-4 z-10 relative">
-                                                                    <div className={`w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shadow-sm shrink-0
-                                                                        ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors'}`}>
+                                                                <div className="flex items-center gap-6 z-10 relative">
+                                                                    <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-black shadow-inner shrink-0 transition-all duration-500
+                                                                        ${isSelected ? 'bg-blue-600 text-white rotate-6' : 'bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:-rotate-6'}`}>
                                                                         {p.name.charAt(0)}
                                                                     </div>
                                                                     
                                                                     <div className="flex-1 min-w-0">
-                                                                        <div className="flex items-center justify-between mb-1">
-                                                                            <h5 className={`font-bold text-lg truncate pr-4 ${isSelected ? 'text-purple-900' : 'text-gray-900'}`}>
+                                                                        <div className="flex items-center justify-between mb-2">
+                                                                            <h5 className={`font-black text-lg truncate pr-4 ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                                                                                 {p.name}
                                                                             </h5>
                                                                             {isSelected && (
-                                                                                <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                                                    Selected
-                                                                                </span>
+                                                                                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/40 animate-in zoom-in duration-500">
+                                                                                    <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                                                                                </div>
                                                                             )}
                                                                         </div>
                                                                         
-                                                                        <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-gray-500">
-                                                                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border ${isSelected ? 'bg-white border-purple-200 text-blue-700' : 'bg-gray-50 border-gray-100 text-gray-600'}`}>
-                                                                                <FontAwesomeIcon icon={faUser} className="text-xs opacity-70" /> {p.parent_role || 'Parent'}
+                                                                        <div className="flex flex-wrap gap-y-2 gap-x-4">
+                                                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-colors ${isSelected ? 'bg-slate-800 border-slate-700 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
+                                                                                {p.parent_role || 'Parent'}
                                                                             </span>
-                                                                            <span className="inline-flex items-center gap-1.5">
-                                                                                <FontAwesomeIcon icon={faPhone} className="text-xs opacity-70" /> {p.phone}
+                                                                            <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                                                <FontAwesomeIcon icon={faPhone} className="text-[10px] opacity-50" /> {p.phone}
                                                                             </span>
-                                                                        </div>
-                                                                        {p.email && (
-                                                                             <div className="mt-2 text-xs text-gray-400 flex items-center gap-2">
-                                                                                 <FontAwesomeIcon icon={faEnvelope} /> {p.email}
-                                                                             </div>
-                                                                        )}
-                                                                    </div>
-                                                                    
-                                                                    <div className={`self-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isSelected ? 'opacity-100' : ''}`}>
-                                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isSelected ? 'bg-green-500 text-white' : 'bg-blue-100 text-blue-600'}`}>
-                                                                            <FontAwesomeIcon icon={isSelected ? faCheck : faArrowRight} />
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 
-                                                                {/* Decorative highlight on hover */}
-                                                                {!isSelected && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-blue-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>}
+                                                                {/* Hover Glow */}
+                                                                {!isSelected && <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>}
                                                             </div>
                                                         );
                                                     })}
@@ -950,15 +943,18 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 py-6 border-t border-slate-200 bg-white/95 backdrop-blur-xl flex-shrink-0 z-20">
+                <div className="px-10 py-6 border-t border-slate-100 bg-white/80 backdrop-blur-2xl flex-shrink-0 z-20 flex justify-center">
                     <button
                         onClick={handleSaveStudent}
-                        className="w-full py-5 rounded-[22px] font-black uppercase tracking-widest text-sm text-white shadow-2xl shadow-blue-900/20 hover:shadow-blue-900/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-4 group"
+                        className="px-8 py-3.5 rounded-full font-black uppercase tracking-[0.2em] text-[10px] text-white shadow-[0_15px_30px_rgba(58,123,255,0.2)] hover:shadow-[0_20px_40px_rgba(58,123,255,0.3)] hover:-translate-y-0.5 active:scale-95 transition-all duration-500 flex items-center gap-3 group relative overflow-hidden"
                         style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}
                     >
-                        <span>Confirm Registration</span>
-                        <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center group-hover:rotate-12 transition-transform duration-500">
-                            <FontAwesomeIcon icon={faCheck} className="text-sm" />
+                        {/* Shimmer Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        
+                        <span className="relative z-10">Secure Registration</span>
+                        <div className="w-8 h-8 bg-white/15 rounded-full flex items-center justify-center group-hover:rotate-[360deg] transition-transform duration-700 relative z-10 border border-white/20">
+                            <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
                         </div>
                     </button>
                 </div>

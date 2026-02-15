@@ -9,7 +9,8 @@ const StudentList = ({
     handleStatusUpdate,
     handleTransportStatusUpdate,
     activeMenuId,
-    setActiveMenuId
+    setActiveMenuId,
+    onSelectionChanged
 }) => {
     return (
         <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-hidden">
@@ -31,7 +32,7 @@ const StudentList = ({
                                     headerName: "Student Name",
                                     field: "name",
                                     flex: 1.0,
-                                    minWidth: 150,
+                                    minWidth: 200,
                                     cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                     cellRenderer: (params) => (
                                         <div
@@ -99,25 +100,6 @@ const StudentList = ({
                                     cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '500' }
                                 },
                                 {
-                                    headerName: "Transport",
-                                    field: "originalData.is_transport_user",
-                                    width: 130,
-                                    minWidth: 130,
-                                    cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
-                                    cellRenderer: (params) => (
-                                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
-                                            params.value 
-                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
-                                            : 'bg-slate-50 text-slate-400 border-slate-100'
-                                        }`}>
-                                            <FontAwesomeIcon icon={params.value ? faBus : faWalking} className="text-[10px]" />
-                                            <span className="text-[10px] font-bold uppercase tracking-wider">
-                                                {params.value ? 'Bus' : 'None'}
-                                            </span>
-                                        </div>
-                                    )
-                                },
-                                {
                                     headerName: "Location",
                                     field: "location",
                                     flex: 1.5,
@@ -183,29 +165,28 @@ const StudentList = ({
                                                                 </button>
                                                             ))}
                                                             
-                                                            <div className="h-px bg-gray-100 my-1" />
                                                             <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
                                                                 Transport Service
                                                             </div>
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
+                                                                    const currentStatus = params.data.originalData?.transport_status;
                                                                     handleTransportStatusUpdate(
                                                                         params.data.id, 
-                                                                        params.data.originalData?.is_transport_user ? 'INACTIVE' : 'ACTIVE'
+                                                                        currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
                                                                     );
                                                                     setActiveMenuId(null);
                                                                 }}
                                                                 className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors"
                                                             >
                                                                 <FontAwesomeIcon 
-                                                                    icon={params.data.originalData?.is_transport_user ? faWalking : faBus} 
-                                                                    className={`w-4 ${params.data.originalData?.is_transport_user ? 'text-amber-600' : 'text-emerald-600'}`} 
+                                                                    icon={params.data.originalData?.transport_status === 'ACTIVE' ? faWalking : faBus} 
+                                                                    className={`w-4 ${params.data.originalData?.transport_status === 'ACTIVE' ? 'text-amber-600' : 'text-emerald-600'}`} 
                                                                 />
-                                                                {params.data.originalData?.is_transport_user ? 'Disable Transport' : 'Enable Transport'}
+                                                                {params.data.originalData?.transport_status === 'ACTIVE' ? 'Stop Transport' : 'Start Transport'}
                                                             </button>
                                                             
-                                                            <div className="h-px bg-gray-100 my-1" />
                                                         </div>
                                                     </div>
                                                 )}
@@ -214,12 +195,32 @@ const StudentList = ({
                                     }
                                 }
                             ]}
+                            rowSelection={{ mode: 'multiRow', headerCheckbox: true, enableClickSelection: false }}
+                            selectionColumnDef={{ 
+                                width: 50, 
+                                minWidth: 50, 
+                                maxWidth: 50, 
+                                pinned: 'left',
+                                cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+                                headerClass: 'ag-center-header'
+                            }}
                             context={{ activeMenuId, setActiveMenuId }}
                             getRowStyle={params => {
                                 if (params.data.id === activeMenuId) {
                                     return { zIndex: 999, overflow: 'visible' };
                                 }
                                 return { zIndex: 1 };
+                            }}
+                            onSelectionChanged={(params) => {
+                                const selectedNodes = params.api.getSelectedNodes();
+                                const selectedData = selectedNodes.map(node => node.data);
+                                onSelectionChanged(selectedData);
+                            }}
+                            onGridReady={(params) => {
+                                params.api.sizeColumnsToFit();
+                            }}
+                            onGridSizeChanged={(params) => {
+                                params.api.sizeColumnsToFit();
                             }}
                             defaultColDef={{
                                 sortable: true,
@@ -241,7 +242,7 @@ const StudentList = ({
                 {/* Mobile/Tablet Card View */}
                 <div className="lg:hidden p-4 space-y-4">
                     {filteredStudents.map((student, index) => (
-                        <div key={student.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
+                        <div key={student.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#3A7BFF' }}></div>
                             <div className="relative p-5">
                                 <div className="flex items-start justify-between mb-4">

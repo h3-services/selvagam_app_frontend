@@ -45,18 +45,23 @@ const ClassManagementHome = () => {
         let result = classes;
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
-            result = result.filter(
-                (c) =>
+            result = result.filter((c) => {
+                const fullId = `${c.class_name}-${c.section}`.toLowerCase();
+                const reverseId = `${c.class_name}${c.section}`.toLowerCase();
+                return (
                     c.class_name.toLowerCase().includes(lowerQuery) ||
                     (c.section || "").toLowerCase().includes(lowerQuery) ||
+                    fullId.includes(lowerQuery) ||
+                    reverseId.includes(lowerQuery) ||
                     String(c.academic_year).includes(lowerQuery)
-            );
+                );
+            });
         }
         return result;
     }, [classes, searchQuery]);
 
     return (
-        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
+        <div className="h-full flex flex-col bg-[#f1f5f9] relative animate-fade-in">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -92,7 +97,7 @@ const ClassManagementHome = () => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 px-8 pt-8 pb-8 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 px-8 pt-4 pb-4 overflow-y-auto custom-scrollbar">
                 <div className="max-w-[1600px] mx-auto">
                     {loading ? (
                         <div className="h-[400px] flex flex-col items-center justify-center bg-white rounded-3xl shadow-xl border border-slate-50">
@@ -103,18 +108,7 @@ const ClassManagementHome = () => {
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between px-2">
-                                <div className="flex items-center gap-3">
-                                    <div className="px-3 py-1 bg-blue-50 text-indigo-700 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-indigo-100">
-                                        {classes.length} Total Hubs
-                                    </div>
-                                    <div className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-emerald-100 flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        System Synced
-                                    </div>
-                                </div>
-                            </div>
-                            
+
                             <ClassList 
                                 classes={filteredClasses} 
                                 onRefresh={fetchClasses} 

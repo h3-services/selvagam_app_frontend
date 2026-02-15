@@ -230,17 +230,17 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
                                 <button
                                     onClick={() => onTransportStatusUpdate(
                                         selectedStudent.id, 
-                                        selectedStudent.originalData?.is_transport_user ? 'INACTIVE' : 'ACTIVE'
+                                        selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
                                     )}
                                     className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all active:scale-95 ${
-                                        selectedStudent.originalData?.is_transport_user 
+                                        selectedStudent.originalData?.transport_status === 'ACTIVE'
                                         ? 'bg-emerald-50 text-emerald-600 border-emerald-100 font-bold' 
                                         : 'bg-slate-50 text-slate-400 border-slate-100 font-bold'
                                     }`}
                                 >
-                                    <span className={`w-1.5 h-1.5 rounded-full ${selectedStudent.originalData?.is_transport_user ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></span>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></span>
                                     <span className="text-[10px] uppercase tracking-widest">
-                                        {selectedStudent.originalData?.is_transport_user ? 'Active Commuter' : 'Day Scholar'}
+                                        {selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'Active Bus' : 'Inactive'}
                                     </span>
                                 </button>
                             </div>

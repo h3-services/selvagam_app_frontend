@@ -1,16 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faCalendarAlt, 
-    faCircle, 
-    faEllipsisH, 
-    faArrowRight,
-    faClock,
-    faArrowUpRightDots,
-    faLayerGroup,
-    faFingerprint
-} from '@fortawesome/free-solid-svg-icons';
+import { faUserGraduate, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { COLORS } from '../../constants/colors';
 
 const ClassCard = ({ classData, onRefresh, allClasses = [] }) => {
+    const navigate = useNavigate();
     const isActive = classData.status === 'ACTIVE';
 
     // Detect next class for promotion path
@@ -22,69 +16,67 @@ const ClassCard = ({ classData, onRefresh, allClasses = [] }) => {
                c.section === classData.section;
     });
 
+    const handleNavigate = (path) => {
+        navigate(path);
+    };
+
     return (
-        <div className="group bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300">
-            <div className="flex flex-col h-full">
-                {/* Header: Grade & Status */}
-                <div className="flex items-start justify-between mb-6">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm transition-transform duration-300 group-hover:scale-105 ${isActive ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                        {classData.class_name}
+        <div className="group relative bg-white rounded-[2rem] px-6 py-5 border border-slate-200 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.06)] transition-all duration-500 hover:shadow-[0_45px_100px_-25px_rgba(0,0,0,0.12)] hover:-translate-y-1.5 focus-within:ring-2 focus-within:ring-blue-500/10">
+            
+            {/* Minimalist Vertical Bar Decoration */}
+            <div className={`absolute left-0 top-[25%] bottom-[25%] w-1 rounded-r-full transition-all duration-500 ${isActive ? 'bg-blue-600' : 'bg-slate-200'} group-hover:h-[40%]`} />
+
+            <div className="flex flex-col h-full pl-3">
+                
+                {/* Visual Label */}
+                <div className="mb-4">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1.5 transition-colors group-hover:text-blue-600">
+                        Academic Unit
+                    </p>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">
+                        {classData.class_name.toLowerCase().startsWith('grade') ? '' : 'Grade '}{classData.class_name}
+                    </h3>
+                </div>
+
+                {/* Primary Data Points */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Section</p>
+                        <p className="text-sm font-black text-slate-800 tracking-tight">{classData.section}</p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                        <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${
-                            isActive
-                                ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
-                                : 'bg-amber-50 text-amber-600 ring-1 ring-amber-100'
-                        }`}>
-                            {classData.status || 'Inactive'}
-                        </span>
-                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight">
-                            ID: {classData.class_id?.substring(0, 6)}
-                        </span>
+                    <div>
+                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Year</p>
+                        <p className="text-sm font-black text-slate-800 tracking-tight">{classData.academic_year}</p>
                     </div>
                 </div>
 
-                {/* Main Info */}
-                <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-1">
-                        Grade {classData.class_name} - {classData.section}
-                    </h3>
-                    <div className="flex items-center gap-2 mb-6">
-                        <div className="px-2 py-0.5 bg-slate-100 rounded text-[9px] font-bold text-slate-500 uppercase tracking-wide flex items-center gap-1.5">
-                            <FontAwesomeIcon icon={faLayerGroup} className="text-[8px] opacity-70" />
-                            Academic Unit
-                        </div>
-                    </div>
+                {/* Navigation Buttons */}
+                <div className="flex gap-2 mb-4">
+                    <button 
+                        onClick={() => handleNavigate('/students')}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-300"
+                    >
+                        <FontAwesomeIcon icon={faUserGraduate} className="text-[10px]" />
+                        Students
+                    </button>
+                    <button 
+                        onClick={() => handleNavigate('/parents')}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-300"
+                    >
+                        <FontAwesomeIcon icon={faUsers} className="text-[10px]" />
+                        Parents
+                    </button>
+                </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 transition-colors group-hover:bg-white">
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Academic Year</p>
-                            <div className="flex items-center gap-2 text-gray-700">
-                                <FontAwesomeIcon icon={faCalendarAlt} className="text-blue-500 text-[10px]" />
-                                <span className="text-sm font-bold">{classData.academic_year}</span>
-                            </div>
-                        </div>
-                        <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 transition-colors group-hover:bg-white">
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Updated</p>
-                            <div className="flex items-center gap-2 text-gray-700">
-                                <FontAwesomeIcon icon={faClock} className="text-blue-500 text-[10px]" />
-                                <span className="text-sm font-bold">{new Date(classData.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                            </div>
-                        </div>
-                    </div>
-
+                {/* Promotion Strategy */}
+                <div className="mt-auto">
                     {nextClass && (
-                        <div className="p-4 bg-blue-50 rounded-2xl border border-indigo-100 flex items-center justify-between group/next transition-all hover:bg-blue-600 hover:border-blue-600 hover:shadow-lg hover:shadow-indigo-100">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-blue-600 shadow-sm border border-blue-50 transition-colors group-hover/next:bg-white/20 group-hover/next:text-white group-hover/next:border-transparent">
-                                    <FontAwesomeIcon icon={faArrowUpRightDots} className="text-xs" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1 group-hover/next:text-indigo-100">Promotion Path</p>
-                                    <p className="text-xs font-bold text-gray-800 group-hover/next:text-white">To Grade {nextClass.class_name}-{nextClass.section}</p>
-                                </div>
+                        <div className="inline-flex items-center gap-4 py-2 px-1 group/link cursor-pointer">
+                            <div className="flex flex-col">
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5 group-hover/link:text-blue-500 transition-colors">Target Pipeline</span>
+                                <span className="text-[12px] font-black text-slate-900">Class {nextClass.class_name}-{nextClass.section}</span>
                             </div>
-                            <FontAwesomeIcon icon={faArrowRight} className="text-indigo-300 text-[10px] group-hover/next:translate-x-1 transition-transform group-hover/next:text-white" />
+                            <div className="w-6 h-[2px] bg-slate-100 group-hover/link:w-10 group-hover/link:bg-blue-600 transition-all duration-500" />
                         </div>
                     )}
                 </div>

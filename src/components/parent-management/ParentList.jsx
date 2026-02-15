@@ -8,11 +8,14 @@ import { useState, useRef, useMemo } from 'react';
 const ParentList = ({ 
     filteredParents, 
     handleDelete,
-    isInactiveView = false
+    isInactiveView = false,
+    activeMenuId,
+    setActiveMenuId,
+    onSelectionChanged,
+    onViewParent
 }) => {
     const gridRef = useRef();
 
-    // Column Definitions
     // Column Definitions
     const columnDefs = useMemo(() => [
         {
@@ -24,14 +27,14 @@ const ParentList = ({
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
                 <div className="flex items-center gap-3 w-full cursor-pointer group" onClick={() => {
-                   // Handle view details
+                   onViewParent(params.data);
                 }}>
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
                         {params.value ? params.value.charAt(0) : '?'}
                     </div>
                     <div className="flex flex-col">
-                        <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors">{params.value || 'Unknown'}</p>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors mt-0.5">ID: {params.data.parent_id?.substring(0, 6)}</span>
+                        <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors tracking-tight">{params.value || 'Unknown'}</p>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors mt-1 opacity-70">ID: {params.data.parent_id?.substring(0, 6)}</span>
                     </div>
                 </div>
             )
@@ -44,31 +47,53 @@ const ParentList = ({
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
-                <div className="flex flex-col justify-center">
-                    <span className="text-gray-900 font-bold text-xs">{params.value}</span>
+                <div className="flex items-center gap-2">
+                    <span className="text-slate-900 font-bold text-[13px] tracking-tight">{params.value}</span>
                 </div>
             )
         },
         {
-            headerName: 'Student',
+            headerName: 'Students Linked',
             field: 'linkedStudents',
             flex: 1.5,
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
-                <div className="flex flex-col justify-center gap-1">
+                <div className="flex flex-wrap gap-x-3 gap-y-1 py-2">
                     {params.value && params.value.map((studentName, idx) => {
                         if (studentName === 'No children linked') return null;
                         return (
-                            <span key={idx} className="text-blue-600 font-bold text-xs truncate flex items-center">
-                                <FontAwesomeIcon icon={faChild} className="mr-1.5 opacity-70 w-3" />
-                                {studentName}
-                            </span>
+                            <div key={idx} className="flex items-center gap-1.5 shrink-0">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
+                                <span className="text-[12px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
+                                    {studentName}
+                                </span>
+                            </div>
                         );
                     })}
                     {(!params.value || params.value.length === 0 || params.value[0] === 'No children linked') && 
-                        <span className="text-gray-400 text-[10px] italic">No students linked</span>
+                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">None Linked</span>
+                    }
+                </div>
+            )
+        },
+        {
+            headerName: 'Classes',
+            field: 'childClasses',
+            width: 160,
+            filter: false,
+            cellDataType: false,
+            cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
+            cellRenderer: params => (
+                <div className="flex flex-wrap gap-1.5 py-2">
+                    {params.value && params.value.map((className, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-lg font-bold text-[10px] border border-blue-100 uppercase tracking-wider whitespace-nowrap shadow-sm">
+                            {className}
+                        </span>
+                    ))}
+                    {(!params.value || params.value.length === 0) && 
+                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">N/A</span>
                     }
                 </div>
             )
@@ -81,66 +106,82 @@ const ParentList = ({
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
-                <div className="flex flex-col justify-center">
-                    <span className="text-gray-700 font-medium text-xs truncate">{params.data.street}</span>
-                    <span className="text-gray-400 text-[10px]">{params.data.city}</span>
+                <div className="flex flex-col justify-center min-w-0">
+                    <span className="text-slate-700 font-bold text-[12px] tracking-tight truncate">{params.data.street}</span>
+                    <span className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-0.5">{params.data.city}</span>
                 </div>
-            )
-        },
-        {
-            headerName: 'Status',
-            field: 'parents_active_status',
-            width: 120,
-            filter: false,
-            cellDataType: false,
-            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', height: '100%' },
-            cellRenderer: params => (
-                <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm ${
-                    params.value === 'ACTIVE'
-                        ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
-                        : 'bg-amber-50 text-amber-600 ring-1 ring-amber-100'
-                }`}>
-                    {params.value || 'Inactive'}
-                </span>
             )
         },
         {
             headerName: 'ACTIONS',
             field: 'parent_id',
-            width: 100,
+            width: 80,
             pinned: 'right',
             sortable: false,
             filter: false,
             cellStyle: { overflow: 'visible' },
-            cellRenderer: params => (
-                <div className="flex items-center justify-center h-full">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(params.data.parent_id);
-                        }}
-                        className={`w-8 h-8 rounded-full transition-all flex items-center justify-center text-sm ${
-                            isInactiveView 
-                            ? 'text-gray-400 hover:bg-emerald-50 hover:text-emerald-600' 
-                            : 'text-gray-400 hover:bg-red-50 hover:text-red-600'
-                        }`}
-                        title={isInactiveView ? "Activate Parent" : "Deactivate Parent"}
-                    >
-                        <FontAwesomeIcon icon={isInactiveView ? faCheckCircle : faTrash} />
-                    </button>
-                </div>
-            )
+            cellRenderer: params => {
+                const isOpen = activeMenuId === params.data.parent_id;
+                return (
+                    <div className="relative flex items-center justify-center h-full">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(isOpen ? null : params.data.parent_id);
+                            }}
+                            className={`action-menu-trigger w-8 h-8 rounded-full transition-all flex items-center justify-center text-sm ${
+                                isOpen ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-100'
+                            }`}
+                        >
+                            <FontAwesomeIcon icon={faEllipsisV} />
+                        </button>
+
+                        {isOpen && (
+                            <div className="action-menu-container absolute right-4 top-10 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                                <div className="p-1">
+                                    <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
+                                        Account Actions
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onViewParent(params.data);
+                                            setActiveMenuId(null);
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors"
+                                    >
+                                        <FontAwesomeIcon icon={faEdit} className="w-4 text-blue-600" />
+                                        Edit Details
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(params.data.parent_id);
+                                            setActiveMenuId(null);
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-red-50 rounded-lg flex items-center gap-2 transition-colors"
+                                    >
+                                        <FontAwesomeIcon icon={isInactiveView ? faCheckCircle : faTrash} className={`w-4 ${isInactiveView ? 'text-emerald-600' : 'text-red-600'}`} />
+                                        {isInactiveView ? 'Activate Account' : 'Deactivate Account'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            }
         }
-    ], [handleDelete]);
+    ], [handleDelete, isInactiveView, activeMenuId, setActiveMenuId]);
 
     const defaultColDef = {
+        sortable: true,
+        filter: false,
         resizable: true,
-        headerClass: 'custom-ag-header',
-        cellClass: 'custom-ag-cell group',
+        headerClass: "font-bold uppercase text-xs tracking-wide",
     };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-hidden relative">
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Desktop/Tablet Table View */}
                 <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
@@ -156,13 +197,23 @@ const ParentList = ({
                             ref={gridRef}
                             rowData={filteredParents}
                             columnDefs={columnDefs}
-                            // Removed inline columnDefs
-
-                            defaultColDef={{
-                                sortable: true,
-                                filter: true,
-                                resizable: true,
-                                headerClass: "font-bold uppercase text-xs tracking-wide",
+                            defaultColDef={defaultColDef}
+                            rowSelection={{ 
+                                mode: 'multiRow', 
+                                headerCheckbox: true, 
+                                enableClickSelection: false 
+                            }}
+                            selectionColumnDef={{ 
+                                width: 50, 
+                                minWidth: 50, 
+                                maxWidth: 50, 
+                                pinned: 'left',
+                                cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+                                headerClass: 'ag-center-header'
+                            }}
+                            onSelectionChanged={(params) => {
+                                const selectedNodes = params.api.getSelectedNodes();
+                                onSelectionChanged(selectedNodes.map(node => node.data));
                             }}
                             pagination={true}
                             paginationPageSize={10}
@@ -170,7 +221,12 @@ const ParentList = ({
                             rowHeight={80}
                             headerHeight={50}
                             animateRows={true}
-                            suppressCellFocus={true}
+                            getRowStyle={params => {
+                                if (params.data.parent_id === activeMenuId) {
+                                    return { zIndex: 999, overflow: 'visible' };
+                                }
+                                return { zIndex: 1 };
+                            }}
                             theme="legacy"
                             overlayNoRowsTemplate='<span class="p-4">No parents found</span>'
                         />
@@ -180,61 +236,83 @@ const ParentList = ({
                 {/* Mobile/Tablet Card View */}
                 <div className="lg:hidden p-4 space-y-4">
                     {filteredParents.map((parent) => (
-                        <div key={parent.parent_id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
-                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#3A7BFF' }}></div>
-                            <div className="relative p-5">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
+                        <div 
+                            key={parent.parent_id} 
+                            className="relative bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
+                        >
+                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-[0.03]" style={{ backgroundColor: '#3A7BFF' }}></div>
+                            
+                            <div className="relative p-6">
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg shadow-blue-100" style={{ backgroundColor: '#3A7BFF' }}>
                                             {parent.name.charAt(0)}
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-gray-900 text-lg">{parent.name}</h3>
+                                            <h3 className="font-black text-gray-900 text-[17px] leading-tight">{parent.name}</h3>
+                                            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1 block">Parent Account</span>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => handleDelete(parent.parent_id)}
-                                        className="w-10 h-10 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center justify-center"
-                                    >
-                                        <FontAwesomeIcon icon={faTrash} className="text-sm" />
-                                    </button>
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleDelete(parent.parent_id)}
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                                                isInactiveView ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                                            }`}
+                                        >
+                                            <FontAwesomeIcon icon={isInactiveView ? faCheckCircle : faTrash} />
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 mb-2">
-                                    <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f0f4ff' }}>
-                                        <p className="text-xs text-gray-500 font-medium mb-1">Student</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {parent.linkedStudents && parent.linkedStudents.map((studentName, idx) => {
-                                                if (studentName === 'No children linked') return <span key={idx} className="text-gray-400 text-[10px] italic">No students linked</span>;
-                                                return (
-                                                    <span key={idx} className="text-blue-600 font-bold text-xs truncate flex items-center bg-white px-2 py-1 rounded-lg border border-indigo-100 shadow-sm">
-                                                        <FontAwesomeIcon icon={faChild} className="mr-1.5 opacity-70 w-3" />
-                                                        {studentName}
-                                                    </span>
-                                                );
-                                            })}
-                                            {(!parent.linkedStudents || parent.linkedStudents.length === 0) && 
-                                                <span className="text-gray-400 text-[10px] italic">No students linked</span>
-                                            }
+                                <div className="grid grid-cols-2 gap-3 mb-6">
+                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/50">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <FontAwesomeIcon icon={faChild} className="text-[10px] text-blue-500" />
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Children</p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1">
+                                            {parent.linkedStudents?.map((s, i) => (
+                                                <span key={i} className="text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                                                    {s === 'No children linked' ? 'None' : s}
+                                                </span>
+                                            ))}
                                         </div>
                                     </div>
-                                    <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
-                                        <p className="text-xs text-gray-500 font-medium mb-1">Phone</p>
-                                        <p className="text-sm text-gray-900 font-bold truncate">{parent.phone}</p>
-                                    </div>
-                                    <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
-                                        <p className="text-xs text-gray-500 font-medium mb-1">Status</p>
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                            parent.parents_active_status === 'ACTIVE' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'
+
+                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/50">
+                                        <div className="flex items-center gap-2 mb-2 text-blue-500">
+                                            <FontAwesomeIcon icon={faCheckCircle} className="text-[10px]" />
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</p>
+                                        </div>
+                                        <span className={`text-[11px] font-black uppercase tracking-wider ${
+                                            parent.parents_active_status === 'ACTIVE' ? 'text-emerald-600' : 'text-amber-600'
                                         }`}>
                                             {parent.parents_active_status || 'Inactive'}
                                         </span>
                                     </div>
+
+                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/50 col-span-2">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Contact Details</p>
+                                                <p className="text-[13px] font-bold text-slate-900">{parent.phone}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Location</p>
+                                                <p className="text-[11px] font-bold text-slate-600 truncate max-w-[150px]">{parent.street}, {parent.city}</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="p-3 rounded-xl mt-2" style={{ backgroundColor: '#f0f4ff' }}>
-                                    <p className="text-xs text-gray-500 font-medium mb-1">Address</p>
-                                    <p className="text-xs text-gray-900 font-medium truncate">{parent.street}, {parent.city}</p>
-                                </div>
+
+                                <button
+                                    onClick={() => onViewParent(parent)}
+                                    className="w-full py-4 rounded-2xl bg-slate-900 text-white text-[13px] font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-[0.98]"
+                                >
+                                    Manage Account
+                                </button>
                             </div>
                         </div>
                     ))}

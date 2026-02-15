@@ -1,0 +1,233 @@
+import { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+    faArrowLeft, faEdit, faCheck, faIdCard, faPhone, 
+    faEnvelope, faMapMarkerAlt, faChild, faUserShield,
+    faClock, faInfoCircle, faHistory, faGraduationCap,
+    faVenusMars, faCalendarDay, faLocationDot, faCircleCheck,
+    faLink, faUserSlash, faTrash
+} from '@fortawesome/free-solid-svg-icons';
+
+const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState(null);
+
+    useEffect(() => {
+        if (selectedParent) {
+            setEditData({ ...selectedParent });
+        }
+    }, [selectedParent]);
+
+    if (!selectedParent) return null;
+
+    const SectionHeader = ({ icon, title, subtitle }) => (
+        <div className="flex items-center gap-4 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500">
+                <FontAwesomeIcon icon={icon} className="text-sm" />
+            </div>
+            <div>
+                <h3 className="text-base font-black text-slate-900 leading-none tracking-tight">{title}</h3>
+                <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{subtitle}</p>
+            </div>
+        </div>
+    );
+
+    const DataRow = ({ label, value, isFullWidth = false }) => (
+        <div className={`${isFullWidth ? 'col-span-2' : ''} space-y-1.5`}>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+            <p className="text-sm font-bold text-slate-700">{value || 'Not Provided'}</p>
+        </div>
+    );
+
+    return (
+        <div className="flex-1 h-full flex flex-col bg-[#F8FAFC] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+            {/* Enterprise Header Bar */}
+            <div className="bg-white border-b border-slate-200 px-8 h-20 flex items-center justify-between flex-shrink-0 z-20">
+                <div className="flex items-center gap-6">
+                    <button 
+                        onClick={onBack}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+                    >
+                        <FontAwesomeIcon icon={faArrowLeft} />
+                    </button>
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white text-xl font-black shadow-xl shadow-slate-200">
+                            {selectedParent.name.charAt(0)}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <h2 className="text-xl font-black text-slate-900 leading-none tracking-tight">{selectedParent.name}</h2>
+                                <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${
+                                    selectedParent.parents_active_status === 'ACTIVE'
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                    : 'bg-amber-50 text-amber-600 border-amber-100'
+                                }`}>
+                                    {selectedParent.parents_active_status || 'Inactive'}
+                                </span>
+                            </div>
+                            <p className="text-[11px] font-bold text-slate-400 mt-1.5 uppercase tracking-widest">
+                                Parent ID: <span className="text-slate-900 font-black">#PAR-{selectedParent.parent_id?.substring(0, 6)}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={() => onDelete(selectedParent.parent_id)}
+                        className="px-4 py-2.5 rounded-xl border border-rose-100 text-rose-500 text-sm font-bold hover:bg-rose-50 transition-all flex items-center gap-2"
+                    >
+                        <FontAwesomeIcon icon={faUserSlash} className="text-xs" />
+                        Deactivate
+                    </button>
+                    <button 
+                        onClick={() => setIsEditing(!isEditing)}
+                        className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-black transition-all shadow-xl shadow-slate-200 flex items-center gap-2 active:scale-95"
+                    >
+                        <FontAwesomeIcon icon={isEditing ? faCheck : faEdit} className="text-xs" />
+                        {isEditing ? 'Save Changes' : 'Edit Account'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+                <div className="max-w-[1200px] mx-auto grid grid-cols-12 gap-8">
+                    
+                    {/* Left Column - Core Profile */}
+                    <div className="col-span-12 lg:col-span-4 space-y-8">
+                        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+                            <SectionHeader icon={faIdCard} title="Guardian Profile" subtitle="Identity Registry" />
+                            <div className="space-y-6 pt-2">
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600">
+                                            <FontAwesomeIcon icon={faPhone} className="text-sm" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Phone Number</p>
+                                            <p className="text-sm font-black text-slate-900">{selectedParent.phone}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600">
+                                            <FontAwesomeIcon icon={faEnvelope} className="text-sm" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Email Address</p>
+                                            <p className="text-sm font-black text-slate-900 truncate max-w-[180px]">{selectedParent.email || 'None Provided'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="h-px bg-slate-100 my-2" />
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <DataRow label="City" value={selectedParent.city} />
+                                    <DataRow label="District" value={selectedParent.district} />
+                                    <div className="col-span-2">
+                                        <DataRow label="Street Address" value={selectedParent.street} isFullWidth />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Security/Access Card */}
+                        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm border-l-4 border-l-blue-500">
+                            <SectionHeader icon={faUserShield} title="Account Access" subtitle="Security & Logs" />
+                            <div className="space-y-4 pt-2">
+                                <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <FontAwesomeIcon icon={faClock} className="text-slate-300 text-xs" />
+                                        <p className="text-xs font-bold text-slate-600">Last Login</p>
+                                    </div>
+                                    <p className="text-[11px] font-black text-slate-900">Today, 09:42 AM</p>
+                                </div>
+                                <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <FontAwesomeIcon icon={faHistory} className="text-slate-300 text-xs" />
+                                        <p className="text-xs font-bold text-slate-600">Registry Created</p>
+                                    </div>
+                                    <p className="text-[11px] font-black text-slate-900">{new Date().toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column - Relations */}
+                    <div className="col-span-12 lg:col-span-8 space-y-8">
+                        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                                <SectionHeader icon={faLink} title="Linked Students" subtitle="Family Tree Management" />
+                                <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                                    {selectedParent.linkedStudents?.filter(s => s !== 'No children linked').length || 0} Connected
+                                </span>
+                            </div>
+                            
+                            <div className="p-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {selectedParent.linkedStudents && selectedParent.linkedStudents[0] !== 'No children linked' ? (
+                                        selectedParent.linkedStudents.map((student, idx) => (
+                                            <div key={idx} className="group p-6 rounded-2xl bg-white border border-slate-200 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50/50 transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-black group-hover:scale-110 transition-transform">
+                                                        {student.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-black text-slate-900 mb-1">{student}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <FontAwesomeIcon icon={faGraduationCap} className="text-[10px] text-slate-300" />
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Student Link</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-2 flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-slate-100 rounded-3xl">
+                                            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4 text-slate-200">
+                                                <FontAwesomeIcon icon={faUserSlash} size="xl" />
+                                            </div>
+                                            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">No Students Linked</h4>
+                                            <p className="text-[11px] font-bold text-slate-400 mt-2 max-w-[200px]">This guardian account is not currently connected to any student records.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity Mini-Feed */}
+                        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+                            <SectionHeader icon={faHistory} title="Recent Activity" subtitle="Registry Audit Trail" />
+                            <div className="space-y-6 pt-2">
+                                {[
+                                    { text: "Account profile updated", time: "2 hours ago", icon: faEdit, color: "text-blue-500" },
+                                    { text: "New student link added", time: "1 day ago", icon: faLink, color: "text-emerald-500" }
+                                ].map((activity, i) => (
+                                    <div key={i} className="flex gap-4 relative">
+                                        {i !== 1 && <div className="absolute left-2.5 top-8 w-px h-8 bg-slate-100" />}
+                                        <div className={`w-5 h-5 rounded-full bg-white border-2 flex items-center justify-center z-10 ${activity.color}`}>
+                                            <FontAwesomeIcon icon={activity.icon} className="text-[8px]" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-bold text-slate-700">{activity.text}</p>
+                                            <p className="text-[10px] font-medium text-slate-400 mt-0.5">{activity.time}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>{`
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+            `}</style>
+        </div>
+    );
+};
+
+export default ParentDetail;

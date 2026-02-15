@@ -63,6 +63,7 @@ const StudentDirectory = () => {
                     mobile: parent1 ? parent1.phone : (s.emergency_contact || 'N/A'),
                     status: currentStatus,
                     isTransport: s.is_transport_user === true || s.is_transport_user === 1 || s.is_transport_user === "true",
+                    transportStatus: s.transport_status,
                     date: s.created_at ? s.created_at.split('T')[0] : 'N/A',
                 };
             });
@@ -88,8 +89,21 @@ const StudentDirectory = () => {
         }
     };
 
+    const handleTransportStatusUpdate = async (studentId, newStatus) => {
+        try {
+            await studentService.updateTransportStatus(studentId, newStatus);
+            setStudents(prev => prev.map(s => 
+                s.id === studentId ? { ...s, transportStatus: newStatus, isTransport: newStatus === 'ACTIVE' } : s
+            ));
+            setActiveMenuId(null);
+        } catch (error) {
+            console.error("Failed to update transport status:", error);
+            alert("Failed to update transport status");
+        }
+    };
+
     const categories = [
-        { id: 'DayScholar', label: 'Day Scholars', icon: faWalking, color: 'text-emerald-600' },
+        { id: 'DayScholar', label: 'Non-Bus Users', icon: faWalking, color: 'text-emerald-600' },
         { id: 'Alumni', label: 'Alumni', icon: faGraduationCap, color: 'text-blue-600' },
         { id: 'Discontinued', label: 'Discontinued', icon: faUserSlash, color: 'text-red-600' },
     ];
@@ -98,11 +112,15 @@ const StudentDirectory = () => {
         let result = students;
 
         if (activeCategory === 'DayScholar') {
-            result = result.filter(s => !s.isTransport && (s.status === 'CURRENT' || !s.status));
+            // Directory 'Non-Bus Users' shows ONLY students with INACTIVE transport status
+            result = result.filter(s => 
+                s.transportStatus === 'INACTIVE' && 
+                (s.status === 'CURRENT' || !s.status)
+            );
         } else if (activeCategory === 'Alumni') {
             result = result.filter(s => s.status === 'ALUMNI');
         } else if (activeCategory === 'Discontinued') {
-            result = result.filter(s => s.status === 'DISCONTINUED' || s.status === 'LONG_ABSENT');
+            result = result.filter(s => s.status === 'DISCONTINUED' || s.status === 'LONG_ABSENT' || s.status === 'INACTIVE');
         }
 
         if (searchQuery) {
@@ -226,6 +244,26 @@ const StudentDirectory = () => {
                                                             {option.label}
                                                         </button>
                                                     ))}
+
+                                                    <div className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50/50 rounded-lg mb-1.5">
+                                                        Transport Service
+                                                    </div>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleTransportStatusUpdate(
+                                                                student.id, 
+                                                                student.transportStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+                                                            );
+                                                        }}
+                                                        className="w-full text-left px-3 py-2 text-[11px] font-bold text-gray-700 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors"
+                                                    >
+                                                        <FontAwesomeIcon 
+                                                            icon={student.transportStatus === 'ACTIVE' ? faWalking : faBus} 
+                                                            className={`w-3 ${student.transportStatus === 'ACTIVE' ? 'text-amber-600' : 'text-emerald-600'}`} 
+                                                        />
+                                                        {student.transportStatus === 'ACTIVE' ? 'Stop Transport' : 'Start Transport'}
+                                                    </button>
                                                 </div>
                                             </div>
                                         )}
