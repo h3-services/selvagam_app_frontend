@@ -277,7 +277,7 @@ const DriverManagementHome = () => {
                 ) : (
                     <DriverList
                         filteredDrivers={filteredDrivers}
-                        setSelectedDriver={setSelectedDriver}
+                        setSelectedStudent={setSelectedDriver}
                         handleToggleStatus={handleToggleStatus}
                         handleDelete={handleDelete}
                         activeMenuId={activeMenuId}
