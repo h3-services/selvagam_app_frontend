@@ -68,7 +68,12 @@ const ParentViewDrawer = ({ show, onClose, parentData }) => {
                                         {parentData.parents_active_status}
                                     </div>
                                     <div className="px-3 py-1 rounded-lg bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest">
-                                        {parentData.parent_role === 'GUARDIAN' ? 'PARENT' : (parentData.parent_role || 'PARENT')}
+                                        {(() => {
+                                            const role = parentData.parent_role || parentData.role;
+                                            if (!role) return 'PARENT';
+                                            const roleUpper = role.toUpperCase();
+                                            return roleUpper === 'GUARDIAN' ? 'PARENT' : roleUpper;
+                                        })()}
                                     </div>
                                     <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
                                         System ID: #{parentData.parent_id?.substring(0, 8)}

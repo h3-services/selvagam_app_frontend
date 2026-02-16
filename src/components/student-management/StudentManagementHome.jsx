@@ -71,6 +71,14 @@ const StudentManagementHome = () => {
                 };
             });
             setStudents(mappedStudents);
+            
+            // Sync current selection if viewing a detail
+            if (selectedStudent) {
+                const refreshedStudent = mappedStudents.find(s => s.id === selectedStudent.id);
+                if (refreshedStudent) {
+                    setSelectedStudent(refreshedStudent);
+                }
+            }
         } catch (error) {
             console.error("Failed to fetch data:", error);
         } finally {
@@ -345,7 +353,7 @@ const StudentManagementHome = () => {
                     <StudentDetail
                         selectedStudent={selectedStudent}
                         onBack={() => setSelectedStudent(null)}
-                        onUpdate={handleEditStudent}
+                        onUpdate={fetchAllData}
                         onTransportStatusUpdate={handleTransportStatusUpdate}
                     />
                 ) : (

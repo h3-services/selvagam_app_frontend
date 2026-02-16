@@ -103,11 +103,13 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
         try {
             await studentService.updateSecondaryParent(selectedStudent.id, parentId);
             setIsSelectingSecondary(false);
-            // Refresh parent data
+            // Trigger parent update in list and wait for it
+            if (onUpdate) await onUpdate();
+            
+            // Re-fetch parent data immediately after assignment to ensure sync
+            // We use the parentId we just assigned for parent2
             const p1Id = selectedStudent.originalData?.parent_id;
-            fetchParents(p1Id, parentId);
-            // Trigger parent update in list
-            if (onUpdate) onUpdate();
+            await fetchParents(p1Id, parentId);
         } catch (error) {
             console.error("Secondary parent assignment failed:", error);
         }
@@ -329,13 +331,20 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
                                                             <h4 className="text-base font-black text-slate-900 leading-none group-hover:text-indigo-600 transition-colors uppercase">{p.data.name}</h4>
                                                             <div className="flex items-center gap-2 mt-1">
                                                                 <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 text-[8px] font-black uppercase tracking-widest border border-indigo-100">
-                                                                    {p.data.parent_role === 'GUARDIAN' ? 'PARENT' : (p.data.parent_role || 'PARENT')}
+                                                                    {(() => {
+                                                                        const role = p.data.parent_role || p.data.role;
+                                                                        if (!role) return 'PARENT';
+                                                                        const roleUpper = role.toUpperCase();
+                                                                        return roleUpper === 'GUARDIAN' ? 'PARENT' : roleUpper;
+                                                                    })()}
                                                                 </span>
                                                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.label} Connection</p>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-xs text-slate-300 group-hover:text-indigo-600 transition-all" />
+                                                    <div className="flex items-center gap-2">
+                                                        <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-xs text-slate-300 group-hover:text-indigo-600 transition-all" />
+                                                    </div>
                                                 </div>
 
                                                 <div className="space-y-4">
@@ -361,6 +370,19 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
                                                             </p>
                                                         </div>
                                                     </div>
+                                                    
+                                                    {p.label === "Secondary" && (
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setIsSelectingSecondary(true);
+                                                                fetchAllParents();
+                                                            }}
+                                                            className="w-full mt-4 py-3 rounded-xl bg-indigo-50/50 text-indigo-600 border border-dashed border-indigo-200 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white hover:border-solid hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
+                                                        >
+                                                            Replace Connection
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
@@ -459,8 +481,18 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
                                                 {parent.name.charAt(0)}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-black text-slate-900 uppercase">{parent.name}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 mt-0.5">{parent.phone}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm font-black text-slate-900 uppercase">{parent.name}</p>
+                                                    <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 text-[7px] font-black uppercase tracking-widest border border-indigo-100">
+                                                        {(() => {
+                                                            const role = parent.parent_role || parent.role;
+                                                            if (!role) return 'PARENT';
+                                                            const roleUpper = role.toUpperCase();
+                                                            return roleUpper === 'GUARDIAN' ? 'PARENT' : roleUpper;
+                                                        })()}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-1">{parent.phone}</p>
                                             </div>
                                         </div>
                                         <button className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest group-hover:bg-indigo-600 group-hover:text-white transition-all">

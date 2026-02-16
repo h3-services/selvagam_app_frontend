@@ -2,9 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with config from environment variables
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL?.endsWith('/') 
-        ? import.meta.env.VITE_API_BASE_URL.slice(0, -1) 
-        : import.meta.env.VITE_API_BASE_URL,
+    baseURL: import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || 'https://api.selvagam.com/api/v1',
     headers: {
         'Content-Type': 'application/json',
         'X-Admin-API-Key': import.meta.env.VITE_ADMIN_API_KEY
@@ -14,14 +12,11 @@ const api = axios.create({
 // Add a request interceptor for potential auth tokens later
 api.interceptors.request.use(
     (config) => {
-        // Ensure Content-Type is set
+        // Ensure the API Key is injected into every request header
+        config.headers['X-Admin-API-Key'] = import.meta.env.VITE_ADMIN_API_KEY;
+        
         if (!config.headers['Content-Type']) {
             config.headers['Content-Type'] = 'application/json';
-        }
-        
-        // Ensure API Key is always present
-        if (!config.headers['X-Admin-API-Key']) {
-            config.headers['X-Admin-API-Key'] = import.meta.env.VITE_ADMIN_API_KEY;
         }
         
         // You can add auth headers here if needed, e.g. from localStorage

@@ -26,7 +26,6 @@ Before sending notifications, check if the service is online and the Firebase cr
   "creds_found": true
 }
 ```
-
 ---
 
 ## 🚀 Sending Notifications
