@@ -78,13 +78,13 @@ export const studentService = {
         }
     },
 
-    // Get student count by route
-    getStudentCountByRoute: async (routeId) => {
+    // Update student secondary parent
+    updateSecondaryParent: async (studentId, sParentId) => {
         try {
-            const response = await api.get(`/students/count/by-route/${routeId}`);
+            const response = await api.patch(`/students/${studentId}/secondary-parent`, { s_parent_id: sParentId });
             return response.data;
         } catch (error) {
-            console.error(`Error fetching student count for route ${routeId}:`, error);
+            console.error(`Error updating secondary parent for ${studentId}:`, error);
             throw error;
         }
     }
