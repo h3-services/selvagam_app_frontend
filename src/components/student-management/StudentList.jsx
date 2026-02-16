@@ -1,6 +1,6 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faEye, faPhone, faChild, faRoute, faUserTie, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faEdit, faEye, faPhone, faChild, faRoute, faUserTie, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking } from '@fortawesome/free-solid-svg-icons';
 
 const StudentList = ({
     filteredStudents,
@@ -10,7 +10,8 @@ const StudentList = ({
     handleTransportStatusUpdate,
     activeMenuId,
     setActiveMenuId,
-    onSelectionChanged
+    onSelectionChanged,
+    onEdit
 }) => {
     return (
         <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-hidden">
@@ -140,6 +141,21 @@ const StudentList = ({
                                                 {isOpen && (
                                                     <div className="action-menu-container absolute right-0 top-10 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                                                         <div className="p-1">
+                                                            <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1 flex items-center justify-between">
+                                                                <span>Quick Actions</span>
+                                                            </div>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    onEdit(params.data);
+                                                                    setActiveMenuId(null);
+                                                                }}
+                                                                className="w-full text-left px-3 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors mb-2"
+                                                            >
+                                                                <FontAwesomeIcon icon={faEdit} className="w-4" />
+                                                                Edit Details
+                                                            </button>
+
                                                             <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
                                                                 Status Updates
                                                             </div>

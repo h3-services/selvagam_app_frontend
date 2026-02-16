@@ -155,7 +155,7 @@ const ClassSelector = ({ label, value, options, onChange, placeholder }) => {
     );
 };
 
-const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
+const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }) => {
     const defaultStudentState = {
         name: '',
         parent_id: '',
@@ -211,6 +211,43 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
             setLocalParents(parents);
         }
     }, [parents]);
+
+    useEffect(() => {
+        if (initialData) {
+            console.log("Loading Initial Data for Edit:", initialData);
+            const d = initialData;
+            
+            // Extract years from study_year (Format: "2024-2025")
+            let yStart = new Date().getFullYear().toString();
+            let yEnd = (new Date().getFullYear() + 1).toString();
+            
+            if (d.study_year && d.study_year.includes('-')) {
+                const parts = d.study_year.split('-');
+                yStart = parts[0];
+                yEnd = parts[1];
+            }
+
+            setFormData({
+                name: d.name || '',
+                parent_id: d.parent_id || '',
+                s_parent_id: d.s_parent_id || '',
+                dob: d.dob || '',
+                class_id: d.class_id || '',
+                pickup_route_id: d.pickup_route_id || '',
+                drop_route_id: d.drop_route_id || '',
+                pickup_stop_id: d.pickup_stop_id || '',
+                drop_stop_id: d.drop_stop_id || '',
+                emergency_contact: d.emergency_contact || '',
+                student_photo_url: d.student_photo_url || '',
+                study_year: d.study_year || '',
+                yearStart: yStart,
+                yearEnd: yEnd,
+                is_transport_user: d.is_transport_user !== undefined ? d.is_transport_user : true
+            });
+        } else {
+            setFormData(defaultStudentState);
+        }
+    }, [initialData, show]);
 
     useEffect(() => {
         if (show) {
@@ -347,8 +384,14 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
 
         if (formData.student_photo_url) payload.student_photo_url = formData.student_photo_url;
 
-        console.log("Student Payload:", JSON.stringify(payload, null, 2));
-        onAdd(payload);
+        console.log("Saving Student Payload:", JSON.stringify(payload, null, 2));
+        
+        if (initialData) {
+            onUpdate(initialData.student_id, payload);
+        } else {
+            onAdd(payload);
+        }
+        
         setFormData(defaultStudentState);
         setIsAddingNewParent(false);
         setIsSearchingParent(false);
@@ -357,25 +400,26 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
 
 
     const handleAutoFill = () => {
+        const randomNum = Math.floor(1000 + Math.random() * 9000);
         const dummyStudent = {
-            name: "Siranjeevan",
+            name: `Student ${randomNum}`,
             dob: "2016-08-15",
             gender: "Male",
-            blood_group: "B+",
+            blood_group: "O+",
             // Use first active class from the fetched list
             class_id: classes.find(c => c.status === 'ACTIVE')?.class_id || "", 
-            section: "B",
-            roll_no: "42",
-            admission_no: "ADM-2024-050",
-            address: "45/2, Green Avenue, Bangalore",
-            emergency_contact: "9876543210",
+            section: "A",
+            roll_no: randomNum.toString().substring(0, 2),
+            admission_no: `ADM-2026-${randomNum}`,
+            address: "4/12, Test Lane, Campus Housing",
+            emergency_contact: `98000${randomNum}`,
             pickup_route_id: routes[0]?.route_id || "",
             // Pickup stop logic would ideally filter, but for demo we just pick first if available
             pickup_stop_id: stops[0]?.stop_id || "", 
             drop_route_id: routes[0]?.route_id || "",
             drop_stop_id: stops[0]?.stop_id || "",
-            student_photo_url: "https://randomuser.me/api/portraits/lego/1.jpg",
-            study_year: "2024-2025",
+            student_photo_url: `https://randomuser.me/api/portraits/lego/${Math.floor(Math.random() * 8) + 1}.jpg`,
+            study_year: "2025-2026",
             is_transport_user: true
         };
         setFormData(prev => ({ ...prev, ...dummyStudent }));
@@ -438,10 +482,14 @@ const AddStudentForm = ({ show, onClose, onAdd, parents }) => {
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">Register Enrollment</h3>
+                                        <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">
+                                            {initialData ? 'Update Profile' : 'Register Enrollment'}
+                                        </h3>
                                         <div className="flex items-center gap-2">
                                             <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
-                                            <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">New Student Onboarding</p>
+                                            <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">
+                                                {initialData ? 'Modify System Records' : 'New Student Onboarding'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

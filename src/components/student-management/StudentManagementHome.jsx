@@ -21,6 +21,7 @@ const StudentManagementHome = () => {
     const [activeTab, setActiveTab] = useState("Active");
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const [editingStudent, setEditingStudent] = useState(null);
 
     // Actions State
     const [activeMenuId, setActiveMenuId] = useState(null);
@@ -229,20 +230,38 @@ const StudentManagementHome = () => {
         }
     };
 
-    const handleUpdateStudent = async (updatedStudent) => {
+    const handleUpdateAction = async (studentId, studentData) => {
         try {
-            const apiData = {
-                ...updatedStudent.originalData,
-                name: updatedStudent.name,
-                emergency_contact: updatedStudent.mobile,
-                // map other fields as needed
-            };
-            await studentService.updateStudent(updatedStudent.id, apiData);
-            await fetchAllData(); // Refresh list
-            setSelectedStudent(null); // Go back to list
+            setLoading(true);
+            await studentService.updateStudent(studentId, studentData);
+            await fetchAllData();
+            setShowForm(false);
+            setEditingStudent(null);
+            
+            // If we're currently viewing this student's details, refresh that view too
+            if (activeTab === "Active" || activeTab === "Archive") {
+                // The fetchAllData handles students state, but we might need to update selectedStudent if open
+                if (selectedStudent && selectedStudent.id === studentId) {
+                    const updated = (await studentService.getAllStudents()).find(s => s.student_id === studentId);
+                    if (updated) {
+                         // Find parent/class to maintain UI structure
+                         // For simplicity, we can just trigger a back-to-list or re-map
+                         // but standard practice is usually closing details or full refresh
+                    }
+                    setSelectedStudent(null); // Return to list for best UX consistency
+                }
+            }
         } catch (error) {
             console.error("Error updating student:", error);
+            alert("Failed to update student: " + (error.response?.data?.detail || error.message));
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleEditStudent = (student) => {
+        setEditingStudent(student.originalData);
+        setShowForm(true);
     };
 
 
@@ -326,7 +345,7 @@ const StudentManagementHome = () => {
                     <StudentDetail
                         selectedStudent={selectedStudent}
                         onBack={() => setSelectedStudent(null)}
-                        onUpdate={handleUpdateStudent}
+                        onUpdate={handleEditStudent}
                         onTransportStatusUpdate={handleTransportStatusUpdate}
                     />
                 ) : (
@@ -339,6 +358,7 @@ const StudentManagementHome = () => {
                         activeMenuId={activeMenuId}
                         setActiveMenuId={setActiveMenuId}
                         onSelectionChanged={setSelectedRows}
+                        onEdit={handleEditStudent}
                     />
                 )}
             </div>
@@ -437,9 +457,14 @@ const StudentManagementHome = () => {
             {/* Add Student Form Drawer */}
             <AddStudentForm
                 show={showForm}
-                onClose={() => setShowForm(false)}
+                onClose={() => {
+                    setShowForm(false);
+                    setEditingStudent(null);
+                }}
                 onAdd={handleAddStudent}
+                onUpdate={handleUpdateAction}
                 parents={parents}
+                initialData={editingStudent}
             />
 
             {/* Floating Add Button */}

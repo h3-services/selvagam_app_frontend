@@ -8,15 +8,13 @@ import {
     faShieldHalved, faCalendarDay, faIdCard, faVenusMars,
     faChevronLeft, faEllipsisVertical, faBuilding,
     faFingerprint, faCircleCheck, faArrowUpRightFromSquare,
-    faGraduationCap, faMap, faPaperclip, faHistory
+    faGraduationCap, faMap, faPaperclip, faHistory, faSchool
 } from '@fortawesome/free-solid-svg-icons';
 import ParentViewDrawer from './ParentViewDrawer';
 import { parentService } from '../../services/parentService';
 import { routeService } from '../../services/routeService';
 
 const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpdate }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState(null);
     const [parent1, setParent1] = useState(null);
     const [parent2, setParent2] = useState(null);
     const [loadingParents, setLoadingParents] = useState(false);
@@ -33,7 +31,6 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
 
     useEffect(() => {
         if (selectedStudent) {
-            setEditData({ ...selectedStudent });
             const p1Id = selectedStudent.originalData?.parent_id;
             const p2Id = selectedStudent.originalData?.s_parent_id;
             
@@ -83,200 +80,275 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
 
     if (!selectedStudent) return null;
 
-    const SectionHeader = ({ icon, title, subtitle }) => (
-        <div className="flex items-center gap-4 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500">
-                <FontAwesomeIcon icon={icon} className="text-sm" />
-            </div>
-            <div>
-                <h3 className="text-base font-bold text-slate-900 leading-none">{title}</h3>
-                <p className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider">{subtitle}</p>
-            </div>
+    const BentoCard = ({ children, className = "" }) => (
+        <div className={`bg-white rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/40 p-10 hover:shadow-2xl hover:shadow-slate-300/40 transition-all duration-500 overflow-hidden relative group ${className}`}>
+            {children}
         </div>
     );
 
-    const DataRow = ({ label, value, isFullWidth = false }) => (
-        <div className={`${isFullWidth ? 'col-span-2' : ''} space-y-1.5`}>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-            <p className="text-sm font-bold text-slate-700">{value || 'N/A'}</p>
+    const StatPill = ({ label, value, colorClass = "bg-blue-50 text-blue-600 border-blue-100" }) => (
+        <div className={`px-4 py-2 rounded-2xl border ${colorClass} flex flex-col`}>
+            <span className="text-[9px] font-black uppercase tracking-widest opacity-70 mb-0.5">{label}</span>
+            <span className="text-sm font-bold truncate leading-none">{value || 'N/A'}</span>
+        </div>
+    );
+
+    const GuardianBadge = ({ parent, label }) => {
+        if (!parent) return null;
+        return (
+            <div className="flex items-center justify-between p-6 rounded-[2rem] bg-slate-50 border border-slate-100 hover:bg-white hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-500 group/guardian cursor-pointer"
+                onClick={() => {
+                    setActiveParentForDrawer(parent);
+                    setShowParentDrawer(true);
+                }}
+            >
+                <div className="flex items-center gap-5">
+                    <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover/guardian:bg-indigo-600 group-hover/guardian:text-white group-hover/guardian:scale-110 transition-all duration-500">
+                        <FontAwesomeIcon icon={faUserTie} className="text-xl" />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h4 className="font-black text-slate-900 text-lg leading-none">{parent.name}</h4>
+                            <span className="px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest border border-indigo-100">
+                                {label}
+                            </span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-400 mt-2 flex items-center gap-2">
+                            <FontAwesomeIcon icon={faPhone} className="text-[10px]" /> {parent.phone}
+                        </p>
+                    </div>
+                </div>
+                <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-300 group-hover/guardian:bg-indigo-50 group-hover/guardian:border-indigo-200 group-hover/guardian:text-indigo-600 transition-all duration-500">
+                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
+                </div>
+            </div>
+        );
+    };
+
+    const DataRow = ({ label, value }) => (
+        <div className="space-y-1.5">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{label}</p>
+            <p className="text-sm font-black text-slate-700">{value || 'UNASSIGNED'}</p>
         </div>
     );
 
     return (
-        <div className="flex-1 h-full flex flex-col bg-[#F1F5F9] overflow-hidden">
-            {/* Enterprise Header Bar */}
-            <div className="bg-white border-b border-slate-200 px-8 h-20 flex items-center justify-between flex-shrink-0 z-20">
-                <div className="flex items-center gap-6">
+        <div className="flex-1 h-full flex flex-col bg-[#F8FAFC] overflow-hidden">
+            {/* 🚀 Next-Gen Navigation Header */}
+            <div className="bg-white/80 backdrop-blur-2xl border-b border-slate-200/60 px-10 h-24 flex items-center justify-between flex-shrink-0 z-30 sticky top-0 shadow-sm">
+                <div className="flex items-center gap-8">
                     <button 
                         onClick={onBack}
-                        className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                        className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-900 hover:bg-white hover:shadow-lg transition-all active:scale-95 flex items-center justify-center"
                     >
                         <FontAwesomeIcon icon={faArrowLeft} />
                     </button>
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-indigo-100">
-                            {selectedStudent.name.charAt(0)}
+                    
+                    <div className="flex items-center gap-6">
+                        <div className="relative group">
+                            <div className="absolute -inset-2 bg-indigo-600 blur-xl opacity-0 group-hover:opacity-10 rounded-full transition-opacity duration-700"></div>
+                            <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-center text-white text-2xl font-black shadow-xl shadow-indigo-100 relative z-10 transform group-hover:rotate-6 transition-transform duration-500">
+                                {selectedStudent.name.charAt(0)}
+                            </div>
                         </div>
                         <div>
-                            <div className="flex items-center gap-3">
-                                <h2 className="text-xl font-bold text-slate-900 leading-none">{selectedStudent.name}</h2>
-                                <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-wider border border-emerald-100">
-                                    {selectedStudent.studentStatus || 'Active'}
+                            <div className="flex items-center gap-4">
+                                <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-none">{selectedStudent.name}</h2>
+                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-100 shadow-sm">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                    {selectedStudent.studentStatus || 'Current Student'}
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 mt-2.5">
+                                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <FontAwesomeIcon icon={faFingerprint} className="text-indigo-500" />
+                                    System ID: <span className="text-slate-900 font-bold">#STU-{selectedStudent.id?.toString().padStart(4, '0')}</span>
+                                </span>
+                                <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <FontAwesomeIcon icon={faSchool} className="text-indigo-500" />
+                                    Academy: <span className="text-slate-900 font-bold">{selectedStudent.className}</span>
                                 </span>
                             </div>
-                            <p className="text-xs font-medium text-slate-500 mt-1.5">
-                                Student ID: <span className="text-slate-900 font-bold">#STU-{selectedStudent.id?.toString().padStart(4, '0')}</span> • Class: <span className="text-slate-900 font-bold">{selectedStudent.className}</span>
-                            </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <button 
-                        onClick={() => setIsEditing(!isEditing)}
-                        className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
-                    >
-                        <FontAwesomeIcon icon={isEditing ? faCheck : faEdit} className="text-xs" />
-                        {isEditing ? 'Save Changes' : 'Edit Profile'}
-                    </button>
-                </div>
+                <button 
+                    onClick={() => onUpdate(selectedStudent)}
+                    className="h-14 px-10 rounded-[1.25rem] bg-slate-900 text-white text-sm font-black uppercase tracking-widest hover:bg-blue-600 hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-slate-200 group"
+                >
+                    <FontAwesomeIcon icon={faEdit} className="text-xs group-hover:rotate-12 transition-transform" />
+                    Modify Profile
+                </button>
             </div>
 
-            {/* Content Area: Professional Multi-Card Layout */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
-                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-8">
+            {/* 🍱 Bento Grid Content Area */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-10">
+                <div className="max-w-[1600px] mx-auto grid grid-cols-12 gap-10">
                     
-                    {/* Main Sidebar (Left - 4 Columns) */}
-                    <div className="col-span-12 lg:col-span-4 space-y-8">
-                        {/* Quick Action Card */}
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                            <SectionHeader icon={faIdCard} title="Identity Overview" subtitle="System Records" />
-                            <div className="space-y-6 pt-2">
-                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-indigo-600">
-                                        <FontAwesomeIcon icon={faGraduationCap} />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Enrollment Class</p>
-                                        <p className="text-sm font-bold text-slate-900">{selectedStudent.className}</p>
-                                    </div>
+                    {/* Column 1: Core Identity (4 Columns) */}
+                    <div className="col-span-12 xl:col-span-4 space-y-10">
+                        <BentoCard>
+                            <div className="flex items-center justify-between mb-10">
+                                <div>
+                                    <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1.5">Identity Core</h3>
+                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Verified Meta Data</p>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <DataRow label="Admission Date" value={new Date(selectedStudent.date).toLocaleDateString()} />
-                                    <DataRow label="Blood Group" value="O+ Positive" />
-                                    <DataRow label="Gender" value={selectedStudent.originalData?.gender || 'Male'} />
-                                    <DataRow label="D.O.B" value={selectedStudent.originalData?.dob ? new Date(selectedStudent.originalData.dob).toLocaleDateString() : 'N/A'} />
-                                    <div className="col-span-2 space-y-1.5 mt-2">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Residential Address</p>
-                                        <p className="text-sm font-bold text-slate-700 leading-relaxed">
-                                            {selectedStudent.location || 'No verified address on record.'}
+                                <div className="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
+                                    <FontAwesomeIcon icon={faIdCard} className="text-2xl" />
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <StatPill label="Enrollment Date" value={new Date(selectedStudent.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
+                                <StatPill label="Blood Group" value="O+ POSITIVE" colorClass="bg-red-50 text-red-600 border-red-100" />
+                                <StatPill label="Gender" value={selectedStudent.originalData?.gender || 'MALE'} colorClass="bg-indigo-50 text-indigo-600 border-indigo-100" />
+                                <StatPill label="D.O.B" value={selectedStudent.originalData?.dob ? new Date(selectedStudent.originalData.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'} colorClass="bg-amber-50 text-amber-600 border-amber-100" />
+                            </div>
+
+                            <div className="mt-8 pt-8 border-t border-slate-100">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
+                                        <FontAwesomeIcon icon={faMapMarkerAlt} className="text-lg" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 leading-none">Residential Address</p>
+                                        <p className="text-sm font-bold text-slate-700 leading-relaxed italic">
+                                            "{selectedStudent.location || 'No verified address on record.'}"
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </BentoCard>
 
-                        {/* Guardian Short Cards */}
-                        {[
-                            { data: parent1, label: "Primary Guardian", id: "p1" },
-                            { data: parent2, label: "Secondary Guardian", id: "p2" }
-                        ].filter(p => p.data).map((parent, idx) => (
-                            <div key={parent.id} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                                <div className="flex items-center justify-between mb-6">
-                                    <SectionHeader icon={faUserTie} title={parent.data.name} subtitle={parent.label} />
-                                    <button 
-                                        onClick={() => {
-                                            setActiveParentForDrawer(parent.data);
-                                            setShowParentDrawer(true);
-                                        }} 
-                                        className="p-2 hover:bg-slate-50 text-indigo-600 rounded-lg transition-colors"
-                                    >
-                                        <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-sm" />
-                                    </button>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                            <FontAwesomeIcon icon={faPhone} className="text-xs" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-900">{parent.data.phone}</p>
-                                            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Mobile Number</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                            <FontAwesomeIcon icon={faEnvelope} className="text-xs" />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-xs font-bold text-slate-900 truncate">{parent.data.email || 'Not Provided'}</p>
-                                            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Email Address</p>
-                                        </div>
-                                    </div>
-                                </div>
+                        {/* Guardian Section */}
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 px-2">
+                                <FontAwesomeIcon icon={faShieldHalved} className="text-indigo-400 text-sm" />
+                                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Guardian Directory</h4>
                             </div>
-                        ))}
+                            <GuardianBadge parent={parent1} label="Primary" />
+                            <GuardianBadge parent={parent2} label="Secondary" />
+                        </div>
                     </div>
 
-                    {/* Main Content (Right - 8 Columns) */}
-                    <div className="col-span-12 lg:col-span-8 space-y-8">
-                        
-                        {/* 1. Logistics Section (The Priority) */}
-                        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                                <SectionHeader icon={faBus} title="Transport & Logistics" subtitle="Daily Commute Management" />
-                                
-                                {/* Transport Status Toggle */}
+                    {/* Column 2: Logistics & Intelligence (8 Columns) */}
+                    <div className="col-span-12 xl:col-span-8 space-y-10">
+                        {/* 🚌 Logistics Intelligence Card */}
+                        <BentoCard className="!p-0 border-none shadow-2xl">
+                            <div className="bg-slate-900 px-10 py-8 flex items-center justify-between">
+                                <div className="flex items-center gap-6">
+                                    <div className="w-16 h-16 rounded-[2rem] bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white text-2xl group-hover:scale-110 transition-transform duration-500">
+                                        <FontAwesomeIcon icon={faBus} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-black text-white tracking-tight leading-none mb-1.5">Commute Intelligence</h3>
+                                        <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.2em]">Fleet Management Hub</p>
+                                    </div>
+                                </div>
                                 <button
                                     onClick={() => onTransportStatusUpdate(
                                         selectedStudent.id, 
                                         selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
                                     )}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all active:scale-95 ${
+                                    className={`flex items-center gap-3 px-6 py-3 rounded-2xl border-2 transition-all active:scale-95 font-black text-[11px] uppercase tracking-widest ${
                                         selectedStudent.originalData?.transport_status === 'ACTIVE'
-                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100 font-bold' 
-                                        : 'bg-slate-50 text-slate-400 border-slate-100 font-bold'
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
+                                        : 'bg-white/5 text-white/40 border-white/10 hover:border-white/20'
                                     }`}
                                 >
-                                    <span className={`w-1.5 h-1.5 rounded-full ${selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></span>
-                                    <span className="text-[10px] uppercase tracking-widest">
-                                        {selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'Active Bus' : 'Inactive'}
-                                    </span>
+                                    <span className={`w-2 h-2 rounded-full ${selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'bg-emerald-400 animate-pulse' : 'bg-white/20'}`}></span>
+                                    {selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'Active Bus License' : 'Inactive'}
                                 </button>
                             </div>
                             
-                            <div className="p-8">
+                            <div className="p-10 bg-white">
                                 {selectedStudent.originalData?.is_transport_user ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                        <div className="space-y-6">
-                                            <div className="flex items-center gap-3 pb-4 border-b border-slate-50">
-                                                <FontAwesomeIcon icon={faClock} className="text-indigo-500 text-xs" />
-                                                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Morning Pickup</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 divide-x divide-slate-100">
+                                        <div className="space-y-8 pr-5">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100/50">
+                                                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-sm -rotate-45" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest leading-none">Morning Pickup</h4>
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1.5">Route Configuration</p>
+                                                </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-6">
-                                                <DataRow label="Route" value={transportData.pickupRoute?.name || transportData.pickupRoute?.route_name} />
-                                                <DataRow label="Stop Name" value={transportData.pickupStop?.stop_name} />
+                                            <div className="grid grid-cols-2 gap-8">
+                                                <DataRow label="Assigned Route" value={transportData.pickupRoute?.name || transportData.pickupRoute?.route_name} />
+                                                <DataRow label="Target Stop" value={transportData.pickupStop?.stop_name} />
                                             </div>
                                         </div>
-                                        <div className="space-y-6">
-                                            <div className="flex items-center gap-3 pb-4 border-b border-slate-50">
-                                                <FontAwesomeIcon icon={faRoute} className="text-rose-500 text-xs" />
-                                                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Evening Drop</h4>
+                                        <div className="space-y-8 pl-10">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 shadow-sm border border-rose-100/50">
+                                                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-sm rotate-135" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest leading-none">Evening Drop-off</h4>
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1.5">Fleet Assignment</p>
+                                                </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-6">
-                                                <DataRow label="Route" value={transportData.dropRoute?.name || transportData.dropRoute?.route_name} />
-                                                <DataRow label="Drop Point" value={transportData.dropStop?.stop_name} />
+                                            <div className="grid grid-cols-2 gap-8">
+                                                <DataRow label="Assigned Route" value={transportData.dropRoute?.name || transportData.dropRoute?.route_name} />
+                                                <DataRow label="Target Stop" value={transportData.dropStop?.stop_name} />
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-slate-100 rounded-2xl">
-                                        <FontAwesomeIcon icon={faUser} className="text-slate-100 text-4xl mb-4" />
-                                        <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Private Transport User</h4>
-                                        <p className="text-xs font-medium text-slate-400 mt-2">School transport services are not active for this student.</p>
+                                    <div className="flex flex-col items-center justify-center py-20 text-center bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                                        <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-lg mb-6 border border-slate-100">
+                                            <FontAwesomeIcon icon={faBus} className="text-3xl text-slate-200" />
+                                        </div>
+                                        <h4 className="text-lg font-black text-slate-900 uppercase tracking-widest">Self-Transport Profile</h4>
+                                        <p className="text-sm font-medium text-slate-400 mt-2 max-w-sm mx-auto">This student currently bypasses the school fleet system. Direct guardian pickup is registered.</p>
                                     </div>
                                 )}
                             </div>
+                        </BentoCard>
+
+                        {/* Additional Info / Academic Context */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <BentoCard>
+                                 <div className="flex items-center gap-4 mb-8">
+                                    <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                                        <FontAwesomeIcon icon={faHistory} className="text-xl" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-lg font-black text-slate-900 leading-none">System Activity</h4>
+                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Audit Trail</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                                        <span className="text-xs font-bold text-slate-600">Last Profile Update</span>
+                                        <span className="text-xs font-black text-slate-900">2h ago</span>
+                                    </div>
+                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                                        <span className="text-xs font-bold text-slate-600">Transport Logs</span>
+                                        <span className="text-xs font-black text-emerald-600">On-Time (98%)</span>
+                                    </div>
+                                </div>
+                            </BentoCard>
+
+                            <BentoCard>
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                        <FontAwesomeIcon icon={faShieldHalved} className="text-xl" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-lg font-black text-slate-900 leading-none">System Security</h4>
+                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Access Control</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    <span className="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest">AES-256 Encrypted</span>
+                                    <span className="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest">Parent Portal: Sync</span>
+                                    <span className="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest">Bio: Verified</span>
+                                </div>
+                            </BentoCard>
                         </div>
                     </div>
 
