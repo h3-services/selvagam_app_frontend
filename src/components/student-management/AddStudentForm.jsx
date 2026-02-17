@@ -351,6 +351,11 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
             return;
         }
 
+        if (formData.s_parent_id && formData.parent_id === formData.s_parent_id) {
+            alert("Security Conflict: The same person cannot be assigned as both Primary and Secondary guardian for this student.");
+            return;
+        }
+
         if (formData.is_transport_user) {
             if (!formData.pickup_route_id || !formData.pickup_stop_id || !formData.drop_route_id || !formData.drop_stop_id) {
                 alert("For Transport Users, please select both Pickup and Drop routes/stops.");

@@ -54,5 +54,16 @@ export const classService = {
             console.error(`Error deleting class ${classId}:`, error);
             throw error;
         }
+    },
+
+    // Update class status
+    updateClassStatus: async (classId, status) => {
+        try {
+            const response = await api.put(`/classes/${classId}/status`, { status });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating status for class ${classId}:`, error);
+            throw error;
+        }
     }
 };

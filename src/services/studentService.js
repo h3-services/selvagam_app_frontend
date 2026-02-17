@@ -78,6 +78,17 @@ export const studentService = {
         }
     },
 
+    // Update student primary parent
+    updatePrimaryParent: async (studentId, parentId) => {
+        try {
+            const response = await api.patch(`/students/${studentId}/primary-parent`, { parent_id: parentId });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating primary parent for ${studentId}:`, error);
+            throw error;
+        }
+    },
+
     // Update student secondary parent
     updateSecondaryParent: async (studentId, sParentId) => {
         try {
@@ -85,6 +96,17 @@ export const studentService = {
             return response.data;
         } catch (error) {
             console.error(`Error updating secondary parent for ${studentId}:`, error);
+            throw error;
+        }
+    },
+
+    // Switch student parents (Swap Primary and Secondary)
+    switchParents: async (studentId) => {
+        try {
+            const response = await api.post(`/students/${studentId}/switch-parents`);
+            return response.data;
+        } catch (error) {
+            console.error(`Error switching parents for ${studentId}:`, error);
             throw error;
         }
     },

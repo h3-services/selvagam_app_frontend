@@ -6,11 +6,11 @@ import {
     faClock, faInfoCircle, faHistory, faGraduationCap,
     faVenusMars, faCalendarDay, faLocationDot, faCircleCheck,
     faLink, faUserSlash, faTrash, faChevronDown, faTimes, faSave, faUserTie, faHashtag,
-    faArrowRight, faBus
+    faArrowRight, faBus, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { parentService } from '../../services/parentService';
 
-const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete, onEdit }) => {
+const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete, onEdit, onLink }) => {
     if (!selectedParent) return null;
 
     const SectionHeader = ({ icon, title, subtitle }) => (
@@ -136,64 +136,89 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete, onEdit }) =>
                         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                                 <SectionHeader icon={faLink} title="Linked Students" subtitle="Family Tree Management" />
-                                <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
-                                    {selectedParent.linkedStudents?.length || 0} Connected
-                                </span>
+                                <div className="flex items-center gap-3">
+                                    <button 
+                                        onClick={onLink}
+                                        className="px-4 py-2 rounded-xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center gap-2 active:scale-95"
+                                    >
+                                        <FontAwesomeIcon icon={faUserPlus} className="text-[10px]" />
+                                        Add Family Link
+                                    </button>
+                                    <span className="bg-white border border-slate-200 text-slate-400 text-[10px] font-black px-3 py-2 rounded-xl uppercase tracking-widest">
+                                        {selectedParent.linkedStudents?.length || 0} Connected
+                                    </span>
+                                </div>
                             </div>
                             
                             <div className="p-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {selectedParent.linkedStudents && selectedParent.linkedStudents.length > 0 ? (
                                         selectedParent.linkedStudents.map((student, idx) => (
-                                            <div key={idx} className="group relative p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50/50 transition-all cursor-pointer overflow-hidden">
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <div 
+                                                key={idx} 
+                                                onClick={() => { /* Navigate to student if needed */ }}
+                                                className="group relative p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50/50 transition-all cursor-pointer overflow-hidden"
+                                            >
+                                                <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 
-                                                <div className="flex flex-col gap-6">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 text-blue-600 flex items-center justify-center text-lg font-black shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-500">
-                                                                {student.name?.charAt(0)}
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors uppercase">{student.name}</h4>
-                                                                <div className="flex items-center gap-2 mt-1">
-                                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{student.class}</span>
-                                                                    <span className="w-1 h-1 rounded-full bg-slate-200" />
-                                                                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{student.status}</span>
-                                                                </div>
-                                                            </div>
+                                                <div className="flex items-center justify-between mb-8">
+                                                    <div className="flex items-center gap-5">
+                                                        <div className="w-14 h-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                                            <FontAwesomeIcon icon={faChild} className="text-xl" />
                                                         </div>
-                                                        <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-blue-600 group-hover:border-blue-100 transition-all">
-                                                            <FontAwesomeIcon icon={faArrowRight} className="text-[10px]" />
+                                                        <div>
+                                                            <h4 className="text-lg font-black text-slate-900 leading-none group-hover:text-blue-600 transition-colors uppercase tracking-tight">
+                                                                {student.name}
+                                                            </h4>
+                                                            <div className="mt-2">
+                                                                <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[9px] font-black uppercase tracking-widest border border-blue-100">
+                                                                    {student.class}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                </div>
 
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div className="bg-white/50 p-3 rounded-xl border border-slate-100">
-                                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Transit Status</p>
-                                                            <div className="flex items-center gap-2">
-                                                                <FontAwesomeIcon icon={faBus} className="text-[10px] text-blue-500" />
-                                                                <span className="text-[10px] font-black text-slate-700">{student.transportStatus ? 'ACTIVE' : 'NONE'}</span>
-                                                            </div>
+                                                <div className="space-y-4 pt-2">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-blue-500 shadow-sm">
+                                                            <FontAwesomeIcon icon={faCalendarDay} className="text-[11px]" />
                                                         </div>
-                                                        <div className="bg-white/50 p-3 rounded-xl border border-slate-100">
-                                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">Verification</p>
-                                                            <div className="flex items-center gap-2">
-                                                                <FontAwesomeIcon icon={faCircleCheck} className="text-[10px] text-emerald-500" />
-                                                                <span className="text-[10px] font-black text-slate-700 uppercase">VERIFIED</span>
-                                                            </div>
+                                                        <div>
+                                                            <p className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Date of Birth</p>
+                                                            <p className="text-[13px] font-bold text-slate-700">
+                                                                {student.dob ? new Date(student.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-indigo-500 shadow-sm">
+                                                            <FontAwesomeIcon icon={faVenusMars} className="text-[11px]" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Gender Alignment</p>
+                                                            <p className="text-[13px] font-bold text-slate-700 uppercase">{student.gender}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-500 shadow-sm">
+                                                            <FontAwesomeIcon icon={faGraduationCap} className="text-[11px]" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Academic Session</p>
+                                                            <p className="text-[13px] font-bold text-slate-700">{student.studyYear}</p>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="col-span-2 flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-slate-100 rounded-3xl">
-                                            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4 text-slate-200">
+                                        <div className="col-span-1 md:col-span-2 flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/30">
+                                            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4 text-slate-200 shadow-sm">
                                                 <FontAwesomeIcon icon={faUserSlash} size="xl" />
                                             </div>
-                                            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">No Students Linked</h4>
-                                            <p className="text-[11px] font-bold text-slate-400 mt-2 max-w-[200px]">This guardian account is not currently connected to any student records.</p>
+                                            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">No Family Records</h4>
+                                            <p className="text-[11px] font-bold text-slate-400 mt-2 max-w-[220px]">This guardian profile is not currently prioritized for any student records.</p>
                                         </div>
                                     )}
                                 </div>

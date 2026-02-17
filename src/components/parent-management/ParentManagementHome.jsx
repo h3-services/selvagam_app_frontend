@@ -9,6 +9,7 @@ import { classService } from '../../services/classService';
 import ParentList from './ParentList';
 import AddParentForm from './AddParentForm';
 import ParentDetail from './ParentDetail';
+import LinkStudentModal from './LinkStudentModal';
 import { COLORS } from '../../constants/colors';
 
 const ParentManagementHome = () => {
@@ -21,6 +22,7 @@ const ParentManagementHome = () => {
     const [showForm, setShowForm] = useState(false);
     const [selectedParent, setSelectedParent] = useState(null);
     const [editingParent, setEditingParent] = useState(null);
+    const [showLinkModal, setShowLinkModal] = useState(false);
 
     // Actions State
     const [activeMenuId, setActiveMenuId] = useState(null);
@@ -81,7 +83,10 @@ const ParentManagementHome = () => {
                         name: s.name,
                         class: studentClass ? `${studentClass.class_name} - ${studentClass.section}` : 'N/A',
                         status: s.status || s.student_status || 'CURRENT',
-                        transportStatus: s.transport_status
+                        transportStatus: s.transport_status,
+                        dob: s.dob,
+                        gender: s.gender || 'NOT PROVIDED',
+                        studyYear: s.study_year || 'N/A'
                     };
                 });
 
@@ -128,7 +133,10 @@ const ParentManagementHome = () => {
                 (parent) =>
                     (parent.name || "").toLowerCase().includes(lowerQuery) ||
                     String(parent.phone || "").includes(lowerQuery) ||
-                    (parent.linkedStudents || []).some(s => (s || "").toLowerCase().includes(lowerQuery))
+                    (parent.linkedStudents || []).some(s => {
+                        const searchTarget = typeof s === 'object' ? s.name : s;
+                        return (searchTarget || "").toLowerCase().includes(lowerQuery);
+                    })
             );
         }
         
@@ -168,6 +176,11 @@ const ParentManagementHome = () => {
     const handleEditParent = (parent) => {
         setEditingParent(parent);
         setShowForm(true);
+    };
+
+    const handleLinkStudent = (parent) => {
+        setSelectedParent(parent);
+        setShowLinkModal(true);
     };
 
     const handleBulkStatusUpdate = async (newStatus) => {
@@ -283,6 +296,7 @@ const ParentManagementHome = () => {
                         onDelete={handleDelete}
                         onUpdate={() => fetchData()}
                         onEdit={handleEditParent}
+                        onLink={() => setShowLinkModal(true)}
                     />
                 ) : (
                     <ParentList 
@@ -393,6 +407,14 @@ const ParentManagementHome = () => {
                 onAdd={handleAddParent} 
                 onUpdate={handleUpdateParent}
                 initialData={editingParent}
+            />
+
+            {/* Link Student Modal */}
+            <LinkStudentModal
+                show={showLinkModal}
+                onClose={() => setShowLinkModal(false)}
+                parent={selectedParent}
+                onRefresh={fetchData}
             />
 
             {/* Delete Confirmation Modal */}

@@ -8,7 +8,7 @@ import {
     faCalendarDay, faIdCard, faVenusMars,
     faChevronLeft, faEllipsisVertical, faBuilding,
     faFingerprint, faCircleCheck, faArrowUpRightFromSquare,
-    faGraduationCap, faMap, faPaperclip, faSchool, faWalking, faUserPlus
+    faGraduationCap, faMap, faPaperclip, faSchool, faWalking, faUserPlus, faRightLeft
 } from '@fortawesome/free-solid-svg-icons';
 import ParentViewDrawer from './ParentViewDrawer';
 import { parentService } from '../../services/parentService';
@@ -31,7 +31,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
     const [loadingTransport, setLoadingTransport] = useState(false);
     
     // Parent Selection State
-    const [isSelectingSecondary, setIsSelectingSecondary] = useState(false);
+    const [selectingParentRole, setSelectingParentRole] = useState(null); // 'PRIMARY', 'SECONDARY', or null
     const [allParents, setAllParents] = useState([]);
     const [loadingAllParents, setLoadingAllParents] = useState(false);
     const [parentSearchQuery, setParentSearchQuery] = useState("");
@@ -85,12 +85,19 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
         }
     };
 
-    const fetchAllParents = async () => {
+    const fetchAllParents = async (roleType) => {
         setLoadingAllParents(true);
         try {
             const data = await parentService.getAllParents();
-            // Filter out parent1 to avoid self-assignment
-            const filtered = data.filter(p => p.parent_id !== selectedStudent.originalData?.parent_id);
+            // Filter logic:
+            // 1. If replacing Primary: Filter out current Secondary
+            // 2. If replacing Secondary: Filter out current Primary
+            // This enforces the "One Role Per Parent" rule
+            const otherParentId = roleType === 'PRIMARY' 
+                ? selectedStudent.originalData?.s_parent_id 
+                : selectedStudent.originalData?.parent_id;
+            
+            const filtered = data.filter(p => p.parent_id !== otherParentId);
             setAllParents(filtered);
         } catch (error) {
             console.error("Error fetching all parents:", error);
@@ -99,19 +106,43 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
         }
     };
 
-    const handleAssignSecondaryParent = async (parentId) => {
+    const handleAssignParent = async (parentId) => {
         try {
-            await studentService.updateSecondaryParent(selectedStudent.id, parentId);
-            setIsSelectingSecondary(false);
-            // Trigger parent update in list and wait for it
-            if (onUpdate) await onUpdate();
+            if (selectingParentRole === 'PRIMARY') {
+                await studentService.updatePrimaryParent(selectedStudent.id, parentId);
+            } else {
+                await studentService.updateSecondaryParent(selectedStudent.id, parentId);
+            }
+            
+            setSelectingParentRole(null);
             
             // Re-fetch parent data immediately after assignment to ensure sync
-            // We use the parentId we just assigned for parent2
-            const p1Id = selectedStudent.originalData?.parent_id;
-            await fetchParents(p1Id, parentId);
+            // Both IDs are needed to update parent1 and parent2 state
+            const p1Id = selectingParentRole === 'PRIMARY' ? parentId : selectedStudent.originalData?.parent_id;
+            const p2Id = selectingParentRole === 'SECONDARY' ? parentId : selectedStudent.originalData?.s_parent_id;
+            
+            await fetchParents(p1Id, p2Id);
+
+            // Trigger parent update in list view if needed
+            if (onUpdate) onUpdate();
         } catch (error) {
-            console.error("Secondary parent assignment failed:", error);
+            console.error(`${selectingParentRole} parent assignment failed:`, error);
+        }
+    };
+
+    const handleSwitchParents = async () => {
+        try {
+            await studentService.switchParents(selectedStudent.id);
+            // Trigger parent update in list view if needed
+            if (onUpdate) await onUpdate();
+            
+            // Re-fetch parent data immediately after swap
+            // Use current IDs but swapped in the fetchParents call
+            const p1Id = selectedStudent.originalData?.s_parent_id;
+            const p2Id = selectedStudent.originalData?.parent_id;
+            await fetchParents(p1Id, p2Id);
+        } catch (error) {
+            console.error("Parent role swap failed:", error);
         }
     };
 
@@ -190,13 +221,15 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                         <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
                             <SectionHeader icon={faIdCard} title="Identity Core" subtitle="Verified Meta Data" />
                             <div className="space-y-6 pt-2">
-                                <div className="grid grid-cols-2 gap-6">
-                                    <DataRow label="Enrollment Date" value={new Date(selectedStudent.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
-                                    <DataRow label="Blood Group" value="O+ POSITIVE" />
-                                    <DataRow label="Gender" value={selectedStudent.originalData?.gender || 'MALE'} />
+                                <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                                    <DataRow label="Academic Year" value={selectedStudent.studyYear} />
                                     <DataRow label="Academy" value={selectedStudent.className} />
-                                    <div className="col-span-2">
-                                        <DataRow label="D.O.B" value={selectedStudent.originalData?.dob ? new Date(selectedStudent.originalData.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not Provided'} />
+                                    <DataRow label="Gender" value={selectedStudent.originalData?.gender || 'NOT PROVIDED'} />
+                                    <DataRow label="D.O.B" value={selectedStudent.originalData?.dob ? new Date(selectedStudent.originalData.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not Provided'} />
+                                    <div className="col-span-2 pt-2">
+                                        <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100/50">
+                                            <DataRow label="Primary Emergency Contact" value={selectedStudent.emergencyContact} />
+                                        </div>
                                     </div>
                                 </div>
 
@@ -280,14 +313,19 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                         {/* Parent Network Section */}
                         <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
                             <div className="flex items-center justify-between mb-8">
-                                <SectionHeader icon={faUserTie} title="Verified Parent Network" subtitle="Parent Network" />
-                                <div className="flex -space-x-3">
-                                    {[parent1, parent2].filter(Boolean).map((p, i) => (
-                                        <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-slate-900 flex items-center justify-center text-white text-xs font-black shadow-lg">
-                                            {p.name.charAt(0)}
-                                        </div>
-                                    ))}
+                                <div className="flex items-center gap-6">
+                                    <SectionHeader icon={faUserTie} title="Verified Parent Network" subtitle="Parent Network" />
                                 </div>
+                                {parent1 && parent2 && (
+                                    <button 
+                                        onClick={handleSwitchParents}
+                                        className="px-4 py-2 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2.5 active:scale-95 shadow-xl shadow-slate-200"
+                                        title="Swap Primary & Secondary Roles"
+                                    >
+                                        <FontAwesomeIcon icon={faRightLeft} className="text-xs" />
+                                        Role Swap
+                                    </button>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -371,18 +409,17 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                         </div>
                                                     </div>
                                                     
-                                                    {p.label === "Secondary" && (
-                                                        <button 
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setIsSelectingSecondary(true);
-                                                                fetchAllParents();
-                                                            }}
-                                                            className="w-full mt-4 py-3 rounded-xl bg-indigo-50/50 text-indigo-600 border border-dashed border-indigo-200 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white hover:border-solid hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
-                                                        >
-                                                            Replace Connection
-                                                        </button>
-                                                    )}
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const role = p.label === "Primary" ? 'PRIMARY' : 'SECONDARY';
+                                                            setSelectingParentRole(role);
+                                                            fetchAllParents(role);
+                                                        }}
+                                                        className="w-full mt-4 py-3 rounded-xl bg-indigo-50/50 text-indigo-600 border border-dashed border-indigo-200 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white hover:border-solid hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
+                                                    >
+                                                        Replace Connection
+                                                    </button>
                                                 </div>
                                             </div>
                                         );
@@ -393,7 +430,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                         return (
                                             <button 
                                                 key={idx}
-                                                onClick={() => { setIsSelectingSecondary(true); fetchAllParents(); }}
+                                                onClick={() => { setSelectingParentRole('SECONDARY'); fetchAllParents('SECONDARY'); }}
                                                 className="p-6 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/30 hover:bg-white hover:border-indigo-300 transition-all flex flex-col items-center justify-center gap-3 group"
                                             >
                                                 <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-slate-300 group-hover:text-indigo-600 group-hover:scale-110 transition-all shadow-sm">
@@ -430,20 +467,20 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
             />
 
             {/* Parent Selection Modal */}
-            {isSelectingSecondary && (
+            {selectingParentRole && (
                 <div className="fixed inset-0 z-[3100] flex items-center justify-center p-4">
                     <div 
                         className="absolute inset-0 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-500"
-                        onClick={() => setIsSelectingSecondary(false)}
+                        onClick={() => setSelectingParentRole(null)}
                     />
                     <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-white w-full max-w-xl animate-in zoom-in slide-in-from-bottom-8 duration-500 overflow-hidden flex flex-col max-h-[80vh]">
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Assign Secondary Parent</h3>
+                                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Assign {selectingParentRole.charAt(0) + selectingParentRole.slice(1).toLowerCase()} Parent</h3>
                                 <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Connect authorized family registry</p>
                             </div>
                             <button 
-                                onClick={() => setIsSelectingSecondary(false)}
+                                onClick={() => setSelectingParentRole(null)}
                                 className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"
                             >
                                 <FontAwesomeIcon icon={faTimes} />
@@ -473,7 +510,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                 filteredParentsForSelection.map((parent) => (
                                     <div 
                                         key={parent.parent_id}
-                                        onClick={() => handleAssignSecondaryParent(parent.parent_id)}
+                                        onClick={() => handleAssignParent(parent.parent_id)}
                                         className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 hover:border-indigo-200 hover:bg-slate-50 transition-all cursor-pointer group shadow-sm hover:shadow-md"
                                     >
                                         <div className="flex items-center gap-4">

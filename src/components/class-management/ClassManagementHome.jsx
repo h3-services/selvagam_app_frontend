@@ -24,10 +24,25 @@ const ClassManagementHome = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [showAddModal, setShowAddModal] = useState(false);
     const [showPromoteModal, setShowPromoteModal] = useState(false);
+    const [activeMenuId, setActiveMenuId] = useState(null);
+    const [editingClass, setEditingClass] = useState(null);
 
     useEffect(() => {
         fetchClasses();
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const isActionMenuClick = event.target.closest('.action-menu-container');
+            const isActionMenuTrigger = event.target.closest('.action-menu-trigger');
+
+            if (!isActionMenuClick && !isActionMenuTrigger) {
+                if (activeMenuId) setActiveMenuId(null);
+            }
+        };
+        window.addEventListener('mousedown', handleClickOutside);
+        return () => window.removeEventListener('mousedown', handleClickOutside);
+    }, [activeMenuId]);
 
     const fetchClasses = async () => {
         setLoading(true);
@@ -39,6 +54,20 @@ const ClassManagementHome = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleUpdateStatus = async (classId, newStatus) => {
+        try {
+            await classService.updateClassStatus(classId, newStatus);
+            fetchClasses();
+        } catch (error) {
+            console.error("Failed to update class status:", error);
+        }
+    };
+
+    const handleEditClass = (classData) => {
+        setEditingClass(classData);
+        setShowAddModal(true);
     };
 
     const filteredClasses = useMemo(() => {
@@ -96,37 +125,50 @@ const ClassManagementHome = () => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 px-8 pt-4 pb-4 overflow-y-auto custom-scrollbar">
-                <div className="max-w-[1600px] mx-auto">
+            <div className="flex-1 px-8 pt-4 pb-4 flex flex-col min-h-0 overflow-hidden">
+                <div className="flex-1 flex flex-col min-h-0">
                     {loading ? (
-                        <div className="h-[400px] flex flex-col items-center justify-center bg-white rounded-3xl shadow-xl border border-slate-50">
+                        <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-3xl shadow-xl border border-slate-50">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                                 <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
                             </div>
                             <p className="text-slate-400 font-semibold uppercase tracking-wider text-xs">Loading Class Structure...</p>
                         </div>
                     ) : (
-                        <div className="space-y-6">
-
-                            <ClassList 
-                                classes={filteredClasses} 
-                                onRefresh={fetchClasses} 
-                            />
-                        </div>
+                        <ClassList 
+                            classes={filteredClasses} 
+                            onRefresh={fetchClasses} 
+                            activeMenuId={activeMenuId}
+                            setActiveMenuId={setActiveMenuId}
+                            onUpdateStatus={handleUpdateStatus}
+                            onEditClass={handleEditClass}
+                        />
                     )}
                 </div>
             </div>
 
             {/* Floating Action Button */}
             <button
-                onClick={() => setShowAddModal(true)}
+                onClick={() => {
+                    setEditingClass(null);
+                    setShowAddModal(true);
+                }}
                 className="fixed bottom-8 right-8 w-16 h-16 text-white rounded-full shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
                 style={{ backgroundColor: COLORS.SIDEBAR_BG }}
             >
                 <FontAwesomeIcon icon={faPlus} className="text-2xl" />
             </button>
 
-            <AddClassForm show={showAddModal} onClose={() => setShowAddModal(false)} onAdd={fetchClasses} />
+            <AddClassForm 
+                show={showAddModal} 
+                onClose={() => {
+                    setShowAddModal(false);
+                    setEditingClass(null);
+                }} 
+                onAdd={fetchClasses}
+                onUpdate={fetchClasses}
+                initialData={editingClass}
+            />
             <PromoteStudentsModal show={showPromoteModal} onClose={() => setShowPromoteModal(false)} onRefresh={fetchClasses} />
         </div>
     );

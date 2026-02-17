@@ -1,6 +1,6 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faEdit, faEye, faPhone, faChild, faRoute, faUserTie, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faEdit, faEye, faPhone, faChild, faCalendarDay, faUserTie, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking } from '@fortawesome/free-solid-svg-icons';
 
 const StudentList = ({
     filteredStudents,
@@ -40,14 +40,10 @@ const StudentList = ({
                                             className="flex items-center gap-3 w-full cursor-pointer group"
                                             onClick={() => { setSelectedStudent(params.data); setShowForm(false); }}
                                         >
-                                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
-                                                {params.value ? params.value.charAt(0) : '?'}
-                                            </div>
                                             <div className="flex flex-col overflow-hidden">
-                                                <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
-                                                <div className="flex items-center gap-1 -mt-1">
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
-                                                    <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-blue-600 transition-colors" />
+                                                <p className="font-semibold text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
+                                                <div className="flex items-center gap-1 mt-0">
+                                                    <span className="text-[9px] font-medium text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -94,21 +90,21 @@ const StudentList = ({
                                     }
                                 },
                                 {
-                                    headerName: "Parent Mobile",
-                                    field: "mobile",
+                                    headerName: "Emergency Contact",
+                                    field: "emergencyContact",
                                     width: 140,
                                     minWidth: 140,
                                     cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '500' }
                                 },
                                 {
-                                    headerName: "Location",
-                                    field: "location",
+                                    headerName: "Academic Year",
+                                    field: "studyYear",
                                     flex: 1.5,
-                                    minWidth: 180,
+                                    minWidth: 150,
                                     cellStyle: { display: 'flex', alignItems: 'center' },
                                     cellRenderer: (params) => (
                                         <div className="flex items-center gap-2 w-full" title={params.value}>
-                                            <FontAwesomeIcon icon={faRoute} className="text-blue-400 text-xs shrink-0" />
+                                            <FontAwesomeIcon icon={faCalendarDay} className="text-blue-400 text-xs shrink-0" />
                                             <span className="text-sm text-gray-600 truncate">{params.value}</span>
                                         </div>
                                     )

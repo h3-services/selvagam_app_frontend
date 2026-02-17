@@ -72,6 +72,8 @@ const StudentManagementHome = () => {
                     parent2Name: parent2 ? parent2.name : '',
                     parentEmail: parent1 ? parent1.email : 'N/A',
                     mobile: parent1 ? parent1.phone : (s.emergency_contact || 'N/A'),
+                    emergencyContact: s.emergency_contact || 'N/A',
+                    studyYear: s.study_year || 'N/A',
                     location: parent1 ? `${parent1.street}, ${parent1.city}, ${parent1.district}` : 'Route: ' + (s.pickup_route_id ? s.pickup_route_id.substring(0, 8) : 'None'),
                     date: s.created_at ? s.created_at.split('T')[0] : 'N/A',
                     status: s.transport_status === 'ACTIVE' ? 'Approved' : 'Inactive',

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faTimes, 
@@ -60,7 +60,7 @@ const SelectField = ({ label, icon, value, onChange, options, disabled = false }
     </div>
 );
 
-const AddClassForm = ({ show, onClose, onAdd }) => {
+const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
     const defaultState = {
         class_name: '',
         section: '',
@@ -69,6 +69,19 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
 
     const [formData, setFormData] = useState(defaultState);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Synchronize form state with initialData for updates
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                class_name: initialData.class_name || '',
+                section: initialData.section || '',
+                status: initialData.status || 'ACTIVE'
+            });
+        } else {
+            setFormData(defaultState);
+        }
+    }, [initialData, show]);
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -88,13 +101,18 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await classService.createClass(formData);
+            if (initialData?.class_id) {
+                await classService.updateClass(initialData.class_id, formData);
+                onUpdate();
+            } else {
+                await classService.createClass(formData);
+                onAdd();
+            }
             setFormData(defaultState);
-            onAdd();
             onClose();
         } catch (error) {
-            console.error("Error creating class:", error);
-            alert("Protocol Failure. Cluster creation aborted.");
+            console.error("Error processing class protocol:", error);
+            alert("Protocol Failure. Operation aborted.");
         } finally {
             setIsSubmitting(false);
         }
@@ -126,7 +144,9 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                                 </div>
                             </div>
                             <div>
-                                <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5 font-['Outfit']">Class Assembly</h3>
+                                <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5 font-['Outfit']">
+                                    {initialData ? 'Modify Architecture' : 'Class Assembly'}
+                                </h3>
                                 <div className="flex items-center gap-2">
                                     <span className="bg-indigo-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
                                     <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Academic Cell Registry</p>
@@ -243,7 +263,7 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                         ) : (
                             <>
                                 <FontAwesomeIcon icon={faCheck} />
-                                <span>Register Cluster</span>
+                                <span>{initialData ? 'Commit Changes' : 'Register Cluster'}</span>
                             </>
                         )}
                     </button>

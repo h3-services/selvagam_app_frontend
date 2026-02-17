@@ -2,7 +2,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faEllipsisV, faChild, faCheckCircle, faBan } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash, faEllipsisV, faChild, faCheckCircle, faBan, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { useState, useRef, useMemo } from 'react';
 
 const ParentList = ({ 
@@ -29,12 +29,11 @@ const ParentList = ({
                 <div className="flex items-center gap-3 w-full cursor-pointer group" onClick={() => {
                    onViewParent(params.data);
                 }}>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
-                        {params.value ? params.value.charAt(0) : '?'}
-                    </div>
                     <div className="flex flex-col">
-                        <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors tracking-tight">{params.value || 'Unknown'}</p>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors mt-1 opacity-70">ID: {params.data.parent_id?.substring(0, 6)}</span>
+                        <p className="font-semibold text-gray-900 leading-none group-hover:text-blue-700 transition-colors tracking-tight">{params.value || 'Unknown'}</p>
+                        <div className="flex items-center gap-1 mt-0">
+                            <span className="text-[9px] font-medium text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
+                        </div>
                     </div>
                 </div>
             )
@@ -68,11 +67,11 @@ const ParentList = ({
                 return (
                     <div className="w-full max-h-[70px] overflow-y-auto custom-mini-scroll py-1 pr-2">
                         <div className="flex flex-col gap-1.5">
-                            {students.map((studentName, idx) => (
+                            {students.map((student, idx) => (
                                 <div key={idx} className="flex items-center gap-2 shrink-0">
                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
                                     <span className="text-[12px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
-                                        {studentName}
+                                        {student.name || student}
                                     </span>
                                 </div>
                             ))}
@@ -284,7 +283,7 @@ const ParentList = ({
                                         <div className="flex flex-wrap gap-1">
                                             {parent.linkedStudents?.map((s, i) => (
                                                 <span key={i} className="text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
-                                                    {s === 'No children linked' ? 'None' : s}
+                                                    {s === 'No children linked' ? 'None' : (s.name || s)}
                                                 </span>
                                             ))}
                                         </div>

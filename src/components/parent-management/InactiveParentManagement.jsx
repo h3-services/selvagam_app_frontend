@@ -61,7 +61,17 @@ const InactiveParentManagement = () => {
                     student.s_parent_id === parent.parent_id
                 );
                 
-                const studentNames = parentChildren.map(s => s.name);
+                const linkedStudents = parentChildren.map(s => {
+                    const studentClass = classData.find(c => c.class_id === s.class_id);
+                    return {
+                        id: s.student_id,
+                        name: s.name,
+                        class: studentClass ? `${studentClass.class_name} - ${studentClass.section}` : 'N/A',
+                        status: s.status || s.student_status || 'CURRENT',
+                        transportStatus: s.transport_status
+                    };
+                });
+
                 const classNames = parentChildren.map(s => {
                     const studentClass = classData.find(c => c.class_id === s.class_id);
                     return studentClass ? `${studentClass.class_name} - ${studentClass.section}` : null;
@@ -69,8 +79,8 @@ const InactiveParentManagement = () => {
                 
                 return {
                     ...parent,
-                    linkedStudents: studentNames.length > 0 ? studentNames : ['No children linked'],
-                    childClasses: classNames
+                    linkedStudents: linkedStudents,
+                    childClasses: [...new Set(classNames)]
                 };
             });
 
@@ -95,7 +105,10 @@ const InactiveParentManagement = () => {
                 (parent) =>
                     (parent.name || "").toLowerCase().includes(lowerQuery) ||
                     String(parent.phone || "").includes(lowerQuery) ||
-                    (parent.linkedStudents || []).some(s => (s || "").toLowerCase().includes(lowerQuery))
+                    (parent.linkedStudents || []).some(s => {
+                        const searchTarget = typeof s === 'object' ? s.name : s;
+                        return (searchTarget || "").toLowerCase().includes(lowerQuery);
+                    })
             );
         }
         
