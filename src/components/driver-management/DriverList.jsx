@@ -7,8 +7,6 @@ import {
     faUserCheck, 
     faUserClock, 
     faIdCard, 
-    faCar, 
-    faCompass, 
     faPhone,
     faEnvelope
 } from '@fortawesome/free-solid-svg-icons';
@@ -110,13 +108,9 @@ const DriverList = ({
                                 cellStyle: { display: 'flex', alignItems: 'center' },
                                 cellRenderer: (params) => (
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-sm shrink-0">
-                                            <FontAwesomeIcon icon={faCar} />
-                                        </div>
                                         <div>
                                             <p className="text-xs font-black text-slate-800 tracking-tight leading-none mb-1">{params.value || 'UNASSIGNED'}</p>
                                             <div className="flex items-center gap-1">
-                                                <FontAwesomeIcon icon={faCompass} className="text-[8px] text-slate-300" />
                                                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{params.data.route || 'BASE'}</span>
                                             </div>
                                         </div>
@@ -218,6 +212,12 @@ const DriverList = ({
                             const selectedData = selectedNodes.map(node => node.data);
                             if (setActiveMenuId) setActiveMenuId(null);
                             onSelectionChanged(selectedData);
+                        }}
+                        getRowStyle={params => {
+                            if (params.data.id === activeMenuId) {
+                                return { zIndex: 999, overflow: 'visible' };
+                            }
+                            return { zIndex: 1 };
                         }}
                         defaultColDef={{
                             sortable: true,

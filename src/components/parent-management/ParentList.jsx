@@ -59,24 +59,27 @@ const ParentList = ({
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
-            cellRenderer: params => (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 py-2">
-                    {params.value && params.value.map((studentName, idx) => {
-                        if (studentName === 'No children linked') return null;
-                        return (
-                            <div key={idx} className="flex items-center gap-1.5 shrink-0">
-                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
-                                <span className="text-[12px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
-                                    {studentName}
-                                </span>
-                            </div>
-                        );
-                    })}
-                    {(!params.value || params.value.length === 0 || params.value[0] === 'No children linked') && 
-                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">None Linked</span>
-                    }
-                </div>
-            )
+            cellRenderer: params => {
+                const students = params.value?.filter(s => s !== 'No children linked') || [];
+                if (students.length === 0) {
+                    return <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">None Linked</span>;
+                }
+                
+                return (
+                    <div className="w-full max-h-[70px] overflow-y-auto custom-mini-scroll py-1 pr-2">
+                        <div className="flex flex-col gap-1.5">
+                            {students.map((studentName, idx) => (
+                                <div key={idx} className="flex items-center gap-2 shrink-0">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
+                                    <span className="text-[12px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
+                                        {studentName}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
         },
         {
             headerName: 'Classes',
@@ -85,18 +88,24 @@ const ParentList = ({
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
-            cellRenderer: params => (
-                <div className="flex flex-wrap gap-1.5 py-2">
-                    {params.value && params.value.map((className, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-lg font-bold text-[10px] border border-blue-100 uppercase tracking-wider whitespace-nowrap shadow-sm">
-                            {className}
-                        </span>
-                    ))}
-                    {(!params.value || params.value.length === 0) && 
-                        <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">N/A</span>
-                    }
-                </div>
-            )
+            cellRenderer: params => {
+                const classes = params.value || [];
+                if (classes.length === 0) {
+                    return <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">N/A</span>;
+                }
+                
+                return (
+                    <div className="w-full max-h-[70px] overflow-y-auto custom-mini-scroll py-1 pr-2">
+                        <div className="flex flex-wrap gap-1.5">
+                            {classes.map((className, idx) => (
+                                <span key={idx} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-lg font-bold text-[10px] border border-blue-100 uppercase tracking-wider whitespace-nowrap shadow-sm">
+                                    {className}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
         },
         {
             headerName: 'Address',
@@ -318,6 +327,21 @@ const ParentList = ({
                     ))}
                 </div>
             </div>
+            <style>{`
+                .custom-mini-scroll::-webkit-scrollbar {
+                    width: 3px;
+                }
+                .custom-mini-scroll::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-mini-scroll::-webkit-scrollbar-thumb {
+                    background: #E2E8F0;
+                    border-radius: 10px;
+                }
+                .custom-mini-scroll::-webkit-scrollbar-thumb:hover {
+                    background: #CBD5E1;
+                }
+            `}</style>
         </div>
     );
 };

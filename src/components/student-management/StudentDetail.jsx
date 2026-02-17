@@ -15,7 +15,7 @@ import { parentService } from '../../services/parentService';
 import { routeService } from '../../services/routeService';
 import { studentService } from '../../services/studentService';
 
-const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpdate }) => {
+const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportStatusUpdate }) => {
     const [parent1, setParent1] = useState(null);
     const [parent2, setParent2] = useState(null);
     const [loadingParents, setLoadingParents] = useState(false);
@@ -172,7 +172,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onTransportStatusUpd
 
                 <div className="flex items-center gap-3">
                     <button 
-                        onClick={() => onUpdate(selectedStudent)}
+                        onClick={() => onEdit(selectedStudent)}
                         className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-black transition-all shadow-xl shadow-slate-200 flex items-center gap-2 active:scale-95"
                     >
                         <FontAwesomeIcon icon={faEdit} className="text-xs" />

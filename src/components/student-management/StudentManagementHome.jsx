@@ -354,6 +354,7 @@ const StudentManagementHome = () => {
                         selectedStudent={selectedStudent}
                         onBack={() => setSelectedStudent(null)}
                         onUpdate={fetchAllData}
+                        onEdit={handleEditStudent}
                         onTransportStatusUpdate={handleTransportStatusUpdate}
                     />
                 ) : (

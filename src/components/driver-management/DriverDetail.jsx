@@ -8,7 +8,6 @@ import {
     faEnvelope, 
     faPhone, 
     faIdCard, 
-    faCar, 
     faCalendarAlt, 
     faPassport, 
     faShieldHalved, 

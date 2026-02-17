@@ -97,7 +97,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete }) => {
                     {/* Left Column - Core Profile */}
                     <div className="col-span-12 lg:col-span-4 space-y-8">
                         <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
-                            <SectionHeader icon={faIdCard} title="Guardian Profile" subtitle="Identity Registry" />
+                            <SectionHeader icon={faIdCard} title="Parent Profile" subtitle="Identity Registry" />
                             <div className="space-y-6 pt-2">
                                 <div className="grid grid-cols-1 gap-6">
                                     <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
@@ -132,26 +132,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete }) => {
                             </div>
                         </div>
 
-                        {/* Security/Access Card */}
-                        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm border-l-4 border-l-blue-500">
-                            <SectionHeader icon={faUserShield} title="Account Access" subtitle="Security & Logs" />
-                            <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center gap-3">
-                                        <FontAwesomeIcon icon={faClock} className="text-slate-300 text-xs" />
-                                        <p className="text-xs font-bold text-slate-600">Last Login</p>
-                                    </div>
-                                    <p className="text-[11px] font-black text-slate-900">Today, 09:42 AM</p>
-                                </div>
-                                <div className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center gap-3">
-                                        <FontAwesomeIcon icon={faHistory} className="text-slate-300 text-xs" />
-                                        <p className="text-xs font-bold text-slate-600">Registry Created</p>
-                                    </div>
-                                    <p className="text-[11px] font-black text-slate-900">{new Date().toLocaleDateString()}</p>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
 
                     {/* Right Column - Relations */}
@@ -196,27 +177,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete }) => {
                             </div>
                         </div>
 
-                        {/* Recent Activity Mini-Feed */}
-                        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
-                            <SectionHeader icon={faHistory} title="Recent Activity" subtitle="Registry Audit Trail" />
-                            <div className="space-y-6 pt-2">
-                                {[
-                                    { text: "Account profile updated", time: "2 hours ago", icon: faEdit, color: "text-blue-500" },
-                                    { text: "New student link added", time: "1 day ago", icon: faLink, color: "text-emerald-500" }
-                                ].map((activity, i) => (
-                                    <div key={i} className="flex gap-4 relative">
-                                        {i !== 1 && <div className="absolute left-2.5 top-8 w-px h-8 bg-slate-100" />}
-                                        <div className={`w-5 h-5 rounded-full bg-white border-2 flex items-center justify-center z-10 ${activity.color}`}>
-                                            <FontAwesomeIcon icon={activity.icon} className="text-[8px]" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-xs font-bold text-slate-700">{activity.text}</p>
-                                            <p className="text-[10px] font-medium text-slate-400 mt-0.5">{activity.time}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>
