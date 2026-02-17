@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faMapLocationDot, faBus, faCircle, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { routeService } from '../../services/routeService';
-import { LocationMarker } from './RouteMapUtils';
+import { LocationMarker, createStopIcon } from './RouteMapUtils';
 
-const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
+const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
     const [currentStopName, setCurrentStopName] = useState('');
@@ -13,9 +13,9 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
     const [locationSearchQuery, setLocationSearchQuery] = useState('');
     const [searchSuggestions, setSearchSuggestions] = useState([]);
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
-    const [isAddingStop, setIsAddingStop] = useState(false);
     const [editingStopIndex, setEditingStopIndex] = useState(null);
     const [editingStopName, setEditingStopName] = useState('');
+    const [localLoading, setLocalLoading] = useState(false);
 
     const handleStartStopEdit = (index, name) => {
         setEditingStopIndex(index);
@@ -70,68 +70,38 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
     };
 
     const handleSaveEdit = async () => {
+        if (localLoading || isSaving) return;
+        setLocalLoading(true);
         try {
             await onUpdate(editData);
             setIsEditing(false);
         } catch (error) {
             console.error("Failed to save route:", error);
-            // Error handling is likely done in parent's onUpdate, but we catch here to prevent exiting edit mode if failed
+        } finally {
+            setLocalLoading(false);
         }
     };
 
-    const handleEditAddStop = async () => {
+    const handleEditAddStop = () => {
         if (currentStopName.trim() && selectedPosition) {
-            setIsAddingStop(true);
-            try {
-                if (!editData.id) {
-                    console.error("Missing route ID in editData:", editData);
-                    // alert("Route ID is missing. Cannot add stop.");
-                    setIsAddingStop(false);
-                    return;
-                }
+            // Determine order locally
+            const currentStops = editData.stopPoints || [];
+            const maxOrder = currentStops.length > 0 ? (currentStops.length) : 0;
+            const order = maxOrder + 1;
 
-                // Determine order
-                const currentStops = editData.stopPoints || [];
-                const existingOrders = currentStops.map(s => s.order || 0);
-                const maxOrder = existingOrders.length > 0 ? Math.max(...existingOrders) : 0;
-                const order = maxOrder + 1;
-
-                const stopData = {
-                    route_id: editData.id,
-                    stop_name: currentStopName.trim(),
-                    latitude: parseFloat(selectedPosition.lat.toFixed(6)),
-                    longitude: parseFloat(selectedPosition.lng.toFixed(6)),
-                    pickup_stop_order: parseInt(order),
-                    drop_stop_order: parseInt(order) // Matching pickup order to avoid 0 validation error
-                };
-                
-
-
-                const createdStop = await routeService.createRouteStop(stopData);
-
-                setEditData(prev => ({
-                    ...prev,
-                    stopPoints: [...(prev.stopPoints || []), { 
-                        name: createdStop.stop_name || currentStopName.trim(), 
-                        position: [createdStop.latitude || selectedPosition.lat, createdStop.longitude || selectedPosition.lng],
-                        id: createdStop.stop_id 
-                    }],
-                    stops: (prev.stops || 0) + 1
-                }));
-                
-                setCurrentStopName('');
-                setSelectedPosition(null);
-                setLocationSearchQuery('');
-            } catch (error) {
-                console.error("Failed to add stop:", error);
-                const errorData = error.response?.data || error.message;
-                console.error("Full Error Response:", JSON.stringify(errorData, null, 2));
-                
-                const errorMsg = error.response?.data?.detail || (typeof errorData === 'object' ? JSON.stringify(errorData) : String(errorData)) || "Unknown error";
-                // alert(`Failed to add stop: ${errorMsg}`);
-            } finally {
-                setIsAddingStop(false);
-            }
+            setEditData(prev => ({
+                ...prev,
+                stopPoints: [...(prev.stopPoints || []), { 
+                    name: currentStopName.trim(), 
+                    position: [selectedPosition.lat, selectedPosition.lng],
+                    id: null // Explicitly null so handleUpdate knows it's a new stop
+                }],
+                stops: (prev.stops || 0) + 1
+            }));
+            
+            setCurrentStopName('');
+            setSelectedPosition(null);
+            setLocationSearchQuery('');
         }
     };
 
@@ -207,11 +177,20 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                     </div>
                     {isEditing ? (
                         <div className="flex gap-2">
-                            <button onClick={() => setIsEditing(false)} className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium">
+                            <button 
+                                onClick={() => setIsEditing(false)} 
+                                disabled={isSaving}
+                                className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium disabled:opacity-50"
+                            >
                                 <FontAwesomeIcon icon={faTimes} className="mr-1" />Cancel
                             </button>
-                            <button onClick={handleSaveEdit} className="px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium">
-                                <FontAwesomeIcon icon={faCheck} className="mr-1" />Save
+                            <button 
+                                onClick={handleSaveEdit} 
+                                disabled={isSaving}
+                                className="px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium disabled:bg-gray-200 flex items-center gap-2"
+                            >
+                                {isSaving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faCheck} />}
+                                {isSaving ? 'Saving...' : 'Save'}
                             </button>
                         </div>
                     ) : (
@@ -241,10 +220,10 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                                     />
                                     <button
                                         onClick={handleEditAddStop}
-                                        disabled={!currentStopName.trim() || !selectedPosition || isAddingStop}
-                                        className={`px-3 rounded-lg text-white shadow-sm transition-all ${(!currentStopName.trim() || !selectedPosition || isAddingStop) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md'}`}
+                                        disabled={!currentStopName.trim() || !selectedPosition}
+                                        className={`px-3 rounded-lg text-white shadow-sm transition-all ${(!currentStopName.trim() || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md'}`}
                                     >
-                                        <FontAwesomeIcon icon={isAddingStop ? faSpinner : faPlus} className={isAddingStop ? "animate-spin" : ""} />
+                                        <FontAwesomeIcon icon={faPlus} />
                                     </button>
                                 </div>
                                 <p className="text-[10px] text-gray-500 font-medium ml-1">
@@ -344,8 +323,8 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
                             </div>
                         )}
                         <MapContainer
-                            center={[12.6083, 80.0528] || selectedRoute.coordinates?.start} // Default to school area
-                            zoom={11}
+                            center={selectedRoute.coordinates?.start || [12.6083, 80.0528]} 
+                            zoom={13}
                             style={{ height: '100%', width: '100%' }}
                             scrollWheelZoom={true}
                         >
@@ -363,12 +342,19 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate }) => {
 
                             {/* Render all stop points */}
                             {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
-                                <Marker key={index} position={stop.position} opacity={isEditing ? 0.7 : 1}>
+                                <Marker 
+                                    key={index} 
+                                    position={stop.position} 
+                                    opacity={isEditing ? 0.7 : 1}
+                                    icon={createStopIcon(index + 1)}
+                                >
                                     <Popup>
                                         <div className="font-bold">{stop.name}</div>
+                                        <div className="text-xs text-gray-400">Stop #{index + 1}</div>
                                     </Popup>
                                 </Marker>
                             ))}
+
 
                             {/* Optional Route Line if needed, can connect all points */}
 

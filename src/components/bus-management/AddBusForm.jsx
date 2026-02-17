@@ -70,6 +70,7 @@ const SelectField = ({ label, icon, value, onChange, options, className = "", pl
 const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
     const [newBus, setNewBus] = useState({ 
         registration_number: '', 
+        bus_name: '',
         vehicle_type: 'School Bus', 
         bus_brand: '', 
         bus_model: '', 
@@ -86,14 +87,17 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
     const [touched, setTouched] = useState({});
 
     // Simple validation (can be expanded)
-    const isValid = newBus.registration_number && newBus.vehicle_type;
+    const isValid = newBus.registration_number && newBus.bus_name && newBus.vehicle_type;
 
     const generateRandomBus = () => {
+        const brand = ['Tata', 'Ashok Leyland', 'Eicher', 'Force'][Math.floor(Math.random() * 4)];
+        const model = ['Starbus', 'Viking', 'Pro 3000', 'Traveller'][Math.floor(Math.random() * 4)];
         setNewBus({
             registration_number: `TN${Math.floor(Math.random() * 90) + 10}AB${Math.floor(Math.random() * 9000) + 1000}`,
+            bus_name: `${brand} ${model} - ${Math.floor(Math.random() * 100)}`,
             vehicle_type: ['School Bus', 'Mini', 'Van'][Math.floor(Math.random() * 3)],
-            bus_brand: ['Tata', 'Ashok Leyland', 'Eicher', 'Force'][Math.floor(Math.random() * 4)],
-            bus_model: ['Starbus', 'Viking', 'Pro 3000', 'Traveller'][Math.floor(Math.random() * 4)],
+            bus_brand: brand,
+            bus_model: model,
             seating_capacity: Math.floor(Math.random() * 30) + 20,
             status: ['Active', 'Maintenance', 'Inactive'][Math.floor(Math.random() * 3)],
             driver_id: drivers.length > 0 ? drivers[Math.floor(Math.random() * drivers.length)].driver_id : '',
@@ -103,15 +107,16 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
             rc_book_url: 'https://example.com/rc_book.pdf',
             fc_certificate_url: 'https://example.com/fc_cert.pdf'
         });
-        setTouched({ registration_number: true, vehicle_type: true });
+        setTouched({ registration_number: true, bus_name: true, vehicle_type: true });
     };
 
     const handleAdd = () => {
-        setTouched({ registration_number: true, vehicle_type: true });
+        setTouched({ registration_number: true, bus_name: true, vehicle_type: true });
         if (isValid) {
             onAdd(newBus);
             setNewBus({ 
                 registration_number: '', 
+                bus_name: '',
                 vehicle_type: 'School Bus', 
                 bus_brand: '', 
                 bus_model: '', 
@@ -214,6 +219,15 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                                     placeholder="TN01AB1234"
                                     error={touched.registration_number && !newBus.registration_number}
                                     errorMessage="Reg. No is required"
+                                />
+                                <InputField 
+                                    label="Bus Name" 
+                                    icon={faBus} 
+                                    value={newBus.bus_name}
+                                    onChange={(e) => setNewBus({ ...newBus, bus_name: e.target.value })}
+                                    placeholder="e.g. Alpha-1"
+                                    error={touched.bus_name && !newBus.bus_name}
+                                    errorMessage="Bus Name is required"
                                 />
                                 <SelectField 
                                     label="Vehicle Type" 

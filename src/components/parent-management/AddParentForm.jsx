@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUser, faPhone, faEnvelope, faMapMarkerAlt, faLock, faUserPlus, faMagic, faCheck, faShieldAlt, faSignature } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUser, faPhone, faEnvelope, faMapMarkerAlt, faLock, faUserPlus, faMagic, faCheck, faShieldAlt, faSignature, faEdit, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 
 const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false }) => (
@@ -23,7 +23,7 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
     </div>
 );
 
-const AddParentForm = ({ show, onClose, onAdd }) => {
+const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
     const defaultState = {
         name: '',
         email: '',
@@ -32,10 +32,32 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
         street: '',
         city: '',
         district: '',
+        pincode: '',
+        door_no: '',
+        parent_role: 'GUARDIAN'
     };
 
     const [formData, setFormData] = useState(defaultState);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                name: initialData.name || '',
+                email: initialData.email || '',
+                phone: initialData.phone || '',
+                password: '', // Don't pre-fill password for security
+                street: initialData.street || '',
+                city: initialData.city || '',
+                district: initialData.district || '',
+                pincode: initialData.pincode || '',
+                door_no: initialData.door_no || '',
+                parent_role: initialData.parent_role || 'GUARDIAN'
+            });
+        } else {
+            setFormData(defaultState);
+        }
+    }, [initialData, show]);
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -50,7 +72,10 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
             password: 'parent@secure',
             street: '45/A, Sterling Towers, MG Road',
             city: 'Bangalore',
-            district: 'Urban'
+            district: 'Urban',
+            pincode: '560001',
+            door_no: '45/A',
+            parent_role: 'FATHER'
         });
     };
 
@@ -58,11 +83,21 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await onAdd(formData);
+            const payload = {
+                ...formData,
+                phone: Number(formData.phone) || 0
+            };
+
+            if (initialData) {
+                await onUpdate(initialData.parent_id, payload);
+            } else {
+                await onAdd(payload);
+            }
+            
             setFormData(defaultState);
             onClose();
         } catch (error) {
-            console.error("Failed to add parent:", error);
+            console.error("Failed to process parent data:", error);
             alert("Execution failed. Please check registry protocols.");
         } finally {
             setIsSubmitting(false);
@@ -86,21 +121,21 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
                     {/* Premium Header */}
                     <div className="relative px-8 py-10 flex justify-between items-center z-10">
-                        <div className="flex items-center gap-6">
-                            <div className="relative group">
-                                <div className="absolute -inset-2 bg-blue-600 blur-xl opacity-0 group-hover:opacity-20 rounded-full transition-opacity duration-700"></div>
-                                <div className="w-14 h-14 rounded-[22px] flex items-center justify-center shadow-[0_15px_30px_rgba(58,123,255,0.3)] relative z-10 text-white transform group-hover:rotate-6 transition-transform duration-500" style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}>
-                                    <FontAwesomeIcon icon={faUserPlus} className="text-xl" />
+                            <div className="flex items-center gap-6">
+                                <div className="relative group">
+                                    <div className="absolute -inset-2 bg-blue-600 blur-xl opacity-0 group-hover:opacity-20 rounded-full transition-opacity duration-700"></div>
+                                    <div className="w-14 h-14 rounded-[22px] flex items-center justify-center shadow-[0_15px_30px_rgba(58,123,255,0.3)] relative z-10 text-white transform group-hover:rotate-6 transition-transform duration-500" style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}>
+                                        <FontAwesomeIcon icon={initialData ? faEdit : faUserPlus} className="text-xl" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">{initialData ? 'Update Profile' : 'Parent Onboarding'}</h3>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${initialData ? 'bg-amber-500' : 'bg-blue-600'}`}></span>
+                                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">{initialData ? 'Modify Registry' : 'New Guardian Registry'}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">Parent Onboarding</h3>
-                                <div className="flex items-center gap-2">
-                                    <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
-                                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">New Guardian Registry</p>
-                                </div>
-                            </div>
-                        </div>
                         
                         <div className="flex items-center gap-3">
                             <button 
@@ -146,6 +181,26 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                                     />
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="relative group/field">
+                                            <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">Parent Role</label>
+                                            <div className="relative flex items-center bg-white rounded-2xl border border-slate-200 hover:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all duration-500">
+                                                <div className="w-12 h-12 flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:text-blue-600">
+                                                    <FontAwesomeIcon icon={faShieldAlt} className="text-sm" />
+                                                </div>
+                                                <select 
+                                                    value={formData.parent_role}
+                                                    onChange={(e) => handleChange('parent_role', e.target.value)}
+                                                    className="w-full pl-12 pr-4 py-4 bg-transparent rounded-2xl text-[13px] font-extrabold text-slate-700 focus:outline-none appearance-none cursor-pointer"
+                                                >
+                                                    <option value="FATHER">Father</option>
+                                                    <option value="MOTHER">Mother</option>
+                                                    <option value="GUARDIAN">Guardian</option>
+                                                </select>
+                                                <div className="absolute right-4 pointer-events-none text-slate-400">
+                                                    <FontAwesomeIcon icon={faChevronDown} className="text-[10px]" />
+                                                </div>
+                                            </div>
+                                        </div>
                                         <InputField 
                                             label="Contact Number" 
                                             icon={faPhone} 
@@ -153,38 +208,16 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                                             onChange={(e) => handleChange('phone', e.target.value)} 
                                             placeholder="9988776655" 
                                         />
-                                        <InputField 
-                                            label="Email Protocol" 
-                                            icon={faEnvelope} 
-                                            type="email"
-                                            value={formData.email} 
-                                            onChange={(e) => handleChange('email', e.target.value)} 
-                                            placeholder="name@domain.com" 
-                                        />
                                     </div>
+                                    <InputField 
+                                        label="Email Protocol" 
+                                        icon={faEnvelope} 
+                                        type="email"
+                                        value={formData.email} 
+                                        onChange={(e) => handleChange('email', e.target.value)} 
+                                        placeholder="name@domain.com" 
+                                    />
                                 </div>
-                            </div>
-
-                            {/* Access Section */}
-                            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 group hover:shadow-xl transition-all duration-500">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                        <FontAwesomeIcon icon={faShieldAlt} className="text-lg" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Access Control</h4>
-                                        <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Account Credentials</p>
-                                    </div>
-                                </div>
-
-                                <InputField 
-                                    label="Secure Password" 
-                                    icon={faLock} 
-                                    type="password"
-                                    value={formData.password} 
-                                    onChange={(e) => handleChange('password', e.target.value)} 
-                                    placeholder="••••••••" 
-                                />
                             </div>
 
                             {/* Geo Data Section */}
@@ -200,13 +233,26 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                                 </div>
 
                                 <div className="space-y-6">
-                                    <InputField 
-                                        label="Street Intelligence" 
-                                        icon={faMapMarkerAlt} 
-                                        value={formData.street} 
-                                        onChange={(e) => handleChange('street', e.target.value)} 
-                                        placeholder="Door No, Building, Street Name" 
-                                    />
+                                    <div className="grid grid-cols-3 gap-6">
+                                        <div className="col-span-1">
+                                            <InputField 
+                                                label="Door No" 
+                                                icon={faSignature} 
+                                                value={formData.door_no} 
+                                                onChange={(e) => handleChange('door_no', e.target.value)} 
+                                                placeholder="45/A" 
+                                            />
+                                        </div>
+                                        <div className="col-span-2">
+                                            <InputField 
+                                                label="Street Name" 
+                                                icon={faMapMarkerAlt} 
+                                                value={formData.street} 
+                                                onChange={(e) => handleChange('street', e.target.value)} 
+                                                placeholder="Sterling Towers, MG Road" 
+                                            />
+                                        </div>
+                                    </div>
                                     <div className="grid grid-cols-2 gap-6">
                                         <InputField 
                                             label="City" 
@@ -223,8 +269,38 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                                             placeholder="Urban" 
                                         />
                                     </div>
+                                    <InputField 
+                                        label="Pincode / Zip" 
+                                        icon={faMapMarkerAlt} 
+                                        value={formData.pincode} 
+                                        onChange={(e) => handleChange('pincode', e.target.value)} 
+                                        placeholder="560001" 
+                                    />
                                 </div>
                             </div>
+
+                            {!initialData && (
+                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 group hover:shadow-xl transition-all duration-500">
+                                    <div className="flex items-center gap-4 mb-8">
+                                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
+                                            <FontAwesomeIcon icon={faShieldAlt} className="text-lg" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Access Control</h4>
+                                            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Account Credentials</p>
+                                        </div>
+                                    </div>
+
+                                    <InputField 
+                                        label="Secure Password" 
+                                        icon={faLock} 
+                                        type="password"
+                                        value={formData.password} 
+                                        onChange={(e) => handleChange('password', e.target.value)} 
+                                        placeholder="••••••••" 
+                                    />
+                                </div>
+                            )}
                         </form>
                     </div>
                 </div>
@@ -252,7 +328,7 @@ const AddParentForm = ({ show, onClose, onAdd }) => {
                         ) : (
                             <>
                                 <FontAwesomeIcon icon={faCheck} />
-                                <span>Commit to Registry</span>
+                                <span>{initialData ? 'Save Changes' : 'Commit to Registry'}</span>
                             </>
                         )}
                     </button>

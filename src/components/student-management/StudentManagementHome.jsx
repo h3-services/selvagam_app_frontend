@@ -39,10 +39,20 @@ const StudentManagementHome = () => {
     const fetchAllData = async () => {
         setLoading(true);
         try {
+            // Fetch data with individual error handling to prevent 500s from blocking the whole view
             const [studentData, parentData, classData] = await Promise.all([
-                studentService.getAllStudents(),
-                parentService.getAllParents(),
-                classService.getAllClasses()
+                studentService.getAllStudents().catch(err => {
+                    console.error("Error fetching students:", err);
+                    return [];
+                }),
+                parentService.getAllParents().catch(err => {
+                    console.error("Error fetching parents:", err);
+                    return [];
+                }),
+                classService.getAllClasses().catch(err => {
+                    console.error("Error fetching classes:", err);
+                    return [];
+                })
             ]);
             
             setParents(parentData);

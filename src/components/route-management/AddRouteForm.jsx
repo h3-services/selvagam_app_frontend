@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import { COLORS } from '../../constants/colors';
 import { LocationMarker, createSchoolIcon, createStopIcon } from './RouteMapUtils';
 
-const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBuses = [] }) => {
+const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBuses = [], isSaving }) => {
     // Default fallback campus if array is empty
     const defaultCampus = { id: 0, name: 'Default Campus', lat: 12.6083, lng: 80.0528 };
     const initialCampusId = schoolLocations.length > 0 ? schoolLocations[0].id : defaultCampus.id;
@@ -18,6 +18,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
     const [isSearchingLocation, setIsSearchingLocation] = useState(false);
     const [selectedCampus, setSelectedCampus] = useState(initialCampusId);
     const [showBusDropdown, setShowBusDropdown] = useState(false);
+    const [localSaving, setLocalSaving] = useState(false);
 
     // Close dropdown on click outside
     useEffect(() => {
@@ -78,9 +79,11 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
     };
 
     const handleAddRoute = () => {
+        if (localSaving || isSaving) return;
         const defaultCampus = { id: 0, name: 'Default Campus', lat: 12.6083, lng: 80.0528 };
         const campus = schoolLocations.find(l => l.id == selectedCampus) || schoolLocations[0] || defaultCampus;
         if (newRoute.routeName) {
+            setLocalSaving(true);
             const startCoords = [campus.lat, campus.lng];
             const endCoords = [campus.lat, campus.lng];
 
@@ -93,10 +96,8 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                     end: endCoords
                 }
             });
-            setNewRoute({ routeName: '', distance: '', assignedBus: '', stops: 0, stopPoints: [] });
-            setCurrentStopName('');
-            setSelectedPosition(null);
-            setLocationSearchQuery('');
+            // Reset is handled by parent closing modal or explicitly here if needed
+            // But we keep localSaving true until unmounted to be safe
         }
     };
 
@@ -367,11 +368,12 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                 <div className="p-6 sm:p-8 border-t border-blue-100 bg-white flex-shrink-0">
                     <button
                         onClick={handleAddRoute}
-                        className="w-full py-4 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all text-base"
-                        style={{ backgroundColor: COLORS.SIDEBAR_BG }}
+                        disabled={isSaving}
+                        className="w-full py-4 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all text-base disabled:bg-gray-400 disabled:shadow-none flex items-center justify-center gap-2"
+                        style={{ backgroundColor: isSaving ? undefined : COLORS.SIDEBAR_BG }}
                     >
-                        <FontAwesomeIcon icon={faMapLocationDot} className="mr-2" />
-                        Add Route
+                        {isSaving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faMapLocationDot} />}
+                        {isSaving ? 'Creating Route...' : 'Add Route'}
                     </button>
                 </div>
             </div>

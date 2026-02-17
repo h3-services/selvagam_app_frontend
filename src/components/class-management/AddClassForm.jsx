@@ -64,7 +64,6 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
     const defaultState = {
         class_name: '',
         section: '',
-        academic_year: '2025-2026',
         status: 'ACTIVE'
     };
 
@@ -81,7 +80,6 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
         setFormData({
             class_name: grades[Math.floor(Math.random() * grades.length)],
             section: sections[Math.floor(Math.random() * sections.length)],
-            academic_year: '2025-2026',
             status: 'ACTIVE'
         });
     };
@@ -203,13 +201,7 @@ const AddClassForm = ({ show, onClose, onAdd }) => {
                                 </div>
 
                                 <div className="space-y-6">
-                                    <InputField 
-                                        label="Academic Cycle" 
-                                        icon={faCalendarAlt} 
-                                        value={formData.academic_year} 
-                                        onChange={(e) => handleChange('academic_year', e.target.value)} 
-                                        placeholder="2025-2026" 
-                                    />
+
 
                                     <SelectField 
                                         label="Activation State" 

@@ -52,8 +52,7 @@ const ClassManagementHome = () => {
                     c.class_name.toLowerCase().includes(lowerQuery) ||
                     (c.section || "").toLowerCase().includes(lowerQuery) ||
                     fullId.includes(lowerQuery) ||
-                    reverseId.includes(lowerQuery) ||
-                    String(c.academic_year).includes(lowerQuery)
+                    reverseId.includes(lowerQuery)
                 );
             });
         }

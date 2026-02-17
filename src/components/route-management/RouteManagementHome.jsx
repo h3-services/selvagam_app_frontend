@@ -27,18 +27,26 @@ const RouteManagementHome = () => {
     const fetchAllData = async () => {
         setLoading(true);
         try {
-            const [routesData, stopsData, busesData, driversData] = await Promise.all([
-                routeService.getAllRoutes(),
-                routeService.getAllRouteStops(),
-                busService.getAllBuses(),
-                driverService.getAllDrivers()
+            const [routesDataRaw, stopsDataRaw, busesDataRaw, driversDataRaw, studentsDataRaw] = await Promise.all([
+                routeService.getAllRoutes().catch(err => { console.error("Routes fetch failed:", err); return []; }),
+                routeService.getAllRouteStops().catch(err => { console.error("Stops fetch failed:", err); return []; }),
+                busService.getAllBuses().catch(err => { console.error("Buses fetch failed:", err); return []; }),
+                driverService.getAllDrivers().catch(err => { console.error("Drivers fetch failed:", err); return []; }),
+                studentService.getAllStudents().catch(err => { console.error("Students fetch failed:", err); return []; })
             ]);
+
+            // 1. Deduplicate source data by ID immediately to prevent "double" entries from server sync issues
+            const routesData = Array.from(new Map((routesDataRaw || []).filter(r => r && r.route_id).map(r => [r.route_id, r])).values());
+            const stopsData = Array.from(new Map((stopsDataRaw || []).filter(s => s && s.stop_id).map(s => [s.stop_id, s])).values());
+            const busesData = Array.from(new Map((busesDataRaw || []).filter(b => b && b.bus_id).map(b => [b.bus_id, b])).values());
+            const driversData = Array.from(new Map((driversDataRaw || []).filter(d => d && d.driver_id).map(d => [d.driver_id, d])).values());
+            const studentsData = studentsDataRaw || [];
 
             // Create Driver Map (id -> name)
             const driverMap = {};
-            if (Array.isArray(driversData)) {
-                driversData.forEach(d => driverMap[d.driver_id] = d.name);
-            }
+            driversData.forEach(d => {
+                if (d && d.driver_id) driverMap[d.driver_id] = d.name;
+            });
 
             // Create a lookup for bus assigned to route (route_id -> bus_number)
             const routeBusMap = {};
@@ -85,15 +93,8 @@ const RouteManagementHome = () => {
                 const startCoord = stopPoints.length > 0 ? stopPoints[0].position : [12.6083, 80.0528]; // Default fallback
                 const endCoord = stopPoints.length > 0 ? stopPoints[stopPoints.length - 1].position : [12.6083, 80.0528];
 
-                // Fetch real student count from API
-                let studentCount = 0;
-                try {
-                    const countData = await studentService.getStudentCountByRoute(route.route_id);
-                    // Mapping correct field: API returns "student_count"
-                    studentCount = countData.student_count || 0;
-                } catch (e) {
-                    console.error(`Failed to fetch count for route ${route.route_id}:`, e);
-                }
+                // Calculate student count locally from fetched studentsData
+                const studentCount = (studentsData || []).filter(s => s.pickup_route_id === route.route_id || s.drop_route_id === route.route_id).length;
 
                 return {
                     id: route.route_id,
@@ -120,6 +121,7 @@ const RouteManagementHome = () => {
         }
     };
 
+    const [isSaving, setIsSaving] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [search, setSearch] = useState('');
     const [selectedRoute, setSelectedRoute] = useState(null);
@@ -213,34 +215,42 @@ const RouteManagementHome = () => {
     };
 
     const handleAdd = async (newRouteData) => {
+        if (isSaving) return;
+        setIsSaving(true);
         try {
             // 1. Create the Route
             const routePayload = {
                 name: newRouteData.routeName,
                 routes_active_status: 'ACTIVE'
             };
+            console.log('📦 [CREATE ROUTE] Payload:', JSON.stringify(routePayload, null, 2));
             const createdRoute = await routeService.createRoute(routePayload);
+            console.log('✅ [CREATE ROUTE] Response:', JSON.stringify(createdRoute, null, 2));
 
             // 2. Create Stops (if any)
             if (newRouteData.stopPoints && newRouteData.stopPoints.length > 0) {
-                await Promise.all(newRouteData.stopPoints.map((stop, index) => {
+                for (let index = 0; index < newRouteData.stopPoints.length; index++) {
+                    const stop = newRouteData.stopPoints[index];
                     const stopData = {
                         route_id: createdRoute.route_id,
-                        stop_name: stop.name,
-                        latitude: parseFloat(stop.position[0].toFixed(6)),
-                        longitude: parseFloat(stop.position[1].toFixed(6)),
+                        stop_name: (stop.name || 'Stop').trim(),
+                        latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
+                        longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
                         pickup_stop_order: index + 1,
                         drop_stop_order: index + 1
                     };
-                    return routeService.createRouteStop(stopData);
-                }));
+                    console.log(`📦 [CREATE STOP ${index + 1}] Payload:`, JSON.stringify(stopData, null, 2));
+                    const createdStop = await routeService.createRouteStop(stopData);
+                    console.log(`✅ [CREATE STOP ${index + 1}] Response:`, JSON.stringify(createdStop, null, 2));
+                }
             }
 
             await fetchAllData();
             setShowModal(false);
         } catch (error) {
             console.error("Failed to create route:", error);
-            // alert("Failed to create route. Please check the logs.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -265,78 +275,122 @@ const RouteManagementHome = () => {
     };
 
     const handleUpdate = async (updatedData) => {
+        if (isSaving) return;
+        setIsSaving(true);
         try {
+            console.log('🔄 [UPDATE ROUTE] Starting update for route:', updatedData.id);
+            console.log('🔄 [UPDATE ROUTE] Full updatedData:', JSON.stringify(updatedData, null, 2));
+
             // 1. Handle Deleted Stops
             const originalStops = selectedRoute.stopPoints || [];
             const currentStops = updatedData.stopPoints || [];
             
+            console.log('📋 [ORIGINAL STOPS]:', JSON.stringify(originalStops, null, 2));
+            console.log('📋 [CURRENT STOPS]:', JSON.stringify(currentStops, null, 2));
+
             const originalStopIds = new Set(originalStops.map(s => s.id).filter(id => id));
             const currentStopIds = new Set(currentStops.map(s => s.id).filter(id => id));
             
             const stopsToDelete = [...originalStopIds].filter(id => !currentStopIds.has(id));
+            console.log('🗑️ [STOPS TO DELETE]:', stopsToDelete);
             
             // Delete removed stops
-            await Promise.all(stopsToDelete.map(id => routeService.deleteRouteStop(id)));
+            for (const id of stopsToDelete) {
+                console.log(`🗑️ [DELETE STOP] Deleting stop: ${id}`);
+                await routeService.deleteRouteStop(id).catch(e => console.warn(`Stop ${id} already gone:`, e));
+            }
 
-            // 2. Handle New Stops
+            // 2. Handle New Stops (Sequential to avoid order conflicts)
             const newStops = currentStops.filter(s => !s.id);
-            await Promise.all(newStops.map((stop, index) => {
+            console.log(`➕ [NEW STOPS] ${newStops.length} new stops to create`);
+            for (const stop of newStops) {
                 const order = currentStops.indexOf(stop) + 1;
-                return routeService.createRouteStop({
+                const newStopPayload = {
                     route_id: updatedData.id,
-                    stop_name: stop.name,
-                    latitude: stop.position[0],
-                    longitude: stop.position[1],
-                    pickup_stop_order: order,
-                    drop_stop_order: order
-                });
-            }));
-
-            // 3. Handle Updated Stops (Existing)
-            const existingStops = currentStops.filter(s => s.id);
-            await Promise.all(existingStops.map(async (stop) => {
-                const order = currentStops.indexOf(stop) + 1;
+                    stop_name: (stop.name || '').trim(),
+                    latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
+                    longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
+                    pickup_stop_order: parseInt(order),
+                    drop_stop_order: parseInt(order)
+                };
+                console.log(`📦 [CREATE STOP order:${order}] Payload:`, JSON.stringify(newStopPayload, null, 2));
                 try {
-                    return await routeService.updateRouteStop(stop.id, {
-                        route_id: updatedData.id, // Adding route_id just in case
-                        stop_name: stop.name,
-                        latitude: stop.position[0],
-                        longitude: stop.position[1],
-                        pickup_stop_order: order,
-                        drop_stop_order: order
-                    });
+                    const result = await routeService.createRouteStop(newStopPayload);
+                    console.log(`✅ [CREATE STOP order:${order}] Response:`, JSON.stringify(result, null, 2));
+                } catch (error) {
+                    if (error.response && error.response.status === 500 && error.response.data?.detail?.includes('Duplicate entry')) {
+                        console.warn(`⚠️ Stop with order ${order} already exists, skipping.`);
+                    } else {
+                        throw error;
+                    }
+                }
+            }
+
+            // 3. Handle Updated Stops — ONLY update stops that actually changed
+            const existingStops = currentStops.filter(s => s.id);
+            const originalStopMap = {};
+            originalStops.forEach(s => { if (s.id) originalStopMap[s.id] = s; });
+
+            console.log(`✏️ [EXISTING STOPS] ${existingStops.length} existing stops to check`);
+            for (const stop of existingStops) {
+                const order = currentStops.indexOf(stop) + 1;
+                const original = originalStopMap[stop.id];
+
+                // Check if anything actually changed
+                const nameChanged = original && (stop.name || '').trim() !== (original.name || '').trim();
+                const posChanged = original && (
+                    parseFloat(parseFloat(stop.position[0]).toFixed(6)) !== parseFloat(parseFloat(original.position[0]).toFixed(6)) ||
+                    parseFloat(parseFloat(stop.position[1]).toFixed(6)) !== parseFloat(parseFloat(original.position[1]).toFixed(6))
+                );
+                const orderChanged = original && order !== (original.order || 0);
+
+                if (!nameChanged && !posChanged && !orderChanged) {
+                    console.log(`⏭️ [SKIP STOP ${stop.id} order:${order}] No changes detected.`);
+                    continue;
+                }
+
+                const stopPayload = {
+                    route_id: updatedData.id,
+                    stop_name: (stop.name || '').trim(),
+                    latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
+                    longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
+                    pickup_stop_order: parseInt(order),
+                    drop_stop_order: parseInt(order)
+                };
+                console.log(`📦 [UPDATE STOP ${stop.id} order:${order}] Payload:`, JSON.stringify(stopPayload, null, 2));
+
+                try {
+                    const result = await routeService.updateRouteStop(stop.id, stopPayload);
+                    console.log(`✅ [UPDATE STOP ${stop.id}] Response:`, JSON.stringify(result, null, 2));
                 } catch (error) {
                     if (error.response && error.response.status === 404) {
-                        console.warn(`Stop ${stop.id} not found on server, skipping update.`);
-                        return null; 
+                        console.warn(`⚠️ Stop ${stop.id} missing, skipping (backend issue).`);
+                    } else if (error.response && error.response.status === 500 && error.response.data?.detail?.includes('Duplicate entry')) {
+                        console.warn(`⚠️ Order collision at ${order} for stop ${stop.id}, skipping.`);
+                    } else {
+                        throw error;
                     }
-                    throw error;
                 }
-            }));
+            }
 
-            // 3. Update Route Details (if name changed)
+            // 4. Update Route Details (if name changed)
             if (updatedData.routeName !== selectedRoute.routeName) {
-                 await routeService.updateRoute(updatedData.id, { 
+                const routeUpdatePayload = { 
                     name: updatedData.routeName,
                     routes_active_status: updatedData.status || 'ACTIVE' 
-                });
+                };
+                console.log('📦 [UPDATE ROUTE NAME] Payload:', JSON.stringify(routeUpdatePayload, null, 2));
+                await routeService.updateRoute(updatedData.id, routeUpdatePayload);
+                console.log('✅ [UPDATE ROUTE NAME] Done');
             }
 
             // Refresh Data
             await fetchAllData();
-            
-            // Update local selection to reflect new IDs
-            // We need to find the updated route from the refreshed list
-            // Since fetchAllData setsRoutes, we can't easily wait for state update here to set selectedRoute immediately
-            // But fetchAllData is async.
-            
-            // For smoother UX, we might want to manually update selectedRoute with placeholders or just close/refresh
-            // Let's just update the list for now; the user might need to re-select or we rely on the list update
-             setSelectedRoute(null); // Go back to list view on save, or we'd need to re-find the route
-             
+            setSelectedRoute(null);
         } catch (error) {
             console.error("Error updating route:", error);
-            // alert("Failed to save changes. Please try again.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -412,6 +466,7 @@ const RouteManagementHome = () => {
                         selectedRoute={selectedRoute}
                         onBack={() => setSelectedRoute(null)}
                         onUpdate={handleUpdate}
+                        isSaving={isSaving}
                     />
                 ) : (
                     <RouteList
@@ -445,6 +500,7 @@ const RouteManagementHome = () => {
                 onAdd={handleAdd}
                 schoolLocations={schoolLocations}
                 availableBuses={activeBuses}
+                isSaving={isSaving}
             />
 
             <BusReassignModal

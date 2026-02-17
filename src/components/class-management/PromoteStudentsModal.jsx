@@ -220,7 +220,7 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
                                                         <option value="">-- Terminal Stage / None --</option>
                                                         {classes.map(target => (
                                                             <option key={target.class_id} value={target.class_id}>
-                                                                {target.class_name} - {target.section} ({target.academic_year})
+                                                                {target.class_name} - {target.section}
                                                             </option>
                                                         ))}
                                                     </select>

@@ -93,7 +93,7 @@ const Sidebar = () => {
     },
     { icon: faUsers, label: 'Directory', path: '/student-directory' },
     { icon: faChartBar, label: 'Reports', path: '/reports' },
-    { icon: faComments, label: 'Inbox', path: '/communication' },
+    { icon: faComments, label: 'Communication', path: '/communication' },
     { icon: faUserShield, label: 'Settings', path: '/admin' },
   ];
 
@@ -302,12 +302,7 @@ const Sidebar = () => {
                 <div className="space-y-2">
                   {item.subItems.map((sub, sIndex) => {
                     const subActive = location.pathname.startsWith(sub.path);
-                    const descriptions = {
-                      'Drivers': 'Manage vehicle operators',
-                      'Buses': 'Vehicle fleet statistics',
-                      'Routes': 'Network & path mapping',
-                      'Trips': 'Live schedule tracking'
-                    };
+
 
                     return (
                       <button
@@ -349,11 +344,7 @@ const Sidebar = () => {
                           }`}>
                             {sub.label}
                           </span>
-                          <span className={`text-[10px] font-black mt-1 transition-colors duration-300 ${
-                            subActive ? 'text-blue-50/80' : 'text-blue-800/60 group-hover/sub:text-blue-600/60'
-                          }`}>
-                            {descriptions[sub.label] || 'Manage system data'}
-                          </span>
+
                         </div>
 
                         {/* Active Laser Indicator */}

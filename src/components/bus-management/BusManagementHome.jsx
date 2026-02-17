@@ -99,6 +99,7 @@ const BusManagementHome = () => {
         try {
             const payload = {
                 registration_number: newBusData.registration_number,
+                bus_name: newBusData.bus_name,
                 vehicle_type: newBusData.vehicle_type || 'School Bus',
                 bus_brand: newBusData.bus_brand,
                 bus_model: newBusData.bus_model,
@@ -292,26 +293,11 @@ const BusManagementHome = () => {
                             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                                 Bus Management
                             </h1>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Manage fleet and assign drivers
-                            </p>
+
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <div className="flex bg-gray-100 p-1 rounded-xl">
-                                <button
-                                    onClick={() => setActiveTab('All')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'All' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    All Buses
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('Scrap')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'Scrap' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    Scrap Buses
-                                </button>
-                            </div>
+
                             <div className="relative group">
                                 <input
                                     type="text"

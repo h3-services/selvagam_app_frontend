@@ -233,28 +233,7 @@ const DriverManagementHome = () => {
 
                     {!selectedDriver && (
                         <div className="flex flex-col md:flex-row items-center gap-6">
-                            <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
-                                <button
-                                    onClick={() => setViewMode('active')}
-                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${
-                                        viewMode === 'active' 
-                                        ? 'bg-white text-blue-600 shadow-lg transform scale-[1.05]' 
-                                        : 'text-slate-400 hover:text-slate-600'
-                                    }`}
-                                >
-                                    Active Duty
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('resigned')}
-                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${
-                                        viewMode === 'resigned' 
-                                        ? 'bg-white text-red-600 shadow-lg transform scale-[1.05]' 
-                                        : 'text-slate-400 hover:text-slate-600'
-                                    }`}
-                                >
-                                    Archived
-                                </button>
-                            </div>
+
 
                             <div className="relative group">
                                 <input

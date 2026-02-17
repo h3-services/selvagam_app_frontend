@@ -45,10 +45,20 @@ const StudentDirectory = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
+            // Fetch data with individual error handling to prevent 500s from blocking the whole view
             const [studentData, parentData, classData] = await Promise.all([
-                studentService.getAllStudents(),
-                parentService.getAllParents(),
-                classService.getAllClasses()
+                studentService.getAllStudents().catch(err => {
+                    console.error("Failed to fetch students:", err);
+                    return [];
+                }),
+                parentService.getAllParents().catch(err => {
+                    console.error("Failed to fetch parents:", err);
+                    return [];
+                }),
+                classService.getAllClasses().catch(err => {
+                    console.error("Failed to fetch classes:", err);
+                    return [];
+                })
             ]);
 
             const mapped = studentData.map(s => {
@@ -302,7 +312,7 @@ const StudentDirectory = () => {
             <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="ml-20 lg:ml-0">
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Record Directory</h1>
+                        <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Record Directory</h1>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center gap-6">
@@ -337,8 +347,8 @@ const StudentDirectory = () => {
                 </div>
             </div>
 
-            <div className="flex-1 px-8 pt-6 pb-8 overflow-hidden flex flex-col">
-                <div className="flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6 border border-gray-100">
+            <div className="flex-1 px-8 pt-0 pb-8 overflow-hidden flex flex-col">
+                <div className="flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6 border border-gray-100 mt-4">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
@@ -347,7 +357,8 @@ const StudentDirectory = () => {
                             <p className="text-gray-500 font-medium">Accessing Archives...</p>
                         </div>
                     ) : (
-                        <div className="ag-theme-quartz w-full h-full custom-ag-grid" style={{
+                        <div className="ag-theme-quartz w-full custom-ag-grid" style={{
+                            height: 'calc(100vh - 140px)',
                             '--ag-header-background-color': '#f0f4ff',
                             '--ag-header-foreground-color': '#3A7BFF',
                             '--ag-font-family': 'inherit',

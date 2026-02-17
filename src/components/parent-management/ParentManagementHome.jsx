@@ -20,6 +20,7 @@ const ParentManagementHome = () => {
     const [activeTab, setActiveTab] = useState("Active");
     const [showForm, setShowForm] = useState(false);
     const [selectedParent, setSelectedParent] = useState(null);
+    const [editingParent, setEditingParent] = useState(null);
 
     // Actions State
     const [activeMenuId, setActiveMenuId] = useState(null);
@@ -50,10 +51,20 @@ const ParentManagementHome = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
+            // Fetch data with individual error handling to prevent 500s from blocking the whole view
             const [parentsData, studentsData, classData] = await Promise.all([
-                parentService.getAllParents(),
-                studentService.getAllStudents(),
-                classService.getAllClasses()
+                parentService.getAllParents().catch(err => {
+                    console.error("Error fetching parents:", err);
+                    return [];
+                }),
+                studentService.getAllStudents().catch(err => {
+                    console.error("Error fetching students:", err);
+                    return [];
+                }),
+                classService.getAllClasses().catch(err => {
+                    console.error("Error fetching classes:", err);
+                    return [];
+                })
             ]);
 
             // Map students and classes to parents
@@ -63,7 +74,17 @@ const ParentManagementHome = () => {
                     student.s_parent_id === parent.parent_id
                 );
                 
-                const studentNames = [...new Set(parentChildren.map(s => s.name))];
+                const linkedStudents = parentChildren.map(s => {
+                    const studentClass = classData.find(c => c.class_id === s.class_id);
+                    return {
+                        id: s.student_id,
+                        name: s.name,
+                        class: studentClass ? `${studentClass.class_name} - ${studentClass.section}` : 'N/A',
+                        status: s.status || s.student_status || 'CURRENT',
+                        transportStatus: s.transport_status
+                    };
+                });
+
                 const classNames = parentChildren.map(s => {
                     const studentClass = classData.find(c => c.class_id === s.class_id);
                     return studentClass ? `${studentClass.class_name} - ${studentClass.section}` : null;
@@ -71,12 +92,20 @@ const ParentManagementHome = () => {
                 
                 return {
                     ...parent,
-                    linkedStudents: studentNames.length > 0 ? studentNames : ['No children linked'],
+                    linkedStudents: linkedStudents,
                     childClasses: [...new Set(classNames)]
                 };
             });
 
             setParents(parentsWithStudents);
+
+            // Sync current selection if viewing a detail
+            if (selectedParent) {
+                const refreshedParent = parentsWithStudents.find(p => p.parent_id === selectedParent.parent_id);
+                if (refreshedParent) {
+                    setSelectedParent(refreshedParent);
+                }
+            }
         } catch (error) {
             console.error("Failed to fetch data:", error);
         } finally {
@@ -108,16 +137,7 @@ const ParentManagementHome = () => {
 
     const handleAddParent = async (newParentData) => {
         try {
-            // Normalize data to match API expectations
-            const payload = {
-                ...newParentData,
-                phone: Number(newParentData.phone) || 0,
-                door_no: '', // Parent form doesn't have explicit door_no yet, but API might want it
-                pincode: '',
-                parent_role: 'GUARDIAN'
-            };
-
-            await parentService.createParent(payload);
+            await parentService.createParent(newParentData);
             await fetchData();
             setShowForm(false);
         } catch (error) {
@@ -128,6 +148,26 @@ const ParentManagementHome = () => {
             }
             alert(errorMessage);
         }
+    };
+
+    const handleUpdateParent = async (parentId, parentData) => {
+        try {
+            setLoading(true);
+            await parentService.updateParent(parentId, parentData);
+            await fetchData();
+            setShowForm(false);
+            setEditingParent(null);
+        } catch (error) {
+            console.error("Error updating parent:", error);
+            alert("Failed to update parent profile.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEditParent = (parent) => {
+        setEditingParent(parent);
+        setShowForm(true);
     };
 
     const handleBulkStatusUpdate = async (newStatus) => {
@@ -242,6 +282,7 @@ const ParentManagementHome = () => {
                         onBack={() => setSelectedParent(null)}
                         onDelete={handleDelete}
                         onUpdate={() => fetchData()}
+                        onEdit={handleEditParent}
                     />
                 ) : (
                     <ParentList 
@@ -345,8 +386,13 @@ const ParentManagementHome = () => {
             {/* Add Parent Form Drawer */}
             <AddParentForm 
                 show={showForm} 
-                onClose={() => setShowForm(false)} 
+                onClose={() => {
+                    setShowForm(false);
+                    setEditingParent(null);
+                }} 
                 onAdd={handleAddParent} 
+                onUpdate={handleUpdateParent}
+                initialData={editingParent}
             />
 
             {/* Delete Confirmation Modal */}

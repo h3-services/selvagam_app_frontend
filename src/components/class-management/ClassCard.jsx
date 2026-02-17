@@ -39,14 +39,10 @@ const ClassCard = ({ classData, onRefresh, allClasses = [] }) => {
                 </div>
 
                 {/* Primary Data Points */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 mb-4">
                     <div>
                         <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Section</p>
                         <p className="text-sm font-black text-slate-800 tracking-tight">{classData.section}</p>
-                    </div>
-                    <div>
-                        <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Year</p>
-                        <p className="text-sm font-black text-slate-800 tracking-tight">{classData.academic_year}</p>
                     </div>
                 </div>
 

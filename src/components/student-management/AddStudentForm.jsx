@@ -99,7 +99,7 @@ const ClassSelector = ({ label, value, options, onChange, placeholder }) => {
     const selectedOption = options.find(opt => opt.value == value);
 
     return (
-        <div className="relative group/field" ref={containerRef}>
+        <div className={`relative group/field ${isOpen ? 'z-[3000]' : 'z-10'}`} ref={containerRef}>
             <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
             <div 
                 onClick={() => setIsOpen(!isOpen)}
@@ -124,26 +124,26 @@ const ClassSelector = ({ label, value, options, onChange, placeholder }) => {
             </div>
 
             {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-4 p-4 bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] border border-white/60 z-[3000] max-h-80 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-6 zoom-in duration-300">
-                    <div className="grid grid-cols-1 gap-2.5">
+                <div className="absolute top-full left-0 right-0 mt-4 p-4 bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] border border-white/60 z-[3001] max-h-80 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-6 zoom-in duration-300">
+                    <div className="grid grid-cols-1 gap-3">
                         {options.map((opt) => (
                             <div 
                                 key={opt.value}
                                 onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                                className={`group/item flex items-center justify-between p-4 rounded-3xl cursor-pointer transition-all duration-500 ${value == opt.value ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/20 translate-x-2' : 'hover:bg-slate-50 text-slate-600 hover:translate-x-2'}`}
+                                className={`group/item flex items-center justify-between p-5 rounded-[2rem] cursor-pointer transition-all duration-500 ${value == opt.value ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/30' : 'hover:bg-slate-50 text-slate-600 hover:translate-x-1'}`}
                             >
-                                <div className="flex items-center gap-5">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-all duration-500 ${value == opt.value ? 'bg-white/20' : 'bg-white border border-slate-100 text-slate-400 group-hover/item:text-blue-600 group-hover/item:shadow-lg'}`}>
+                                <div className="flex items-center gap-6">
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all duration-500 ${value == opt.value ? 'bg-white/20' : 'bg-white border border-slate-100 text-slate-400 group-hover/item:text-blue-600 group-hover/item:shadow-lg'}`}>
                                         {opt.className.charAt(0)}
                                     </div>
                                     <div>
-                                        <div className={`text-sm font-black ${value == opt.value ? 'text-white' : 'text-slate-900'}`}>Class {opt.className}</div>
-                                        <div className={`text-[10px] font-black uppercase tracking-widest leading-none mt-1 ${value == opt.value ? 'text-blue-100' : 'text-slate-400'}`}>Section {opt.section} • {opt.year}</div>
+                                        <div className={`text-base font-black tracking-tight ${value == opt.value ? 'text-white' : 'text-slate-900'}`}>Class {opt.className}</div>
+                                        <div className={`text-[11px] font-black uppercase tracking-[0.2em] leading-none mt-1.5 ${value == opt.value ? 'text-blue-100' : 'text-slate-400'}`}>Section {opt.section}</div>
                                     </div>
                                 </div>
                                 {value == opt.value && (
-                                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
-                                        <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30 animate-in zoom-in spin-in-12 duration-500">
+                                        <FontAwesomeIcon icon={faCheck} className="text-xs" />
                                     </div>
                                 )}
                             </div>
@@ -514,7 +514,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                             <div className="px-8 pb-8 space-y-8 bg-slate-50 min-h-full">
                                 
                                 {/* Section: Personal Details */}
-                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                                     <div className="flex items-center gap-5 mb-10">
                                         <div className="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                             <FontAwesomeIcon icon={faChild} className="text-2xl" />
@@ -559,8 +559,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                             options={classes.filter(c => c.status === 'ACTIVE').map(c => ({
                                                 value: c.class_id, 
                                                 className: c.class_name,
-                                                section: c.section,
-                                                year: c.academic_year
+                                                section: c.section
                                             }))} 
                                         />
                                         
@@ -576,7 +575,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                 </div>
 
                                 {/* Section: Parent/Guardian Link */}
-                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                                     <div className="flex items-center gap-5 mb-10">
                                         <div className="w-14 h-14 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                             <FontAwesomeIcon icon={faUserTie} className="text-2xl" />
@@ -656,7 +655,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                 </div>
 
                                 {/* Section: Secondary Parent (Optional) */}
-                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden hover:shadow-md transition-shadow duration-300">
+                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative hover:shadow-md transition-shadow duration-300">
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                                             <FontAwesomeIcon icon={faUserTie} className="text-lg" />
@@ -736,7 +735,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                 </div>
 
                                 {/* Section: Transport */}
-                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                                     <div className="flex items-center justify-between mb-10">
                                         <div className="flex items-center gap-5">
                                             <div className="w-14 h-14 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
