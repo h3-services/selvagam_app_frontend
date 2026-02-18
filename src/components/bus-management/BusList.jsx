@@ -427,59 +427,61 @@ const BusList = ({
             ` }} />
 
             {/* Mobile/Tablet Card View */}
-            <div className="lg:hidden p-1 space-y-4 pb-24">
+            <div className="lg:hidden p-4 space-y-6 pb-24">
                 {filteredBuses.map((bus) => (
-                    <div key={bus.id} className="relative bg-white rounded-3xl shadow-lg border border-blue-100 overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-5" style={{ backgroundColor: '#3A7BFF' }}></div>
+                    <div key={bus.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-50">
+                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#3A7BFF' }}></div>
                         <div className="relative p-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
+                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
+                                        <FontAwesomeIcon icon={faBus} />
+                                    </div>
                                     <div className="flex flex-col">
-                                        <h3 className="font-bold text-gray-900 text-lg">{bus.busNumber}</h3>
-                                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full border inline-block mt-1 ${getStatusColor(bus.status)}`}>
+                                        <h3 className="font-bold text-gray-900 text-lg leading-tight">{bus.busNumber}</h3>
+                                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border w-fit ${
+                                            (bus.status || '').toLowerCase() === 'active' 
+                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                                            : (bus.status || '').toLowerCase() === 'maintenance'
+                                            ? 'text-blue-600 bg-blue-50 border-blue-100'
+                                            : 'text-amber-600 bg-amber-50 border-amber-100'
+                                        }`}>
                                             {bus.status}
                                         </span>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => handleStatusChange(bus.id, 'Scrap')}
-                                    className="w-10 h-10 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-all flex items-center justify-center"
-                                >
-                                    <FontAwesomeIcon icon={faTrash} className="text-sm" />
-                                </button>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-4">
                                 <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <div className="flex items-center gap-2 mb-1">
                                         <FontAwesomeIcon icon={faUser} className="text-xs" style={{ color: '#3A7BFF' }} />
-                                        <p className="text-xs text-gray-500 font-medium">Driver</p>
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Driver</p>
                                     </div>
-                                    <p className="text-sm text-gray-900 font-bold truncate">{bus.driverName}</p>
+                                    <p className="text-sm text-gray-900 font-bold truncate tracking-tight">{bus.driverName || 'Unassigned'}</p>
                                 </div>
                                 <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
                                     <div className="flex items-center gap-2 mb-1">
                                         <FontAwesomeIcon icon={faUserFriends} className="text-xs" style={{ color: '#3A7BFF' }} />
-                                        <p className="text-xs text-gray-500 font-medium">Capacity</p>
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Capacity</p>
                                     </div>
-                                    <p className="text-sm text-gray-900 font-bold">{bus.capacity} Seats</p>
+                                    <p className="text-sm text-gray-900 font-bold truncate tracking-tight">{bus.capacity} Seats</p>
                                 </div>
-                            </div>
-
-                            <div className="p-3 rounded-xl mb-4" style={{ backgroundColor: '#f0f4ff' }}>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <FontAwesomeIcon icon={faPhone} className="text-xs" style={{ color: '#3A7BFF' }} />
-                                    <p className="text-xs text-gray-500 font-medium">Contact</p>
+                                <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f0f4ff' }}>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <FontAwesomeIcon icon={faRoute} className="text-xs" style={{ color: '#3A7BFF' }} />
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Route Assignment</p>
+                                    </div>
+                                    <p className="text-sm text-gray-900 font-bold truncate tracking-tight">{bus.route || 'TRANSIT (NO ASSIGNMENT)'}</p>
                                 </div>
-                                <p className="text-sm text-gray-900 font-semibold">{bus.contactNumber}</p>
                             </div>
 
                             <button
                                 onClick={() => setSelectedBus(bus)}
-                                className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all"
+                                className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95"
                                 style={{ backgroundColor: '#3A7BFF' }}
                             >
-                                <FontAwesomeIcon icon={faEye} className="mr-2" /> View Details
+                                <FontAwesomeIcon icon={faEye} /> View Fleet Asset
                             </button>
                         </div>
                     </div>

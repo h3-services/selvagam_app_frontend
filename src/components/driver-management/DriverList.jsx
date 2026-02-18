@@ -9,7 +9,8 @@ import {
     faIdCard, 
     faPhone,
     faEnvelope,
-    faEdit
+    faEdit,
+    faIdBadge
 } from '@fortawesome/free-solid-svg-icons';
 
 const DriverList = ({
@@ -257,50 +258,71 @@ const DriverList = ({
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden p-4 space-y-6 pb-24">
                 {filteredDrivers.map((driver) => (
-                    <div key={driver.id} 
-                         onClick={() => setSelectedDriver(driver)}
-                         className="relative bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden active:scale-95 transition-transform"
-                    >
-                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 bg-slate-50 group-hover:scale-110 transition-transform" />
-                        <div className="relative p-6">
-                            <div className="flex items-center gap-5 mb-6">
-                                <div className="w-16 h-16 rounded-[1.5rem] bg-slate-900 text-white flex items-center justify-center text-2xl font-black shadow-2xl overflow-hidden">
-                                    {driver.photo_url ? (
-                                        <img src={driver.photo_url} alt="" className="w-full h-full object-cover" />
-                                    ) : (
-                                        driver.name.charAt(0)
-                                    )}
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-slate-900 text-xl tracking-tight leading-none mb-1">{driver.name}</h3>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{driver.email}</p>
+                    <div key={driver.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-50">
+                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#3A7BFF' }}></div>
+                        <div className="relative p-5">
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
+                                        {driver.photo_url ? (
+                                            <img src={driver.photo_url} alt="" className="w-full h-full object-cover rounded-2xl" />
+                                        ) : (
+                                            driver.name.charAt(0)
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-900 text-lg leading-tight">{driver.name}</h3>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Personnel ID: {driver.id}</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Mobile</p>
-                                    <p className="text-sm text-slate-900 font-black truncate tracking-tight">{driver.mobile}</p>
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <FontAwesomeIcon icon={faPhone} className="text-xs" style={{ color: '#3A7BFF' }} />
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Contact</p>
+                                    </div>
+                                    <p className="text-sm text-gray-900 font-bold truncate tracking-tight">{driver.mobile}</p>
                                 </div>
-                                <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">License</p>
-                                    <p className="text-sm text-slate-900 font-black truncate tracking-tight">{driver.licenseNumber}</p>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <FontAwesomeIcon icon={faIdCard} className="text-xs" style={{ color: '#3A7BFF' }} />
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">License</p>
+                                    </div>
+                                    <p className="text-sm text-gray-900 font-bold truncate tracking-tight">{driver.licenseNumber}</p>
                                 </div>
-                                <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Vehicle</p>
-                                    <p className="text-sm text-slate-900 font-black truncate tracking-tight">{driver.vehicleNumber}</p>
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <FontAwesomeIcon icon={faIdBadge} className="text-xs" style={{ color: '#3A7BFF' }} />
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Vehicle</p>
+                                    </div>
+                                    <p className="text-sm text-gray-900 font-bold truncate tracking-tight">{driver.vehicleNumber || 'UNASSIGNED'}</p>
                                 </div>
-                                <div className="p-4 rounded-3xl bg-slate-50 border border-slate-100">
-                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Status</p>
-                                    <span className={`inline-block mt-1 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
-                                        driver.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                                        driver.status === 'Resigned' ? 'text-red-600 bg-red-50' :
-                                        'text-amber-600 bg-amber-50'
+                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <FontAwesomeIcon icon={faUserClock} className="text-xs" style={{ color: '#3A7BFF' }} />
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Status</p>
+                                    </div>
+                                    <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                        (driver.status || '').toLowerCase() === 'active' 
+                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                                        : (driver.status || '').toLowerCase() === 'resigned'
+                                        ? 'text-red-600 bg-red-50 border-red-100'
+                                        : 'text-amber-600 bg-amber-50 border-amber-100'
                                     }`}>
                                         {driver.status || 'Inactive'}
                                     </span>
                                 </div>
                             </div>
+
+                            <button
+                                onClick={() => setSelectedDriver(driver)}
+                                className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95"
+                                style={{ backgroundColor: '#3A7BFF' }}
+                            >
+                                <FontAwesomeIcon icon={faIdBadge} /> View Full Identity
+                            </button>
                         </div>
                     </div>
                 ))}

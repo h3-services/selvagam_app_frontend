@@ -163,11 +163,20 @@ const DriverManagementHome = () => {
         return matchesSearch && !isResignedStatus;
     });
 
-    const handleAdd = async (newDriver) => {
+    const handleAdd = async (newDriverData) => {
         setLoading(true);
         try {
-            await driverService.createDriver(newDriver);
-            await fetchDrivers(); // Refresh list to see new driver
+            const payload = {
+                name: newDriverData.name,
+                phone: newDriverData.phone,
+                email: newDriverData.email,
+                licence_number: newDriverData.licence_number,
+                licence_expiry: newDriverData.licence_expiry,
+                fcm_token: newDriverData.fcm_token,
+                password: newDriverData.password
+            };
+            await driverService.createDriver(payload);
+            await fetchDrivers(); 
             setShowModal(false);
         } catch (err) {
             console.error(err);

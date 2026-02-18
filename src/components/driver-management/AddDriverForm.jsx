@@ -12,49 +12,42 @@ import {
     faCheck, 
     faLock, 
     faLink, 
-    faExclamationCircle, 
     faMagic,
     faFingerprint,
     faBriefcase,
     faCameraRetro,
-    faIdBadge
+    faIdBadge,
+    faChevronDown
 } from '@fortawesome/free-solid-svg-icons';
+import { COLORS } from '../../constants/colors';
 
-const InputField = ({ label, icon, type = "text", placeholder, value, onChange, error, errorMessage, maxLength }) => {
-    return (
-        <div className="group">
-            <div className="flex justify-between items-center mb-1.5 px-1">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none group-focus-within:text-blue-600 transition-colors">
-                    {label}
-                </label>
-                {error && (
-                    <span className="text-[10px] text-rose-500 font-bold uppercase tracking-tighter flex items-center gap-1 animate-pulse">
-                        <FontAwesomeIcon icon={faExclamationCircle} /> {errorMessage || "Required"}
-                    </span>
-                )}
-            </div>
-            <div className="relative">
-                <div className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${error ? 'bg-rose-50 text-rose-500' : 'bg-slate-50 text-slate-400 group-focus-within:bg-blue-600 group-focus-within:text-white group-focus-within:scale-110 group-focus-within:shadow-lg group-focus-within:shadow-blue-200'}`}>
-                    <FontAwesomeIcon icon={icon} className="text-sm" />
-                </div>
-                <input
-                    type={type}
-                    placeholder={placeholder}
-                    value={value}
-                    onChange={onChange}
-                    maxLength={maxLength}
-                    className={`w-full bg-[#fcfcfd] border border-slate-100 rounded-2xl pl-16 pr-5 py-3.5 text-sm font-black text-slate-900 focus:outline-none transition-all placeholder:text-slate-300 placeholder:font-medium focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/5 ${error ? 'border-rose-200 bg-rose-50/30' : ''}`}
-                />
-            </div>
+const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false, error, maxLength }) => (
+    <div className="relative group/field">
+        <div className="flex justify-between items-center mb-1.5 px-1">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
+            {error && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-tighter animate-pulse">{error}</span>}
         </div>
-    );
-};
+        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 ${disabled ? 'bg-slate-50 border-slate-100' : error ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/5 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500'}`}>
+            <div className={`w-12 h-12 flex items-center justify-center absolute left-0 top-0 pointer-events-none transition-all duration-500 ${error ? 'text-rose-400' : 'text-slate-400 group-focus-within/field:text-blue-600 group-focus-within/field:scale-110'}`}>
+                <FontAwesomeIcon icon={icon} className="text-sm" />
+            </div>
+            <input
+                type={type}
+                value={value}
+                onChange={onChange}
+                disabled={disabled}
+                maxLength={maxLength}
+                className="w-full pl-12 pr-4 py-4 bg-transparent rounded-2xl text-[13px] font-bold text-slate-700 placeholder-slate-300 focus:outline-none disabled:text-slate-400"
+                placeholder={placeholder}
+            />
+        </div>
+    </div>
+);
 
 const AddDriverForm = ({ show, onClose, onAdd }) => {
     const [newDriver, setNewDriver] = useState({
-        name: '', phone: '', email: '', dob: '', licence_number: '',
-        licence_expiry: '', aadhar_number: '', licence_url: '',
-        aadhar_url: '', photo_url: '', password: ''
+        name: '', phone: '', email: '', licence_number: '',
+        licence_expiry: '', fcm_token: 'string', password: ''
     });
 
     const [touched, setTouched] = useState({});
@@ -65,14 +58,9 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
         if (values.email?.trim() && !/\S+@\S+\.\S+/.test(values.email)) errors.email = "Invalid";
         if (!values.phone) errors.phone = "Required";
         else if (values.phone.length !== 10) errors.phone = "10 Digits";
-        if (!values.dob) errors.dob = "Required";
         if (!values.password) errors.password = "Required";
         if (!values.licence_number?.trim()) errors.licence_number = "Required";
         if (!values.licence_expiry) errors.licence_expiry = "Required";
-        if (!values.aadhar_number?.trim()) errors.aadhar_number = "Required";
-        if (!values.photo_url?.trim()) errors.photo_url = "Required";
-        if (!values.licence_url?.trim()) errors.licence_url = "Required";
-        if (!values.aadhar_url?.trim()) errors.aadhar_url = "Required";
         return errors;
     };
 
@@ -86,13 +74,11 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
         if (isValid) {
             onAdd({
                 ...newDriver,
-                phone: Number(newDriver.phone),
-                status: 'ACTIVE'
+                phone: Number(newDriver.phone)
             });
             setNewDriver({
-                name: '', phone: '', email: '', dob: '', licence_number: '',
-                licence_expiry: '', aadhar_number: '', licence_url: '',
-                aadhar_url: '', photo_url: '', password: ''
+                name: '', phone: '', email: '', licence_number: '',
+                licence_expiry: '', fcm_token: 'string', password: ''
             });
             setTouched({});
         }
@@ -108,23 +94,19 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
         if (!touched[field]) setTouched(prev => ({ ...prev, [field]: true }));
     };
 
-    const generateRandomDriver = () => {
+    const handleAutoFill = () => {
         const randomNum = Math.floor(Math.random() * 10000);
         const randomPhone = "9" + Math.floor(Math.random() * 1000000000).toString().substring(0, 9);
         const futureDate = new Date();
         futureDate.setFullYear(futureDate.getFullYear() + 5);
 
         setNewDriver({
-            name: `Fleet Captain ${randomNum}`,
+            name: `Driver ${randomNum}`,
             email: `driver${randomNum}@fleet.com`,
             phone: randomPhone,
-            dob: '1985-06-12',
             licence_number: `DL-${randomNum}-IND`,
             licence_expiry: futureDate.toISOString().split('T')[0],
-            aadhar_number: `7854 5678 ${randomNum}`,
-            photo_url: `https://i.pravatar.cc/300?u=${randomNum}`,
-            licence_url: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
-            aadhar_url: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+            fcm_token: `fcm_token_${randomNum}`,
             password: 'AuthPassword2024'
         });
         const allTouched = Object.keys(newDriver).reduce((acc, key) => ({ ...acc, [key]: true }), {});
@@ -133,105 +115,110 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
 
     if (!show) return null;
 
-    const getFieldProps = (field) => ({
-        error: touched[field] && !!errors[field],
-        errorMessage: errors[field],
-        value: newDriver[field],
-        onChange: (e) => updateField(field, e.target.value)
-    });
-
     return (
-        <div className="fixed inset-0 z-[2000] flex justify-end">
-            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+        <>
+            <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[1999] transition-opacity duration-300" onClick={onClose} />
             
-            <div className="relative w-full max-w-3xl bg-[#fcfcfd] h-full shadow-[-40px_0_80px_rgba(0,0,0,0.1)] flex flex-col animate-slide-in-right border-l border-slate-100">
+            <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-2xl z-[2000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
                 
-                {/* Visual Header */}
-                <div className="px-10 py-12 bg-white flex justify-between items-center group/header">
-                    <div className="flex items-center gap-8">
-                        <div className="w-20 h-20 rounded-[2rem] bg-slate-900 text-white flex items-center justify-center shadow-2xl shadow-indigo-200 transition-transform group-hover/header:scale-105 duration-500">
-                            <FontAwesomeIcon icon={faUserPlus} className="text-3xl" />
+                {/* Header Substrate */}
+                <div className="relative px-8 py-8 bg-slate-50 flex justify-between items-center z-10">
+                    <div className="flex items-center gap-6">
+                        <div className="relative group">
+                            <div className="absolute -inset-2 bg-blue-600 blur-xl opacity-0 group-hover:opacity-10 rounded-full transition-opacity duration-700"></div>
+                            <div className="w-14 h-14 rounded-[22px] flex items-center justify-center shadow-[0_10px_25px_rgba(58,123,255,0.25)] relative z-10 text-white transform group-hover:rotate-6 transition-transform duration-500" style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}>
+                                <FontAwesomeIcon icon={faUserPlus} className="text-lg" />
+                            </div>
                         </div>
                         <div>
-                            <h3 className="text-4xl font-black text-slate-900 tracking-tighter leading-none mb-3 font-['Outfit']">Enroll Driver</h3>
-                            <div className="flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Fleet Personnel Registry</p>
+                            <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">Enroll Driver</h3>
+                            <div className="flex items-center gap-2">
+                                <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
+                                <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">API Core Compliance</p>
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <button onClick={generateRandomDriver} className="w-12 h-12 rounded-2xl bg-slate-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm flex items-center justify-center group/magic">
-                            <FontAwesomeIcon icon={faMagic} className="group-hover/magic:rotate-12 transition-transform" />
+                        <button 
+                            onClick={handleAutoFill}
+                            className="h-12 px-6 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center text-blue-600 font-black text-[10px] uppercase tracking-widest gap-2.5 transition-all active:scale-95 shadow-sm"
+                        >
+                            <FontAwesomeIcon icon={faMagic} className="opacity-70" /> 
+                            <span>Auto Pilot</span>
                         </button>
-                        <button onClick={onClose} className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center">
-                            <FontAwesomeIcon icon={faTimes} className="text-xl" />
+                        <button 
+                            onClick={onClose} 
+                            className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
+                        >
+                            <FontAwesomeIcon icon={faTimes} className="text-lg" />
                         </button>
                     </div>
                 </div>
 
-                {/* Form Substrate */}
-                <div className="flex-1 overflow-y-auto px-10 py-8 custom-scrollbar space-y-12">
+                {/* Form Environment */}
+                <div className="flex-1 overflow-y-auto px-8 pb-32 space-y-8 custom-scrollbar">
                     
-                    {/* Bento Card: Identity Core */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden group/card">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -mr-16 -mt-16 group-hover/card:scale-110 transition-transform duration-700" />
-                        <h4 className="flex items-center gap-3 text-[11px] font-black text-slate-900 uppercase tracking-widest mb-8 relative z-10">
-                            <FontAwesomeIcon icon={faFingerprint} className="text-blue-600" />
-                            Identity Core
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                            <InputField label="Full Name" icon={faUser} {...getFieldProps('name')} placeholder="Captain's Legal Name" className="md:col-span-2" />
-                            <InputField label="Contact Terminal" icon={faPhone} {...getFieldProps('phone')} type="tel" maxLength={10} placeholder="Primary 10-Digit Mobile" />
-                            <InputField label="Digital Mail" icon={faEnvelope} {...getFieldProps('email')} type="email" placeholder="official@fleet.net" />
-                            <InputField label="Lifecycle Origin" icon={faCalendarAlt} {...getFieldProps('dob')} type="date" />
-                            <InputField label="System Clearance" icon={faLock} {...getFieldProps('password')} type="password" placeholder="Access Authentication" />
+                    {/* Crew Identity Bento */}
+                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                        <div className="flex items-center gap-5 mb-10">
+                            <div className="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
+                                <FontAwesomeIcon icon={faFingerprint} className="text-2xl" />
+                            </div>
+                            <div>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Crew Identity</h4>
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Personnel Core Metrics</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <InputField label="Full Name" icon={faUser} value={newDriver.name} onChange={(e) => updateField('name', e.target.value)} placeholder="Legal Name" error={touched.name && errors.name} />
+                            
+                            <div className="grid grid-cols-2 gap-5">
+                                <InputField label="Contact Terminal" icon={faPhone} value={newDriver.phone} onChange={(e) => updateField('phone', e.target.value)} type="tel" maxLength={10} placeholder="10-Digit Mobile" error={touched.phone && errors.phone} />
+                                <InputField label="Digital Mail" icon={faEnvelope} value={newDriver.email} onChange={(e) => updateField('email', e.target.value)} type="email" placeholder="user@example.com" error={touched.email && errors.email} />
+                            </div>
+                            <InputField label="Auth Password" icon={faLock} value={newDriver.password} onChange={(e) => updateField('password', e.target.value)} type="password" placeholder="System Access" error={touched.password && errors.password} />
                         </div>
                     </div>
 
-                    {/* Bento Card: Operational Clearance */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden group/card">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-bl-full -mr-16 -mt-16 group-hover/card:scale-110 transition-transform duration-700" />
-                        <h4 className="flex items-center gap-3 text-[11px] font-black text-slate-900 uppercase tracking-widest mb-8 relative z-10">
-                            <FontAwesomeIcon icon={faBriefcase} className="text-blue-600" />
-                            Operational Clearance
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                            <InputField label="License ID" icon={faIdCard} {...getFieldProps('licence_number')} placeholder="DL-STRAT-XXXX" />
-                            <InputField label="Clearance Expiry" icon={faCalendarAlt} {...getFieldProps('licence_expiry')} type="date" />
-                            <InputField label="Aadhar Directive" icon={faIdBadge} {...getFieldProps('aadhar_number')} placeholder="Universal ID Number" className="md:col-span-2" />
+                    {/* Operational Clearance Bento */}
+                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                        <div className="flex items-center gap-5 mb-10">
+                            <div className="w-14 h-14 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
+                                <FontAwesomeIcon icon={faBriefcase} className="text-2xl" />
+                            </div>
+                            <div>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Operational Clearance</h4>
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Compliance & Credentials</p>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Bento Card: Visual & Document Assets */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm relative overflow-hidden group/card">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-bl-full -mr-16 -mt-16 group-hover/card:scale-110 transition-transform duration-700" />
-                        <h4 className="flex items-center gap-3 text-[11px] font-black text-slate-900 uppercase tracking-widest mb-8 relative z-10">
-                            <FontAwesomeIcon icon={faCameraRetro} className="text-blue-600" />
-                            Asset Synchronization
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                            <InputField label="Visual Profile URL" icon={faLink} {...getFieldProps('photo_url')} placeholder="Secure Avatar URI" className="md:col-span-2" />
-                            <InputField label="Clearance Doc URL" icon={faLink} {...getFieldProps('licence_url')} placeholder="License Image URI" />
-                            <InputField label="Registry Doc URL" icon={faLink} {...getFieldProps('aadhar_url')} placeholder="Aadhar Image URI" />
+                        <div className="space-y-6">
+                            <InputField label="License ID" icon={faIdCard} value={newDriver.licence_number} onChange={(e) => updateField('licence_number', e.target.value)} placeholder="DL-XXXX-XXXX" error={touched.licence_number && errors.licence_number} />
+                            <InputField label="Clearance Expiry" icon={faCalendarAlt} value={newDriver.licence_expiry} onChange={(e) => updateField('licence_expiry', e.target.value)} type="date" error={touched.licence_expiry && errors.licence_expiry} />
                         </div>
                     </div>
                 </div>
 
                 {/* Execution Footer */}
-                <div className="px-10 py-10 bg-white border-t border-slate-100">
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-20">
                     <button
                         onClick={handleAdd}
-                        className={`w-full py-5 rounded-[2rem] font-black text-white text-[11px] uppercase tracking-[0.3em] flex items-center justify-center gap-5 transition-all shadow-2xl shadow-indigo-100 active:scale-95 ${!isValid && Object.keys(touched).length > 0 ? 'bg-slate-400 opacity-60' : 'bg-slate-900 hover:bg-black hover:shadow-indigo-200'}`}
+                        className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${!isValid && Object.keys(touched).length > 0 ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
+                        style={{ 
+                            background: isValid || Object.keys(touched).length === 0 
+                                ? 'linear-gradient(135deg, #3A7BFF 0%, #1e3a8a 100%)' 
+                                : '' 
+                        }}
                     >
-                        <span>Authorize Fleet Member</span>
-                        <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center shadow-inner group-hover:rotate-6 transition-transform">
-                            <FontAwesomeIcon icon={faCheck} className="text-sm" />
+                        <span>Register Driver</span>
+                        <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform">
+                            <FontAwesomeIcon icon={faCheck} className="text-xs" />
                         </div>
                     </button>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
