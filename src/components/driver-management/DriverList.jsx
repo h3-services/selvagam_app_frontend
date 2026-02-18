@@ -254,32 +254,7 @@ const DriverList = ({
                 </div>
             </div>
 
-            {/* Selection Overrides */}
-            <style dangerouslySetInnerHTML={{ __html: `
-                .ag-center-header .ag-header-cell-comp-wrapper {
-                    justify-content: center !important;
-                }
-                .ag-selection-checkbox {
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                    width: 100% !important;
-                    cursor: pointer !important;
-                }
-                .ag-checkbox-input-wrapper {
-                    cursor: pointer !important;
-                    width: 20px !important;
-                    height: 20px !important;
-                }
-                .ag-center-header .ag-header-cell-label {
-                     justify-content: center !important;
-                }
-                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
-                .custom-ag-grid .ag-cell { border: none !important; }
-                .custom-ag-grid .ag-root-wrapper { border: none !important; }
-            ` }} />
+
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden p-4 space-y-6 pb-24">

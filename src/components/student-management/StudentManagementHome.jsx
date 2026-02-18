@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers, faBus, faWalking, faUserCheck, faUserSlash, faUserTie } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers, faBus, faWalking, faUserCheck, faUserSlash, faUserTie, faBan } from '@fortawesome/free-solid-svg-icons';
 import { useRef } from 'react';
 import { COLORS } from '../../constants/colors';
 import StudentList from './StudentList';
@@ -542,33 +542,44 @@ const StudentManagementHome = () => {
                             </div>
                             <div className="space-y-1">
                                 <div className="px-3 py-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Update Primary Status</div>
-                                {[
-                                    { label: 'Set as Current', value: 'CURRENT', icon: faUserCheck, color: 'text-emerald-500', bgColor: 'bg-emerald-50/50' },
-                                    { label: 'Mark as Alumni', value: 'ALUMNI', icon: faGraduationCap, color: 'text-blue-500', bgColor: 'bg-blue-50/50' },
-                                    { label: 'Long Absent', value: 'LONG_ABSENT', icon: faUserSlash, color: 'text-rose-500', bgColor: 'bg-rose-50/50' }
-                                ].map(opt => (
-                                    <button 
-                                        key={opt.value}
-                                        onClick={() => handleBulkStatusUpdate(opt.value)}
-                                        className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-xl transition-all group"
-                                    >
-                                        <div className={`w-8 h-8 rounded-lg ${opt.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                            <FontAwesomeIcon icon={opt.icon} className={`text-sm ${opt.color}`} />
-                                        </div>
-                                        {opt.label}
-                                    </button>
-                                ))}
+                                {(() => {
+                                    const options = [
+                                        { label: 'Set as Current', value: 'CURRENT', icon: faUserCheck, color: 'text-emerald-500', bgColor: 'bg-emerald-50/50' },
+                                        { label: 'Mark as Alumni', value: 'ALUMNI', icon: faGraduationCap, color: 'text-blue-500', bgColor: 'bg-blue-50/50' },
+                                        { label: 'Long Absent', value: 'LONG_ABSENT', icon: faUserSlash, color: 'text-rose-500', bgColor: 'bg-rose-50/50' },
+                                        { label: 'Discontinue', value: 'DISCONTINUED', icon: faBan, color: 'text-red-500', bgColor: 'bg-red-50/50' }
+                                    ];
+                                    
+                                    // Context-aware filtering of status options
+                                    let displayedOptions = options;
+                                    
+                                    if (activeTab === 'Active') {
+                                        // On Active tab, hide 'Set as Current'
+                                        displayedOptions = displayedOptions.filter(o => o.value !== 'CURRENT');
+                                    } else if (activeTab === 'LongAbsent') {
+                                        // On Long Absent tab, hide 'Long Absent'
+                                        displayedOptions = displayedOptions.filter(o => o.value !== 'LONG_ABSENT');
+                                    }
+                                    // Add conditions for other tabs (e.g., Alumni) if they exist in the future
+                                        
+                                    return displayedOptions.map(opt => (
+                                        <button 
+                                            key={opt.value}
+                                            onClick={() => handleBulkStatusUpdate(opt.value)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 active:bg-slate-100 rounded-xl transition-all group"
+                                        >
+                                            <div className={`w-8 h-8 rounded-lg ${opt.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                                <FontAwesomeIcon icon={opt.icon} className={`text-sm ${opt.color}`} />
+                                            </div>
+                                            {opt.label}
+                                        </button>
+                                    ));
+                                })()}
                                 
                                 <div className="h-px bg-slate-100 my-2 mx-2" />
                                 <div className="px-3 py-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Transport Fleet</div>
-                                <div className="grid grid-cols-2 gap-2 p-1">
-                                    <button 
-                                        onClick={() => handleBulkTransportUpdate('ACTIVE')}
-                                        className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors group"
-                                    >
-                                        <FontAwesomeIcon icon={faBus} className="text-sm group-hover:scale-110 transition-transform" />
-                                        <span className="text-[9px] font-black uppercase">Enable</span>
-                                    </button>
+                                <div className="grid grid-cols-1 gap-2 p-1">
+                                    {/* Enable button hidden per user request across different pages */}
                                     <button 
                                         onClick={() => handleBulkTransportUpdate('INACTIVE')}
                                         className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 transition-colors group"

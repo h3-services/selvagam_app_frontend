@@ -22,3 +22,40 @@ body,
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in;
 }
+
+/* Global AG Grid Styles - Removing Vertical Lines */
+.ag-theme-quartz,
+.ag-theme-quartz-dark {
+  --ag-cell-horizontal-border: none !important;
+  --ag-header-column-separator-display: none !important;
+  --ag-header-column-resize-handle-display: none !important;
+}
+
+.ag-header-cell::after,
+.ag-header-group-cell::after {
+  display: none !important;
+}
+
+.ag-pinned-left-header,
+.ag-pinned-left-cols-container {
+  border-right: none !important;
+}
+
+.ag-cell {
+  border-right: none !important;
+}
+
+.ag-center-header .ag-header-cell-comp-wrapper {
+  justify-content: center !important;
+}
+
+.ag-selection-checkbox {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+.ag-checkbox-input-wrapper {
+  transform: scale(1.4) !important;
+}
