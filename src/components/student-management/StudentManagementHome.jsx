@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers, faBus, faWalking, faUserCheck, faUserSlash } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers, faBus, faWalking, faUserCheck, faUserSlash, faUserTie } from '@fortawesome/free-solid-svg-icons';
 import { useRef } from 'react';
 import { COLORS } from '../../constants/colors';
 import StudentList from './StudentList';
@@ -28,8 +28,13 @@ const StudentManagementHome = () => {
     const [showDeactivateModal, setShowDeactivateModal] = useState(false);
     const [deactivatingItemId, setDeactivatingItemId] = useState(null);
     const [deactivationReason, setDeactivationReason] = useState("");
+    const [showParentStatusModal, setShowParentStatusModal] = useState(false);
+    const [pendingStudentStatusUpdate, setPendingStudentStatusUpdate] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
     const [showBulkMenu, setShowBulkMenu] = useState(false);
+    const [showBulkParentStatusModal, setShowBulkParentStatusModal] = useState(false);
+    const [pendingBulkUpdate, setPendingBulkUpdate] = useState(null);
+    const [bulkParentSelection, setBulkParentSelection] = useState([]);
 
     // Fetch students and parents on mount
     useEffect(() => {
@@ -121,9 +126,9 @@ const StudentManagementHome = () => {
                 student.studentStatus === 'CURRENT' && 
                 student.originalData?.transport_status === 'ACTIVE'
             );
-        } else if (activeTab === "Archive") {
-            // Archived Records shows everyone who is NOT current (Inactive, Alumni, etc.)
-            result = result.filter(student => student.studentStatus && student.studentStatus !== 'CURRENT');
+        } else if (activeTab === "LongAbsent") {
+            // Only show students marked as Long Absent
+            result = result.filter(student => student.studentStatus === 'LONG_ABSENT');
         }
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
@@ -170,11 +175,66 @@ const StudentManagementHome = () => {
 
     const handleBulkStatusUpdate = async (newStatus) => {
         if (!selectedRows.length) return;
+        
+        // Prepare unique parents list with related students
+        const parentsMap = new Map();
+        selectedRows.forEach(s => {
+            if (s.parentData && s.parentData.parent_id) {
+                if (!parentsMap.has(s.parentData.parent_id)) {
+                    parentsMap.set(s.parentData.parent_id, {
+                        ...s.parentData,
+                        relatedStudents: [s.name]
+                    });
+                } else {
+                    parentsMap.get(s.parentData.parent_id).relatedStudents.push(s.name);
+                }
+            }
+        });
+        
+        const uniqueParents = Array.from(parentsMap.values());
+        
+        // Smart Selection: Default select parents whose status contradicts the new student status
+        const targetParentStatus = newStatus === 'CURRENT' ? 'ACTIVE' : 'INACTIVE';
+        const smartSelection = uniqueParents
+            .filter(p => (p.parents_active_status || 'ACTIVE') !== targetParentStatus)
+            .map(p => p.parent_id);
+
+        setPendingBulkUpdate({ newStatus, selectedRows, uniqueParents });
+        setBulkParentSelection(smartSelection);
+        setShowBulkParentStatusModal(true);
+    };
+
+    const confirmBulkUpdate = async (shouldUpdateParents) => {
+        if (!pendingBulkUpdate) return;
+        const { newStatus, selectedRows } = pendingBulkUpdate;
+
         setLoading(true);
         try {
+            // 1. Update all selected students
             await Promise.all(selectedRows.map(student => 
                 studentService.updateStudentStatus(student.id, newStatus)
             ));
+
+            // 2. Update Selected Parents if confirmed
+            if (shouldUpdateParents && bulkParentSelection.length > 0) {
+                 const parentStatusToSet = newStatus === 'CURRENT' ? 'ACTIVE' : 'INACTIVE';
+                 
+                 
+                 await Promise.all(bulkParentSelection.map(pid => {
+                     // Corrected method name to updateParentStatus
+                     return parentService.updateParentStatus 
+                        ? parentService.updateParentStatus(pid, parentStatusToSet)
+                        : Promise.resolve();
+                 }));
+                 
+                 // Update local parent state
+                 setParents(prev => prev.map(p => 
+                    bulkParentSelection.includes(p.parent_id)
+                    ? { ...p, parents_active_status: parentStatusToSet }
+                    : p
+                 ));
+            }
+
             setShowBulkMenu(false);
             setSelectedRows([]);
             await fetchAllData();
@@ -183,6 +243,9 @@ const StudentManagementHome = () => {
             alert("Some updates failed. Please refresh and try again.");
         } finally {
             setLoading(false);
+            setShowBulkParentStatusModal(false);
+            setPendingBulkUpdate(null);
+            setBulkParentSelection([]);
         }
     };
 
@@ -205,7 +268,80 @@ const StudentManagementHome = () => {
     };
     
     // Status update handler
+    // Status update handler
     const handleStatusUpdate = async (studentId, newStatus) => {
+        const student = students.find(s => s.id === studentId);
+        // We verify parent status field. Assuming 'parents_active_status' from context, strictly checking 'ACTIVE'.
+        // If data is missing, we default to treating it as inconsistent or just skip modal for safety?
+        // Let's safe check: if no parent data, skip.
+        if (!student || !student.parentData) {
+            await executeStatusUpdate(studentId, newStatus);
+            return;
+        }
+
+        const parentStatus = student.parentData.parents_active_status || 'ACTIVE'; // Default to active if undefined? Or handle null. 
+        // Note: Safe to assume if parents_active_status is missing, it might be an older record or default. 
+        // Let's assume 'ACTIVE' if undefined for UX to prompt deactivation, OR verify typical API response.
+        
+        if (newStatus === 'CURRENT') {
+            // Case: Reactivating Student
+            if (parentStatus !== 'ACTIVE') {
+                 // Parent is Inactive, prompt to Reactivate
+                 setPendingStudentStatusUpdate({ studentId, newStatus });
+                 setShowParentStatusModal(true);
+            } else {
+                 // Parent already Active, just sync student
+                 await executeStatusUpdate(studentId, newStatus);
+            }
+        } else {
+            // Case: Deactivating Student (Alumni, Long Absent, etc)
+            if (parentStatus === 'ACTIVE') {
+                 // Parent is Active, prompt to Deactivate
+                 setPendingStudentStatusUpdate({ studentId, newStatus });
+                 setShowParentStatusModal(true);
+            } else {
+                 // Parent already Inactive, just sync student
+                 await executeStatusUpdate(studentId, newStatus);
+            }
+        }
+    };
+
+    const confirmParentStatusUpdate = async (parentStatusOrNull) => {
+        if (!pendingStudentStatusUpdate) return;
+        
+        const { studentId, newStatus } = pendingStudentStatusUpdate;
+        
+        // 1. Update Student Status
+        await executeStatusUpdate(studentId, newStatus);
+        
+        // 2. Update Parent Status if requested
+        if (parentStatusOrNull) {
+            const student = students.find(s => s.id === studentId);
+            if (student && student.parentData) {
+                try {
+                    if (typeof parentService.updateParentStatus === 'function') {
+                        await parentService.updateParentStatus(student.parentData.parent_id, parentStatusOrNull);
+                    }
+                   
+                   // Update local parent state for UI reflection
+                   setParents(prev => prev.map(p => 
+                        p.parent_id === student.parentData.parent_id 
+                        ? { ...p, parents_active_status: parentStatusOrNull } 
+                        : p
+                   ));
+                   
+                } catch (err) {
+                    console.error("Failed to update parent status", err);
+                    alert("Student updated, but failed to update parent status.");
+                }
+            }
+        }
+        
+        setShowParentStatusModal(false);
+        setPendingStudentStatusUpdate(null);
+    };
+
+    const executeStatusUpdate = async (studentId, newStatus) => {
         try {
             await studentService.updateStudentStatus(studentId, newStatus);
             // Update local state immediately so filtering (Active/Archive) reacts
@@ -259,7 +395,7 @@ const StudentManagementHome = () => {
             setEditingStudent(null);
             
             // If we're currently viewing this student's details, refresh that view too
-            if (activeTab === "Active" || activeTab === "Archive") {
+            if (activeTab === "Active" || activeTab === "LongAbsent") {
                 // The fetchAllData handles students state, but we might need to update selectedStudent if open
                 if (selectedStudent && selectedStudent.id === studentId) {
                     const updated = (await studentService.getAllStudents()).find(s => s.student_id === studentId);
@@ -326,14 +462,14 @@ const StudentManagementHome = () => {
                                     Active Students
                                 </button>
                                 <button
-                                    onClick={() => setActiveTab('Archive')}
+                                    onClick={() => setActiveTab('LongAbsent')}
                                     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
-                                        activeTab === 'Archive' 
+                                        activeTab === 'LongAbsent' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
                                         : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
-                                    Archived Records
+                                    Long Absent
                                 </button>
                             </div>
 
@@ -540,6 +676,185 @@ const StudentManagementHome = () => {
                                 Confirm
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+                    {/* Parent Status Update Modal */}
+                    {/* Parent Status Update Modal */}
+            {showParentStatusModal && pendingStudentStatusUpdate && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setShowParentStatusModal(false)}
+                    />
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300 text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-6 mx-auto">
+                            <FontAwesomeIcon icon={faUserTie} className="text-2xl text-blue-600" />
+                        </div>
+                        
+                        {(() => {
+                             const student = students.find(s => s.id === pendingStudentStatusUpdate.studentId);
+                             const parentStatus = student?.parentData?.parents_active_status || 'ACTIVE'; // Default to Active if missing
+                             const isParentActive = parentStatus === 'ACTIVE';
+                             
+                             return (
+                                 <>
+                                     <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                         {isParentActive ? 'Deactivate Parent Account?' : 'Reactivate Parent Account?'}
+                                     </h3>
+                                     <p className="text-gray-500 text-sm mb-6 leading-relaxed text-center">
+                                         {isParentActive 
+                                             ? "The parent account is currently Active. Do you want to deactivate it as well?"
+                                             : "The parent account is currently Inactive. Do you want to reactivate it as well?"}
+                                     </p>
+                                     
+                                     <div className="flex flex-col gap-3 w-full">
+                                         {isParentActive ? (
+                                             <button
+                                                 onClick={() => confirmParentStatusUpdate('INACTIVE')}
+                                                 className="w-full px-4 py-3 rounded-xl bg-amber-50 text-amber-700 font-bold text-sm hover:bg-amber-100 transition-all active:scale-95 flex items-center justify-center gap-2"
+                                             >
+                                                 <FontAwesomeIcon icon={faUserSlash} /> Yes, Deactivate Parent
+                                             </button>
+                                         ) : (
+                                             <button
+                                                 onClick={() => confirmParentStatusUpdate('ACTIVE')}
+                                                 className="w-full px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm hover:bg-emerald-100 transition-all active:scale-95 flex items-center justify-center gap-2"
+                                             >
+                                                 <FontAwesomeIcon icon={faUserCheck} /> Yes, Reactivate Parent
+                                             </button>
+                                         )}
+                                         
+                                         <button
+                                             onClick={() => confirmParentStatusUpdate(null)}
+                                             className="w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                                         >
+                                             {isParentActive ? "No, Keep Parent Active" : "No, Keep Parent Inactive"}
+                                         </button>
+                                     </div>
+                                 </>
+                             );
+                        })()}
+                    </div>
+                </div>
+            )}
+            {/* Bulk Parent Status Update Modal */}
+            {showBulkParentStatusModal && pendingBulkUpdate && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+                        onClick={() => setShowBulkParentStatusModal(false)}
+                    />
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-6 w-full max-w-2xl animate-in zoom-in slide-in-from-bottom-4 duration-300 flex flex-col max-h-[85vh]">
+                        
+                        {(() => {
+                             const { newStatus, uniqueParents } = pendingBulkUpdate;
+                             const isActivating = newStatus === 'CURRENT';
+                             const targetStatus = isActivating ? 'ACTIVE' : 'INACTIVE';
+                             
+                             const toggleParent = (pid) => {
+                                 setBulkParentSelection(prev => 
+                                     prev.includes(pid) ? prev.filter(id => id !== pid) : [...prev, pid]
+                                 );
+                             };
+
+                             const toggleAll = () => {
+                                 if (bulkParentSelection.length === uniqueParents.length) {
+                                     setBulkParentSelection([]);
+                                 } else {
+                                     setBulkParentSelection(uniqueParents.map(p => p.parent_id));
+                                 }
+                             };
+                             
+                             return (
+                                 <>
+                                     <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+                                         <div className={`w-12 h-12 rounded-2xl ${isActivating ? 'bg-emerald-50' : 'bg-amber-50'} flex items-center justify-center`}>
+                                            <FontAwesomeIcon icon={isActivating ? faUserCheck : faUserSlash} className={`text-xl ${isActivating ? 'text-emerald-600' : 'text-amber-600'}`} />
+                                         </div>
+                                         <div>
+                                             <h3 className="text-xl font-bold text-gray-900">
+                                                 {isActivating ? 'Reactivate Parents' : 'Deactivate Parents'}
+                                             </h3>
+                                             <p className="text-gray-500 text-sm">
+                                                 Select parents to {isActivating ? 'reactivate' : 'deactivate'} along with students.
+                                             </p>
+                                         </div>
+                                     </div>
+                                     
+                                     <div className="flex-1 overflow-y-auto min-h-0 pr-2 mb-6 space-y-2">
+                                         <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg mb-2">
+                                             <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                                 {bulkParentSelection.length} Selected
+                                             </span>
+                                             <button 
+                                                 onClick={toggleAll}
+                                                 className="text-xs font-bold text-blue-600 hover:text-blue-700"
+                                             >
+                                                 {bulkParentSelection.length === uniqueParents.length ? 'Deselect All' : 'Select All'}
+                                             </button>
+                                         </div>
+                                         
+                                         {uniqueParents.map(parent => {
+                                             const isSelected = bulkParentSelection.includes(parent.parent_id);
+                                             const isActive = (parent.parents_active_status || 'ACTIVE') === 'ACTIVE';
+                                             
+                                             return (
+                                                 <label 
+                                                     key={parent.parent_id}
+                                                     className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                                                         isSelected 
+                                                         ? 'border-blue-500 bg-blue-50/50' 
+                                                         : 'border-gray-100 hover:border-blue-200'
+                                                     }`}
+                                                 >
+                                                     <div className="pt-0.5">
+                                                         <input 
+                                                             type="checkbox"
+                                                             checked={isSelected}
+                                                             onChange={() => toggleParent(parent.parent_id)}
+                                                             className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                         />
+                                                     </div>
+                                                     <div className="flex-1">
+                                                         <div className="flex items-center justify-between">
+                                                             <span className="font-bold text-gray-900 text-sm">{parent.name}</span>
+                                                             <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                                                 {isActive ? 'Active' : 'Inactive'}
+                                                             </span>
+                                                         </div>
+                                                         <p className="text-xs text-gray-500 mt-1">
+                                                             Linking: {parent.relatedStudents.join(', ')}
+                                                         </p>
+                                                     </div>
+                                                 </label>
+                                             );
+                                         })}
+                                     </div>
+                                     
+                                     <div className="flex gap-3 pt-4 border-t border-gray-100 mt-auto">
+                                         <button
+                                             onClick={() => confirmBulkUpdate(false)}
+                                             className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-600 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                                         >
+                                             Skip Parent Updates
+                                         </button>
+                                         <button
+                                             onClick={() => confirmBulkUpdate(true)}
+                                             className={`flex-1 px-4 py-3 rounded-xl font-bold text-sm text-white transition-all active:scale-95 flex items-center justify-center gap-2 ${
+                                                 isActivating 
+                                                 ? 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-200' 
+                                                 : 'bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-200'
+                                             }`}
+                                         >
+                                             {isActivating 
+                                                 ? `Reactivate ${bulkParentSelection.length} Parents` 
+                                                 : `Deactivate ${bulkParentSelection.length} Parents`}
+                                         </button>
+                                     </div>
+                                 </>
+                             );
+                        })()}
                     </div>
                 </div>
             )}
