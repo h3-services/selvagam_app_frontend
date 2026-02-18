@@ -10,278 +10,222 @@ import {
     faArrowTrendUp,
     faUserGraduate,
     faExclamationCircle,
-    faMagic
+    faCalendarAlt,
+    faShieldAlt,
+    faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { classService } from '../../services/classService';
-import { studentService } from '../../services/studentService';
 import { COLORS } from '../../constants/colors';
 
 const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
     const [classes, setClasses] = useState([]);
-    const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [promoting, setPromoting] = useState(false);
-    const [promotionMapping, setPromotionMapping] = useState({});
-    const [successCount, setSuccessCount] = useState(0);
-    const [errorCount, setErrorCount] = useState(0);
+    const [showSuccess, setShowSuccess] = useState(false);
+    
+    // Form States
+    const [newStudyYear, setNewStudyYear] = useState('');
+    const [maxClass, setMaxClass] = useState(12); // Default to 12
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (show) {
-            fetchInitialData();
+            fetchClasses();
+            setShowSuccess(false);
+            setError(null);
         }
     }, [show]);
 
-    const fetchInitialData = async () => {
+    const fetchClasses = async () => {
         setLoading(true);
-        setSuccessCount(0);
-        setErrorCount(0);
         try {
-            const rawClasses = await classService.getAllClasses();
-            const rawStudents = await studentService.getAllStudents();
-            
-            const classData = Array.isArray(rawClasses) ? rawClasses : (rawClasses?.data || []);
-            const studentData = Array.isArray(rawStudents) ? rawStudents : (rawStudents?.data || []);
-            
-            console.log("Promotion Modal - Loaded:", { classesCount: classData.length, studentsCount: studentData.length });
-            
-            setClasses(classData);
-            setStudents(studentData);
+            const data = await classService.getAllClasses();
+            const classList = Array.isArray(data) ? data : (data?.data || []);
+            setClasses(classList);
 
-            // Auto-generate mapping intelligence with safety checks
-            const initialMapping = {};
-            classData.forEach(sourceClass => {
-                const className = sourceClass.class_name || "";
-                const gradeMatch = className.match(/\d+/);
-                const currentGradeNum = gradeMatch ? parseInt(gradeMatch[0]) : NaN;
-
-                if (!isNaN(currentGradeNum)) {
-                    const nextGradeNum = currentGradeNum + 1;
-                    const nextClass = classData.find(c => {
-                        const tName = c.class_name || "";
-                        const targetGradeMatch = tName.match(/\d+/);
-                        const targetGradeNum = targetGradeMatch ? parseInt(targetGradeMatch[0]) : NaN;
-                        return targetGradeNum === nextGradeNum && c.section === sourceClass.section;
-                    });
-                    
-                    if (nextClass) {
-                        initialMapping[sourceClass.class_id] = nextClass.class_id;
-                    } else {
-                        initialMapping[sourceClass.class_id] = ""; 
-                    }
-                } else {
-                    initialMapping[sourceClass.class_id] = "";
+            // Detect Max Class dynamically from existing classes
+            let detectedMax = 0;
+            classList.forEach(c => {
+                const match = c.class_name.match(/\d+/);
+                if (match) {
+                    const num = parseInt(match[0]);
+                    if (num > detectedMax) detectedMax = num;
                 }
             });
-            setPromotionMapping(initialMapping);
+            
+            if (detectedMax > 0) {
+                setMaxClass(detectedMax);
+            }
+            
+            // Try to predict next study year if common pattern (e.g. 2024-25 -> 2025-26)
+            // But we'll leave it empty for user to enter as it's critical
         } catch (error) {
-            console.error("Critical Promotion Engine Failure:", error);
-            alert(`Terminal Synchronization Error: ${error.message || 'Check System Logs'}`);
+            console.error("Failed to load classes:", error);
+            setError("Could not establish connection to Academic Registry.");
         } finally {
             setLoading(false);
         }
     };
 
     const handlePromotion = async () => {
-        const affectedStudents = students.filter(student => {
-            const nextClassId = promotionMapping[student.class_id];
-            return nextClassId && nextClassId !== student.class_id;
-        });
-
-        if (affectedStudents.length === 0) {
-            alert("Zero students found matching the current promotion criteria.");
+        if (!newStudyYear) {
+            setError("New Study Year is required for synchronization.");
             return;
         }
 
-        const confirmMsg = `CRITICAL OPERATION: This will promote ${affectedStudents.length} students to their next academic level. This will modify live records. Proceed?`;
+        const confirmMsg = `WARNING: This will promote ALL students in the system. Students in Class ${maxClass} will be marked as GRADUATED. This action CANNOT be undone. Proceed with Bulk Promotion to Academic Year ${newStudyYear}?`;
+        
         if (!window.confirm(confirmMsg)) return;
 
         setPromoting(true);
-        let success = 0;
-        let errors = 0;
+        setError(null);
 
-        // Process in throttled chunks to ensure system stability
-        const CHUNK_SIZE = 10;
-        const total = affectedStudents.length;
-
-        for (let i = 0; i < total; i += CHUNK_SIZE) {
-            const chunk = affectedStudents.slice(i, i + CHUNK_SIZE);
+        try {
+            await classService.promoteAllClasses({
+                new_study_year: newStudyYear,
+                max_class: parseInt(maxClass)
+            });
             
-            await Promise.all(chunk.map(async (student) => {
-                const nextClassId = promotionMapping[student.class_id];
-                const studentId = student.student_id || student._id || student.id;
-                
-                if (!studentId) {
-                    console.error("Critical Failure: Student ID missing on record", student);
-                    errors++;
-                    return;
-                }
-
-                try {
-                    // We only send the updated class_id to preserve other data intact
-                    // and ensure compatibility with various backend implementations
-                    await studentService.updateStudent(studentId, {
-                        ...student, // Keep existing data
-                        class_id: nextClassId
-                    });
-                    success++;
-                } catch (e) {
-                    console.error(`Promotion Failed for student ${studentId}:`, e);
-                    errors++;
-                }
-            }));
-            
-            setSuccessCount(success);
-            setErrorCount(errors);
-        }
-
-        setPromoting(false);
-        if (errors === 0) {
-            alert(`SUCCESS: ${success} student cycles completed.`);
-            onRefresh();
-            onClose();
-        } else {
-            alert(`COMPLETED WITH ANOMALIES. Success: ${success}, Failure: ${errors}. Please audit student records.`);
-            onRefresh();
+            setShowSuccess(true);
+            setTimeout(() => {
+                onRefresh();
+                onClose();
+            }, 2000);
+        } catch (err) {
+            console.error("Bulk Promotion Engine Failure:", err);
+            setError(err.response?.data?.detail || "Bulk promotion protocol failed. Please check server logs.");
+        } finally {
+            setPromoting(false);
         }
     };
 
     if (!show) return null;
 
     return (
-        <>
-            <div className="fixed inset-0 z-[2005] flex items-center justify-center p-4">
-                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+        <div className="fixed inset-0 z-[2005] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose} />
+            
+            <div className="relative bg-white rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-100 w-full max-w-xl overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-500">
                 
-                <div className="relative bg-white rounded-[3rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-100 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
-                    
-                    {/* Premium Header */}
-                    <div className="px-10 py-8 border-b border-slate-100 flex justify-between items-center bg-[#fcfcfd]">
-                        <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-3xl bg-slate-900 text-white flex items-center justify-center shadow-2xl shadow-indigo-200">
-                                <FontAwesomeIcon icon={faArrowTrendUp} className="text-2xl" />
-                            </div>
-                            <div>
-                                <h3 className="font-black text-3xl text-slate-900 tracking-tight leading-none mb-2 font-['Outfit']">Promotion Engine</h3>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Academic Cycle Orchestrator</p>
-                                </div>
-                            </div>
+                {/* Header */}
+                <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-[#fcfcfd]">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-xl shadow-indigo-100">
+                            <FontAwesomeIcon icon={faArrowTrendUp} className="text-xl" />
                         </div>
-                        <button onClick={onClose} className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all active:scale-90 border border-slate-100">
-                            <FontAwesomeIcon icon={faTimes} className="text-xl" />
-                        </button>
+                        <div>
+                            <h3 className="font-black text-xl text-slate-900 tracking-tight leading-none mb-1">Promotion Engine</h3>
+                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.15em]">Bulk Academic Transition</p>
+                        </div>
                     </div>
+                    <button onClick={onClose} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all border border-slate-100">
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                </div>
 
-                    {/* Dashboard Body */}
-                    <div className="flex-1 p-10 overflow-y-auto custom-scrollbar bg-white">
-                        {loading ? (
-                            <div className="h-96 flex flex-col items-center justify-center">
-                                <div className="w-20 h-20 rounded-3xl bg-indigo-50 flex items-center justify-center text-indigo-600 mb-6 border border-indigo-100">
-                                    <FontAwesomeIcon icon={faCircleNotch} spin className="text-3xl" />
-                                </div>
-                                <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-xs">Synchronizing Student Grid...</p>
+                {/* Body */}
+                <div className="p-8">
+                    {showSuccess ? (
+                        <div className="py-12 flex flex-col items-center justify-center text-center animate-in zoom-in duration-300">
+                            <div className="w-20 h-20 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mb-6 shadow-lg shadow-emerald-100">
+                                <FontAwesomeIcon icon={faCheckCircle} className="text-4xl" />
                             </div>
-                        ) : (
-                            <div className="space-y-10">
-                                {/* Mapping Grid */}
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-12 px-8 py-2">
-                                        <div className="col-span-1 text-[10px] font-black text-slate-300 uppercase tracking-widest">#</div>
-                                        <div className="col-span-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Source Origin</div>
-                                        <div className="col-span-1"></div>
-                                        <div className="col-span-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Transition Target</div>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        {classes.filter(c => c.status === 'ACTIVE').map((sourceClass, idx) => (
-                                            <div key={sourceClass.class_id} className="grid grid-cols-12 items-center bg-white hover:bg-slate-50 p-4 rounded-[2rem] border border-slate-100 hover:border-indigo-200 transition-all group">
-                                                <div className="col-span-1 text-xs font-black text-slate-300 group-hover:text-indigo-400">{idx + 1}</div>
-                                                <div className="col-span-5 flex items-center gap-4">
-                                                    <div className="w-11 h-11 rounded-2xl bg-[#fcfcfd] border border-slate-100 flex items-center justify-center text-slate-900 font-black text-sm shadow-sm group-hover:scale-110 transition-transform">
-                                                        {sourceClass.class_name.match(/\d+/) || sourceClass.class_name.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-black text-slate-900 text-[13px] tracking-tight">{sourceClass.class_name} - {sourceClass.section}</p>
-                                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-wider">
-                                                            {students.filter(s => s.class_id === sourceClass.class_id).length} Active Students
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="col-span-1 flex justify-center text-slate-300 group-hover:text-indigo-500">
-                                                    <FontAwesomeIcon icon={faArrowRight} className="group-hover:translate-x-1 transition-transform" />
-                                                </div>
-                                                <div className="col-span-5">
-                                                    <select
-                                                        value={promotionMapping[sourceClass.class_id] || ""}
-                                                        onChange={(e) => setPromotionMapping({...promotionMapping, [sourceClass.class_id]: e.target.value})}
-                                                        className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-3 text-[12px] font-black text-slate-700 tracking-tight focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-400 focus:bg-white outline-none transition-all cursor-pointer appearance-none"
-                                                    >
-                                                        <option value="">-- Terminal Stage / None --</option>
-                                                        {classes.map(target => (
-                                                            <option key={target.class_id} value={target.class_id}>
-                                                                {target.class_name} - {target.section}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                            <h4 className="text-2xl font-black text-slate-900 mb-2">Promotion Complete</h4>
+                            <p className="text-slate-500 text-sm font-medium">All student records have been successfully synchronized to {newStudyYear}.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4 text-amber-700">
+                                <FontAwesomeIcon icon={faExclamationCircle} className="mt-1 text-lg" />
+                                <div className="text-xs font-bold leading-relaxed">
+                                    This operation will increment the class for all students and update their study year. Final year students will be moved to Graduation status.
                                 </div>
-
-                                {errorCount > 0 && (
-                                    <div className="p-6 bg-rose-50 rounded-[2rem] border border-rose-100 flex items-center gap-5 text-rose-700">
-                                        <FontAwesomeIcon icon={faExclamationCircle} className="text-xl" />
-                                        <p className="text-xs font-black uppercase tracking-widest">
-                                            {errorCount} Records failed to synchronize. Please check connectivity and system logs.
-                                        </p>
-                                    </div>
-                                )}
                             </div>
-                        )}
-                    </div>
 
-                    {/* Execution Footer */}
-                    <div className="px-10 py-10 border-t border-slate-100 bg-white flex items-center justify-between gap-6">
-                        <div className="flex gap-4">
-                            {promoting && (
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping" />
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                        Processing Batch: {successCount} / {students.filter(s => promotionMapping[s.class_id]).length}
-                                    </span>
+                            {/* New Study Year Input */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">New Academic Year</label>
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors">
+                                        <FontAwesomeIcon icon={faCalendarAlt} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="E.g., 2025-26"
+                                        value={newStudyYear}
+                                        onChange={(e) => setNewStudyYear(e.target.value)}
+                                        className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-400 focus:bg-white transition-all placeholder:text-slate-300"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Max Class Input */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Highest School Grade (Graduation Gate)</label>
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-500 transition-colors">
+                                        <FontAwesomeIcon icon={faTrophy} />
+                                    </div>
+                                    <input
+                                        type="number"
+                                        value={maxClass}
+                                        onChange={(e) => setMaxClass(e.target.value)}
+                                        className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-700 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-400 focus:bg-white transition-all"
+                                    />
+                                </div>
+                                <p className="text-[9px] text-slate-400 font-medium italic ml-1">* Students in this grade will be marked as 'Graduated' upon promotion.</p>
+                            </div>
+
+                            {error && (
+                                <div className="p-4 bg-rose-50 rounded-xl border border-rose-100 flex items-center gap-3 text-rose-600 text-[11px] font-black uppercase tracking-wide">
+                                    <FontAwesomeIcon icon={faExclamationCircle} />
+                                    {error}
                                 </div>
                             )}
                         </div>
-                        <div className="flex gap-4">
-                            <button
-                                onClick={onClose}
-                                disabled={promoting}
-                                className="px-8 py-4 rounded-2xl bg-slate-50 text-slate-500 font-black text-[11px] uppercase tracking-widest hover:bg-slate-100 hover:text-slate-700 transition-all active:scale-95 disabled:opacity-50"
-                            >
-                                Abort
-                            </button>
-                            <button
-                                onClick={handlePromotion}
-                                disabled={promoting || loading}
-                                className="px-10 py-4 rounded-2xl bg-slate-900 text-white font-black text-[11px] uppercase tracking-[0.2em] flex items-center gap-3 transition-all active:scale-95 disabled:opacity-50 shadow-2xl shadow-indigo-200 enabled:hover:bg-black"
-                            >
-                                {promoting ? (
-                                    <>
-                                        <FontAwesomeIcon icon={faCircleNotch} spin /> Orchestrating...
-                                    </>
-                                ) : (
-                                    <>
-                                        <FontAwesomeIcon icon={faTrophy} /> Execute Promotion
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
+                    )}
                 </div>
+
+                {/* Footer */}
+                {!showSuccess && (
+                    <div className="px-8 py-8 bg-slate-50/50 border-t border-slate-100 flex flex-col gap-4">
+                        <div className="flex items-center gap-3 text-slate-400 px-2">
+                            <FontAwesomeIcon icon={faShieldAlt} className="text-xs" />
+                            <p className="text-[9px] font-black uppercase tracking-widest">Two-factor confirmation required for execution</p>
+                        </div>
+                        <button
+                            onClick={handlePromotion}
+                            disabled={promoting || loading}
+                            className={`w-full py-4 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3 relative overflow-hidden group ${promoting ? 'opacity-70' : 'hover:bg-black'}`}
+                        >
+                            {promoting ? (
+                                <>
+                                    <FontAwesomeIcon icon={faCircleNotch} spin />
+                                    <span>Synchronizing Personnel...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <FontAwesomeIcon icon={faTrophy} className="text-amber-400" />
+                                    <span>Execute Bulk Promotion</span>
+                                </>
+                            )}
+                            
+                            {/* Animated Shine Effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer duration-1000" />
+                        </button>
+                    </div>
+                )}
             </div>
-        </>
+            
+            <style>{`
+                @keyframes shimmer {
+                    100% { transform: translateX(100%); }
+                }
+                .animate-shimmer {
+                    animation: shimmer 1.5s infinite;
+                }
+            `}</style>
+        </div>
     );
 };
 

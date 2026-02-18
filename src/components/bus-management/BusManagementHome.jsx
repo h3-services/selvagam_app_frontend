@@ -99,18 +99,17 @@ const BusManagementHome = () => {
         try {
             const payload = {
                 registration_number: newBusData.registration_number,
-                bus_name: newBusData.bus_name,
-                vehicle_type: newBusData.vehicle_type || 'School Bus',
+                driver_id: newBusData.driver_id || null,
+                route_id: newBusData.route_id || null,
+                vehicle_type: newBusData.vehicle_type,
                 bus_brand: newBusData.bus_brand,
                 bus_model: newBusData.bus_model,
                 seating_capacity: parseInt(newBusData.seating_capacity || 0),
-                status: (newBusData.status || 'ACTIVE').toUpperCase(),
-                driver_id: newBusData.driver_id || null, 
-                route_id: newBusData.route_id || null,
                 rc_expiry_date: newBusData.rc_expiry_date || null,
                 fc_expiry_date: newBusData.fc_expiry_date || null,
                 rc_book_url: newBusData.rc_book_url || null,
-                fc_certificate_url: newBusData.fc_certificate_url || null
+                fc_certificate_url: newBusData.fc_certificate_url || null,
+                bus_name: newBusData.bus_name
             };
 
             await busService.createBus(payload);
@@ -296,7 +295,30 @@ const BusManagementHome = () => {
 
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-6">
+                            {/* Premium Tab System */}
+                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
+                                <button
+                                    onClick={() => setActiveTab('All')}
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                        activeTab === 'All' 
+                                        ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Active Fleet
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('Scrap')}
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                        activeTab === 'Scrap' 
+                                        ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Scrap Registry
+                                </button>
+                            </div>
 
                             <div className="relative group">
                                 <input

@@ -5,6 +5,7 @@ import {
     faEdit, faEye, faCheckCircle, faBan 
 } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
 
 const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdateStatus, onEditClass }) => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
         );
     }
 
-    const columnDefs = [
+    const columnDefs = useMemo(() => [
         {
             headerName: "Class Name",
             field: "class_name",
@@ -31,11 +32,8 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
             cellRenderer: (params) => (
                 <div className="flex flex-col items-center overflow-hidden">
                     <p className="font-semibold text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate text-center">
-                        {params.value?.toLowerCase().startsWith('grade') ? '' : 'Grade '}{params.value}
+                        {params.value ? `Class ${params.value.toString().replace(/(grade|class)\s*/i, '').trim()}` : ''}
                     </p>
-                    <div className="flex items-center gap-1 mt-1">
-                        <span className="text-[9px] font-medium text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
-                    </div>
                 </div>
             )
         },
@@ -51,26 +49,6 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                     Section {params.value}
                 </span>
             )
-        },
-        {
-            headerName: "Status",
-            field: "status",
-            width: 130,
-            headerClass: 'ag-center-header',
-            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
-            cellRenderer: (params) => {
-                const isActive = params.value === 'ACTIVE';
-                return (
-                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                        isActive 
-                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
-                        : 'bg-slate-50 text-slate-400 border-slate-200'
-                    }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
-                        {params.value || 'INACTIVE'}
-                    </div>
-                );
-            }
         },
         {
             headerName: "Enrollment",
@@ -96,6 +74,7 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
             headerClass: 'ag-center-header',
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
             cellRenderer: (params) => {
+                const { activeMenuId, setActiveMenuId, onEditClass, onUpdateStatus } = params.context;
                 const isOpen = activeMenuId === params.data.class_id;
                 const isActive = params.data.status === 'ACTIVE';
                 
@@ -119,13 +98,6 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                                     <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
                                         Unit Management
                                     </div>
-                                    <button
-                                        onClick={() => navigate('/students')}
-                                        className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors"
-                                    >
-                                        <FontAwesomeIcon icon={faEye} className="w-4 text-blue-600" />
-                                        View Unit Registry
-                                    </button>
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -161,7 +133,7 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                 );
             }
         }
-    ];
+    ], []);
 
     return (
         <div className="flex flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -180,15 +152,7 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                         sortable: true,
                         filter: false,
                         resizable: true,
-                        headerClass: "font-bold uppercase text-[10px] tracking-wider ag-center-header",
-                    }}
-                    rowSelection={{ mode: 'multiRow', headerCheckbox: true, enableClickSelection: false }}
-                    selectionColumnDef={{ 
-                        width: 50, 
-                        minWidth: 50, 
-                        pinned: 'left',
-                        cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
-                        headerClass: 'ag-center-header'
+                        headerClass: "font-black uppercase text-[10px] tracking-wider ag-center-header",
                     }}
                     pagination={true}
                     paginationPageSize={10}
@@ -196,7 +160,7 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                     rowHeight={80}
                     headerHeight={50}
                     theme="legacy"
-                    context={{ activeMenuId, setActiveMenuId }}
+                    context={{ activeMenuId, setActiveMenuId, onEditClass, onUpdateStatus }}
                     getRowStyle={params => {
                         if (params.data.class_id === activeMenuId) {
                             return { zIndex: 999, overflow: 'visible' };
@@ -233,6 +197,9 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                 }
                 .ag-center-header .ag-header-cell-label {
                     justify-content: center !important;
+                }
+                .custom-ag-grid .ag-header-cell-text {
+                    font-weight: 900 !important;
                 }
             `}</style>
         </div>

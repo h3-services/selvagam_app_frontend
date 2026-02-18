@@ -43,14 +43,10 @@ const BusList = ({
                                         className="flex items-center gap-3 w-full cursor-pointer group"
                                         onClick={() => setSelectedBus(params.data)}
                                     >
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
-                                            <FontAwesomeIcon icon={faBus} />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors">{params.value}</p>
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
-                                                <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-blue-600 transition-colors" />
+                                        <div className="flex flex-col overflow-hidden">
+                                            <p className="font-semibold text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value}</p>
+                                            <div className="flex items-center gap-1 mt-1">
+                                                <span className="text-[9px] font-medium text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
                                             </div>
                                         </div>
                                     </div>
@@ -438,10 +434,7 @@ const BusList = ({
                         <div className="relative p-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
-                                        <FontAwesomeIcon icon={faBus} />
-                                    </div>
-                                    <div>
+                                    <div className="flex flex-col">
                                         <h3 className="font-bold text-gray-900 text-lg">{bus.busNumber}</h3>
                                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full border inline-block mt-1 ${getStatusColor(bus.status)}`}>
                                             {bus.status}

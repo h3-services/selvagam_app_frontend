@@ -65,5 +65,16 @@ export const classService = {
             console.error(`Error updating status for class ${classId}:`, error);
             throw error;
         }
+    },
+
+    // Bulk promote all classes
+    promoteAllClasses: async (promotionData) => {
+        try {
+            const response = await api.post('/classes/promote-all', promotionData);
+            return response.data;
+        } catch (error) {
+            console.error("Error promoting classes:", error);
+            throw error;
+        }
     }
 };

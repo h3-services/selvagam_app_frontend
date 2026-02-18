@@ -136,7 +136,7 @@ const DriverManagementHome = () => {
 
     const handleBulkDelete = async () => {
         if (!selectedRows.length) return;
-        if (!window.confirm(`Are you sure you want to retire ${selectedRows.length} fleet members?`)) return;
+        if (!window.confirm(`Are you sure you want to archive ${selectedRows.length} fleet members?`)) return;
         
         setLoading(true);
         try {
@@ -227,13 +227,35 @@ const DriverManagementHome = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className='ml-20 lg:ml-0'>
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
-                            {selectedDriver ? 'Driver Profile' : 'Driver Force'}
+                            {selectedDriver ? 'Driver Profile' : 'Driver Management'}
                         </h1>
                     </div>
 
                     {!selectedDriver && (
                         <div className="flex flex-col md:flex-row items-center gap-6">
-
+                            {/* Premium Tab System */}
+                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
+                                <button
+                                    onClick={() => setViewMode('active')}
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                        viewMode === 'active' 
+                                        ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Active Personnel
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('resigned')}
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                        viewMode === 'resigned' 
+                                        ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                                        : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Archived Records
+                                </button>
+                            </div>
 
                             <div className="relative group">
                                 <input
@@ -329,7 +351,7 @@ const DriverManagementHome = () => {
                                         <div className="w-8 h-8 rounded-lg bg-rose-100/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                                             <FontAwesomeIcon icon={faTrash} className="text-sm" />
                                         </div>
-                                        Retire Selected
+                                        Archive Selected
                                     </button>
                                 </div>
                             </div>
@@ -393,9 +415,9 @@ const DriverManagementHome = () => {
                             <div className="w-20 h-20 rounded-[2rem] bg-rose-50 flex items-center justify-center mb-6">
                                 <FontAwesomeIcon icon={faTrash} className="text-3xl text-rose-600" />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Retire Personnel</h3>
+                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Archive Personnel</h3>
                             <p className="text-slate-500 text-sm mb-8 leading-relaxed font-medium">
-                                Are you sure you want to mark this driver as <span className="font-black text-rose-600">Resigned</span>? This action will archive their profile.
+                                Are you sure you want to <span className="font-black text-rose-600">Archive</span> this personnel? This action will move them from the active fleet to the archived registry.
                             </p>
                             <div className="flex gap-4 w-full">
                                 <button
