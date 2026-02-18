@@ -148,12 +148,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                         >
                             <FontAwesomeIcon icon={faArrowLeft} />
                         </button>
-                        <div className="relative">
-                            <div className="w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg bg-white/20 backdrop-blur-sm border-2 border-white/30">
-                                <FontAwesomeIcon icon={faMapLocationDot} />
-                            </div>
-                        </div>
-                        <div>
+                        <div className="ml-1 flex flex-col items-start gap-1">
                             {isEditing ? (
                                 <input
                                     type="text"
@@ -162,17 +157,13 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                                     className="bg-transparent border-b border-white text-white font-bold text-2xl focus:outline-none placeholder-white/50"
                                 />
                             ) : (
-                                <h2 className="text-2xl font-bold text-white">{selectedRoute.routeName}</h2>
+                                <>
+                                    <h2 className="text-2xl font-bold text-white">{selectedRoute.routeName}</h2>
+                                    <div className="px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30">
+                                        <span className="text-white font-bold text-xs uppercase tracking-widest">{selectedRoute.assignedBus}</span>
+                                    </div>
+                                </>
                             )}
-
-                            <div className="flex items-center gap-3 mt-1">
-
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30">
-                                    <FontAwesomeIcon icon={faBus} className="text-white text-xs" />
-                                    <span className="text-white font-bold text-xs">{selectedRoute.assignedBus}</span>
-                                    <FontAwesomeIcon icon={faCircle} className="text-green-300 text-[5px] animate-pulse ml-0.5" />
-                                </div>
-                            </div>
                         </div>
                     </div>
                     {isEditing ? (
@@ -365,5 +356,6 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
         </div>
     );
 };
+
 
 export default RouteDetail;

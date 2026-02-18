@@ -66,8 +66,8 @@ const SelectField = ({ label, icon, value, onChange, options, placeholder, disab
     </div>
 );
 
-const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
-    const [newBus, setNewBus] = useState({ 
+const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], routes = [] }) => {
+    const [busData, setBusData] = useState({ 
         registration_number: '', 
         bus_name: '',
         vehicle_type: 'School Bus', 
@@ -83,14 +83,40 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
         fc_certificate_url: ''
     });
 
+    useEffect(() => {
+        if (show && editingBus) {
+            setBusData({
+                ...editingBus,
+                seating_capacity: editingBus.seating_capacity || editingBus.capacity || '',
+                registration_number: editingBus.registration_number || editingBus.busNumber || ''
+            });
+        } else if (show && !editingBus) {
+            setBusData({ 
+                registration_number: '', 
+                bus_name: '',
+                vehicle_type: 'School Bus', 
+                bus_brand: '', 
+                bus_model: '', 
+                seating_capacity: '', 
+                status: 'Active',
+                driver_id: '',
+                route_id: '',
+                rc_expiry_date: '',
+                fc_expiry_date: '',
+                rc_book_url: '',
+                fc_certificate_url: ''
+            });
+        }
+    }, [show, editingBus]);
+
     const [touched, setTouched] = useState({});
 
-    const isValid = newBus.registration_number && newBus.bus_name && newBus.vehicle_type;
+    const isValid = busData.registration_number && busData.bus_name && busData.vehicle_type;
 
     const handleAutoFill = () => {
         const brand = ['Tata', 'Ashok Leyland', 'Eicher', 'Force'][Math.floor(Math.random() * 4)];
         const model = ['Starbus', 'Viking', 'Pro 3000', 'Traveller'][Math.floor(Math.random() * 4)];
-        setNewBus({
+        setBusData({
             registration_number: `TN${Math.floor(Math.random() * 90) + 10}AB${Math.floor(Math.random() * 9000) + 1000}`,
             bus_name: `${brand} ${model} - ${Math.floor(Math.random() * 100)}`,
             vehicle_type: ['School Bus', 'Mini', 'Van'][Math.floor(Math.random() * 3)],
@@ -108,31 +134,20 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
         setTouched({ registration_number: true, bus_name: true, vehicle_type: true });
     };
 
-    const handleAdd = () => {
+    const handleSubmit = () => {
         setTouched({ registration_number: true, bus_name: true, vehicle_type: true });
         if (isValid) {
-            onAdd(newBus);
-            setNewBus({ 
-                registration_number: '', 
-                bus_name: '',
-                vehicle_type: 'School Bus', 
-                bus_brand: '', 
-                bus_model: '', 
-                seating_capacity: '', 
-                status: 'Active',
-                driver_id: '',
-                route_id: '',
-                rc_expiry_date: '',
-                fc_expiry_date: '',
-                rc_book_url: '',
-                fc_certificate_url: ''
-            });
-            setTouched({});
+            if (editingBus) {
+                onUpdate({ ...editingBus, ...busData });
+            } else {
+                onAdd(busData);
+            }
+            onClose();
         }
     };
 
     const handleClose = () => {
-        setNewBus({ 
+        setBusData({ 
             registration_number: '', 
             bus_name: '',
             vehicle_type: 'School Bus', 
@@ -159,8 +174,8 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
             
             <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-2xl z-[2001] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
                 
-                {/* Header Substrate */}
-                <div className="relative px-8 py-8 bg-slate-50 flex justify-between items-center z-10">
+                {/* Header Substrate - Now Sticky */}
+                <div className="sticky top-0 px-8 py-7 bg-slate-50/80 backdrop-blur-xl flex justify-between items-center z-30 border-b border-slate-100/50">
                     <div className="flex items-center gap-6">
                         <div className="relative group">
                             <div className="absolute -inset-2 bg-blue-600 blur-xl opacity-0 group-hover:opacity-10 rounded-full transition-opacity duration-700"></div>
@@ -169,11 +184,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                             </div>
                         </div>
                         <div>
-                            <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">Add Fleet Asset</h3>
-                            <div className="flex items-center gap-2">
-                                <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
-                                <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">Vehicle Inventory Management</p>
-                            </div>
+                            <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">{editingBus ? 'Update Details' : 'Add New Bus'}</h3>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -203,36 +214,35 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                                 <FontAwesomeIcon icon={faClipboardList} className="text-2xl" />
                             </div>
                             <div>
-                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Specifications</h4>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Core Asset Identification</p>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Bus Info</h4>
                             </div>
                         </div>
 
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-5">
                                 <InputField 
-                                    label="Registration No" 
+                                    label="Bus Number" 
                                     icon={faHashtag} 
-                                    value={newBus.registration_number} 
-                                    onChange={(e) => setNewBus({...newBus, registration_number: e.target.value})} 
+                                    value={busData.registration_number} 
+                                    onChange={(e) => setBusData({...busData, registration_number: e.target.value})} 
                                     placeholder="TNXXABXXXX" 
-                                    error={touched.registration_number && !newBus.registration_number}
+                                    error={touched.registration_number && !busData.registration_number}
                                 />
                                 <InputField 
-                                    label="Asset Callsign" 
+                                    label="Bus Name" 
                                     icon={faBus} 
-                                    value={newBus.bus_name} 
-                                    onChange={(e) => setNewBus({...newBus, bus_name: e.target.value})} 
+                                    value={busData.bus_name} 
+                                    onChange={(e) => setBusData({...busData, bus_name: e.target.value})} 
                                     placeholder="e.g. ALPHA-01" 
-                                    error={touched.bus_name && !newBus.bus_name}
+                                    error={touched.bus_name && !busData.bus_name}
                                 />
                             </div>
 
                             <SelectField 
-                                label="Vehicle Category" 
+                                label="Type" 
                                 icon={faTruck} 
-                                value={newBus.vehicle_type} 
-                                onChange={(e) => setNewBus({...newBus, vehicle_type: e.target.value})} 
+                                value={busData.vehicle_type} 
+                                onChange={(e) => setBusData({...busData, vehicle_type: e.target.value})} 
                                 placeholder="Select Category"
                                 options={[
                                     { value: 'School Bus', label: 'School Bus' },
@@ -242,8 +252,8 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                             />
 
                             <div className="grid grid-cols-2 gap-5">
-                                <InputField label="Manufacturer" icon={faTrademark} value={newBus.bus_brand} onChange={(e) => setNewBus({...newBus, bus_brand: e.target.value})} placeholder="Tata / AL" />
-                                <InputField label="Fleet Model" icon={faCarSide} value={newBus.bus_model} onChange={(e) => setNewBus({...newBus, bus_model: e.target.value})} placeholder="Viking / Starbus" />
+                                <InputField label="Brand" icon={faTrademark} value={busData.bus_brand} onChange={(e) => setBusData({...busData, bus_brand: e.target.value})} placeholder="Tata / AL" />
+                                <InputField label="Model" icon={faCarSide} value={busData.bus_model} onChange={(e) => setBusData({...busData, bus_model: e.target.value})} placeholder="Viking / Starbus" />
                             </div>
                         </div>
                     </div>
@@ -255,18 +265,17 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                                 <FontAwesomeIcon icon={faCogs} className="text-2xl" />
                             </div>
                             <div>
-                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Asset Layout</h4>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Capacity & Status Configuration</p>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Seats & Status</h4>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-5">
-                            <InputField label="Seat Capacity" icon={faChair} type="number" value={newBus.seating_capacity} onChange={(e) => setNewBus({...newBus, seating_capacity: e.target.value})} placeholder="40" />
+                            <InputField label="Seats" icon={faChair} type="number" value={busData.seating_capacity} onChange={(e) => setBusData({...busData, seating_capacity: e.target.value})} placeholder="40" />
                             <SelectField 
-                                label="Operational Status" 
+                                label="Status" 
                                 icon={faInfoCircle} 
-                                value={newBus.status} 
-                                onChange={(e) => setNewBus({...newBus, status: e.target.value})} 
+                                value={busData.status} 
+                                onChange={(e) => setBusData({...busData, status: e.target.value})} 
                                 options={[
                                     { value: 'Active', label: 'Active Service' },
                                     { value: 'Maintenance', label: 'Maintenance Bay' },
@@ -283,25 +292,24 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                                 <FontAwesomeIcon icon={faRoute} className="text-2xl" />
                             </div>
                             <div>
-                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Assignments</h4>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Personnel & Logistics Link</p>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Driver & Route</h4>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-5">
                             <SelectField 
-                                label="Fleet Captain" 
+                                label="Driver" 
                                 icon={faUser} 
-                                value={newBus.driver_id} 
-                                onChange={(e) => setNewBus({...newBus, driver_id: e.target.value})} 
-                                placeholder="Select Captain"
+                                value={busData.driver_id} 
+                                onChange={(e) => setBusData({...busData, driver_id: e.target.value})} 
+                                placeholder="Select Driver"
                                 options={drivers.map(d => ({ value: d.driver_id, label: d.name }))} 
                             />
                             <SelectField 
-                                label="Assigned Route" 
+                                label="Route" 
                                 icon={faRoute} 
-                                value={newBus.route_id} 
-                                onChange={(e) => setNewBus({...newBus, route_id: e.target.value})} 
+                                value={busData.route_id} 
+                                onChange={(e) => setBusData({...busData, route_id: e.target.value})} 
                                 placeholder="Select Route"
                                 options={routes.map(r => ({ value: r.route_id, label: r.name }))} 
                             />
@@ -315,18 +323,17 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                                 <FontAwesomeIcon icon={faShieldAlt} className="text-2xl" />
                             </div>
                             <div>
-                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Compliance Assets</h4>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Legal Registry Documents</p>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Documents</h4>
                             </div>
                         </div>
 
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-5">
-                                <InputField label="RC Lifecycle End" icon={faCalendarAlt} type="date" value={newBus.rc_expiry_date} onChange={(e) => setNewBus({...newBus, rc_expiry_date: e.target.value})} />
-                                <InputField label="FC Lifecycle End" icon={faCalendarAlt} type="date" value={newBus.fc_expiry_date} onChange={(e) => setNewBus({...newBus, fc_expiry_date: e.target.value})} />
+                                <InputField label="RC Expiry" icon={faCalendarAlt} type="date" value={busData.rc_expiry_date} onChange={(e) => setBusData({...busData, rc_expiry_date: e.target.value})} />
+                                <InputField label="FC Expiry" icon={faCalendarAlt} type="date" value={busData.fc_expiry_date} onChange={(e) => setBusData({...busData, fc_expiry_date: e.target.value})} />
                             </div>
-                            <InputField label="RC Digital Asset" icon={faLink} value={newBus.rc_book_url} onChange={(e) => setNewBus({...newBus, rc_book_url: e.target.value})} placeholder="https://..." />
-                            <InputField label="FC Digital Asset" icon={faLink} value={newBus.fc_certificate_url} onChange={(e) => setNewBus({...newBus, fc_certificate_url: e.target.value})} placeholder="https://..." />
+                            <InputField label="RC URL" icon={faLink} value={busData.rc_book_url} onChange={(e) => setBusData({...busData, rc_book_url: e.target.value})} placeholder="https://..." />
+                            <InputField label="FC URL" icon={faLink} value={busData.fc_certificate_url} onChange={(e) => setBusData({...busData, fc_certificate_url: e.target.value})} placeholder="https://..." />
                         </div>
                     </div>
                 </div>
@@ -334,7 +341,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                 {/* Execution Footer */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-20">
                     <button
-                        onClick={handleAdd}
+                        onClick={handleSubmit}
                         className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${!isValid && Object.keys(touched).length > 0 ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
                         style={{ 
                             background: isValid || Object.keys(touched).length === 0 
@@ -342,7 +349,7 @@ const AddBusForm = ({ show, onClose, onAdd, drivers = [], routes = [] }) => {
                                 : '' 
                         }}
                     >
-                        <span>Add Vehicle</span>
+                        <span>{editingBus ? 'Update Profile' : 'Add Bus'}</span>
                         <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform">
                             <FontAwesomeIcon icon={faCheck} className="text-xs" />
                         </div>

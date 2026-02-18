@@ -22,6 +22,7 @@ const DriverManagementHome = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [viewMode, setViewMode] = useState('active'); // 'active' or 'resigned'
+    const [editingDriver, setEditingDriver] = useState(null);
     
     // Bulk Actions State
     const [selectedRows, setSelectedRows] = useState([]);
@@ -205,42 +206,82 @@ const DriverManagementHome = () => {
         }
     };
 
+    const handleStatusChange = async (driverId, newStatus) => {
+        try {
+            await driverService.updateDriverStatus(driverId, newStatus);
+            await fetchDrivers(); // Refresh the list
+            
+            // Re-sync selected driver
+            if (selectedDriver) {
+                const refreshed = (await driverService.getAllDrivers()).find(d => d.driver_id === driverId);
+                if (refreshed) {
+                    setSelectedDriver({
+                        ...refreshed,
+                        id: refreshed.driver_id,
+                        mobile: refreshed.phone,
+                        licenseNumber: refreshed.licence_number
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("Error updating personnel status:", err);
+        }
+    };
+
     const handleUpdate = async (updatedData) => {
+        setLoading(true);
         try {
             const apiPayload = {
                 name: updatedData.name,
+                phone: Number(updatedData.phone || updatedData.mobile),
                 email: updatedData.email,
-                phone: Number(updatedData.mobile),
-                dob: updatedData.dob,
-                licence_number: updatedData.licenseNumber,
+                licence_number: updatedData.licence_number || updatedData.licenseNumber,
                 licence_expiry: updatedData.licence_expiry,
-                aadhar_number: updatedData.aadhar_number,
-                photo_url: updatedData.photo_url,
-                licence_url: updatedData.licence_url,
-                aadhar_url: updatedData.aadhar_url,
-                is_available: updatedData.is_available,
-                status: updatedData.status
+                fcm_token: updatedData.fcm_token || 'string', // 'string' as per example if empty
+                status: (updatedData.status || 'ACTIVE').toUpperCase()
             };
             await driverService.updateDriver(updatedData.id, apiPayload);
             await fetchDrivers();
-            setSelectedDriver(updatedData);
+            
+            // Re-sync selected driver if it's the one we just updated
+            if (selectedDriver && selectedDriver.id === updatedData.id) {
+                const refreshed = (await driverService.getAllDrivers()).find(d => d.driver_id === updatedData.id);
+                if (refreshed) {
+                    setSelectedDriver({
+                        ...refreshed,
+                        id: refreshed.driver_id,
+                        mobile: refreshed.phone,
+                        licenseNumber: refreshed.licence_number
+                    });
+                }
+            }
+            
+            setShowModal(false);
+            setEditingDriver(null);
         } catch (err) {
             console.error(err);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleEdit = (driver) => {
+        setEditingDriver(driver);
+        setShowModal(true);
     };
 
     return (
         <div className="h-full flex flex-col bg-[#f1f5f9] relative animate-fade-in">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className='ml-20 lg:ml-0'>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
-                            {selectedDriver ? 'Driver Profile' : 'Driver Management'}
-                        </h1>
-                    </div>
+            {!selectedDriver && (
+                <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className='ml-20 lg:ml-0'>
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
+                                Driver Management
+                            </h1>
+                        </div>
 
-                    {!selectedDriver && (
                         <div className="flex flex-col md:flex-row items-center gap-6">
                             {/* Premium Tab System */}
                             <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
@@ -277,9 +318,9 @@ const DriverManagementHome = () => {
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors" />
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Grid Content */}
             <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">
@@ -300,6 +341,9 @@ const DriverManagementHome = () => {
                         selectedDriver={selectedDriver}
                         onBack={() => setSelectedDriver(null)}
                         onUpdate={handleUpdate}
+                        onDelete={handleDelete}
+                        onEdit={handleEdit}
+                        onStatusChange={handleStatusChange}
                     />
                 ) : (
                     <DriverList
@@ -408,8 +452,13 @@ const DriverManagementHome = () => {
 
             <AddDriverForm
                 show={showModal}
-                onClose={() => setShowModal(false)}
+                onClose={() => {
+                    setShowModal(false);
+                    setEditingDriver(null);
+                }}
                 onAdd={handleAdd}
+                onUpdate={handleUpdate}
+                initialData={editingDriver}
             />
 
             {/* Delete Confirmation Modal */}

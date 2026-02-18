@@ -40,10 +40,7 @@ const RouteList = ({
                                         className="flex items-center gap-3 w-full cursor-pointer group"
                                         onClick={() => setSelectedRoute(params.data)}
                                     >
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
-                                            <FontAwesomeIcon icon={faRoute} />
-                                        </div>
-                                        <div className="flex flex-col">
+                                        <div className="flex flex-col ml-1">
                                             <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors">{params.value}</p>
                                             <div className="flex items-center gap-1">
                                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
@@ -60,7 +57,6 @@ const RouteList = ({
                                 cellRenderer: (params) => (
                                     <div className="flex items-center h-full">
                                         <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold text-xs border border-blue-100 uppercase tracking-wide">
-                                            <FontAwesomeIcon icon={faUserFriends} className="mr-1.5 opacity-70" />
                                             {params.value} Students
                                         </span>
                                     </div>
@@ -89,15 +85,10 @@ const RouteList = ({
                                             className="group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer"
                                             title="Click to reassign bus"
                                         >
-                                            <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
-                                                <FontAwesomeIcon icon={faBus} className="text-white text-xs" />
-                                            </div>
                                             <span className="text-white font-bold text-xs tracking-wide">{params.value}</span>
                                             <div className="flex items-center gap-1 ml-1">
-                                                <FontAwesomeIcon icon={faCircle} className="text-green-300 text-[6px] animate-pulse" />
-                                                <span className="text-green-200 text-[10px] font-medium">Active</span>
+                                                <span className="text-green-300 text-[10px] font-medium uppercase tracking-widest">Active</span>
                                             </div>
-                                            <FontAwesomeIcon icon={faExchangeAlt} className="text-white/60 text-[10px] ml-1 group-hover:text-white transition-colors" />
                                         </button>
                                     </div>
                                 )
@@ -181,10 +172,7 @@ const RouteList = ({
                         <div className="relative p-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg" style={{ backgroundColor: '#3A7BFF' }}>
-                                        <FontAwesomeIcon icon={faRoute} />
-                                    </div>
-                                    <div>
+                                    <div className="ml-1">
                                         <h3 className="font-bold text-gray-900 text-lg">{route.routeName}</h3>
                                         <p className="text-xs font-bold text-gray-500 mt-1">{route.distance}</p>
                                     </div>
@@ -219,13 +207,9 @@ const RouteList = ({
                                         onClick={(e) => openBusReassignModal(route.id, e)}
                                         className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-blue-600 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
                                     >
-                                        <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-                                            <FontAwesomeIcon icon={faBus} className="text-white text-sm" />
-                                        </div>
                                         <div className="flex-1 text-left">
-                                            <p className="text-white font-bold text-sm">{route.assignedBus}</p>
+                                            <p className="text-white font-bold text-sm ml-1">{route.assignedBus}</p>
                                         </div>
-                                        <FontAwesomeIcon icon={faExchangeAlt} className="text-white/70 text-xs" />
                                     </button>
                                 </div>
                                 <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f0f4ff' }}>

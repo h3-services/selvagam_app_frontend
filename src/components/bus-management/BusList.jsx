@@ -33,7 +33,7 @@ const BusList = ({
                         rowData={filteredBuses}
                         columnDefs={[
                             {
-                                headerName: "Bus Number",
+                                headerName: "Number",
                                 field: "busNumber",
                                 flex: 1.2,
                                 minWidth: 150,
@@ -53,7 +53,7 @@ const BusList = ({
                                 )
                             },
                             {
-                                headerName: "Driver Name",
+                                headerName: "Driver",
                                 field: "driverName",
                                 flex: 1.8,
                                 minWidth: 180,
@@ -132,7 +132,7 @@ const BusList = ({
                                 }
                             },
                             {
-                                headerName: "Seating Capacity",
+                                headerName: "Seats",
                                 field: "capacity",
                                 flex: 1,
                                 minWidth: 140,

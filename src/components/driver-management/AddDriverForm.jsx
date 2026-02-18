@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faTimes, 
@@ -44,7 +44,7 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
     </div>
 );
 
-const AddDriverForm = ({ show, onClose, onAdd }) => {
+const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
     const [newDriver, setNewDriver] = useState({
         name: '', phone: '', email: '', licence_number: '',
         licence_expiry: '', fcm_token: 'string', password: ''
@@ -52,13 +52,36 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
 
     const [touched, setTouched] = useState({});
 
+    useEffect(() => {
+        if (show) {
+            if (initialData) {
+                setNewDriver({
+                    ...initialData,
+                    phone: String(initialData.phone || initialData.mobile || ''),
+                    licence_number: initialData.licence_number || initialData.licenseNumber || '',
+                    password: '' // Keep password empty on edit unless changed
+                });
+            } else {
+                // Reset form when opening for "Add"
+                setNewDriver({
+                    name: '', phone: '', email: '', licence_number: '',
+                    licence_expiry: '', fcm_token: 'string', password: ''
+                });
+            }
+            setTouched({});
+        }
+    }, [initialData, show]);
+
     const validate = (values) => {
         const errors = {};
         if (!values.name?.trim()) errors.name = "Required";
         if (values.email?.trim() && !/\S+@\S+\.\S+/.test(values.email)) errors.email = "Invalid";
         if (!values.phone) errors.phone = "Required";
         else if (values.phone.length !== 10) errors.phone = "10 Digits";
-        if (!values.password) errors.password = "Required";
+        
+        // Password only required for new enrollment
+        if (!initialData && !values.password) errors.password = "Required";
+        
         if (!values.licence_number?.trim()) errors.licence_number = "Required";
         if (!values.licence_expiry) errors.licence_expiry = "Required";
         return errors;
@@ -67,15 +90,25 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
     const errors = validate(newDriver);
     const isValid = Object.keys(errors).length === 0;
 
-    const handleAdd = () => {
+    const handleAction = () => {
         const allTouched = Object.keys(newDriver).reduce((acc, key) => ({ ...acc, [key]: true }), {});
         setTouched(allTouched);
 
-        if (isValid) {
-            onAdd({
-                ...newDriver,
-                phone: Number(newDriver.phone)
-            });
+        const currentErrors = validate(newDriver);
+        if (Object.keys(currentErrors).length === 0) {
+            if (initialData) {
+                onUpdate({
+                    ...newDriver,
+                    id: initialData.id,
+                    phone: Number(newDriver.phone)
+                });
+            } else {
+                onAdd({
+                    ...newDriver,
+                    phone: Number(newDriver.phone)
+                });
+            }
+            onClose();
             setNewDriver({
                 name: '', phone: '', email: '', licence_number: '',
                 licence_expiry: '', fcm_token: 'string', password: ''
@@ -131,7 +164,9 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
                             </div>
                         </div>
                         <div>
-                            <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">Enroll Driver</h3>
+                            <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">
+                                {initialData ? 'Update Profile' : 'Enroll Driver'}
+                            </h3>
                             <div className="flex items-center gap-2">
                                 <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
                                 <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">API Core Compliance</p>
@@ -177,7 +212,10 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
                                 <InputField label="Contact Terminal" icon={faPhone} value={newDriver.phone} onChange={(e) => updateField('phone', e.target.value)} type="tel" maxLength={10} placeholder="10-Digit Mobile" error={touched.phone && errors.phone} />
                                 <InputField label="Digital Mail" icon={faEnvelope} value={newDriver.email} onChange={(e) => updateField('email', e.target.value)} type="email" placeholder="user@example.com" error={touched.email && errors.email} />
                             </div>
-                            <InputField label="Auth Password" icon={faLock} value={newDriver.password} onChange={(e) => updateField('password', e.target.value)} type="password" placeholder="System Access" error={touched.password && errors.password} />
+                            
+                            {!initialData && (
+                                <InputField label="Auth Password" icon={faLock} value={newDriver.password} onChange={(e) => updateField('password', e.target.value)} type="password" placeholder="System Access" error={touched.password && errors.password} />
+                            )}
                         </div>
                     </div>
 
@@ -203,7 +241,7 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
                 {/* Execution Footer */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-20">
                     <button
-                        onClick={handleAdd}
+                        onClick={handleAction}
                         className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${!isValid && Object.keys(touched).length > 0 ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
                         style={{ 
                             background: isValid || Object.keys(touched).length === 0 
@@ -211,7 +249,7 @@ const AddDriverForm = ({ show, onClose, onAdd }) => {
                                 : '' 
                         }}
                     >
-                        <span>Register Driver</span>
+                        <span>{initialData ? 'Update Profile' : 'Register Driver'}</span>
                         <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform">
                             <FontAwesomeIcon icon={faCheck} className="text-xs" />
                         </div>

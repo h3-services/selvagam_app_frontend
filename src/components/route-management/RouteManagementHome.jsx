@@ -72,7 +72,9 @@ const RouteManagementHome = () => {
                 });
             }
             
-            setActiveBuses(mappedBuses);
+            // Filter to only show active buses for assignment
+            const onlyActiveBuses = mappedBuses.filter(b => b.status === 'Active');
+            setActiveBuses(onlyActiveBuses);
 
             // Transform and merge data
             const mappedRoutes = await Promise.all(routesData.map(async (route) => {
@@ -243,6 +245,13 @@ const RouteManagementHome = () => {
                     const createdStop = await routeService.createRouteStop(stopData);
                     console.log(`✅ [CREATE STOP ${index + 1}] Response:`, JSON.stringify(createdStop, null, 2));
                 }
+            }
+
+            // 3. Assign Bus (if selected)
+            if (newRouteData.busId) {
+                console.log(`🚌 [ASSIGN BUS] Assigning bus ${newRouteData.busId} to route ${createdRoute.route_id}`);
+                await busService.assignRoute(newRouteData.busId, createdRoute.route_id);
+                console.log('✅ [ASSIGN BUS] Done');
             }
 
             await fetchAllData();
@@ -420,7 +429,6 @@ const RouteManagementHome = () => {
                                         : 'text-slate-500 hover:text-slate-700'
                                         }`}
                                 >
-                                    <FontAwesomeIcon icon={faRoute} />
                                     Active Routes
                                 </button>
                                 <button
@@ -430,7 +438,6 @@ const RouteManagementHome = () => {
                                         : 'text-slate-500 hover:text-slate-700'
                                         }`}
                                 >
-                                    <FontAwesomeIcon icon={faArchive} />
                                     Archived
                                 </button>
                             </div>
@@ -565,9 +572,6 @@ const RouteManagementHome = () => {
                                     onClick={() => handleBulkStatusUpdate('ACTIVE')}
                                     className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-emerald-50 active:bg-emerald-100 rounded-xl transition-all group"
                                 >
-                                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <FontAwesomeIcon icon={faRoute} className="text-sm text-emerald-600" />
-                                    </div>
                                     Mark as Active
                                 </button>
 
@@ -575,9 +579,6 @@ const RouteManagementHome = () => {
                                     onClick={() => handleBulkStatusUpdate('INACTIVE')}
                                     className="w-full flex items-center gap-3 px-3 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-amber-50 active:bg-amber-100 rounded-xl transition-all group"
                                 >
-                                    <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <FontAwesomeIcon icon={faArchive} className="text-sm text-amber-600" />
-                                    </div>
                                     Move to Archive
                                 </button>
                             </div>

@@ -18,211 +18,206 @@ import {
     faFingerprint,
     faBriefcase,
     faUserCircle,
-    faCogs
+    faCogs,
+    faHistory,
+    faUserSlash,
+    faGraduationCap,
+    faChevronDown,
+    faCircle,
+    faBan
 } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 
-const DriverDetail = ({ selectedDriver, onBack, onUpdate }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState(null);
-
-    useEffect(() => {
-        if (selectedDriver) {
-            setEditData({
-                ...selectedDriver,
-                phone: Number(selectedDriver.mobile || selectedDriver.phone),
-                licence_number: selectedDriver.licenseNumber || selectedDriver.licence_number,
-                kyc_verified: selectedDriver.kyc_verified === 1 || selectedDriver.kyc_verified === true,
-                is_available: selectedDriver.is_available === 1 || selectedDriver.is_available === true
-            });
-        }
-    }, [selectedDriver]);
-
-    const handleSaveEdit = () => {
-        const payload = {
-            ...editData,
-            status: editData.status?.toUpperCase() || "ACTIVE"
-        };
-        onUpdate(payload);
-        setIsEditing(false);
-    };
-
+const DriverDetail = ({ selectedDriver, onBack, onUpdate, onDelete, onEdit, onStatusChange }) => {
+    const [showStatusMenu, setShowStatusMenu] = useState(false);
+    
     if (!selectedDriver) return null;
 
-    const DetailItem = ({ icon, label, value, field, type = "text", editable = true }) => (
-        <div className="group p-5 bg-[#fcfcfd] rounded-[2rem] border border-slate-100 hover:border-blue-100 transition-all duration-300">
-            <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-white text-slate-400 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all shadow-sm">
+    const statuses = [
+        { label: 'Active', value: 'ACTIVE', icon: faCheck, color: 'emerald' },
+        { label: 'Inactive', value: 'INACTIVE', icon: faCircle, color: 'amber' },
+        { label: 'Resigned', value: 'RESIGNED', icon: faBan, color: 'rose' }
+    ];
+
+    const currentStatus = statuses.find(s => s.value === (selectedDriver.status || 'ACTIVE')?.toUpperCase()) || statuses[1];
+
+    const SectionHeader = ({ icon, title, subtitle, color = "slate" }) => (
+        <div className="flex items-center gap-5 mb-10">
+            <div className={`w-14 h-14 rounded-[1.25rem] bg-white border border-slate-100 flex items-center justify-center text-${color}-600 shadow-xl shadow-slate-200/50 group-hover:scale-110 transition-transform duration-500`}>
+                <FontAwesomeIcon icon={icon} className="text-lg" />
+            </div>
+            <div>
+                <h3 className="text-xl font-black text-slate-900 leading-none tracking-tight">{title}</h3>
+                <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-[0.2em]">{subtitle}</p>
+            </div>
+        </div>
+    );
+
+    const InsightCard = ({ label, value, icon, color = "blue" }) => (
+        <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 group/card hover:bg-white hover:shadow-2xl hover:shadow-slate-200 transition-all duration-500">
+            <div className="flex items-center gap-5">
+                <div className={`w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-${color}-500 shadow-sm group-hover/card:scale-110 group-hover/card:bg-${color}-600 group-hover/card:text-white transition-all`}>
                     <FontAwesomeIcon icon={icon} className="text-sm" />
                 </div>
-                <div className="flex-1 min-w-0">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 group-hover:text-blue-600 transition-colors">{label}</p>
-                    {isEditing && editable ? (
-                        <input
-                            type={type}
-                            value={editData?.[field] || ''}
-                            onChange={(e) => setEditData({ ...editData, [field]: e.target.value })}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-black text-slate-900 outline-none focus:border-blue-400"
-                        />
-                    ) : (
-                        <p className="text-sm font-black text-slate-900 tracking-tight truncate leading-tight">{value || 'NOT_SET'}</p>
-                    )}
+                <div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">{label}</p>
+                    <p className="text-sm font-black text-slate-900 tracking-tight capitalize">{value || 'N/A'}</p>
                 </div>
             </div>
         </div>
     );
 
     return (
-        <div className="h-full flex flex-col bg-[#f1f5f9] animate-fade-in overflow-hidden">
-            {/* Action Bar */}
-            <div className="px-10 py-6 bg-white border-b border-slate-100 flex justify-between items-center sticky top-0 z-10">
-                <div className="flex items-center gap-6">
-                    <button onClick={onBack} className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center shadow-sm">
+        <div className="flex-1 h-full flex flex-col bg-[#F8FAFC] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+            {/* Enterprise Header Bar */}
+            <div className="bg-white border-b border-slate-200 px-10 h-24 flex items-center justify-between flex-shrink-0 z-20">
+                <div className="flex items-center gap-8">
+                    <button 
+                        onClick={onBack}
+                        className="w-12 h-12 flex items-center justify-center hover:bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-all active:scale-95 border border-transparent hover:border-slate-100"
+                    >
                         <FontAwesomeIcon icon={faArrowLeft} />
                     </button>
-                    <div>
-                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-1">Dossier Access</p>
-                        <h2 className="text-2xl font-black text-slate-900 tracking-tighter leading-none font-['Outfit']">Identity Verification</h2>
-                    </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    {isEditing ? (
-                        <>
-                            <button onClick={() => setIsEditing(false)} className="px-6 py-3 rounded-2xl bg-slate-50 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all">Abort</button>
-                            <button onClick={handleSaveEdit} className="px-8 py-3 rounded-2xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:bg-black transition-all shadow-xl shadow-indigo-100">
-                                <FontAwesomeIcon icon={faCheck} /> Commit Changes
-                            </button>
-                        </>
-                    ) : (
-                        <button onClick={() => setIsEditing(true)} className="px-8 py-3 rounded-2xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 hover:bg-black transition-all shadow-xl shadow-indigo-100">
-                            <FontAwesomeIcon icon={faEdit} /> Modify Dossier
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
-                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-10">
-                    
-                    {/* Left Panel: Profile & Status */}
-                    <div className="col-span-12 lg:col-span-4 space-y-10">
-                        {/* Profile Bento */}
-                        <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm text-center relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-slate-50 rounded-bl-full -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700" />
-                            
-                            <div className="relative mx-auto w-32 h-32 rounded-[2.5rem] bg-slate-50 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden mb-8 group-hover:scale-105 transition-transform duration-500">
-                                {selectedDriver.photo_url ? (
-                                    <img src={selectedDriver.photo_url} alt={selectedDriver.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <FontAwesomeIcon icon={faUserCircle} className="text-6xl text-slate-200" />
-                                )}
-                            </div>
-
-                            <h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-2 relative z-10 font-['Outfit']">{selectedDriver.name}</h3>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-8 relative z-10">System ID: {selectedDriver.id}</p>
-
-                            <div className="flex flex-wrap justify-center gap-3 relative z-10 mb-8">
-                                <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${selectedDriver.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
-                                    {selectedDriver.status}
+                    <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 rounded-[2rem] bg-slate-900 flex items-center justify-center text-white text-2xl font-black shadow-2xl shadow-slate-300 transform -rotate-3 hover:rotate-0 transition-transform duration-500">
+                            {selectedDriver.name?.charAt(0)}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-4">
+                                <h2 className="text-2xl font-black text-slate-900 leading-none tracking-tight">{selectedDriver.name}</h2>
+                                <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] border shadow-sm ${
+                                    selectedDriver.status === 'Active' || selectedDriver.status === 'ACTIVE'
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                    : 'bg-amber-50 text-amber-600 border-amber-100'
+                                }`}>
+                                    {selectedDriver.status || 'Inactive'}
                                 </span>
-                                {selectedDriver.kyc_verified === 1 && (
-                                    <span className="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-200 flex items-center gap-2">
-                                        <FontAwesomeIcon icon={faShieldHalved} /> Verified
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="space-y-3">
-                                <div className="p-4 bg-slate-50/50 rounded-[2rem] border border-slate-100 flex items-center justify-between group/toggle">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm ${selectedDriver.is_available === 1 ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
-                                            <FontAwesomeIcon icon={selectedDriver.is_available === 1 ? faCheck : faTimes} />
-                                        </div>
-                                        <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Availability</p>
-                                    </div>
-                                    {isEditing && (
-                                        <button onClick={() => setEditData({ ...editData, is_available: !editData.is_available })} className="text-2xl text-blue-600 transition-transform active:scale-95">
-                                            <FontAwesomeIcon icon={editData?.is_available ? faToggleOn : faToggleOff} />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Operational Card */}
-                        <div className="bg-slate-900 rounded-[3rem] p-8 text-white relative overflow-hidden group">
-                            <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/5 rounded-tl-full -mr-16 -mb-16 group-hover:scale-110 transition-transform duration-700" />
-                            <h4 className="flex items-center gap-3 text-[10px] font-black text-white/40 uppercase tracking-widest mb-6">
-                                <FontAwesomeIcon icon={faCogs} className="text-blue-500" />
-                                Active Assignment
-                            </h4>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white/5 p-4 rounded-3xl border border-white/10">
-                                    <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-1">Vehicle</p>
-                                    <p className="text-lg font-black tracking-tight">{selectedDriver.vehicleNumber || 'BASE'}</p>
-                                </div>
-                                <div className="bg-white/5 p-4 rounded-3xl border border-white/10">
-                                    <p className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-1">Route</p>
-                                    <p className="text-lg font-black tracking-tight">{selectedDriver.route || 'TRANSIT'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Panel: Detailed Metrics */}
-                    <div className="col-span-12 lg:col-span-8 space-y-10">
-                        {/* Information Grid */}
-                        <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -mr-16 -mt-16" />
-                            <h4 className="flex items-center gap-3 text-[11px] font-black text-slate-900 uppercase tracking-widest mb-10 relative z-10">
-                                <FontAwesomeIcon icon={faFingerprint} className="text-blue-600" />
-                                Identification Metrics
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
-                                <DetailItem icon={faEnvelope} label="Communication Line" value={selectedDriver.email} field="email" type="email" />
-                                <DetailItem icon={faPhone} label="Terminal Contact" value={selectedDriver.mobile || selectedDriver.phone} field="phone" type="number" />
-                                <DetailItem icon={faCalendarAlt} label="Lifecycle Origin" value={selectedDriver.dob} field="dob" type="date" />
-                                <DetailItem icon={faIdCard} label="License Directive" value={selectedDriver.licenseNumber || selectedDriver.licence_number} field="licence_number" />
-                                <DetailItem icon={faClock} label="Clearance Expiry" value={selectedDriver.licence_expiry} field="licence_expiry" type="date" />
-                                <DetailItem icon={faPassport} label="Universal Registry" value={selectedDriver.aadhar_number} field="aadhar_number" />
-                            </div>
-                        </div>
-
-                        {/* Document Assets */}
-                        <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm">
-                            <h4 className="flex items-center gap-3 text-[11px] font-black text-slate-900 uppercase tracking-widest mb-10">
-                                <FontAwesomeIcon icon={faLink} className="text-blue-600" />
-                                Legal Documentation Assets
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {[
-                                    { label: 'License Clearance', url: selectedDriver.licence_url, icon: faIdCard },
-                                    { label: 'Aadhar Registry', url: selectedDriver.aadhar_url, icon: faPassport }
-                                ].map((doc, idx) => (
-                                    <div key={idx} className="group/asset relative aspect-[16/10] bg-slate-50 rounded-[2.5rem] border-2 border-slate-100 overflow-hidden hover:border-blue-400 hover:shadow-2xl transition-all duration-500">
-                                        {doc.url ? (
-                                            <>
-                                                <img src={doc.url} alt={doc.label} className="w-full h-full object-cover group-hover/asset:scale-105 transition-transform duration-700" />
-                                                <div className="absolute inset-0 bg-slate-900/0 group-hover/asset:bg-slate-900/20 transition-all flex items-center justify-center">
-                                                    <button className="bg-white text-slate-900 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl scale-90 opacity-0 group-hover/asset:scale-100 group-hover/asset:opacity-100 transition-all">Inspect Asset</button>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-200">
-                                                <FontAwesomeIcon icon={doc.icon} className="text-4xl mb-4 group-hover/asset:text-slate-300 transition-colors" />
-                                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Asset Missing</span>
-                                            </div>
-                                        )}
-                                        <div className="absolute top-6 left-6 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-[9px] font-black text-slate-900 uppercase tracking-widest shadow-sm">
-                                            {doc.label}
-                                        </div>
-                                    </div>
-                                ))}
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div className="flex items-center gap-4">
+                    {/* Status Management Dropdown */}
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowStatusMenu(!showStatusMenu)}
+                            className={`px-6 py-3.5 rounded-2xl border ${
+                                currentStatus.value === 'ACTIVE' 
+                                ? 'border-emerald-100 text-emerald-600 bg-emerald-50/30' 
+                                : currentStatus.value === 'RESIGNED'
+                                ? 'border-rose-100 text-rose-500 bg-rose-50/30'
+                                : 'border-amber-100 text-amber-600 bg-amber-50/30'
+                            } text-xs font-black uppercase tracking-widest transition-all flex items-center gap-3 active:scale-95 shadow-sm hover:shadow-md`}
+                        >
+                            <FontAwesomeIcon icon={currentStatus.icon} className="text-[10px]" />
+                            {currentStatus.label}
+                            <FontAwesomeIcon icon={faChevronDown} className={`ml-1 text-[10px] transition-transform duration-300 ${showStatusMenu ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {showStatusMenu && (
+                            <>
+                                <div className="fixed inset-0 z-30" onClick={() => setShowStatusMenu(false)} />
+                                <div className="absolute top-full right-0 mt-3 w-56 bg-white border border-slate-100 rounded-3xl shadow-2xl p-2 z-40 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="px-4 py-3 mb-2 border-b border-slate-50">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Update Registry Status</p>
+                                    </div>
+                                    {statuses.map((status) => (
+                                        <button
+                                            key={status.value}
+                                            onClick={() => {
+                                                onStatusChange(selectedDriver.driver_id, status.value);
+                                                setShowStatusMenu(false);
+                                            }}
+                                            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-xs font-bold transition-all hover:bg-slate-50 ${
+                                                selectedDriver.status?.toUpperCase() === status.value 
+                                                ? `text-${status.color}-600 bg-${status.color}-50/50` 
+                                                : 'text-slate-600'
+                                            }`}
+                                        >
+                                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${
+                                                selectedDriver.status?.toUpperCase() === status.value 
+                                                ? `bg-white border-${status.color}-100 text-${status.color}-600` 
+                                                : 'bg-white border-slate-100 text-slate-400'
+                                            }`}>
+                                                <FontAwesomeIcon icon={status.icon} className="text-[10px]" />
+                                            </div>
+                                            {status.label}
+                                            {selectedDriver.status?.toUpperCase() === status.value && (
+                                                <div className={`ml-auto w-1.5 h-1.5 rounded-full bg-${status.color}-500 shadow-sm`} />
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <button 
+                        onClick={() => onEdit(selectedDriver)}
+                        className="px-8 py-3.5 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-200 flex items-center gap-3 active:scale-95 group"
+                    >
+                        <FontAwesomeIcon icon={faEdit} className="group-hover:rotate-12 transition-transform" />
+                        Modify Profile
+                    </button>
+                </div>
             </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-12">
+                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-12">
+                    
+                    {/* Left Column - Core Identity */}
+                    <div className="col-span-12 lg:col-span-5 space-y-10">
+                        <div className="bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-bl-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700" />
+                            <SectionHeader icon={faIdCard} title="Personnel Dossier" color="blue" />
+                            
+                            <div className="space-y-6">
+                                <InsightCard label="Primary Contact" value={selectedDriver.phone || selectedDriver.mobile} icon={faPhone} color="blue" />
+                                <InsightCard label="Official Email" value={selectedDriver.email} icon={faEnvelope} color="indigo" />
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column - Operational Credentials & Timeline */}
+                    <div className="col-span-12 lg:col-span-7 space-y-10">
+                        {/* Operational Card */}
+                        <div className="bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm group">
+                            <SectionHeader icon={faCheck} title="License Information" color="emerald" />
+                            <div className="grid grid-cols-2 gap-8">
+                                <div className="p-8 bg-slate-50/50 rounded-[2.5rem] border border-slate-100 hover:border-emerald-200 transition-all duration-500">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">License Number</p>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-50">
+                                            <FontAwesomeIcon icon={faIdCard} />
+                                        </div>
+                                        <p className="text-lg font-black text-slate-900 tracking-tight">{selectedDriver.licence_number || selectedDriver.licenseNumber || 'Unassigned'}</p>
+                                    </div>
+                                </div>
+                                <div className="p-8 bg-slate-50/50 rounded-[2.5rem] border border-slate-100 hover:border-amber-200 transition-all duration-500">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">License Expiry</p>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm border border-amber-50">
+                                            <FontAwesomeIcon icon={faCalendarAlt} />
+                                        </div>
+                                        <p className="text-lg font-black text-slate-900 tracking-tight">{selectedDriver.licence_expiry || 'N/A'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <style>{`
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+            `}</style>
         </div>
     );
 };

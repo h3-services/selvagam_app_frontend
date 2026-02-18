@@ -122,10 +122,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                     >
                         <FontAwesomeIcon icon={faTimes} className="text-xl" />
                     </button>
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg" style={{ backgroundColor: COLORS.SIDEBAR_BG }}>
-                            <FontAwesomeIcon icon={faMapLocationDot} className="text-white text-2xl" />
-                        </div>
+                    <div className="flex items-center gap-4 ml-1">
                         <div>
                             <h3 className="font-bold text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add New Route</h3>
                             <p className="text-gray-500 text-sm">Create a new travel route with stops</p>
@@ -226,7 +223,6 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                             {/* Route Details */}
                             <div className="space-y-4 mb-6">
                                 <h4 className="font-bold text-lg text-gray-800 border-b border-blue-100 pb-2 flex items-center gap-2">
-                                    <FontAwesomeIcon icon={faRoute} className="text-blue-600" />
                                     Route Details
                                 </h4>
 
@@ -293,7 +289,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                                                     {bus.busNumber}
                                                                 </span>
                                                                 <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                                                                    Pilot: {bus.driverName || 'No Driver'}
+                                                                    Driver: {bus.driverName || 'No Driver'}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -308,7 +304,6 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                             {/* Stop Points Management */}
                             <div className="flex flex-col flex-1">
                                 <h4 className="font-bold text-lg text-gray-800 border-b border-blue-100 pb-2 mb-4 flex items-center gap-2">
-                                    <FontAwesomeIcon icon={faLocationDot} className="text-blue-600" />
                                     Stops
                                 </h4>
 
@@ -372,7 +367,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                         className="w-full py-4 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all text-base disabled:bg-gray-400 disabled:shadow-none flex items-center justify-center gap-2"
                         style={{ backgroundColor: isSaving ? undefined : COLORS.SIDEBAR_BG }}
                     >
-                        {isSaving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faMapLocationDot} />}
+                        {isSaving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : null}
                         {isSaving ? 'Creating Route...' : 'Add Route'}
                     </button>
                 </div>

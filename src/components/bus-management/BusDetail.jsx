@@ -8,21 +8,7 @@ import {
     faMapMarkerAlt, faPhone, faEnvelope
 } from '@fortawesome/free-solid-svg-icons';
 
-const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState(null);
-
-    useEffect(() => {
-        if (selectedBus) {
-            setEditData({ ...selectedBus });
-        }
-    }, [selectedBus]);
-
-    const handleSaveEdit = () => {
-        onUpdate(editData);
-        setIsEditing(false);
-    };
-
+const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
     if (!selectedBus) return null;
 
     const SectionHeader = ({ icon, title, subtitle }) => (
@@ -37,19 +23,10 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
         </div>
     );
 
-    const DataRow = ({ label, value, isEditing, field, type = "text", isFullWidth = false }) => (
+    const DataRow = ({ label, value, isFullWidth = false }) => (
         <div className={`${isFullWidth ? 'col-span-2' : ''} space-y-1.5`}>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-            {isEditing ? (
-                <input
-                    type={type}
-                    value={editData?.[field] || ''}
-                    onChange={(e) => setEditData({ ...editData, [field]: e.target.value })}
-                    className="w-full px-2 py-1 text-sm border-b border-indigo-200 focus:border-indigo-600 outline-none bg-transparent font-bold text-slate-700"
-                />
-            ) : (
-                <p className="text-sm font-bold text-slate-700">{value || 'N/A'}</p>
-            )}
+            <p className="text-sm font-bold text-slate-700">{value || 'N/A'}</p>
         </div>
     );
 
@@ -70,7 +47,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                         </div>
                         <div>
                             <div className="flex items-center gap-3">
-                                <h2 className="text-xl font-bold text-slate-900 leading-none">{selectedBus.busNumber}</h2>
+                                <h2 className="text-xl font-bold text-slate-900 leading-none">{selectedBus.bus_name || selectedBus.busNumber}</h2>
                                 <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
                                     (selectedBus.status || '').toUpperCase() === 'ACTIVE' 
                                     ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
@@ -79,39 +56,21 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                                     {selectedBus.status}
                                 </span>
                             </div>
-                            <p className="text-xs font-medium text-slate-500 mt-1.5">
-                                Vehicle ID: <span className="text-slate-900 font-bold">#{selectedBus.id?.substring(0, 8).toUpperCase()}</span> • Make: <span className="text-slate-900 font-bold">{selectedBus.bus_brand}</span>
+                            <p className="text-xs font-medium text-slate-500 mt-1.5 focus-within:">
+                                <span className="text-slate-400 font-bold tracking-widest uppercase text-[10px]">Registry No:</span> <span className="text-slate-900 font-bold">{selectedBus.registration_number || selectedBus.busNumber}</span> • <span className="text-slate-400 font-bold tracking-widest uppercase text-[10px]">Type:</span> <span className="text-indigo-600 font-black">{selectedBus.vehicle_type || 'Standard'}</span>
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {isEditing ? (
-                        <>
-                            <button 
-                                onClick={() => setIsEditing(false)}
-                                className="px-6 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-all"
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                onClick={handleSaveEdit}
-                                className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2"
-                            >
-                                <FontAwesomeIcon icon={faCheck} className="text-xs" />
-                                Save Changes
-                            </button>
-                        </>
-                    ) : (
-                        <button 
-                            onClick={() => setIsEditing(true)}
-                            className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
-                        >
-                            <FontAwesomeIcon icon={faEdit} className="text-xs" />
-                            Edit Profile
-                        </button>
-                    )}
+                    <button 
+                        onClick={() => onEdit(selectedBus)}
+                        className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
+                    >
+                        <FontAwesomeIcon icon={faEdit} className="text-xs" />
+                        Edit Profile
+                    </button>
                 </div>
             </div>
 
@@ -123,44 +82,23 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                     <div className="col-span-12 lg:col-span-4 space-y-8">
                         {/* Technical Specifications */}
                         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                            <SectionHeader icon={faFingerprint} title="Technical Identity" subtitle="System Specifications" />
+                            <SectionHeader icon={faFingerprint} title="Bus Details" />
                             <div className="space-y-6 pt-2">
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <DataRow label="Model Series" value={selectedBus.bus_model} isEditing={isEditing} field="bus_model" />
-                                    <DataRow label="Seating Cap." value={`${selectedBus.capacity} Seats`} isEditing={isEditing} field="capacity" type="number" />
-                                    <DataRow label="Registration" value={selectedBus.busNumber} isEditing={isEditing} field="busNumber" />
-                                    <DataRow label="Fleet Status" value={selectedBus.status} />
+                                    <DataRow label="Bus Name" value={selectedBus.bus_name} />
+                                    <DataRow label="Registry No" value={selectedBus.registration_number} />
+                                    <DataRow label="Make / Brand" value={selectedBus.bus_brand} />
+                                    <DataRow label="Model" value={selectedBus.bus_model} />
+                                    <DataRow label="Seats" value={`${selectedBus.seating_capacity || selectedBus.capacity} Seats`} />
+                                    <DataRow label="Category" value={selectedBus.vehicle_type} />
                                 </div>
                             </div>
                         </div>
 
                         {/* Driver Assignment Card */}
                         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                            <SectionHeader icon={faUser} title="Designated Pilot" subtitle="Personnel Assignment" />
-                            {isEditing ? (
-                                <div className="space-y-4 pt-2">
-                                    <div className="space-y-1.5">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select Driver</p>
-                                        <select
-                                            value={editData.driver_id || ''}
-                                            onChange={(e) => {
-                                                const driverId = e.target.value || null;
-                                                const driverName = driverId ? (drivers.find(d => d.driver_id === driverId)?.name || 'Assigned') : 'Unassigned';
-                                                setEditData({ ...editData, driver_id: driverId, driverName: driverName });
-                                            }}
-                                            className="w-full px-2 py-2 text-sm border border-slate-200 rounded-xl focus:border-indigo-600 outline-none bg-slate-50 font-bold text-slate-700"
-                                        >
-                                            <option value="">Unassigned</option>
-                                            {drivers.map(driver => (
-                                                <option key={driver.driver_id} value={driver.driver_id}>
-                                                    {driver.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            ) : (
+                            <SectionHeader icon={faUser} title="Driver Info" />
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 font-bold">
@@ -185,7 +123,6 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                                         </div>
                                     )}
                                 </div>
-                            )}
                         </div>
                     </div>
 
@@ -194,7 +131,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                         {/* Legal & Compliance Section */}
                         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                                <SectionHeader icon={faShieldAlt} title="Compliance & Legal" subtitle="Statutory Documentation" />
+                                <SectionHeader icon={faShieldAlt} title="Documents" />
                             </div>
                             <div className="p-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -205,7 +142,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                                             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Registration (RC)</h4>
                                         </div>
                                         <div className="grid grid-cols-1 gap-6">
-                                            <DataRow label="Expiry Date" value={selectedBus.rc_expiry_date} isEditing={isEditing} field="rc_expiry_date" type="date" />
+                                            <DataRow label="Expiry Date" value={selectedBus.rc_expiry_date} />
                                             <div className="group relative rounded-2xl overflow-hidden border-2 border-slate-100 hover:border-indigo-200 transition-all bg-slate-50 h-[200px]">
                                                 {selectedBus.rc_book_url ? (
                                                     <img src={selectedBus.rc_book_url} alt="RC Book" className="w-full h-full object-cover" />
@@ -216,11 +153,8 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                                                     </div>
                                                 )}
                                             </div>
-                                            {isEditing && (
-                                                <DataRow label="RC Image URL" value={selectedBus.rc_book_url} isEditing={true} field="rc_book_url" isFullWidth={true} />
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
 
                                     {/* FC Details */}
                                     <div className="space-y-6">
@@ -229,7 +163,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                                             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-widest">Fitness (FC)</h4>
                                         </div>
                                         <div className="grid grid-cols-1 gap-6">
-                                            <DataRow label="Expiry Date" value={selectedBus.fc_expiry_date} isEditing={isEditing} field="fc_expiry_date" type="date" />
+                                            <DataRow label="Expiry Date" value={selectedBus.fc_expiry_date} />
                                             <div className="group relative rounded-2xl overflow-hidden border-2 border-slate-100 hover:border-rose-200 transition-all bg-slate-50 h-[200px]">
                                                 {selectedBus.fc_certificate_url ? (
                                                     <img src={selectedBus.fc_certificate_url} alt="FC Certificate" className="w-full h-full object-cover" />
@@ -240,18 +174,15 @@ const BusDetail = ({ selectedBus, drivers, onBack, onUpdate }) => {
                                                     </div>
                                                 )}
                                             </div>
-                                            {isEditing && (
-                                                <DataRow label="FC Image URL" value={selectedBus.fc_certificate_url} isEditing={true} field="fc_certificate_url" isFullWidth={true} />
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Logistics Summary */}
                         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                            <SectionHeader icon={faRoute} title="Operational Logistics" subtitle="Route Network" />
+                            <SectionHeader icon={faRoute} title="Route Info" />
                             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-rose-500">

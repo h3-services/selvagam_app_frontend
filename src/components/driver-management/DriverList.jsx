@@ -39,7 +39,7 @@ const DriverList = ({
                         rowData={filteredDrivers}
                         columnDefs={[
                             {
-                                headerName: "Driver Identity",
+                                headerName: "Name",
                                 field: "name",
                                 flex: 1.8,
                                 minWidth: 220,
@@ -62,7 +62,7 @@ const DriverList = ({
                                 )
                             },
                             {
-                                headerName: "Terminal / Contact",
+                                headerName: "Contact",
                                 field: "mobile",
                                 flex: 1.5,
                                 minWidth: 180,
@@ -81,7 +81,7 @@ const DriverList = ({
                                 )
                             },
                             {
-                                headerName: "Clearance ID",
+                                headerName: "License",
                                 field: "licenseNumber",
                                 flex: 1.2,
                                 minWidth: 160,
@@ -94,7 +94,7 @@ const DriverList = ({
                                 )
                             },
                             {
-                                headerName: "Fleet Assignment",
+                                headerName: "Vehicle",
                                 field: "vehicleNumber",
                                 flex: 1.5,
                                 minWidth: 180,
@@ -109,6 +109,27 @@ const DriverList = ({
                                         </div>
                                     </div>
                                 )
+                            },
+                            {
+                                headerName: "Status",
+                                field: "status",
+                                flex: 1,
+                                minWidth: 140,
+                                cellStyle: { display: 'flex', alignItems: 'center' },
+                                cellRenderer: (params) => {
+                                    const status = (params.value || 'INACTIVE').toUpperCase();
+                                    const config = {
+                                        'ACTIVE': { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100' },
+                                        'RESIGNED': { bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100' },
+                                        'INACTIVE': { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' }
+                                    }[status] || { bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-100' };
+
+                                    return (
+                                        <div className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${config.bg} ${config.text} ${config.border}`}>
+                                            {params.value || 'Inactive'}
+                                        </div>
+                                    );
+                                }
                             },
                             {
                                 headerName: "Actions",

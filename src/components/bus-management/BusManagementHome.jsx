@@ -22,6 +22,7 @@ const BusManagementHome = () => {
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
+    const [editingBus, setEditingBus] = useState(null);
 
     // Bulk Actions State
     const [selectedRows, setSelectedRows] = useState([]);
@@ -115,6 +116,7 @@ const BusManagementHome = () => {
             await busService.createBus(payload);
             await fetchData();
             setShowModal(false);
+            setEditingBus(null);
         } catch (err) {
             console.error(err);
             console.error(err);
@@ -236,18 +238,19 @@ const BusManagementHome = () => {
         setLoading(true);
         try {
             const payload = {
-                registration_number: updatedData.busNumber, // map back to backend field name
-                driver_id: updatedData.driver_id,
-                route_id: updatedData.route_id,
+                registration_number: updatedData.registration_number || updatedData.busNumber,
+                driver_id: updatedData.driver_id || null,
+                route_id: updatedData.route_id || null,
                 vehicle_type: updatedData.vehicle_type,
                 bus_brand: updatedData.bus_brand,
                 bus_model: updatedData.bus_model,
-                seating_capacity: parseInt(updatedData.capacity || 0), // map back to backend field name
-                rc_expiry_date: updatedData.rc_expiry_date,
-                fc_expiry_date: updatedData.fc_expiry_date,
-                rc_book_url: updatedData.rc_book_url,
-                fc_certificate_url: updatedData.fc_certificate_url,
-                status: (updatedData.status || 'ACTIVE').toUpperCase()
+                seating_capacity: parseInt(updatedData.seating_capacity || updatedData.capacity || 0),
+                rc_expiry_date: updatedData.rc_expiry_date || null,
+                fc_expiry_date: updatedData.fc_expiry_date || null,
+                rc_book_url: updatedData.rc_book_url || null,
+                fc_certificate_url: updatedData.fc_certificate_url || null,
+                status: (updatedData.status || 'ACTIVE').toUpperCase(),
+                bus_name: updatedData.bus_name
             };
 
             const response = await busService.updateBus(updatedData.id, payload);
@@ -289,7 +292,7 @@ const BusManagementHome = () => {
                 <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className='ml-20 lg:ml-0'>
-                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
                                 Bus Management
                             </h1>
 
@@ -306,7 +309,7 @@ const BusManagementHome = () => {
                                         : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
-                                    Active Fleet
+                                    Active Buses
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('Scrap')}
@@ -354,6 +357,10 @@ const BusManagementHome = () => {
                         selectedBus={selectedBus}
                         drivers={drivers}
                         onBack={() => setSelectedBus(null)}
+                        onEdit={(bus) => {
+                            setEditingBus(bus);
+                            setShowModal(true);
+                        }}
                         onUpdate={handleUpdate}
                         getStatusColor={getStatusColor}
                     />
@@ -469,8 +476,13 @@ const BusManagementHome = () => {
 
             <AddBusForm
                 show={showModal}
-                onClose={() => setShowModal(false)}
+                onClose={() => {
+                    setShowModal(false);
+                    setEditingBus(null);
+                }}
                 onAdd={handleAdd}
+                onUpdate={handleUpdate}
+                editingBus={editingBus}
                 drivers={drivers}
                 routes={routes}
             />
