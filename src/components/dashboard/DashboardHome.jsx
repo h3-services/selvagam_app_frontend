@@ -14,7 +14,7 @@ const DashboardHome = () => {
             <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                    <h1 className="text-2xl font-bold text-gray-800 ml-20 lg:ml-0">Dashboard Overview</h1>
-                   <p className="text-gray-500 text-sm mt-1 ml-20 lg:ml-0">Real-time insights and fleet management summary.</p>
+                   {/* <p className="text-gray-500 text-sm mt-1 ml-20 lg:ml-0">Real-time insights and fleet management summary.</p> */}
                 </div>
             </div>
 
