@@ -171,7 +171,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
         study_year: '',
         yearStart: new Date().getFullYear().toString(),
         yearEnd: (new Date().getFullYear() + 1).toString(),
-        is_transport_user: true
+        is_transport_user: true,
+        gender: 'MALE'
     };
 
     const defaultParentState = {
@@ -242,7 +243,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                 study_year: d.study_year || '',
                 yearStart: yStart,
                 yearEnd: yEnd,
-                is_transport_user: d.is_transport_user !== undefined ? d.is_transport_user : true
+                is_transport_user: d.is_transport_user !== undefined ? d.is_transport_user : true,
+                gender: d.gender || 'MALE'
             });
         } else {
             setFormData(defaultStudentState);
@@ -370,6 +372,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
             name: formData.name,
             parent_id: formData.parent_id,
             dob: formData.dob,
+            gender: formData.gender || 'MALE',
             s_parent_id: formData.s_parent_id || null, 
             is_transport_user: formData.is_transport_user,
             study_year: combinedStudyYear,
@@ -409,7 +412,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
         const dummyStudent = {
             name: `Student ${randomNum}`,
             dob: "2016-08-15",
-            gender: "Male",
+            gender: "MALE",
             blood_group: "O+",
             // Use first active class from the fetched list
             class_id: classes.find(c => c.status === 'ACTIVE')?.class_id || "", 
@@ -547,6 +550,20 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                 value={formData.dob} 
                                                 onChange={(e) => handleChange('dob', e.target.value)} 
                                             />
+                                            <SelectField 
+                                                label="Gender Identity" 
+                                                icon={faUser} 
+                                                value={formData.gender} 
+                                                onChange={(e) => handleChange('gender', e.target.value)} 
+                                                placeholder="Select Gender"
+                                                options={[
+                                                    { value: 'MALE', label: 'Male' },
+                                                    { value: 'FEMALE', label: 'Female' },
+                                                    { value: 'OTHER', label: 'Other' }
+                                                ]}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-1">
                                             <YearRangePicker 
                                                 label="Academic Tenure"
                                                 start={formData.yearStart}

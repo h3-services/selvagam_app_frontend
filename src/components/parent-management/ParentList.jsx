@@ -340,6 +340,11 @@ const ParentList = ({
                 .custom-mini-scroll::-webkit-scrollbar-thumb:hover {
                     background: #CBD5E1;
                 }
+                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
+                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
+                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
+                .custom-ag-grid .ag-cell { border: none !important; }
+                .custom-ag-grid .ag-root-wrapper { border: none !important; }
             `}</style>
         </div>
     );

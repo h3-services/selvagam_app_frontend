@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import AdminTeam from './AdminTeam';
-import SchoolLocations from './SchoolLocations';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import DeactivationReasonModal from './DeactivationReasonModal';
 import { adminService } from '../../services/adminService';
@@ -35,21 +34,9 @@ const SuperAdminHome = () => {
         }
     };
 
-    // Location Data State
-    const [locations, setLocations] = useState([
-        {
-            id: 1,
-            name: 'Main Campus',
-            address: '123 Education Lane, Knowledge City, Bangalore',
-            lat: 12.9716,
-            lng: 77.5946
-        }
-    ]);
-
-    // UI States for Modals
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
-    const [deleteType, setDeleteType] = useState(null); // 'admin' | 'location'
+    const [deleteType, setDeleteType] = useState(null); // 'admin'
     const [showDeactivateModal, setShowDeactivateModal] = useState(false);
     const [deactivatingItemId, setDeactivatingItemId] = useState(null);
 
@@ -107,21 +94,6 @@ const SuperAdminHome = () => {
         }
     };
 
-    // --- Location Handlers ---
-    const handleAddLocation = (newLocation) => {
-        setLocations([...locations, { ...newLocation, id: Date.now() }]);
-    };
-
-    const handleUpdateLocation = (id, updatedData) => {
-        setLocations(locations.map(l => l.id === id ? updatedData : l));
-    };
-
-    const handleDeleteLocationRequest = (id) => {
-        setItemToDelete(id);
-        setDeleteType('location');
-        setShowDeleteConfirm(true);
-    };
-
     // --- Shared Handlers ---
     const confirmDelete = async () => {
         if (!itemToDelete || !deleteType) return;
@@ -134,8 +106,6 @@ const SuperAdminHome = () => {
                 console.error("Failed to delete admin:", err);
                 alert("Failed to delete admin");
             }
-        } else if (deleteType === 'location') {
-            setLocations(locations.filter(l => l.id !== itemToDelete));
         }
 
         setShowDeleteConfirm(false);
@@ -164,13 +134,6 @@ const SuperAdminHome = () => {
                         onUpdateAdmin={handleUpdateAdmin}
                         onDeleteAdmin={handleDeleteAdminRequest}
                         onToggleStatus={handleToggleAdminStatus}
-                    />
-
-                    <SchoolLocations
-                        locations={locations}
-                        onAddLocation={handleAddLocation}
-                        onUpdateLocation={handleUpdateLocation}
-                        onDeleteLocation={handleDeleteLocationRequest}
                     />
                 </div>
             </div>

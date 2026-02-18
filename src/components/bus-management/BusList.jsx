@@ -53,6 +53,17 @@ const BusList = ({
                                 )
                             },
                             {
+                                headerName: "Bus Name",
+                                field: "bus_name",
+                                flex: 1.5,
+                                minWidth: 160,
+                                cellRenderer: (params) => (
+                                    <div className="flex items-center h-full">
+                                        <span className="text-gray-900 font-bold text-xs">{params.value || 'N/A'}</span>
+                                    </div>
+                                )
+                            },
+                            {
                                 headerName: "Driver",
                                 field: "driverName",
                                 flex: 1.8,
@@ -424,6 +435,11 @@ const BusList = ({
                 .ag-checkbox-input-wrapper input {
                     cursor: pointer !important;
                 }
+                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
+                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
+                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
+                .custom-ag-grid .ag-cell { border: none !important; }
+                .custom-ag-grid .ag-root-wrapper { border: none !important; }
             ` }} />
 
             {/* Mobile/Tablet Card View */}

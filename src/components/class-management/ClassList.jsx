@@ -52,7 +52,7 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
         },
         {
             headerName: "Enrollment",
-            field: "student_count",
+            field: "number_of_students",
             flex: 1,
             minWidth: 150,
             headerClass: 'ag-center-header',
@@ -201,6 +201,11 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                 .custom-ag-grid .ag-header-cell-text {
                     font-weight: 900 !important;
                 }
+                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
+                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
+                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
+                .custom-ag-grid .ag-cell { border: none !important; }
+                .custom-ag-grid .ag-root-wrapper { border: none !important; }
             `}</style>
         </div>
     );

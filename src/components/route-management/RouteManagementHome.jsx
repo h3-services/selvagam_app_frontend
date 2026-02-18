@@ -72,8 +72,11 @@ const RouteManagementHome = () => {
                 });
             }
             
-            // Filter to only show active buses for assignment
-            const onlyActiveBuses = mappedBuses.filter(b => b.status === 'Active');
+            // Strict filter: Only show buses that are explicitly 'Active' (case-insensitive)
+            // This prevents buses in 'Scrap', 'Maintenance', or 'Spare' status from appearing in route assignment
+            const onlyActiveBuses = mappedBuses.filter(b => 
+                (b.status || '').trim().toUpperCase() === 'ACTIVE'
+            );
             setActiveBuses(onlyActiveBuses);
 
             // Transform and merge data
@@ -140,12 +143,8 @@ const RouteManagementHome = () => {
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);
 
-    // Mock School Locations (mirroring SuperAdmin)
-    const schoolLocations = [
-        { id: 1, name: 'Main Campus', lat: 12.6083, lng: 80.0528 },
-        { id: 2, name: 'Sports Complex', lat: 12.6100, lng: 80.0550 },
-        { id: 3, name: 'City Branch', lat: 12.6050, lng: 80.0500 }
-    ];
+    // Mock School Locations removed as per system settings update
+    const schoolLocations = [];
 
     const getStatusColor = (status) => {
         switch (status) {
