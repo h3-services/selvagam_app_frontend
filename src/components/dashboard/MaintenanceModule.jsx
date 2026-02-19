@@ -49,18 +49,18 @@ const MaintenanceModule = () => {
     }, []);
 
     const StatusCard = ({ label, count, icon, colorClass, bgClass, borderClass, ringClass, iconBgClass }) => (
-        <div className={`rounded-2xl p-4 border transition-all duration-300 hover:shadow-md group/card ${bgClass} ${borderClass}`}>
-            <div className="flex items-center gap-3 mb-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs transition-colors ${iconBgClass} ${colorClass}`}>
+        <div className={`rounded-xl sm:rounded-2xl p-3 sm:p-4 border transition-all duration-300 hover:shadow-md group/card ${bgClass} ${borderClass}`}>
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs transition-colors ${iconBgClass} ${colorClass}`}>
                     <FontAwesomeIcon icon={icon} />
                 </div>
-                <span className={`text-[10px] font-black uppercase tracking-wider ${colorClass}`}>{label}</span>
+                <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-wider ${colorClass}`}>{label}</span>
             </div>
-            <div className="flex items-end gap-2">
-                <span className="text-3xl font-black text-slate-900 leading-none">
+            <div className="flex items-end gap-1.5 sm:gap-2">
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 leading-none">
                     {fleetStatus.loading ? '-' : count}
                 </span>
-                <span className={`text-[10px] font-bold mb-1 opacity-70 ${colorClass}`}>
+                <span className={`text-[9px] sm:text-[10px] font-bold mb-0.5 sm:mb-1 opacity-70 ${colorClass}`}>
                     Buses
                 </span>
             </div>
@@ -68,17 +68,17 @@ const MaintenanceModule = () => {
     );
 
     return (
-        <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all duration-300 flex flex-col h-full">
-            <div className="flex items-center justify-between mb-6 relative z-10 shrink-0">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8 border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all duration-300 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-4 sm:mb-6 relative z-10 shrink-0">
                 <div>
-                    <h3 className="text-xl font-bold text-slate-800">Fleet Status</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-800">Fleet Status</h3>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                    <FontAwesomeIcon icon={faBus} className="text-xl" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                    <FontAwesomeIcon icon={faBus} className="text-lg sm:text-xl" />
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 relative z-10 mb-6">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 relative z-10 mb-4 sm:mb-6">
                 {/* Active */}
                 <StatusCard 
                     label="Active" 
@@ -126,7 +126,7 @@ const MaintenanceModule = () => {
 
 
             {/* Decorative Background */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-40 sm:w-64 h-40 sm:h-64 bg-slate-50 rounded-full -mr-10 sm:-mr-16 -mt-10 sm:-mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700 pointer-events-none"></div>
         </div>
     );
 };

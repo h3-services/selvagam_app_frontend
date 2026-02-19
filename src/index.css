@@ -67,3 +67,18 @@ body,
     padding-right: 2rem !important;
   }
 }
+
+/* Fix AG Grid Overlay/Menu Clipping */
+.ag-row[style*="z-index: 999"] {
+  z-index: 999 !important;
+  overflow: visible !important;
+}
+
+.ag-row[style*="z-index: 999"] .ag-cell {
+  overflow: visible !important;
+}
+
+.action-menu-container {
+  z-index: 10000 !important;
+}
+

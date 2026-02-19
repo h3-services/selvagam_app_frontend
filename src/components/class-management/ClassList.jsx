@@ -29,7 +29,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
             cellRenderer: (params) => (
                 <div className="flex flex-col items-center overflow-hidden">
-                    <p className="font-semibold text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate text-center">
+                    <p className="font-light text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate text-center">
                         {params.value ? `Class ${params.value.toString().replace(/(grade|class)\s*/i, '').trim()}` : ''}
                     </p>
                 </div>
@@ -43,7 +43,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             minWidth: 120,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
             cellRenderer: (params) => (
-                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-xs border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-light text-xs border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
                     Section {params.value}
                 </span>
             )
@@ -58,7 +58,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             cellRenderer: (params) => (
                 <div className="flex items-center gap-2">
                     <FontAwesomeIcon icon={faUserGraduate} className="text-blue-400 text-xs shrink-0" />
-                    <span className="text-sm text-gray-600 truncate font-medium">{params.value || 0} Students</span>
+                    <span className="text-sm text-gray-600 truncate font-light">{params.value || 0} Students</span>
                 </div>
             )
         },
@@ -139,7 +139,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4 shadow-inner">
                     <FontAwesomeIcon icon={faInbox} className="text-3xl" />
                 </div>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No classes found</p>
+                <p className="text-gray-400 font-light uppercase tracking-widest text-xs">No classes found</p>
             </div>
         );
     }
@@ -148,7 +148,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
         <div className="flex flex-col flex-1 bg-white rounded-none shadow-none overflow-hidden p-0 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 mobile-full-width-table">
             <div className="ag-theme-quartz w-full custom-ag-grid overflow-hidden" style={{
                 height: 'calc(100vh - 165px)',
-                '--ag-header-background-color': '#f8fafc',
+                '--ag-header-background-color': '#f0f4ff',
                 '--ag-header-foreground-color': '#3b82f6',
                 '--ag-font-family': 'inherit',
                 '--ag-border-radius': '24px',
@@ -169,12 +169,13 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
                     rowHeight={isMobile ? 60 : 80}
                     headerHeight={isMobile ? 40 : 50}
                     theme="legacy"
+                    suppressRowTransform={true}
                     context={{ activeMenuId, setActiveMenuId, onEditClass, onUpdateStatus }}
                     getRowStyle={params => {
                         if (params.data.class_id === activeMenuId) {
                             return { zIndex: 999, overflow: 'visible' };
                         }
-                        return { zIndex: 1 };
+                        return { zIndex: 'auto' };
                     }}
                     onGridReady={(params) => {
                         if (!isMobile) {

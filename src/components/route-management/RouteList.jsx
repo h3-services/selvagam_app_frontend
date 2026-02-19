@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRoute, faChevronRight, faBuilding, faBus, faCircle, faExchangeAlt, faEye, faTrash, faMapLocationDot, faUserFriends, faUndo } from '@fortawesome/free-solid-svg-icons';
-import { CiMenuKebab } from "react-icons/ci";
+import { faRoute, faChevronRight, faUndo, faTrash } from '@fortawesome/free-solid-svg-icons';
 import '../../styles/agGridMobileStyles.css';
 
 const RouteList = ({
@@ -13,7 +12,6 @@ const RouteList = ({
     activeMenuId,
     setActiveMenuId,
     openBusReassignModal,
-    COLORS,
     activeTab,
     onSelectionChanged
 }) => {
@@ -26,12 +24,12 @@ const RouteList = ({
     }, []);
 
     return (
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* Unified Table View */}
-            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
-                <div className="ag-theme-quartz w-full custom-ag-grid overflow-hidden" style={{
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden w-full lg:bg-transparent">
+            {/* Unified Table View for All Screen Sizes */}
+            <div className="flex flex-col flex-1 overflow-hidden p-0 w-full">
+                <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{
                     height: 'calc(100vh - 165px)',
-                    '--ag-header-background-color': '#f8fafc',
+                    '--ag-header-background-color': '#f0f4ff',
                     '--ag-header-foreground-color': '#3b82f6',
                     '--ag-font-family': 'inherit',
                     '--ag-border-radius': '24px',
@@ -52,11 +50,7 @@ const RouteList = ({
                                         onClick={() => setSelectedRoute(params.data)}
                                     >
                                         <div className="flex flex-col ml-1">
-                                            <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors">{params.value}</p>
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
-                                                <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-blue-600 transition-colors" />
-                                            </div>
+                                            <p className="font-light text-gray-950 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value}</p>
                                         </div>
                                     </div>
                                 )
@@ -68,7 +62,7 @@ const RouteList = ({
                                 minWidth: 150,
                                 cellRenderer: (params) => (
                                     <div className="flex items-center h-full">
-                                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold text-xs border border-blue-100 uppercase tracking-wide">
+                                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-light text-xs border border-blue-100 uppercase tracking-wide">
                                             {params.value} Students
                                         </span>
                                     </div>
@@ -81,7 +75,7 @@ const RouteList = ({
                                 minWidth: 120,
                                 cellRenderer: (params) => (
                                     <div className="flex items-center h-full">
-                                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold text-xs border border-blue-100">
+                                        <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-light text-xs border border-blue-100">
                                             {params.value} Stops
                                         </span>
                                     </div>
@@ -99,7 +93,7 @@ const RouteList = ({
                                             className="group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 shadow-md hover:shadow-lg hover:scale-105 transition-all cursor-pointer"
                                             title="Click to reassign bus"
                                         >
-                                            <span className="text-white font-bold text-xs tracking-wide">{params.value}</span>
+                                            <span className="text-white font-light text-xs tracking-wide">{params.value}</span>
                                             <div className="flex items-center gap-1 ml-1">
                                                 <span className="text-green-300 text-[10px] font-medium uppercase tracking-widest">Active</span>
                                             </div>
@@ -151,31 +145,35 @@ const RouteList = ({
                             maxWidth: 50, 
                             pinned: 'left',
                             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
-                            headerClass: 'ag-center-header'
+                            headerClass: 'ag-center-header',
+                            headerComponentParams: {
+                                template: '<div class="ag-cell-label-container" role="presentation" style="display: flex; justify-content: center; align-items: center; width: 100%;"><span ref="eCheckbox" class="ag-header-select-all"></span></div>'
+                            }
                         }}
                         onSelectionChanged={(params) => {
                             const selectedNodes = params.api.getSelectedNodes();
                             const selectedData = selectedNodes.map(node => node.data);
                             if (onSelectionChanged) onSelectionChanged(selectedData);
                         }}
-                        getRowStyle={params => {
-                            if (params.data.id === activeMenuId) {
-                                return { zIndex: 999, overflow: 'visible' };
-                            }
-                            return { zIndex: 1 };
-                        }}
                         defaultColDef={{
                             sortable: true,
                             resizable: true,
-                            headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
+                            headerClass: "font-black uppercase text-[12px] tracking-wider",
                         }}
                         rowHeight={isMobile ? 60 : 80}
                         headerHeight={isMobile ? 40 : 50}
                         pagination={true}
                         paginationPageSize={10}
                         paginationPageSizeSelector={[10, 20, 50]}
-                        overlayNoRowsTemplate='<span class="p-4">No routes found</span>'
+                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No routes found</span>'
                         theme="legacy"
+                        suppressRowTransform={true}
+                        getRowStyle={params => {
+                            if (params.data.id === activeMenuId) {
+                                return { zIndex: 999, overflow: 'visible' };
+                            }
+                            return { zIndex: 'auto' };
+                        }}
                         onGridReady={(params) => {
                             if (window.innerWidth >= 1024) {
                                 params.api.sizeColumnsToFit();
@@ -189,76 +187,8 @@ const RouteList = ({
                     />
                 </div>
             </div>
-
-            {/* REMOVED MOBILE CARD VIEW - NOW USING TABLE ON ALL SCREEN SIZES */}
-            {/* Mobile/Tablet Card View */}
-            {/* <div className="lg:hidden p-4 space-y-4 pb-24">
-                {filteredRoutes.map((route) => (
-                    <div key={route.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
-                        <div className="relative p-5">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="ml-1">
-                                        <h3 className="font-bold text-gray-900 text-lg">{route.routeName}</h3>
-                                        <p className="text-xs font-bold text-gray-500 mt-1">{route.distance}</p>
-                                    </div>
-                                </div>
-                                {activeTab === 'Archived' ? (
-                                    <button
-                                        onClick={() => handleRestore(route.id)}
-                                        className="w-10 h-10 rounded-xl bg-green-100 text-green-700 hover:bg-green-200 transition-all flex items-center justify-center"
-                                        title="Restore Route"
-                                    >
-                                        <FontAwesomeIcon icon={faUndo} className="text-sm" />
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleDelete(route.id)}
-                                        className="w-10 h-10 rounded-xl bg-red-100 text-red-700 hover:bg-red-200 transition-all flex items-center justify-center"
-                                        title="Delete Route"
-                                    >
-                                        <FontAwesomeIcon icon={faTrash} className="text-sm" />
-                                    </button>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
-                                    <p className="text-xs text-gray-500 font-medium">No. of Students</p>
-                                    <p className="text-sm text-gray-900 font-bold truncate">{route.studentCount} Students</p>
-                                </div>
-                                <div className="p-3 rounded-xl" style={{ backgroundColor: '#f0f4ff' }}>
-                                    <p className="text-xs text-gray-500 font-medium mb-2">Assigned Bus</p>
-                                    <button
-                                        onClick={(e) => openBusReassignModal(route.id, e)}
-                                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-blue-600 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
-                                    >
-                                        <div className="flex-1 text-left">
-                                            <p className="text-white font-bold text-sm ml-1">{route.assignedBus}</p>
-                                        </div>
-                                    </button>
-                                </div>
-                                <div className="p-3 rounded-xl col-span-2" style={{ backgroundColor: '#f0f4ff' }}>
-                                    <p className="text-xs text-gray-500 font-medium">Total Stops</p>
-                                    <p className="text-sm text-gray-900 font-bold truncate">{route.stops} Stops</p>
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={() => setSelectedRoute(route)}
-                                className="w-full py-3.5 rounded-xl text-white text-sm font-bold shadow-lg hover:shadow-xl transition-all"
-                                style={{ backgroundColor: '#3A7BFF' }}
-                            >
-                                <FontAwesomeIcon icon={faEye} className="mr-2" /> View Details
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div> */}
         </div>
     );
 };
 
 export default RouteList;
-
-/* REMOVED INLINE STYLES - NOW USING SHARED CSS FILE */

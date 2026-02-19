@@ -11,7 +11,7 @@ import {
   faSignOutAlt,
   faCode,
   faCalendarCheck,
-  faChartBar,
+
   faSchool,
   faUserGraduate,
   faUserGroup,
@@ -99,7 +99,7 @@ const Sidebar = () => {
       ]
     },
     { icon: faUsers, label: 'Directory', path: '/student-directory' },
-    { icon: faChartBar, label: 'Reports', path: '/reports' },
+
     { icon: faComments, label: 'Communication', path: '/communication' },
     { icon: faUserShield, label: 'Settings', path: '/admin' },
   ];

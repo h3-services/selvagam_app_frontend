@@ -150,13 +150,13 @@ const StudentDirectory = () => {
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: (params) => (
                 <div className="flex items-center gap-3 w-full group">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-light shadow-sm transition-transform group-hover:scale-110" style={{ backgroundColor: '#3A7BFF' }}>
                         {params.value ? params.value.charAt(0) : '?'}
                     </div>
                     <div className="flex flex-col overflow-hidden">
-                        <p className="font-bold text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
+                        <p className="font-light text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
                         <div className="flex items-center gap-1 -mt-1">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">Archive Record</span>
+                            <span className="text-[10px] font-light text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">Archive Record</span>
                             <FontAwesomeIcon icon={faChevronRight} className="text-[8px] text-gray-300 group-hover:text-blue-600 transition-colors" />
                         </div>
                     </div>
@@ -170,7 +170,7 @@ const StudentDirectory = () => {
             minWidth: 110,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', height: '100%' },
             cellRenderer: (params) => (
-                <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-xs border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
+                <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-lg font-light text-xs border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
                     {params.value}
                 </span>
             )
@@ -185,7 +185,7 @@ const StudentDirectory = () => {
                 <div className="flex flex-col justify-center py-2 h-full gap-1.5 max-w-full">
                     <div className="flex items-center gap-2 overflow-hidden">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
-                        <p className="font-bold text-gray-950 truncate tracking-tight text-[12px] leading-none">
+                        <p className="font-light text-gray-950 truncate tracking-tight text-[12px] leading-none">
                             {params.value}
                         </p>
                     </div>
@@ -205,7 +205,7 @@ const StudentDirectory = () => {
             minWidth: 130,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: (params) => (
-                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white ${
+                <span className={`px-2.5 py-1 rounded-full text-[10px] font-light uppercase tracking-widest text-white ${
                     params.value === 'CURRENT' ? 'bg-emerald-500' :
                     params.value === 'ALUMNI' ? 'bg-blue-500' :
                     'bg-rose-500'
@@ -225,7 +225,7 @@ const StudentDirectory = () => {
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs ${params.data.isTransport ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
                         <FontAwesomeIcon icon={params.data.isTransport ? faBus : faWalking} />
                     </div>
-                    <span className="text-[10px] font-bold uppercase text-gray-400">{params.data.isTransport ? 'Bus' : 'Day'}</span>
+                    <span className="text-[10px] font-light uppercase text-gray-400">{params.data.isTransport ? 'Bus' : 'Day'}</span>
                 </div>
             )
         },
@@ -360,7 +360,7 @@ const StudentDirectory = () => {
                     ) : (
                         <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{
                             height: 'calc(100vh - 165px)',
-                            '--ag-header-background-color': '#f8fafc',
+                            '--ag-header-background-color': '#f0f4ff',
                             '--ag-header-foreground-color': '#3b82f6',
                             '--ag-font-family': 'inherit',
                             '--ag-border-radius': '24px',
@@ -372,7 +372,7 @@ const StudentDirectory = () => {
                                 defaultColDef={{
                                     sortable: true,
                                     resizable: true,
-                                    headerClass: "font-bold uppercase text-xs tracking-wide",
+                                    headerClass: "font-black uppercase text-xs tracking-wide",
                                 }}
                                 rowHeight={window.innerWidth < 1024 ? 60 : 80}
                                 headerHeight={window.innerWidth < 1024 ? 40 : 50}
@@ -380,6 +380,7 @@ const StudentDirectory = () => {
                                 paginationPageSize={10}
                                 paginationPageSizeSelector={[10, 20, 50]}
                                 theme="legacy"
+                                suppressRowTransform={true}
                                 rowSelection={{ mode: 'multiRow', headerCheckbox: true, enableClickSelection: false }}
                                 selectionColumnDef={{ 
                                     width: 50, 

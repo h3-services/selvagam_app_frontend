@@ -1,7 +1,7 @@
 import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faEdit, faEye, faPhone, faChild, faCalendarDay, faUserTie, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking } from '@fortawesome/free-solid-svg-icons';
 
 import '../../styles/agGridMobileStyles.css';
 
@@ -13,16 +13,12 @@ const StudentList = ({
     handleTransportStatusUpdate,
     activeMenuId,
     setActiveMenuId,
-    onSelectionChanged,
-    onEdit
+    onSelectionChanged
 }) => {
     const [isMobile, setIsMobile] = React.useState(window.innerWidth < 1024);
 
     React.useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 1024);
-        };
-        
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -41,10 +37,7 @@ const StudentList = ({
                     onClick={() => { setSelectedStudent(params.data); setShowForm(false); }}
                 >
                     <div className="flex flex-col overflow-hidden">
-                        <p className="font-bold text-gray-950 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
-                        <div className="flex items-center gap-1 mt-1.5">
-                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.15em] group-hover:text-blue-400 transition-colors">View Details</span>
-                        </div>
+                        <p className="font-light text-gray-950 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
                     </div>
                 </div>
             )
@@ -56,7 +49,7 @@ const StudentList = ({
             minWidth: 100,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start' },
             cellRenderer: (params) => (
-                <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-[11px] border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
+                <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-light text-[11px] border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
                     {params.value}
                 </span>
             )
@@ -73,14 +66,14 @@ const StudentList = ({
                     <div className="flex flex-col justify-center py-2 h-full gap-1.5 max-w-full">
                         <div className="flex items-center gap-2 overflow-hidden">
                             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
-                            <p className="font-bold text-gray-950 truncate tracking-tight text-[12px] leading-none">
+                            <p className="font-light text-gray-950 truncate tracking-tight text-[12px] leading-none">
                                 {p1}
                             </p>
                         </div>
                         {p2 && (
                             <div className="flex items-center gap-2 overflow-hidden">
                                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
-                                <p className="font-bold text-gray-900 truncate tracking-tight text-[12px] leading-none">
+                                <p className="font-light text-gray-900 truncate tracking-tight text-[12px] leading-none">
                                     {p2}
                                 </p>
                             </div>
@@ -94,23 +87,9 @@ const StudentList = ({
             field: "emergencyContact",
             flex: 1.2,
             minWidth: 150,
-            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: 'bold', fontSize: '13px' }
+            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '300', fontSize: '13px' }
         },
-        {
-            headerName: "Academic Year",
-            field: "studyYear",
-            flex: 1.2,
-            minWidth: 160,
-            hide: isMobile, // Hide on mobile/tablet
-            suppressColumnsToolPanel: true,
-            cellStyle: { display: 'flex', alignItems: 'center' },
-            cellRenderer: (params) => (
-                <div className="flex items-center gap-2 w-full" title={params.value}>
-                    <FontAwesomeIcon icon={faCalendarDay} className="text-blue-400 text-xs shrink-0" />
-                    <span className="text-sm font-medium text-gray-600 truncate">{params.value}</span>
-                </div>
-            )
-        },
+
         {
             headerName: "ACTIONS",
             field: "id",
@@ -118,7 +97,6 @@ const StudentList = ({
             minWidth: 100,
             sortable: false,
             filter: false,
-            pinned: 'right',
             suppressMovable: true,
             suppressSizeToFit: true,
             cellStyle: { overflow: 'visible' },
@@ -187,7 +165,6 @@ const StudentList = ({
                                         />
                                         {params.data.originalData?.transport_status === 'ACTIVE' ? 'Stop Transport' : 'Start Transport'}
                                     </button>
-                                    
                                 </div>
                             </div>
                         )}
@@ -203,7 +180,7 @@ const StudentList = ({
             <div className="flex flex-col flex-1 overflow-hidden p-0 w-full">
                 <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{
                     height: 'calc(100vh - 165px)',
-                    '--ag-header-background-color': '#f8fafc',
+                    '--ag-header-background-color': '#f0f4ff',
                     '--ag-header-foreground-color': '#3b82f6',
                     '--ag-font-family': 'inherit',
                     '--ag-border-radius': '24px',
@@ -218,22 +195,11 @@ const StudentList = ({
                                 minWidth: 50, 
                                 maxWidth: 50, 
                                 pinned: 'left',
-                                cellStyle: { 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center' 
-                                },
+                                cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
                                 headerClass: 'ag-center-header',
                                 headerComponentParams: {
                                     template: '<div class="ag-cell-label-container" role="presentation" style="display: flex; justify-content: center; align-items: center; width: 100%;"><span ref="eCheckbox" class="ag-header-select-all"></span></div>'
                                 }
-                            }}
-                            context={{ activeMenuId, setActiveMenuId }}
-                            getRowStyle={params => {
-                                if (params.data.id === activeMenuId) {
-                                    return { zIndex: 999, overflow: 'visible' };
-                                }
-                                return { zIndex: 1 };
                             }}
                             onSelectionChanged={(params) => {
                                 const selectedNodes = params.api.getSelectedNodes();
@@ -241,13 +207,11 @@ const StudentList = ({
                                 onSelectionChanged(selectedData);
                             }}
                             onGridReady={(params) => {
-                                // On mobile/tablet, don't auto-size columns to allow horizontal scroll
                                 if (window.innerWidth >= 1024) {
                                     params.api.sizeColumnsToFit();
                                 }
                             }}
                             onGridSizeChanged={(params) => {
-                                // Only auto-size on desktop
                                 if (window.innerWidth >= 1024) {
                                     params.api.sizeColumnsToFit();
                                 }
@@ -256,15 +220,22 @@ const StudentList = ({
                                 sortable: true,
                                 filter: false,
                                 resizable: true,
-                                headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
+                                headerClass: "font-black uppercase text-[12px] tracking-wider",
                             }}
-                            rowHeight={window.innerWidth < 1024 ? 60 : 80}
-                            headerHeight={window.innerWidth < 1024 ? 40 : 50}
+                            rowHeight={isMobile ? 60 : 80}
+                            headerHeight={isMobile ? 40 : 50}
                             pagination={true}
                             paginationPageSize={10}
                             paginationPageSizeSelector={[10, 20, 50]}
                             theme="legacy"
-                            overlayNoRowsTemplate='<span class="p-4">No students found</span>'
+                            suppressRowTransform={true}
+                            getRowStyle={params => {
+                                if (params.data.id === activeMenuId) {
+                                    return { zIndex: 999, overflow: 'visible' };
+                                }
+                                return { zIndex: 'auto' };
+                            }}
+                            overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No student profiles found in registry</span>'
                         />
                     </div>
                 </div>

@@ -33,7 +33,7 @@ const StatsModule = () => {
             loading: true
         },
         {
-            title: 'Active Routes',
+            title: 'Total routes',
             value: '-',
             icon: faRoute,
             iconBg: 'bg-emerald-100 text-emerald-600',
@@ -78,7 +78,7 @@ const StatsModule = () => {
                         loading: false
                     },
                     {
-                        title: 'Active Routes',
+                        title: 'Total routes',
                         value: routes.length,
                         icon: faRoute,
                         iconBg: 'bg-emerald-100 text-emerald-600',
@@ -88,7 +88,6 @@ const StatsModule = () => {
                 ]);
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);
-                // Simplify error handling by just removing loading state
                 setStats(prev => prev.map(s => ({ ...s, loading: false, value: '0' })));
             }
         };
@@ -97,33 +96,33 @@ const StatsModule = () => {
     }, []);
 
     return (
-        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {stats.map((stat, index) => (
-                <div key={index} className={`group rounded-3xl p-6 border shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white ${
+                <div key={index} className={`group rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white ${
                     stat.variant === 'indigo' ? 'border-indigo-100' :
                     stat.variant === 'purple' ? 'border-blue-100' :
                     stat.variant === 'pink' ? 'border-pink-100' :
                     'border-emerald-100'
                 }`}>
                     {/* Decorative Gradients */}
-                    {stat.variant === 'indigo' && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
-                    {stat.variant === 'purple' && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
-                    {stat.variant === 'pink' && <div className="absolute top-0 right-0 w-32 h-32 bg-pink-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
-                    {stat.variant === 'emerald' && <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'indigo' && <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 bg-blue-50 rounded-bl-full -mr-4 sm:-mr-8 -mt-4 sm:-mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'purple' && <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 bg-blue-50 rounded-bl-full -mr-4 sm:-mr-8 -mt-4 sm:-mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'pink' && <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 bg-pink-50 rounded-bl-full -mr-4 sm:-mr-8 -mt-4 sm:-mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
+                    {stat.variant === 'emerald' && <div className="absolute top-0 right-0 w-20 sm:w-32 h-20 sm:h-32 bg-emerald-50 rounded-bl-full -mr-4 sm:-mr-8 -mt-4 sm:-mt-8 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>}
 
                     <div className="relative z-10">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${stat.iconBg}`}>
-                                <FontAwesomeIcon icon={stat.icon} className="text-lg" />
+                        <div className="flex justify-between items-start mb-3 sm:mb-4">
+                            <div className={`w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${stat.iconBg}`}>
+                                <FontAwesomeIcon icon={stat.icon} className="text-sm sm:text-base lg:text-lg" />
                             </div>
                         </div>
                         <div>
                             {stat.loading ? (
-                                <div className="h-9 w-24 bg-gray-100 rounded-lg animate-pulse mb-1"></div>
+                                <div className="h-7 sm:h-9 w-16 sm:w-24 bg-gray-100 rounded-lg animate-pulse mb-1"></div>
                             ) : (
-                                <h3 className="text-4xl font-bold tracking-tight text-slate-900 mb-1">{stat.value}</h3>
+                                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 mb-0.5 sm:mb-1">{stat.value}</h3>
                             )}
-                            <p className="font-medium text-slate-500">{stat.title}</p>
+                            <p className="text-xs sm:text-sm font-medium text-slate-500 leading-tight">{stat.title}</p>
                         </div>
                     </div>
                 </div>

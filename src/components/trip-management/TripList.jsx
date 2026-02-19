@@ -27,7 +27,7 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                     <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                         <FontAwesomeIcon icon={faRoute} />
                     </div>
-                    <span>{params.value}</span>
+                    <span className="font-light text-gray-950">{params.value}</span>
                 </div>
             )
         },
@@ -38,7 +38,7 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             minWidth: 120,
             cellStyle: { display: 'flex', alignItems: 'center' },
             cellRenderer: params => (
-                <div className="font-medium text-gray-700">{params.value || '-'}</div>
+                <div className="font-light text-gray-700">{params.value || '-'}</div>
             )
         },
         {
@@ -53,8 +53,8 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                         <FontAwesomeIcon icon={faUser} size="sm" />
                     </div>
                     <div className="flex flex-col justify-center -space-y-0.5">
-                        <span className="font-semibold text-gray-900 text-sm leading-none">{params.data.driver}</span>
-                        <span className="text-[11px] text-gray-500 font-medium leading-none mt-1">{params.data.driverMobile}</span>
+                        <span className="font-light text-gray-950 text-sm leading-none">{params.data.driver}</span>
+                        <span className="text-[11px] text-gray-400 font-light uppercase tracking-wider leading-none mt-1.5">{params.data.driverMobile}</span>
                     </div>
                 </div>
             )
@@ -65,6 +65,9 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             flex: 0.8,
             minWidth: 110,
             cellStyle: { display: 'flex', alignItems: 'center', color: '#6b7280' },
+            cellRenderer: params => (
+               <span className="font-light text-gray-500 text-xs">{params.value}</span>
+            )
         },
         {
             headerName: "Status",
@@ -105,11 +108,11 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
     ];
 
     return (
-        <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full mobile-full-width-container" onClick={() => setActiveStatusId(null)}>
-            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
-                <div className="ag-theme-quartz w-full custom-ag-grid overflow-hidden" style={{
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden w-full lg:bg-transparent" onClick={() => setActiveStatusId(null)}>
+            <div className="flex flex-col flex-1 overflow-hidden p-0 w-full">
+                <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{
                     height: 'calc(100vh - 165px)',
-                    '--ag-header-background-color': '#f8fafc',
+                    '--ag-header-background-color': '#f0f4ff',
                     '--ag-header-foreground-color': '#3b82f6',
                     '--ag-font-family': 'inherit',
                     '--ag-border-radius': '24px',
@@ -121,7 +124,7 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                         defaultColDef={{
                             sortable: true,
                             resizable: true,
-                            headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
+                            headerClass: "font-black uppercase text-[12px] tracking-wider",
                         }}
                         rowHeight={isMobile ? 60 : 80}
                         headerHeight={isMobile ? 40 : 50}
@@ -139,12 +142,14 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                                 params.api.sizeColumnsToFit();
                             }
                         }}
+                        suppressRowTransform={true}
                         getRowStyle={params => {
                             if (params.data.id === activeStatusId) {
                                 return { zIndex: 999, overflow: 'visible' };
                             }
                             return { zIndex: 'auto' };
                         }}
+                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No trips recorded in fleet logs</span>'
                     />
                 </div>
             </div>
@@ -153,5 +158,3 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
 };
 
 export default TripList;
-
-/* REMOVED INLINE STYLES - NOW USING SHARED CSS FILE */

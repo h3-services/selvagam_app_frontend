@@ -4,7 +4,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../../styles/agGridMobileStyles.css';
-import { faEdit, faTrash, faEllipsisV, faChild, faCheckCircle, faBan, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEllipsisV, faCheckCircle, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 const ParentList = ({ 
     filteredParents, 
@@ -19,10 +19,7 @@ const ParentList = ({
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
     useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 1024);
-        };
-        
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -42,10 +39,7 @@ const ParentList = ({
                    onViewParent(params.data);
                 }}>
                     <div className="flex flex-col">
-                        <p className="font-semibold text-gray-900 leading-none group-hover:text-blue-700 transition-colors tracking-tight text-[13px] sm:text-sm">{params.value || 'Unknown'}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                            <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">View Profile</span>
-                        </div>
+                        <p className="font-light text-gray-950 leading-tight group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
                     </div>
                 </div>
             )
@@ -60,7 +54,7 @@ const ParentList = ({
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
                 <div className="flex items-center gap-2">
-                    <span className="text-slate-900 font-bold text-[13px] tracking-tight">{params.value}</span>
+                    <span className="text-gray-950 font-light text-[13px] tracking-tight">{params.value}</span>
                 </div>
             )
         },
@@ -75,7 +69,7 @@ const ParentList = ({
             cellRenderer: params => {
                 const students = params.value?.filter(s => s !== 'No children linked') || [];
                 if (students.length === 0) {
-                    return <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">None Linked</span>;
+                    return <span className="text-slate-300 text-[10px] font-light uppercase tracking-widest opacity-60">None Linked</span>;
                 }
                 
                 return (
@@ -84,7 +78,7 @@ const ParentList = ({
                             {students.map((student, idx) => (
                                 <div key={idx} className="flex items-center gap-2 shrink-0">
                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div>
-                                    <span className="text-[12px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
+                                    <span className="text-[12px] font-light text-gray-950 tracking-tight whitespace-nowrap">
                                         {student.name || student}
                                     </span>
                                 </div>
@@ -105,14 +99,14 @@ const ParentList = ({
             cellRenderer: params => {
                 const classes = params.value || [];
                 if (classes.length === 0) {
-                    return <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">N/A</span>;
+                    return <span className="text-slate-300 text-[10px] font-light uppercase tracking-widest opacity-60">N/A</span>;
                 }
                 
                 return (
                     <div className="w-full max-h-[70px] overflow-y-auto custom-mini-scroll py-1 pr-2">
                         <div className="flex flex-wrap gap-1.5">
                             {classes.map((className, idx) => (
-                                <span key={idx} className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-[10px] sm:text-[11px] border border-blue-100 uppercase tracking-wide whitespace-nowrap shadow-sm">
+                                <span key={idx} className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-light text-[10px] sm:text-[11px] border border-blue-100 uppercase tracking-wide whitespace-nowrap shadow-sm">
                                     {className}
                                 </span>
                             ))}
@@ -126,14 +120,14 @@ const ParentList = ({
             field: 'street',
             flex: 1.2,
             minWidth: 160,
-            hide: isMobile && window.innerWidth < 640, // Only hide on very small phones
+            hide: isMobile && window.innerWidth < 640,
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
                 <div className="flex flex-col justify-center min-w-0">
-                    <span className="text-slate-700 font-bold text-[12px] tracking-tight truncate">{params.data.street}</span>
-                    <span className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-0.5">{params.data.city}</span>
+                    <span className="text-gray-950 font-light text-[12px] tracking-tight truncate">{params.data.street}</span>
+                    <span className="text-slate-400 font-light text-[10px] uppercase tracking-widest mt-0.5">{params.data.city}</span>
                 </div>
             )
         },
@@ -198,81 +192,73 @@ const ParentList = ({
         }
     ], [handleDelete, isInactiveView, activeMenuId, setActiveMenuId, onViewParent, isMobile]);
 
-    const defaultColDef = useMemo(() => ({
-        sortable: true,
-        filter: false,
-        resizable: true,
-        headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
-    }), []);
-
-    const onGridReady = (params) => {
-        if (window.innerWidth >= 1024) {
-            params.api.sizeColumnsToFit();
-        }
-    };
-
-    const onGridSizeChanged = (params) => {
-        if (window.innerWidth >= 1024) {
-            params.api.sizeColumnsToFit();
-        }
-    };
-
     return (
-        <div className="flex flex-col flex-1 min-h-0 overflow-hidden relative w-full">
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden w-full">
-                {/* Unified Table View */}
-                <div className="flex flex-col flex-1 bg-white rounded-none shadow-none overflow-hidden p-0 w-full mobile-full-width-table">
-                    <div className="ag-theme-quartz w-full custom-ag-grid overflow-hidden" style={{
-                        height: 'calc(100vh - 165px)',
-                        '--ag-header-background-color': '#f8fafc',
-                        '--ag-header-foreground-color': '#3b82f6',
-                        '--ag-font-family': 'inherit',
-                        '--ag-border-radius': '24px',
-                        '--ag-row-hover-color': '#f1f5f9',
-                    }}>
-                        <AgGridReact
-                            ref={gridRef}
-                            rowData={filteredParents}
-                            columnDefs={columnDefs}
-                            defaultColDef={defaultColDef}
-                            rowSelection={{ 
-                                mode: 'multiRow', 
-                                headerCheckbox: true, 
-                                enableClickSelection: false 
-                            }}
-                            selectionColumnDef={{ 
-                                width: 50, 
-                                minWidth: 50, 
-                                maxWidth: 50, 
-                                pinned: 'left',
-                                cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
-                                headerClass: 'ag-center-header',
-                                headerComponentParams: {
-                                    template: '<div class="ag-cell-label-container" role="presentation" style="display: flex; justify-content: center; align-items: center; width: 100%;"><span ref="eCheckbox" class="ag-header-select-all"></span></div>'
-                                }
-                            }}
-                            onSelectionChanged={(params) => {
-                                const selectedNodes = params.api.getSelectedNodes();
-                                onSelectionChanged(selectedNodes.map(node => node.data));
-                            }}
-                            pagination={true}
-                            paginationPageSize={10}
-                            paginationPageSizeSelector={[10, 20, 50]}
-                            rowHeight={isMobile ? 60 : 80}
-                            headerHeight={isMobile ? 40 : 50}
-                            animateRows={true}
-                            getRowStyle={params => {
-                                if (params.data.parent_id === activeMenuId) {
-                                    return { zIndex: 999, overflow: 'visible' };
-                                }
-                                return { zIndex: 1 };
-                            }}
-                            theme="legacy"
-                            overlayNoRowsTemplate='<span class="p-4">No parents found</span>'
-                            onGridReady={onGridReady}
-                            onGridSizeChanged={onGridSizeChanged}
-                        />
-                    </div>
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden w-full lg:bg-transparent">
+            {/* Unified Table View for All Screen Sizes */}
+            <div className="flex flex-col flex-1 overflow-hidden p-0 w-full">
+                <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{
+                    height: 'calc(100vh - 165px)',
+                    '--ag-header-background-color': '#f0f4ff',
+                    '--ag-header-foreground-color': '#3b82f6',
+                    '--ag-font-family': 'inherit',
+                    '--ag-border-radius': '24px',
+                    '--ag-row-hover-color': '#f1f5f9',
+                }}>
+                    <AgGridReact
+                        ref={gridRef}
+                        rowData={filteredParents}
+                        columnDefs={columnDefs}
+                        defaultColDef={{
+                            sortable: true,
+                            filter: false,
+                            resizable: true,
+                            headerClass: "font-black uppercase text-[12px] tracking-wider",
+                        }}
+                        rowSelection={{ 
+                            mode: 'multiRow', 
+                            headerCheckbox: true, 
+                            enableClickSelection: false 
+                        }}
+                        selectionColumnDef={{ 
+                            width: 50, 
+                            minWidth: 50, 
+                            maxWidth: 50, 
+                            pinned: 'left',
+                            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+                            headerClass: 'ag-center-header',
+                            headerComponentParams: {
+                                template: '<div class="ag-cell-label-container" role="presentation" style="display: flex; justify-content: center; align-items: center; width: 100%;"><span ref="eCheckbox" class="ag-header-select-all"></span></div>'
+                            }
+                        }}
+                        onSelectionChanged={(params) => {
+                            onSelectionChanged(params.api.getSelectedNodes().map(node => node.data));
+                        }}
+                        pagination={true}
+                        paginationPageSize={10}
+                        paginationPageSizeSelector={[10, 20, 50]}
+                        rowHeight={isMobile ? 60 : 80}
+                        headerHeight={isMobile ? 40 : 50}
+                        animateRows={true}
+                        suppressRowTransform={true}
+                        getRowStyle={params => {
+                            if (params.data.parent_id === activeMenuId) {
+                                return { zIndex: 999, overflow: 'visible' };
+                            }
+                            return { zIndex: 1 };
+                        }}
+                        theme="legacy"
+                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No parent records found in directory</span>'
+                        onGridReady={(params) => {
+                            if (window.innerWidth >= 1024) {
+                                params.api.sizeColumnsToFit();
+                            }
+                        }}
+                        onGridSizeChanged={(params) => {
+                            if (window.innerWidth >= 1024) {
+                                params.api.sizeColumnsToFit();
+                            }
+                        }}
+                    />
                 </div>
             </div>
         </div>
