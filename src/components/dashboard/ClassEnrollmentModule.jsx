@@ -1,72 +1,68 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSchool, faUserGraduate, faChalkboardTeacher, faUsers, faLayerGroup } from '@fortawesome/free-solid-svg-icons';
-import { classService } from '../../services/classService';
+import { faBus, faUsers, faMars, faVenus, faRoute } from '@fortawesome/free-solid-svg-icons';
+import { routeService } from '../../services/routeService';
+import { studentService } from '../../services/studentService';
 
 const ClassEnrollmentModule = () => {
-    const [classData, setClassData] = useState([]);
+    const [routeData, setRouteData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const colorVariants = [
-        { bg: 'bg-indigo-50', border: 'border-indigo-100', text: 'text-indigo-600', subText: 'text-indigo-400' },
-        { bg: 'bg-pink-50', border: 'border-pink-100', text: 'text-pink-600', subText: 'text-pink-400' },
-        { bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-600', subText: 'text-emerald-400' },
-        { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-600', subText: 'text-amber-400' },
-        { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600', subText: 'text-blue-400' },
-        { bg: 'bg-violet-50', border: 'border-violet-100', text: 'text-violet-600', subText: 'text-violet-400' },
-        { bg: 'bg-rose-50', border: 'border-rose-100', text: 'text-rose-600', subText: 'text-rose-400' },
-        { bg: 'bg-cyan-50', border: 'border-cyan-100', text: 'text-cyan-600', subText: 'text-cyan-400' },
+        { bg: 'bg-indigo-50', border: 'border-indigo-100', text: 'text-indigo-600', male: 'text-indigo-500', female: 'text-indigo-400' },
+        { bg: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-600', male: 'text-emerald-500', female: 'text-emerald-400' },
+        { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600', male: 'text-blue-500', female: 'text-blue-400' },
+        { bg: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-600', male: 'text-amber-500', female: 'text-amber-400' },
+        { bg: 'bg-violet-50', border: 'border-violet-100', text: 'text-violet-600', male: 'text-violet-500', female: 'text-violet-400' },
+        { bg: 'bg-rose-50', border: 'border-rose-100', text: 'text-rose-600', male: 'text-rose-500', female: 'text-rose-400' },
+        { bg: 'bg-cyan-50', border: 'border-cyan-100', text: 'text-cyan-600', male: 'text-cyan-500', female: 'text-cyan-400' },
+        { bg: 'bg-pink-50', border: 'border-pink-100', text: 'text-pink-600', male: 'text-pink-500', female: 'text-pink-400' },
     ];
 
     useEffect(() => {
-        const fetchClassData = async () => {
+        const fetchData = async () => {
             try {
-                const classes = await classService.getAllClasses();
+                const [routes, students] = await Promise.all([
+                    routeService.getAllRoutes(),
+                    studentService.getAllStudents()
+                ]);
                 
-                // Group classes by name (e.g. "9") and sum students across sections
-                const grouped = classes.reduce((acc, curr) => {
-                    const name = curr.class_name;
-                    if (!acc[name]) {
-                        acc[name] = 0;
-                    }
-                    acc[name] += (curr.number_of_students || 0);
-                    return acc;
-                }, {});
+                // Process data: Group students by route and gender for ACTIVE routes only
+                const formattedData = routes
+                    .filter(route => (route.routes_active_status || '').toUpperCase() === 'ACTIVE')
+                    .map(route => {
+                        const routeStudents = students.filter(s => s.pickup_route_id === route.route_id);
+                        const maleCount = routeStudents.filter(s => (s.gender || '').toUpperCase() === 'MALE').length;
+                        const femaleCount = routeStudents.filter(s => (s.gender || '').toUpperCase() === 'FEMALE').length;
+                        
+                        return {
+                            id: route.route_id,
+                            name: route.name || route.route_name,
+                            total: routeStudents.length,
+                            male: maleCount,
+                            female: femaleCount
+                        };
+                    }); 
 
-                // Convert to array and sort numerically
-                const formattedData = Object.entries(grouped)
-                    .map(([name, count]) => ({
-                        name: `Class ${name}`,
-                        count: count,
-                        originalName: name // for sorting
-                    }))
-                    .sort((a, b) => {
-                        // Numeric sort for clean ordering (e.g. 1, 2, 9, 10 instead of 1, 10, 2)
-                        const numA = parseInt(a.originalName) || 0;
-                        const numB = parseInt(b.originalName) || 0;
-                        return numA - numB;
-                    });
-
-                setClassData(formattedData);
+                setRouteData(formattedData);
             } catch (error) {
-                console.error("Error fetching class enrollment:", error);
+                console.error("Error fetching route enrollment:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchClassData();
+        fetchData();
     }, []);
 
     return (
         <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-xl transition-all duration-300 md:col-span-2 lg:col-span-1 h-[400px] flex flex-col">
             <div className="flex items-center justify-between mb-6 relative z-10 shrink-0">
                 <div>
-                    <h3 className="text-xl font-bold text-slate-800">Enrollment by Class</h3>
-                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Student Distribution</p>
+                    <h3 className="text-xl font-bold text-slate-800">Enrollment by Route</h3>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                    <FontAwesomeIcon icon={faSchool} className="text-xl" />
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors shadow-inner">
+                    <FontAwesomeIcon icon={faBus} className="text-xl" />
                 </div>
             </div>
 
@@ -75,32 +71,42 @@ const ClassEnrollmentModule = () => {
                     <div className="flex items-center justify-center h-full">
                          <div className="h-8 w-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
                     </div>
-                ) : classData.length === 0 ? (
+                ) : routeData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-slate-300">
-                        <FontAwesomeIcon icon={faChalkboardTeacher} className="text-4xl mb-3 opacity-50" />
-                        <p className="text-sm font-bold">No Class Data</p>
+                        <FontAwesomeIcon icon={faRoute} className="text-4xl mb-3 opacity-50" />
+                        <p className="text-sm font-bold">No Route Data</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {classData.map((item, index) => {
+                    <div className="grid grid-cols-3 gap-2 pb-2">
+                        {routeData.map((item, index) => {
                             const theme = colorVariants[index % colorVariants.length];
                             return (
-                                <div key={index} className={`relative overflow-hidden rounded-2xl p-4 border ${theme.bg} ${theme.border} transition-all duration-300 hover:shadow-md group/card`}>
-                                    {/* Decorative Icon Watermark */}
+                                <div key={index} className={`relative overflow-hidden rounded-xl p-3.5 border ${theme.bg} ${theme.border} transition-all duration-300 hover:shadow-md group/card`}>
+                                    {/* Decorative Icon Watermark - Smaller */}
                                     <FontAwesomeIcon 
-                                        icon={faLayerGroup} 
-                                        className={`absolute -bottom-2 -right-2 text-4xl opacity-10 transform -rotate-12 group-hover/card:scale-110 transition-transform ${theme.text}`} 
+                                        icon={faBus} 
+                                        className={`absolute -bottom-1 -right-1 text-3xl opacity-5 transform -rotate-12 group-hover/card:scale-110 transition-transform ${theme.text}`} 
                                     />
                                     
-                                    <div className="relative z-10 flex flex-col items-start h-full justify-between">
-                                        <div className="w-full">
-                                            <span className={`text-[10px] font-black uppercase tracking-wider opacity-70 block mb-0.5 ${theme.text}`}>Class</span>
-                                            <span className={`text-2xl font-black leading-none ${theme.text}`}>{item.originalName}</span>
+                                    <div className="relative z-10 flex flex-col h-full">
+                                        <div className="mb-2.5">
+                                            <span className={`text-[13px] font-extrabold leading-tight block truncate ${theme.text}`}>{item.name || 'Unnamed'}</span>
                                         </div>
                                         
-                                        <div className={`mt-3 flex items-center gap-1.5 text-xs font-bold ${theme.text} bg-white/60 px-2 py-1 rounded-lg backdrop-blur-sm self-start`}>
-                                            <FontAwesomeIcon icon={faUsers} className="text-[10px] opacity-80" />
-                                            <span>{item.count}</span>
+                                        <div className="pt-2 flex items-center gap-1.5 border-t border-black/5 mt-auto">
+                                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                                <div className="w-5 h-5 rounded-lg bg-blue-100/80 flex items-center justify-center text-blue-600 text-[10px]">
+                                                    <FontAwesomeIcon icon={faMars} />
+                                                </div>
+                                                <span className="text-[12px] font-black text-slate-700 leading-none">{item.male}</span>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                                <div className="w-5 h-5 rounded-lg bg-rose-100/80 flex items-center justify-center text-rose-600 text-[10px]">
+                                                    <FontAwesomeIcon icon={faVenus} />
+                                                </div>
+                                                <span className="text-[12px] font-black text-slate-700 leading-none">{item.female}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -112,17 +118,11 @@ const ClassEnrollmentModule = () => {
             
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
+                    display: none;
                 }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #e2e8f0;
-                    border-radius: 4px;
-                }
-                .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-                    background: #cbd5e1;
+                .custom-scrollbar {
+                    -ms-overflow-style: none;  /* IE and Edge */
+                    scrollbar-width: none;  /* Firefox */
                 }
             `}</style>
 

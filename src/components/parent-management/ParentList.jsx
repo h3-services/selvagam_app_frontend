@@ -128,56 +128,24 @@ const ParentList = ({
             sortable: false,
             filter: false,
             cellStyle: { overflow: 'visible' },
-            cellRenderer: params => {
-                const isOpen = activeMenuId === params.data.parent_id;
-                return (
-                    <div className="relative flex items-center justify-center h-full">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveMenuId(isOpen ? null : params.data.parent_id);
-                            }}
-                            className={`action-menu-trigger w-8 h-8 rounded-full transition-all flex items-center justify-center text-sm ${
-                                isOpen ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-100'
-                            }`}
-                        >
-                            <FontAwesomeIcon icon={faEllipsisV} />
-                        </button>
-
-                        {isOpen && (
-                            <div className="action-menu-container absolute right-4 top-10 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                                <div className="p-1">
-                                    <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
-                                        Account Actions
-                                    </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onViewParent(params.data);
-                                            setActiveMenuId(null);
-                                        }}
-                                        className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors"
-                                    >
-                                        <FontAwesomeIcon icon={faEdit} className="w-4 text-blue-600" />
-                                        Edit Details
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDelete(params.data.parent_id);
-                                            setActiveMenuId(null);
-                                        }}
-                                        className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-red-50 rounded-lg flex items-center gap-2 transition-colors"
-                                    >
-                                        <FontAwesomeIcon icon={isInactiveView ? faCheckCircle : faTrash} className={`w-4 ${isInactiveView ? 'text-emerald-600' : 'text-red-600'}`} />
-                                        {isInactiveView ? 'Activate Account' : 'Deactivate Account'}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                );
-            }
+            cellRenderer: params => (
+                <div className="flex items-center justify-center h-full">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(params.data.parent_id);
+                        }}
+                        className={`w-9 h-9 rounded-xl transition-all flex items-center justify-center text-sm shadow-sm border ${
+                            isInactiveView 
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100' 
+                                : 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100'
+                        }`}
+                        title={isInactiveView ? 'Activate Account' : 'Deactivate Account'}
+                    >
+                        <FontAwesomeIcon icon={isInactiveView ? faCheckCircle : faTrash} />
+                    </button>
+                </div>
+            )
         }
     ], [handleDelete, isInactiveView, activeMenuId, setActiveMenuId]);
 

@@ -158,18 +158,23 @@ const Sidebar = () => {
         <div className="absolute inset-0 opacity-[0.2] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1.5px)', backgroundSize: '32px 32px' }}></div>
 
         <div 
-          className="p-8 pb-4 flex flex-col items-center gap-2 cursor-pointer relative z-10"
+          className="pt-6 pb-2 px-4 flex flex-col items-center gap-1.5 cursor-pointer relative z-10"
           onClick={() => handleNavigation('/dashboard')}
         >
           <div className="relative group">
-            <div className="absolute -inset-8 bg-white/20 rounded-full blur-3xl group-hover:bg-white/30 transition-all duration-700 opacity-0 group-hover:opacity-100"></div>
-            <div className="w-24 h-24 flex items-center justify-center relative">
-               <img src={Logo} alt="Selvagam Logo" className="w-full h-full object-contain filter drop-shadow-[0_12px_25px_rgba(0,0,0,0.3)]" />
+            <div className="absolute -inset-6 bg-white/20 rounded-full blur-3xl group-hover:bg-white/30 transition-all duration-700 opacity-0 group-hover:opacity-100"></div>
+            <div className="w-20 h-20 flex items-center justify-center relative">
+               <img src={Logo} alt="Selvagam Santhanalakshmi Noble School Logo" className="w-full h-full object-contain filter drop-shadow-[0_12px_25px_rgba(0,0,0,0.3)]" />
             </div>
           </div>
-          <div className="text-center">
-            <h1 className="text-2xl font-black text-white tracking-[6px] uppercase leading-none" style={{ fontFamily: "'Outfit', sans-serif" }}>
-              Selvagam
+          <div className="text-center px-4">
+            <h1 className="text-white uppercase leading-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
+              <span className="block text-[24px] font-black tracking-[3px] mb-0.5">Selvagam</span>
+              <div className="mt-1">
+                <span className="text-[9px] font-light tracking-[0.3px] opacity-80 block">
+                  Selvagam Santhanalakshmi Noble School in Tirukalikundram
+                </span>
+              </div>
             </h1>
           </div>
         </div>

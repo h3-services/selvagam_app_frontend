@@ -72,7 +72,6 @@ const MaintenanceModule = () => {
             <div className="flex items-center justify-between mb-6 relative z-10 shrink-0">
                 <div>
                     <h3 className="text-xl font-bold text-slate-800">Fleet Status</h3>
-                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Real-time Availability</p>
                 </div>
                 <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                     <FontAwesomeIcon icon={faBus} className="text-xl" />

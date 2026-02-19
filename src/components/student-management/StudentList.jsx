@@ -137,21 +137,6 @@ const StudentList = ({
                                                 {isOpen && (
                                                     <div className="action-menu-container absolute right-0 top-10 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                                                         <div className="p-1">
-                                                            <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1 flex items-center justify-between">
-                                                                <span>Quick Actions</span>
-                                                            </div>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    onEdit(params.data);
-                                                                    setActiveMenuId(null);
-                                                                }}
-                                                                className="w-full text-left px-3 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors mb-2"
-                                                            >
-                                                                <FontAwesomeIcon icon={faEdit} className="w-4" />
-                                                                Edit Details
-                                                            </button>
-
                                                             <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
                                                                 Status Updates
                                                             </div>
@@ -159,7 +144,7 @@ const StudentList = ({
                                                                 { label: 'Current Student', value: 'CURRENT', icon: faUserCheck, color: 'text-emerald-600' },
                                                                 { label: 'Alumni', value: 'ALUMNI', icon: faUserClock, color: 'text-blue-600' },
                                                                 { label: 'Discontinued', value: 'DISCONTINUED', icon: faBan, color: 'text-amber-600' },
-                                                                { label: 'Long Absent', value: 'LONG_ABSENT', icon: faUserSlash, color: 'text-red-500' },
+                                                                { label: '               Long Absent', value: 'LONG_ABSENT', icon: faUserSlash, color: 'text-red-500' },
                                                             ]
                                                             .filter(option => option.value !== params.data.studentStatus)
                                                             .map((option) => (
