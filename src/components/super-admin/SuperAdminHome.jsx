@@ -116,18 +116,17 @@ const SuperAdminHome = () => {
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
+            <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className='ml-20 lg:ml-0'>
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">System Administration</h1>
-                        <p className="text-sm text-gray-500 mt-1">Control access and system configurations</p>
                     </div>
                 </div>
             </div>
 
             {/* Content area */}
-            <div className="flex-1 p-8 overflow-y-auto">
-                <div className="max-w-7xl mx-auto space-y-10">
+            <div className="flex-1 px-4 lg:px-8 pt-4 pb-8 overflow-y-auto custom-scrollbar">
+                <div className="max-w-7xl mx-auto">
                     <AdminTeam
                         admins={admins}
                         onAddAdmin={handleAddAdmin}

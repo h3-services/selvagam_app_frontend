@@ -25,7 +25,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             field: "class_name",
             flex: 1.2,
             minWidth: 200,
-            headerClass: 'ag-center-header',
+            minWidth: 200,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
             cellRenderer: (params) => (
                 <div className="flex flex-col items-center overflow-hidden">
@@ -40,7 +40,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             field: "section",
             width: 120,
             minWidth: 120,
-            headerClass: 'ag-center-header',
+            minWidth: 120,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
             cellRenderer: (params) => (
                 <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-xs border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
@@ -53,7 +53,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             field: "number_of_students",
             flex: 1,
             minWidth: 150,
-            headerClass: 'ag-center-header',
+            minWidth: 150,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
             cellRenderer: (params) => (
                 <div className="flex items-center gap-2">
@@ -69,7 +69,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             pinned: 'right',
             sortable: false,
             filter: false,
-            headerClass: 'ag-center-header',
+            filter: false,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'visible' },
             cellRenderer: (params) => {
                 const { activeMenuId, setActiveMenuId, onEditClass, onUpdateStatus } = params.context;

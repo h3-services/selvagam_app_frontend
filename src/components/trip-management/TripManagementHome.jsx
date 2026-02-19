@@ -84,30 +84,29 @@ const TripManagementHome = () => {
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-0 py-4 sticky top-0 z-30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 lg:px-0">
+            <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className='ml-20 lg:ml-0'>
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Trip Management</h1>
-                        <p className="text-sm text-gray-500 mt-1">Manage daily trips, schedules, and assignments</p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                        <div className="relative group w-full sm:w-auto">
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="relative group">
                             <input
                                 type="date"
                                 value={selectedDate}
                                 onChange={(e) => setSelectedDate(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-full sm:w-40 bg-slate-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all outline-none"
+                                className="pl-10 pr-4 py-2.5 w-full sm:w-44 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none"
                             />
-                            <FontAwesomeIcon icon={faCalendarAlt} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                            <FontAwesomeIcon icon={faCalendarAlt} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                         </div>
-                        <div className="relative group w-full sm:w-auto">
+                        <div className="relative group">
                             <input
                                 type="text"
                                 placeholder="Search trips..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-full sm:w-64 md:w-80 lg:w-96 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                className="pl-10 pr-4 py-2.5 w-64 md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                             />
                             <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                         </div>
@@ -116,11 +115,14 @@ const TripManagementHome = () => {
             </div>
 
             {/* Grid Content */}
-            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
-                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:p-6 overflow-hidden">
+            <div className="flex-1 px-0 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col w-full">
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
                     {loading ? (
-                         <div className="flex-1 flex flex-col items-center justify-center">
-                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Logistics Registry...</p>
+                        <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
+                            <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+                                <FontAwesomeIcon icon={faCalendarAlt} spin className="text-2xl text-blue-600" />
+                            </div>
+                            <p className="text-gray-500 font-medium tracking-wide">Syncing Logistics Registry...</p>
                         </div>
                     ) : (
                         <TripList

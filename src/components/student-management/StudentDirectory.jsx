@@ -310,10 +310,10 @@ const StudentDirectory = () => {
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header Section */}
-            <div className="bg-white border-b border-gray-200 px-0 lg:px-8 py-4 sticky top-0 z-30 mobile-full-width-container">
+            <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30 mobile-full-width-container">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="ml-20 lg:ml-0">
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Record Directory</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Record Directory</h1>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center gap-6">
@@ -348,14 +348,14 @@ const StudentDirectory = () => {
                 </div>
             </div>
 
-            <div className="flex-1 px-0 lg:px-8 pt-2 pb-4 overflow-hidden flex flex-col mobile-full-width-container">
-                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-6 lg:pb-3 overflow-hidden mobile-full-width-table">
+            <div className="flex-1 px-0 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col mobile-full-width-container">
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden mobile-full-width-table">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                                 <FontAwesomeIcon icon={faUsers} spin className="text-2xl text-blue-600" />
                             </div>
-                            <p className="text-gray-500 font-medium">Accessing Archives...</p>
+                            <p className="text-gray-500 font-medium tracking-wide">Accessing Archives...</p>
                         </div>
                     ) : (
                         <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{

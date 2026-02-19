@@ -407,23 +407,20 @@ const RouteManagementHome = () => {
             {/* Header */}
             {/* Header - Hidden when viewing details */}
             {!selectedRoute && (
-                <div className="bg-white border-b border-gray-200 px-0 py-4 sm:py-6 sticky top-0 z-30">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 px-4 lg:px-0">
-                        <div className='flex items-center justify-between'>
-                            <div className='ml-14 lg:ml-0'>
-                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-                                    Route Management
-                                </h1>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] hidden sm:block">Path Optimization Protocol</p>
-                            </div>
+                <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className='ml-20 lg:ml-0'>
+                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                                Route Management
+                            </h1>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-6">
+                        <div className="flex flex-col md:flex-row items-center gap-6">
                             {/* View Mode Toggle (Segmented Control) */}
-                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner overflow-x-auto no-scrollbar">
+                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
                                 <button
                                     onClick={() => setActiveTab('Active')}
-                                    className={`flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 whitespace-nowrap ${
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         activeTab === 'Active' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
                                         : 'text-gray-500 hover:text-gray-700'
@@ -433,7 +430,7 @@ const RouteManagementHome = () => {
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('Archived')}
-                                    className={`flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 whitespace-nowrap ${
+                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         activeTab === 'Archived' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
                                         : 'text-gray-500 hover:text-gray-700'
@@ -443,13 +440,13 @@ const RouteManagementHome = () => {
                                 </button>
                             </div>
 
-                            <div className="relative group w-full sm:w-auto">
+                            <div className="relative group">
                                 <input
                                     type="text"
                                     placeholder="Search routes..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-full sm:w-64 md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-64 md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>
@@ -461,14 +458,14 @@ const RouteManagementHome = () => {
 
 
             {/* Grid Content */}
-            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
-                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:p-6 overflow-hidden">
+            <div className="flex-1 px-0 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col w-full">
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
-                            <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
+                            <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                                 <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
                             </div>
-                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Mapping Registry...</p>
+                            <p className="text-gray-500 font-medium tracking-wide">Mapping Registry...</p>
                         </div>
                     ) : selectedRoute ? (
                         <RouteDetail
