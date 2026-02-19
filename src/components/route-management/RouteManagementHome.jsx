@@ -488,7 +488,7 @@ const RouteManagementHome = () => {
                             handleDelete={handleDelete}
                             activeMenuId={activeMenuId}
                             setActiveMenuId={setActiveMenuId}
-                            onSelectionChanged={setSelectedRows}
+                            onSelectionChanged={setSelectedRoutes}
                         />
                     )}
                 </div>

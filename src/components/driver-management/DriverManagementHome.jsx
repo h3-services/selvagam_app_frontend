@@ -271,11 +271,11 @@ const DriverManagementHome = () => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
+        <div className="h-full flex flex-col bg-[#f1f5f9] relative animate-fade-in">
             {/* Header */}
             {!selectedDriver && (
-                <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="bg-white border-b border-gray-200 px-0 py-4 sticky top-0 z-30">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 lg:px-0">
                         <div className='ml-20 lg:ml-0'>
                             <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
                                 Driver Management
@@ -323,8 +323,8 @@ const DriverManagementHome = () => {
             )}
 
             {/* Grid Content */}
-            <div className="flex-1 px-0 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col w-full">
-                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
+            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:p-6 overflow-hidden">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
