@@ -1,9 +1,9 @@
-import { AgGridReact } from 'ag-grid-react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import '../../styles/agGridMobileStyles.css';
 import { faEdit, faTrash, faEllipsisV, faChild, faCheckCircle, faBan, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { useState, useRef, useMemo } from 'react';
 
 const ParentList = ({ 
     filteredParents, 
@@ -110,6 +110,7 @@ const ParentList = ({
             headerName: 'Address',
             field: 'street',
             flex: 1.5,
+            hide: isMobile,
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
@@ -147,7 +148,7 @@ const ParentList = ({
                 </div>
             )
         }
-    ], [handleDelete, isInactiveView, activeMenuId, setActiveMenuId]);
+    ], [handleDelete, isInactiveView, activeMenuId, setActiveMenuId, isMobile]);
 
     const defaultColDef = {
         sortable: true,
@@ -157,10 +158,34 @@ const ParentList = ({
     };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-hidden relative">
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                {/* Desktop/Tablet Table View */}
-                <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const onGridReady = (params) => {
+        if (window.innerWidth >= 1024) {
+            params.api.sizeColumnsToFit();
+        }
+    };
+
+    const onGridSizeChanged = (params) => {
+        if (window.innerWidth >= 1024) {
+            params.api.sizeColumnsToFit();
+        }
+    };
+
+    return (
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden relative w-full">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden w-full">
+                {/* Unified Table View */}
+                <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 w-full">
                     <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                         height: 'calc(100vh - 140px)',
                         '--ag-header-background-color': '#f0f4ff',
@@ -185,7 +210,10 @@ const ParentList = ({
                                 maxWidth: 50, 
                                 pinned: 'left',
                                 cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
-                                headerClass: 'ag-center-header'
+                                headerClass: 'ag-center-header',
+                                headerComponentParams: {
+                                    template: '<div class="ag-cell-label-container" role="presentation" style="display: flex; justify-content: center; align-items: center; width: 100%;"><span ref="eCheckbox" class="ag-header-select-all"></span></div>'
+                                }
                             }}
                             onSelectionChanged={(params) => {
                                 const selectedNodes = params.api.getSelectedNodes();
@@ -194,8 +222,8 @@ const ParentList = ({
                             pagination={true}
                             paginationPageSize={10}
                             paginationPageSizeSelector={[10, 20, 50]}
-                            rowHeight={80}
-                            headerHeight={50}
+                            rowHeight={isMobile ? 60 : 80}
+                            headerHeight={isMobile ? 40 : 50}
                             animateRows={true}
                             getRowStyle={params => {
                                 if (params.data.parent_id === activeMenuId) {
@@ -205,93 +233,10 @@ const ParentList = ({
                             }}
                             theme="legacy"
                             overlayNoRowsTemplate='<span class="p-4">No parents found</span>'
+                            onGridReady={onGridReady}
+                            onGridSizeChanged={onGridSizeChanged}
                         />
                     </div>
-                </div>
-
-                {/* Mobile/Tablet Card View */}
-                <div className="lg:hidden p-4 space-y-4">
-                    {filteredParents.map((parent) => (
-                        <div 
-                            key={parent.parent_id} 
-                            className="relative bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
-                        >
-                            <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-[0.03]" style={{ backgroundColor: '#3A7BFF' }}></div>
-                            
-                            <div className="relative p-6">
-                                <div className="flex items-start justify-between mb-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg shadow-blue-100" style={{ backgroundColor: '#3A7BFF' }}>
-                                            {parent.name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <h3 className="font-black text-gray-900 text-[17px] leading-tight">{parent.name}</h3>
-                                            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1 block">Parent Account</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleDelete(parent.parent_id)}
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                                                isInactiveView ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
-                                            }`}
-                                        >
-                                            <FontAwesomeIcon icon={isInactiveView ? faCheckCircle : faTrash} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 mb-6">
-                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/50">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <FontAwesomeIcon icon={faChild} className="text-[10px] text-blue-500" />
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Children</p>
-                                        </div>
-                                        <div className="flex flex-wrap gap-1">
-                                            {parent.linkedStudents?.map((s, i) => (
-                                                <span key={i} className="text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
-                                                    {s === 'No children linked' ? 'None' : (s.name || s)}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/50">
-                                        <div className="flex items-center gap-2 mb-2 text-blue-500">
-                                            <FontAwesomeIcon icon={faCheckCircle} className="text-[10px]" />
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</p>
-                                        </div>
-                                        <span className={`text-[11px] font-black uppercase tracking-wider ${
-                                            parent.parents_active_status === 'ACTIVE' ? 'text-emerald-600' : 'text-amber-600'
-                                        }`}>
-                                            {parent.parents_active_status || 'Inactive'}
-                                        </span>
-                                    </div>
-
-                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100/50 col-span-2">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Contact Details</p>
-                                                <p className="text-[13px] font-bold text-slate-900">{parent.phone}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Location</p>
-                                                <p className="text-[11px] font-bold text-slate-600 truncate max-w-[150px]">{parent.street}, {parent.city}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={() => onViewParent(parent)}
-                                    className="w-full py-4 rounded-2xl bg-slate-900 text-white text-[13px] font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-[0.98]"
-                                >
-                                    Manage Account
-                                </button>
-                            </div>
-                        </div>
-                    ))}
                 </div>
             </div>
             <style>{`
@@ -308,14 +253,221 @@ const ParentList = ({
                 .custom-mini-scroll::-webkit-scrollbar-thumb:hover {
                     background: #CBD5E1;
                 }
-                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
-                .custom-ag-grid .ag-cell { border: none !important; }
-                .custom-ag-grid .ag-root-wrapper { border: none !important; }
+
+                .custom-ag-grid .ag-pinned-right-header {
+                    border-left: none !important;
+                }
+                .custom-ag-grid .ag-pinned-right-cols-container {
+                    border-left: none !important;
+                }
+                .custom-ag-grid .ag-pinned-right-header::before,
+                .custom-ag-grid .ag-pinned-right-cols-container::before {
+                    display: none !important;
+                }
+                .custom-ag-grid .ag-cell {
+                    border: none !important;
+                }
+                .custom-ag-grid .ag-header-cell {
+                    border-right: none !important;
+                }
+                .custom-ag-grid .ag-root-wrapper {
+                    border: none !important;
+                }
+                
+                /* Center align checkbox column header */
+                .custom-ag-grid .ag-header-select-all {
+                    margin: 0 auto;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                
+                .custom-ag-grid .ag-pinned-left-header .ag-header-cell-comp-wrapper {
+                    justify-content: center;
+                }
+                
+                .custom-ag-grid .ag-header-cell.ag-header-cell-sortable .ag-header-cell-comp-wrapper {
+                    justify-content: center;
+                }
+                
+                /* Mobile/Tablet Responsive Styles */
+                @media (max-width: 1023px) {
+                    .custom-ag-grid {
+                        font-size: 12px;
+                        border-radius: 0 !important;
+                    }
+                    
+                    /* Header styles */
+                    .custom-ag-grid .ag-header {
+                        border-bottom: 2px solid #e5e7eb;
+                    }
+                    
+                    .custom-ag-grid .ag-header-cell {
+                        padding-left: 8px !important;
+                        padding-right: 8px !important;
+                        border-right: none !important;
+                    }
+                    
+                    .custom-ag-grid .ag-header-cell-text {
+                        font-size: 10px;
+                        font-weight: 700;
+                    }
+                    
+                    /* Row and cell styles */
+                    .custom-ag-grid .ag-row {
+                        border-bottom: 1px solid #f3f4f6;
+                    }
+                    
+                    .custom-ag-grid .ag-cell {
+                        padding-left: 8px !important;
+                        padding-right: 8px !important;
+                        line-height: 1.3;
+                        border-right: none !important;
+                    }
+                    
+                    /* Checkbox column alignment */
+                    .custom-ag-grid .ag-selection-checkbox {
+                        margin: 0 auto;
+                    }
+                    
+                    .custom-ag-grid .ag-header-select-all {
+                        margin: 0 auto;
+                    }
+                    
+                    /* Checkbox column styling */
+                    .custom-ag-grid .ag-pinned-left-cols-container .ag-cell {
+                        border-right: none !important;
+                        padding-left: 4px !important;
+                        padding-right: 4px !important;
+                        justify-content: center;
+                    }
+                    
+                    .custom-ag-grid .ag-pinned-left-header .ag-header-cell {
+                        border-right: none !important;
+                        padding-left: 4px !important;
+                        padding-right: 4px !important;
+                    }
+                    
+                    /* Actions column styling */
+                    .custom-ag-grid .ag-pinned-right-cols-container .ag-cell {
+                        border-left: none !important;
+                        border-right: none !important;
+                        padding-left: 4px !important;
+                        padding-right: 4px !important;
+                    }
+                    
+                    .custom-ag-grid .ag-pinned-right-header .ag-header-cell {
+                        border-left: none !important;
+                        border-right: none !important;
+                        padding-left: 4px !important;
+                        padding-right: 4px !important;
+                    }
+                    
+                    /* Pagination styles */
+                    .custom-ag-grid .ag-paging-panel {
+                        font-size: 11px;
+                        padding: 8px 6px;
+                        border-top: 2px solid #e5e7eb;
+                        justify-content: center;
+                        flex-wrap: wrap;
+                        gap: 6px;
+                    }
+                    
+                    .custom-ag-grid .ag-paging-button {
+                        min-width: 28px;
+                        height: 28px;
+                    }
+                    
+                    .custom-ag-grid .ag-paging-page-summary-panel {
+                        order: -1;
+                        width: 100%;
+                        text-align: center;
+                        margin-bottom: 6px;
+                    }
+                    
+                    /* Enable horizontal scroll on mobile/tablet */
+                    .custom-ag-grid .ag-body-horizontal-scroll-viewport {
+                        overflow-x: auto !important;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    
+                    .custom-ag-grid .ag-body-viewport {
+                        overflow-x: auto !important;
+                    }
+                    
+                    /* Remove rounded corners on mobile */
+                    .custom-ag-grid .ag-root-wrapper {
+                        border-radius: 0 !important;
+                    }
+                    
+                    /* Pinned columns styling */
+                    .custom-ag-grid .ag-pinned-left-header,
+                    .custom-ag-grid .ag-pinned-left-cols-container {
+                        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+                    }
+                    
+                    .custom-ag-grid .ag-pinned-right-header,
+                    .custom-ag-grid .ag-pinned-right-cols-container {
+                        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+                    }
+                    
+                    /* Action button styling */
+                    .custom-ag-grid .action-menu-trigger {
+                        width: 32px;
+                        height: 32px;
+                    }
+                }
+                
+                /* Extra small mobile devices */
+                @media (max-width: 640px) {
+                    .custom-ag-grid {
+                        font-size: 11px;
+                    }
+                    
+                    .custom-ag-grid .ag-header-cell-text {
+                        font-size: 9px;
+                    }
+                    
+                    .custom-ag-grid .ag-cell {
+                        padding-left: 6px !important;
+                        padding-right: 6px !important;
+                        border-right: none !important;
+                    }
+                    
+                    .custom-ag-grid .ag-header-cell {
+                        padding-left: 6px !important;
+                        padding-right: 6px !important;
+                        border-right: none !important;
+                    }
+                    
+                    .custom-ag-grid .ag-pinned-left-cols-container .ag-cell,
+                    .custom-ag-grid .ag-pinned-right-cols-container .ag-cell {
+                        padding-left: 3px !important;
+                        padding-right: 3px !important;
+                    }
+                    
+                    .custom-ag-grid .ag-pinned-left-header .ag-header-cell,
+                    .custom-ag-grid .ag-pinned-right-header .ag-header-cell {
+                        padding-left: 3px !important;
+                        padding-right: 3px !important;
+                    }
+                    
+                    .custom-ag-grid .ag-paging-panel {
+                        font-size: 10px;
+                        padding: 6px 4px;
+                    }
+                    
+                    .custom-ag-grid .ag-paging-button {
+                        min-width: 26px;
+                        height: 26px;
+                    }
+                }
             `}</style>
         </div>
     );
 };
 
 export default ParentList;
+
+/* REMOVED MOBILE CARD VIEW - NOW USING TABLE ON ALL SCREEN SIZES */
+/* REMOVED INLINE STYLES - NOW USING SHARED CSS FILE */

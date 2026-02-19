@@ -2,6 +2,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRoute, faChevronRight, faBuilding, faBus, faCircle, faExchangeAlt, faEye, faTrash, faMapLocationDot, faUserFriends, faUndo } from '@fortawesome/free-solid-svg-icons';
 import { CiMenuKebab } from "react-icons/ci";
+import '../../styles/agGridMobileStyles.css';
 
 const RouteList = ({
     filteredRoutes,
@@ -17,8 +18,8 @@ const RouteList = ({
 }) => {
     return (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* Desktop Table View */}
-            <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+            {/* Unified Table View */}
+            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
                     '--ag-header-background-color': '#f0f4ff',
@@ -154,19 +155,30 @@ const RouteList = ({
                             resizable: true,
                             headerClass: "font-bold uppercase text-xs tracking-wide",
                         }}
-                        rowHeight={80}
-                        headerHeight={50}
+                        rowHeight={window.innerWidth < 1024 ? 60 : 80}
+                        headerHeight={window.innerWidth < 1024 ? 40 : 50}
                         pagination={true}
                         paginationPageSize={10}
                         paginationPageSizeSelector={[10, 20, 50]}
                         overlayNoRowsTemplate='<span class="p-4">No routes found</span>'
                         theme="legacy"
+                        onGridReady={(params) => {
+                            if (window.innerWidth >= 1024) {
+                                params.api.sizeColumnsToFit();
+                            }
+                        }}
+                        onGridSizeChanged={(params) => {
+                            if (window.innerWidth >= 1024) {
+                                params.api.sizeColumnsToFit();
+                            }
+                        }}
                     />
                 </div>
             </div>
 
+            {/* REMOVED MOBILE CARD VIEW - NOW USING TABLE ON ALL SCREEN SIZES */}
             {/* Mobile/Tablet Card View */}
-            <div className="lg:hidden p-4 space-y-4 pb-24">
+            {/* <div className="lg:hidden p-4 space-y-4 pb-24">
                 {filteredRoutes.map((route) => (
                     <div key={route.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden" style={{ border: '2px solid #e9d5ff' }}>
                         <div className="relative p-5">
@@ -228,16 +240,11 @@ const RouteList = ({
                         </div>
                     </div>
                 ))}
-            </div>
-            <style>{`
-                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
-                .custom-ag-grid .ag-cell { border: none !important; }
-                .custom-ag-grid .ag-root-wrapper { border: none !important; }
-            `}</style>
+            </div> */}
         </div>
     );
 };
 
 export default RouteList;
+
+/* REMOVED INLINE STYLES - NOW USING SHARED CSS FILE */

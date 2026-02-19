@@ -1,5 +1,6 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import '../../styles/agGridMobileStyles.css';
 import { 
     faChevronRight, 
     faTrash, 
@@ -25,8 +26,8 @@ const DriverList = ({
 }) => {
     return (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* Desktop Table View */}
-            <div className="hidden lg:flex lg:flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6">
+            {/* Unified Table View */}
+            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
                     '--ag-header-background-color': '#f0f4ff',
@@ -237,27 +238,30 @@ const DriverList = ({
                             resizable: true,
                             headerClass: "font-bold uppercase text-xs tracking-wide",
                         }}
-                        rowHeight={80}
-                        headerHeight={50}
+                        rowHeight={window.innerWidth < 1024 ? 60 : 80}
+                        headerHeight={window.innerWidth < 1024 ? 40 : 50}
                         pagination={true}
                         paginationPageSize={10}
                         paginationPageSizeSelector={[10, 20, 50]}
                         overlayNoRowsTemplate='<span class="p-4 font-bold uppercase text-xs tracking-widest text-gray-300">No personnel detected in registry</span>'
                         theme="legacy"
                         onGridReady={(params) => {
-                            params.api.sizeColumnsToFit();
+                            if (window.innerWidth >= 1024) {
+                                params.api.sizeColumnsToFit();
+                            }
                         }}
                         onGridSizeChanged={(params) => {
-                            params.api.sizeColumnsToFit();
+                            if (window.innerWidth >= 1024) {
+                                params.api.sizeColumnsToFit();
+                            }
                         }}
                     />
                 </div>
             </div>
 
-
-
+            {/* REMOVED MOBILE CARD VIEW - NOW USING TABLE ON ALL SCREEN SIZES */}
             {/* Mobile/Tablet Card View */}
-            <div className="lg:hidden p-4 space-y-6 pb-24">
+            {/* <div className="lg:hidden p-4 space-y-6 pb-24">
                 {filteredDrivers.map((driver) => (
                     <div key={driver.id} className="relative bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-50">
                         <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-10" style={{ backgroundColor: '#3A7BFF' }}></div>
@@ -327,9 +331,11 @@ const DriverList = ({
                         </div>
                     </div>
                 ))}
-            </div>
+            </div> */}
         </div>
     );
 };
 
 export default DriverList;
+
+/* REMOVED INLINE STYLES - NOW USING SHARED CSS FILE */

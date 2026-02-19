@@ -1,5 +1,6 @@
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import '../../styles/agGridMobileStyles.css';
 import { 
     faInbox, faUsers, faUserGraduate, faEllipsisV, 
     faEdit, faEye, faCheckCircle, faBan 
@@ -136,7 +137,7 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
     ], []);
 
     return (
-        <div className="flex flex-col flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 animate-in fade-in slide-in-from-bottom-4 duration-700 mobile-full-width-table">
             <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                 height: 'calc(100vh - 180px)',
                 '--ag-header-background-color': '#f0f4ff',
@@ -157,8 +158,8 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                     pagination={true}
                     paginationPageSize={10}
                     paginationPageSizeSelector={[10, 20, 50, 100]}
-                    rowHeight={80}
-                    headerHeight={50}
+                    rowHeight={window.innerWidth < 1024 ? 60 : 80}
+                    headerHeight={window.innerWidth < 1024 ? 40 : 50}
                     theme="legacy"
                     context={{ activeMenuId, setActiveMenuId, onEditClass, onUpdateStatus }}
                     getRowStyle={params => {
@@ -168,10 +169,14 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                         return { zIndex: 1 };
                     }}
                     onGridReady={(params) => {
-                        params.api.sizeColumnsToFit();
+                        if (window.innerWidth >= 1024) {
+                            params.api.sizeColumnsToFit();
+                        }
                     }}
                     onGridSizeChanged={(params) => {
-                        params.api.sizeColumnsToFit();
+                        if (window.innerWidth >= 1024) {
+                            params.api.sizeColumnsToFit();
+                        }
                     }}
                 />
             </div>

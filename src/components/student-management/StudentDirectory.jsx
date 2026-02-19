@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import '../../styles/agGridMobileStyles.css';
 import { 
     faSearch, 
     faGraduationCap, 
@@ -309,7 +310,7 @@ const StudentDirectory = () => {
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header Section */}
-            <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
+            <div className="bg-white border-b border-gray-200 px-0 lg:px-8 py-4 sticky top-0 z-30 mobile-full-width-container">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="ml-20 lg:ml-0">
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Record Directory</h1>
@@ -347,8 +348,8 @@ const StudentDirectory = () => {
                 </div>
             </div>
 
-            <div className="flex-1 px-8 pt-0 pb-8 overflow-hidden flex flex-col">
-                <div className="flex-1 bg-white rounded-3xl shadow-xl overflow-hidden p-6 border border-gray-100 mt-4">
+            <div className="flex-1 px-0 lg:px-8 pt-0 pb-8 overflow-hidden flex flex-col mobile-full-width-container">
+                <div className="flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 border border-gray-100 mt-4 mobile-full-width-table">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
@@ -373,8 +374,8 @@ const StudentDirectory = () => {
                                     resizable: true,
                                     headerClass: "font-bold uppercase text-xs tracking-wide",
                                 }}
-                                rowHeight={80}
-                                headerHeight={50}
+                                rowHeight={window.innerWidth < 1024 ? 60 : 80}
+                                headerHeight={window.innerWidth < 1024 ? 40 : 50}
                                 pagination={true}
                                 paginationPageSize={10}
                                 paginationPageSizeSelector={[10, 20, 50]}
@@ -389,10 +390,14 @@ const StudentDirectory = () => {
                                     headerClass: 'ag-center-header'
                                 }}
                                 onGridReady={(params) => {
-                                    params.api.sizeColumnsToFit();
+                                    if (window.innerWidth >= 1024) {
+                                        params.api.sizeColumnsToFit();
+                                    }
                                 }}
                                 onGridSizeChanged={(params) => {
-                                    params.api.sizeColumnsToFit();
+                                    if (window.innerWidth >= 1024) {
+                                        params.api.sizeColumnsToFit();
+                                    }
                                 }}
                                 getRowStyle={params => {
                                     if (params.data.id === activeMenuId) {
@@ -405,15 +410,10 @@ const StudentDirectory = () => {
                     )}
                 </div>
             </div>
-            <style>{`
-                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
-                .custom-ag-grid .ag-cell { border: none !important; }
-                .custom-ag-grid .ag-root-wrapper { border: none !important; }
-            `}</style>
         </div>
     );
 };
 
 export default StudentDirectory;
+
+/* REMOVED INLINE STYLES - NOW USING SHARED CSS FILE */

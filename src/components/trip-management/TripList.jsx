@@ -3,6 +3,7 @@ import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRoute, faUser, faSpinner, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import TripStatusBadge from './TripStatusBadge';
+import '../../styles/agGridMobileStyles.css';
 
 const TripList = ({ filteredTrips, handleStatusChange }) => {
     const [activeStatusId, setActiveStatusId] = useState(null);
@@ -93,8 +94,8 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
     ];
 
     return (
-        <div className="flex-1 px-8 pt-2 pb-8 flex flex-col min-h-0 overflow-hidden" onClick={() => setActiveStatusId(null)}>
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden p-6 flex-1 flex flex-col min-h-0">
+        <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 flex flex-col min-h-0 overflow-hidden mobile-full-width-container" onClick={() => setActiveStatusId(null)}>
+            <div className="bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 flex-1 flex flex-col min-h-0 mobile-full-width-table">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
                     '--ag-header-background-color': '#f0f4ff',
@@ -111,14 +112,24 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                             resizable: true,
                             headerClass: "font-bold uppercase text-xs tracking-wide",
                         }}
-                        rowHeight={80}
-                        headerHeight={50}
+                        rowHeight={window.innerWidth < 1024 ? 60 : 80}
+                        headerHeight={window.innerWidth < 1024 ? 40 : 50}
                         pagination={true}
                         paginationPageSize={10}
                         paginationPageSizeSelector={[5, 10, 20, 50]}
                         overlayNoRowsTemplate='<span class="p-4">No trips found</span>'
                         animateRows={true}
                         theme="legacy"
+                        onGridReady={(params) => {
+                            if (window.innerWidth >= 1024) {
+                                params.api.sizeColumnsToFit();
+                            }
+                        }}
+                        onGridSizeChanged={(params) => {
+                            if (window.innerWidth >= 1024) {
+                                params.api.sizeColumnsToFit();
+                            }
+                        }}
                         getRowStyle={params => {
                             if (params.data.id === activeStatusId) {
                                 return { zIndex: 999, overflow: 'visible' };
@@ -128,15 +139,10 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                     />
                 </div>
             </div>
-            <style>{`
-                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
-                .custom-ag-grid .ag-cell { border: none !important; }
-                .custom-ag-grid .ag-root-wrapper { border: none !important; }
-            `}</style>
         </div>
     );
 };
 
 export default TripList;
+
+/* REMOVED INLINE STYLES - NOW USING SHARED CSS FILE */
