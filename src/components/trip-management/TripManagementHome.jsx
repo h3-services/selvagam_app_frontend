@@ -116,10 +116,12 @@ const TripManagementHome = () => {
             </div>
 
             {/* Grid Content */}
-            <TripList
-                filteredTrips={filteredTrips}
-                handleStatusChange={handleStatusChange}
-            />
+            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
+                <TripList
+                    filteredTrips={filteredTrips}
+                    handleStatusChange={handleStatusChange}
+                />
+            </div>
         </div>
     );
 };

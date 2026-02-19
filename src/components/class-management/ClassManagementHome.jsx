@@ -125,7 +125,7 @@ const ClassManagementHome = () => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 px-0 pt-2 pb-8 flex flex-col min-h-0 overflow-hidden w-full">
+            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 flex flex-col min-h-0 overflow-hidden w-full">
                 <div className="flex-1 flex flex-col min-h-0">
                     {loading ? (
                         <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl border-0 lg:border border-slate-50">

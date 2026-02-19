@@ -289,31 +289,33 @@ const BusManagementHome = () => {
             {/* Header */}
             {/* Header - Hidden when viewing details */}
             {!selectedBus && (
-                <div className="bg-white border-b border-gray-200 px-0 py-4 sticky top-0 z-30">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 lg:px-0">
-                        <div className='ml-20 lg:ml-0'>
-                            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
-                                Bus Management
-                            </h1>
-
+                <div className="bg-white border-b border-gray-200 px-0 py-4 sm:py-6 sticky top-0 z-30">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 px-4 lg:px-0">
+                        <div className='flex items-center justify-between'>
+                            <div className='ml-14 lg:ml-0'>
+                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                                    Bus Management
+                                </h1>
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] hidden sm:block">Fleet Registry Protocol</p>
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-6">
-                            {/* Premium Tab System */}
-                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-6">
+                            {/* View Mode Toggle (Segmented Control) */}
+                            <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner overflow-x-auto no-scrollbar">
                                 <button
                                     onClick={() => setActiveTab('All')}
-                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                    className={`flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 whitespace-nowrap ${
                                         activeTab === 'All' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
                                         : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
-                                    Active Buses
+                                    Active Fleet
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('Scrap')}
-                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                    className={`flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 whitespace-nowrap ${
                                         activeTab === 'Scrap' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
                                         : 'text-gray-500 hover:text-gray-700'
@@ -323,13 +325,13 @@ const BusManagementHome = () => {
                                 </button>
                             </div>
 
-                            <div className="relative group">
+                            <div className="relative group w-full sm:w-auto">
                                 <input
                                     type="text"
-                                    placeholder="Search buses..."
+                                    placeholder="Search fleet..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-64 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-full sm:w-64 md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>
@@ -339,18 +341,18 @@ const BusManagementHome = () => {
             )}
 
             {/* Grid Content */}
-            <div className="flex-1 px-0 pt-2 pb-8 overflow-hidden flex flex-col w-full">
+            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
                 {loading ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl border-0 lg:border border-gray-100">
-                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl border-0 lg:border border-gray-100/50">
+                        <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
                             <FontAwesomeIcon icon={faSpinner} spin className="text-2xl text-blue-600" />
                         </div>
-                        <p className="text-gray-500 font-medium">Loading fleet data...</p>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Fleet Registry...</p>
                     </div>
                 ) : error ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl border-0 lg:border border-red-100">
+                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl border-0 lg:border border-red-50">
                          <p className="text-red-500 font-bold mb-4">{error}</p>
-                         <button onClick={fetchData} className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-95">Retry</button>
+                         <button onClick={fetchData} className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-95">Retry Sync</button>
                     </div>
                 ) : selectedBus ? (
                     <BusDetail
@@ -464,10 +466,10 @@ const BusManagementHome = () => {
                 </>
             )}
 
-            {!selectedBus && !loading && (
+            {!selectedBus && !loading && !showBulkMenu && (
                 <button
                     onClick={() => setShowModal(true)}
-                    className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
+                    className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-[24px] shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-40"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
                     <FontAwesomeIcon icon={faBus} className="text-xl sm:text-2xl" />

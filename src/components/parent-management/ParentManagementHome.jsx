@@ -286,7 +286,9 @@ const ParentManagementHome = () => {
             )}
 
             {/* Content */}
-            <div className="flex-1 px-0 pt-2 pb-0 sm:pb-8 overflow-hidden flex flex-col w-full">
+            {/* Content Area with Bento Background padding */}
+            <div className="flex-1 px-4 sm:px-10 py-6 overflow-hidden flex flex-col w-full bg-slate-50/30">
+                <div className="flex-1 bg-white rounded-[40px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] border border-gray-100/50 overflow-hidden flex flex-col">
                 {loading ? (
                     <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl border-0 lg:border border-gray-100/50">
                         <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
@@ -314,6 +316,7 @@ const ParentManagementHome = () => {
                     />
                 )}
             </div>
+        </div>
 
             {/* Bulk Actions Floating Pill */}
             {selectedRows.length > 0 && !selectedParent && (
