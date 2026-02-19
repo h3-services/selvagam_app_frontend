@@ -115,42 +115,42 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
             />
             
             {/* Drawer */}
-            <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[2006] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) animate-in slide-in-from-right-full">
+            <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] md:w-[600px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[2006] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) animate-in slide-in-from-right-full">
                 
                 {/* Scrollable Content Area */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
                     {/* Premium Header */}
-                    <div className="relative px-8 py-10 flex justify-between items-center z-10">
-                            <div className="flex items-center gap-6">
+                    <div className="relative px-6 sm:px-8 py-6 sm:py-10 flex justify-between items-center z-10">
+                            <div className="flex items-center gap-4 sm:gap-6">
                                 <div className="relative group">
                                     <div className="absolute -inset-2 bg-blue-600 blur-xl opacity-0 group-hover:opacity-20 rounded-full transition-opacity duration-700"></div>
-                                    <div className="w-14 h-14 rounded-[22px] flex items-center justify-center shadow-[0_15px_30px_rgba(58,123,255,0.3)] relative z-10 text-white transform group-hover:rotate-6 transition-transform duration-500" style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}>
-                                        <FontAwesomeIcon icon={initialData ? faEdit : faUserPlus} className="text-xl" />
+                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[20px] sm:rounded-[22px] flex items-center justify-center shadow-[0_15px_30px_rgba(58,123,255,0.3)] relative z-10 text-white transform group-hover:rotate-6 transition-transform duration-500" style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}>
+                                        <FontAwesomeIcon icon={initialData ? faEdit : faUserPlus} className="text-lg sm:text-xl" />
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">{initialData ? 'Update Profile' : 'Parent Onboarding'}</h3>
+                                    <h3 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-none mb-1 sm:mb-1.5">{initialData ? 'Update Profile' : 'Parent Onboarding'}</h3>
                                     <div className="flex items-center gap-2">
                                         <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${initialData ? 'bg-amber-500' : 'bg-blue-600'}`}></span>
-                                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">{initialData ? 'Modify Registry' : 'New Guardian Registry'}</p>
+                                        <p className="text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]">{initialData ? 'Modify Registry' : 'New Guardian Registry'}</p>
                                     </div>
                                 </div>
                             </div>
                         
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                             <button 
                                 type="button" 
                                 onClick={handleAutoFill}
-                                className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition-all active:scale-90"
+                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition-all active:scale-90"
                             >
-                                <FontAwesomeIcon icon={faMagic} className="text-sm" />
+                                <FontAwesomeIcon icon={faMagic} className="text-xs sm:text-sm" />
                             </button>
                             <button 
                                 type="button"
                                 onClick={onClose} 
-                                className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all active:scale-90"
+                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all active:scale-90"
                             >
-                                <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                                <FontAwesomeIcon icon={faTimes} className="text-base sm:text-lg" />
                             </button>
                         </div>
                     </div>
@@ -221,7 +221,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                             </div>
 
                             {/* Geo Data Section */}
-                            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 group hover:shadow-xl transition-all duration-500">
+                            <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-100 group hover:shadow-xl transition-all duration-500">
                                 <div className="flex items-center gap-4 mb-8">
                                     <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
                                         <FontAwesomeIcon icon={faMapMarkerAlt} className="text-lg" />
@@ -233,8 +233,8 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className="grid grid-cols-3 gap-6">
-                                        <div className="col-span-1">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                        <div className="sm:col-span-1">
                                             <InputField 
                                                 label="Door No" 
                                                 icon={faSignature} 
@@ -243,7 +243,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                                 placeholder="45/A" 
                                             />
                                         </div>
-                                        <div className="col-span-2">
+                                        <div className="sm:col-span-2">
                                             <InputField 
                                                 label="Street Name" 
                                                 icon={faMapMarkerAlt} 
@@ -253,7 +253,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                             />
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <InputField 
                                             label="City" 
                                             icon={faMapMarkerAlt} 
@@ -306,11 +306,11 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                 </div>
 
                 {/* Sticky Footer */}
-                <div className="px-8 py-8 bg-white border-t border-slate-100 flex gap-4 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
+                <div className="px-6 sm:px-8 py-6 sm:py-8 bg-white border-t border-slate-100 flex gap-3 sm:gap-4 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 px-8 py-4 bg-slate-50 border border-slate-200 text-slate-500 font-black uppercase tracking-widest rounded-2xl hover:bg-slate-100 hover:text-slate-700 transition-all active:scale-95 text-[11px]"
+                        className="flex-1 px-4 sm:px-8 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 text-slate-500 font-black uppercase tracking-widest rounded-2xl hover:bg-slate-100 hover:text-slate-700 transition-all active:scale-95 text-[10px] sm:text-[11px]"
                     >
                         Cancel
                     </button>
@@ -318,16 +318,16 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                         type="submit"
                         form="add-parent-form"
                         disabled={isSubmitting}
-                        className={`flex-[2] px-8 py-4 bg-slate-900 text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-black transition-all active:scale-95 text-[11px] shadow-2xl shadow-slate-200 flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`flex-[2] px-4 sm:px-8 py-3.5 sm:py-4 bg-slate-900 text-white font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-black transition-all active:scale-95 text-[10px] sm:text-[11px] shadow-2xl shadow-slate-200 flex items-center justify-center gap-2 sm:gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
                         {isSubmitting ? (
                             <>
-                                <FontAwesomeIcon icon={faMagic} spin />
+                                <FontAwesomeIcon icon={faMagic} spin className="text-[10px] sm:text-xs" />
                                 <span>Processing...</span>
                             </>
                         ) : (
                             <>
-                                <FontAwesomeIcon icon={faCheck} />
+                                <FontAwesomeIcon icon={faCheck} className="text-[10px] sm:text-xs" />
                                 <span>{initialData ? 'Save Changes' : 'Commit to Registry'}</span>
                             </>
                         )}

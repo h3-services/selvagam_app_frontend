@@ -286,7 +286,7 @@ const ParentManagementHome = () => {
             )}
 
             {/* Content */}
-            <div className="flex-1 px-0 sm:px-8 pt-2 pb-0 sm:pb-8 overflow-hidden flex flex-col">
+            <div className="flex-1 px-0 pt-2 pb-0 sm:pb-8 overflow-hidden flex flex-col">
                 {loading ? (
                     <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-[32px] shadow-xl border border-gray-100/50">
                         <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">

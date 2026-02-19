@@ -22,6 +22,7 @@ const ParentList = ({
             headerName: 'Parent Name',
             field: 'name',
             flex: 1.5,
+            minWidth: 200,
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
@@ -42,6 +43,7 @@ const ParentList = ({
             headerName: 'Mobile',
             field: 'phone',
             flex: 1.2,
+            minWidth: 140,
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
@@ -54,7 +56,8 @@ const ParentList = ({
         {
             headerName: 'Students Linked',
             field: 'linkedStudents',
-            flex: 1.5,
+            flex: 1.8,
+            minWidth: 200,
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
@@ -83,7 +86,8 @@ const ParentList = ({
         {
             headerName: 'Classes',
             field: 'childClasses',
-            width: 160,
+            flex: 1.2,
+            minWidth: 140,
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
@@ -109,7 +113,8 @@ const ParentList = ({
         {
             headerName: 'Address',
             field: 'street',
-            flex: 1.5,
+            flex: 1.8,
+            minWidth: 200,
             hide: isMobile,
             filter: false,
             cellDataType: false,
@@ -124,10 +129,13 @@ const ParentList = ({
         {
             headerName: 'ACTIONS',
             field: 'parent_id',
-            width: 80,
+            width: 100,
+            minWidth: 100,
             pinned: 'right',
             sortable: false,
             filter: false,
+            suppressMovable: true,
+            suppressSizeToFit: true,
             cellStyle: { overflow: 'visible' },
             cellRenderer: params => (
                 <div className="flex items-center justify-center h-full">
@@ -185,7 +193,7 @@ const ParentList = ({
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden relative w-full">
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden w-full">
                 {/* Unified Table View */}
-                <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 w-full">
+                <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 w-full">
                     <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                         height: 'calc(100vh - 140px)',
                         '--ag-header-background-color': '#f0f4ff',

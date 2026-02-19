@@ -31,7 +31,7 @@ const StudentList = ({
             headerName: "Student Name",
             field: "name",
             flex: 1.5,
-            minWidth: 200,
+            minWidth: 220,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: (params) => (
                 <div
@@ -40,8 +40,8 @@ const StudentList = ({
                 >
                     <div className="flex flex-col overflow-hidden">
                         <p className="font-semibold text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
-                        <div className="flex items-center gap-1 mt-0">
-                            <span className="text-[9px] font-medium text-gray-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">View Details</span>
+                        <div className="flex items-center gap-1 mt-1">
+                            <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">View Profile</span>
                         </div>
                     </div>
                 </div>
@@ -51,10 +51,10 @@ const StudentList = ({
             headerName: "Class",
             field: "className",
             flex: 0.8,
-            minWidth: 110,
+            minWidth: 100,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start' },
             cellRenderer: (params) => (
-                <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-xs border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
+                <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-bold text-[11px] border border-blue-100 shadow-sm uppercase tracking-wide whitespace-nowrap">
                     {params.value}
                 </span>
             )
@@ -90,33 +90,35 @@ const StudentList = ({
         {
             headerName: "Emergency Contact",
             field: "emergencyContact",
-            flex: 1,
-            minWidth: 140,
-            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '500' }
+            flex: 1.2,
+            minWidth: 150,
+            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: 'bold', fontSize: '13px' }
         },
         {
             headerName: "Academic Year",
             field: "studyYear",
             flex: 1.2,
-            minWidth: 150,
+            minWidth: 160,
             hide: isMobile, // Hide on mobile/tablet
             suppressColumnsToolPanel: true,
             cellStyle: { display: 'flex', alignItems: 'center' },
             cellRenderer: (params) => (
                 <div className="flex items-center gap-2 w-full" title={params.value}>
                     <FontAwesomeIcon icon={faCalendarDay} className="text-blue-400 text-xs shrink-0" />
-                    <span className="text-sm text-gray-600 truncate">{params.value}</span>
+                    <span className="text-sm font-medium text-gray-600 truncate">{params.value}</span>
                 </div>
             )
         },
         {
             headerName: "ACTIONS",
             field: "id",
-            width: 90,
-            minWidth: 90,
+            width: 100,
+            minWidth: 100,
             sortable: false,
             filter: false,
             pinned: 'right',
+            suppressMovable: true,
+            suppressSizeToFit: true,
             cellStyle: { overflow: 'visible' },
             cellRenderer: (params) => {
                 const isOpen = activeMenuId === params.data.id;
