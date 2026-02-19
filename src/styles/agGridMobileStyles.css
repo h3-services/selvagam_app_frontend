@@ -1,0 +1,237 @@
+
+/* Shared AG Grid Styles for Mobile Responsiveness */
+
+.custom-ag-grid .ag-pinned-right-header {
+    border-left: none !important;
+}
+.custom-ag-grid .ag-pinned-right-cols-container {
+    border-left: none !important;
+}
+.custom-ag-grid .ag-pinned-right-header::before,
+.custom-ag-grid .ag-pinned-right-cols-container::before {
+    display: none !important;
+}
+.custom-ag-grid .ag-cell {
+    border: none !important;
+}
+.custom-ag-grid .ag-header-cell {
+    border-right: none !important;
+}
+.custom-ag-grid .ag-root-wrapper {
+    border: none !important;
+}
+
+/* Center align checkbox column header */
+.custom-ag-grid .ag-header-select-all {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-ag-grid .ag-pinned-left-header .ag-header-cell-comp-wrapper {
+    justify-content: center;
+}
+
+.custom-ag-grid .ag-header-cell.ag-header-cell-sortable .ag-header-cell-comp-wrapper {
+    justify-content: center;
+}
+
+.custom-ag-grid .ag-center-header .ag-header-cell-label {
+    justify-content: center !important;
+}
+
+.custom-ag-grid .ag-center-header .ag-header-cell-comp-wrapper {
+    justify-content: center !important;
+}
+
+/* Action Menu Styles */
+.action-menu-container {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Full Width Utility for Mobile */
+@media (max-width: 1023px) {
+    .mobile-full-width-container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    .mobile-full-width-table {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+    }
+
+    .custom-ag-grid {
+        font-size: 12px;
+        border-radius: 0 !important;
+    }
+    
+    /* Header styles */
+    .custom-ag-grid .ag-header {
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .custom-ag-grid .ag-header-cell {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        border-right: none !important;
+    }
+    
+    .custom-ag-grid .ag-header-cell-text {
+        font-size: 11px;
+        font-weight: 800;
+    }
+    
+    /* Row and cell styles */
+    .custom-ag-grid .ag-row {
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .custom-ag-grid .ag-cell {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        line-height: 1.3;
+        border-right: none !important;
+    }
+    
+    /* Checkbox column alignment */
+    .custom-ag-grid .ag-selection-checkbox {
+        margin: 0 auto;
+    }
+    
+    .custom-ag-grid .ag-header-select-all {
+        margin: 0 auto;
+    }
+    
+    /* Checkbox column styling */
+    .custom-ag-grid .ag-pinned-left-cols-container .ag-cell {
+        border-right: none !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+        justify-content: center;
+    }
+    
+    .custom-ag-grid .ag-pinned-left-header .ag-header-cell {
+        border-right: none !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+    
+    /* Actions column styling */
+    .custom-ag-grid .ag-pinned-right-cols-container .ag-cell {
+        border-left: none !important;
+        border-right: none !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+    
+    .custom-ag-grid .ag-pinned-right-header .ag-header-cell {
+        border-left: none !important;
+        border-right: none !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+    
+    /* Pagination styles */
+    .custom-ag-grid .ag-paging-panel {
+        font-size: 11px;
+        padding: 8px 6px;
+        border-top: 2px solid #e5e7eb;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    
+    .custom-ag-grid .ag-paging-button {
+        min-width: 28px;
+        height: 28px;
+    }
+    
+    .custom-ag-grid .ag-paging-page-summary-panel {
+        order: -1;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 6px;
+    }
+    
+    /* Enable horizontal scroll on mobile/tablet */
+    .custom-ag-grid .ag-body-horizontal-scroll-viewport {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .custom-ag-grid .ag-body-viewport {
+        overflow-x: auto !important;
+    }
+    
+    /* Remove rounded corners on mobile */
+    .custom-ag-grid .ag-root-wrapper {
+        border-radius: 0 !important;
+    }
+    
+    /* Pinned columns styling */
+    .custom-ag-grid .ag-pinned-left-header,
+    .custom-ag-grid .ag-pinned-left-cols-container {
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .custom-ag-grid .ag-pinned-right-header,
+    .custom-ag-grid .ag-pinned-right-cols-container {
+        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Action button styling */
+    .custom-ag-grid .action-menu-trigger {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 640px) {
+    .custom-ag-grid {
+        font-size: 11px;
+    }
+    
+    .custom-ag-grid .ag-header-cell-text {
+        font-size: 10px;
+    }
+    
+    .custom-ag-grid .ag-cell {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        border-right: none !important;
+    }
+    
+    .custom-ag-grid .ag-header-cell {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        border-right: none !important;
+    }
+    
+    .custom-ag-grid .ag-pinned-left-cols-container .ag-cell,
+    .custom-ag-grid .ag-pinned-right-cols-container .ag-cell {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+    
+    .custom-ag-grid .ag-pinned-left-header .ag-header-cell,
+    .custom-ag-grid .ag-pinned-right-header .ag-header-cell {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+    
+    .custom-ag-grid .ag-paging-panel {
+        font-size: 10px;
+        padding: 6px 4px;
+    }
+    
+    .custom-ag-grid .ag-paging-button {
+        min-width: 26px;
+        height: 26px;
+    }
+}

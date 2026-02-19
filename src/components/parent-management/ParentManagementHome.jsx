@@ -232,8 +232,8 @@ const ParentManagementHome = () => {
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header */}
             {!selectedParent && (
-                <div className="bg-white border-b border-gray-200 px-4 md:px-8 py-4 sm:py-6 sticky top-0 z-30">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+                <div className="bg-white border-b border-gray-200 px-0 py-4 sm:py-6 sticky top-0 z-30">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 px-4 lg:px-0">
                         <div className='flex items-center justify-between'>
                             <div className='ml-14 lg:ml-0'>
                                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
@@ -286,9 +286,9 @@ const ParentManagementHome = () => {
             )}
 
             {/* Content */}
-            <div className="flex-1 px-0 pt-2 pb-0 sm:pb-8 overflow-hidden flex flex-col">
+            <div className="flex-1 px-0 pt-2 pb-0 sm:pb-8 overflow-hidden flex flex-col w-full">
                 {loading ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-[32px] shadow-xl border border-gray-100/50">
+                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl border-0 lg:border border-gray-100/50">
                         <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
                             <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
                         </div>

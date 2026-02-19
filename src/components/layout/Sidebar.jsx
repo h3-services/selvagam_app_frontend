@@ -30,6 +30,13 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Helper to check if a path is active
   const isActive = (path) => {
@@ -192,7 +199,7 @@ const Sidebar = () => {
                 key={index} 
                 className="px-4"
                 onMouseEnter={(e) => {
-                  if (hasSubItems) {
+                  if (hasSubItems && !isMobile) {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const estimatedCardHeight = 360; // Estimated max height of the transport hub card
                     const viewportHeight = window.innerHeight;
@@ -266,6 +273,35 @@ const Sidebar = () => {
                       )}
                     </div>
                   </button>
+
+                  {/* Mobile Submenu Accordion */}
+                  {isMobile && hasSubItems && isPinned && (
+                    <div className="mt-2 ml-4 mr-4 space-y-1.5 overflow-hidden animate-in slide-in-from-top-4 duration-500">
+                      {item.subItems.map((sub, sIndex) => {
+                        const subActive = location.pathname.startsWith(sub.path);
+                        return (
+                          <button
+                            key={sIndex}
+                            onClick={() => handleNavigation(sub.path)}
+                            className={`w-full flex items-center gap-4 px-6 py-3.5 rounded-2xl transition-all duration-300 relative overflow-hidden group/sub ${
+                              subActive 
+                                ? 'text-white bg-blue-600 shadow-lg' 
+                                : 'text-blue-900/60 hover:text-blue-600 hover:bg-blue-600/5'
+                            }`}
+                          >
+                            <FontAwesomeIcon 
+                              icon={sub.icon} 
+                              className={`w-4 text-sm transition-transform ${subActive ? 'scale-110' : 'opacity-60 group-hover/sub:scale-110'}`} 
+                            />
+                            <span className="font-bold text-xs tracking-wide">{sub.label}</span>
+                            {subActive && (
+                              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )
@@ -273,7 +309,7 @@ const Sidebar = () => {
         </nav>
 
         {/* Floating Flyout Cards - The "Interactive Hub" Redesign */}
-        {menuItems.map((item, index) => {
+        {!isMobile && menuItems.map((item, index) => {
           if (!item.subItems || activeFlyout !== item.id) return null;
 
           return (

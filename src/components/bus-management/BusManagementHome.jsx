@@ -289,8 +289,8 @@ const BusManagementHome = () => {
             {/* Header */}
             {/* Header - Hidden when viewing details */}
             {!selectedBus && (
-                <div className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="bg-white border-b border-gray-200 px-0 py-4 sticky top-0 z-30">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 lg:px-0">
                         <div className='ml-20 lg:ml-0'>
                             <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
                                 Bus Management
@@ -339,16 +339,16 @@ const BusManagementHome = () => {
             )}
 
             {/* Grid Content */}
-            <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">
+            <div className="flex-1 px-0 pt-2 pb-8 overflow-hidden flex flex-col w-full">
                 {loading ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-gray-100">
+                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl border-0 lg:border border-gray-100">
                         <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                             <FontAwesomeIcon icon={faSpinner} spin className="text-2xl text-blue-600" />
                         </div>
                         <p className="text-gray-500 font-medium">Loading fleet data...</p>
                     </div>
                 ) : error ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-red-100">
+                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl border-0 lg:border border-red-100">
                          <p className="text-red-500 font-bold mb-4">{error}</p>
                          <button onClick={fetchData} className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-95">Retry</button>
                     </div>

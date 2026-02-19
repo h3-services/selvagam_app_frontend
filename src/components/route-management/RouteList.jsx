@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRoute, faChevronRight, faBuilding, faBus, faCircle, faExchangeAlt, faEye, faTrash, faMapLocationDot, faUserFriends, faUndo } from '@fortawesome/free-solid-svg-icons';
@@ -16,10 +17,18 @@ const RouteList = ({
     activeTab,
     onSelectionChanged
 }) => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     return (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Unified Table View */}
-            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
+            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
                     '--ag-header-background-color': '#f0f4ff',
@@ -35,6 +44,7 @@ const RouteList = ({
                                 headerName: "Route Name",
                                 field: "routeName",
                                 flex: 1.5,
+                                minWidth: 200,
                                 cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
                                 cellRenderer: (params) => (
                                     <div
@@ -55,6 +65,7 @@ const RouteList = ({
                                 headerName: "No. of Students",
                                 field: "studentCount",
                                 flex: 1,
+                                minWidth: 150,
                                 cellRenderer: (params) => (
                                     <div className="flex items-center h-full">
                                         <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold text-xs border border-blue-100 uppercase tracking-wide">
@@ -66,7 +77,8 @@ const RouteList = ({
                             {
                                 headerName: "Stops",
                                 field: "stops",
-                                flex: 0.6,
+                                flex: 0.8,
+                                minWidth: 120,
                                 cellRenderer: (params) => (
                                     <div className="flex items-center h-full">
                                         <span className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold text-xs border border-blue-100">
@@ -79,6 +91,7 @@ const RouteList = ({
                                 headerName: "Bus",
                                 field: "assignedBus",
                                 flex: 1.2,
+                                minWidth: 160,
                                 cellRenderer: (params) => (
                                     <div className="flex items-center h-full">
                                         <button
@@ -97,7 +110,8 @@ const RouteList = ({
                             {
                                 headerName: activeTab === 'Archived' ? "Restore" : "Delete",
                                 field: "id",
-                                width: 100,
+                                width: 90,
+                                minWidth: 90,
                                 sortable: false,
                                 filter: false,
                                 cellRenderer: (params) => (
@@ -153,10 +167,10 @@ const RouteList = ({
                         defaultColDef={{
                             sortable: true,
                             resizable: true,
-                            headerClass: "font-bold uppercase text-xs tracking-wide",
+                            headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
                         }}
-                        rowHeight={window.innerWidth < 1024 ? 60 : 80}
-                        headerHeight={window.innerWidth < 1024 ? 40 : 50}
+                        rowHeight={isMobile ? 60 : 80}
+                        headerHeight={isMobile ? 40 : 50}
                         pagination={true}
                         paginationPageSize={10}
                         paginationPageSizeSelector={[10, 20, 50]}

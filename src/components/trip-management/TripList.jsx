@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRoute, faUser, faSpinner, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
@@ -7,12 +7,20 @@ import '../../styles/agGridMobileStyles.css';
 
 const TripList = ({ filteredTrips, handleStatusChange }) => {
     const [activeStatusId, setActiveStatusId] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const columnDefs = [
         {
             headerName: "Route Name",
             field: "route",
             flex: 1.2,
+            minWidth: 180,
             cellStyle: { display: 'flex', alignItems: 'center' },
             cellRenderer: params => (
                 <div className="flex items-center gap-2">
@@ -27,6 +35,7 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             headerName: "Bus",
             field: "bus",
             flex: 1,
+            minWidth: 120,
             cellStyle: { display: 'flex', alignItems: 'center' },
             cellRenderer: params => (
                 <div className="font-medium text-gray-700">{params.value || '-'}</div>
@@ -35,7 +44,8 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
         {
             headerName: "Driver",
             field: "driver",
-            flex: 1,
+            flex: 1.5,
+            minWidth: 200,
             cellStyle: { display: 'flex', alignItems: 'center' },
             cellRenderer: params => (
                 <div className="flex items-center gap-3">
@@ -53,13 +63,14 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             headerName: "Date",
             field: "date",
             flex: 0.8,
+            minWidth: 110,
             cellStyle: { display: 'flex', alignItems: 'center', color: '#6b7280' },
         },
-
         {
             headerName: "Status",
             field: "status",
             flex: 1,
+            minWidth: 140,
             cellStyle: { display: 'flex', alignItems: 'center', overflow: 'visible' },
             cellRenderer: params => (
                 <div className="relative">
@@ -94,8 +105,8 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
     ];
 
     return (
-        <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 flex flex-col min-h-0 overflow-hidden mobile-full-width-container" onClick={() => setActiveStatusId(null)}>
-            <div className="bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 flex-1 flex flex-col min-h-0 mobile-full-width-table">
+        <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full mobile-full-width-container" onClick={() => setActiveStatusId(null)}>
+            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
                     '--ag-header-background-color': '#f0f4ff',
@@ -110,15 +121,13 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                         defaultColDef={{
                             sortable: true,
                             resizable: true,
-                            headerClass: "font-bold uppercase text-xs tracking-wide",
+                            headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
                         }}
-                        rowHeight={window.innerWidth < 1024 ? 60 : 80}
-                        headerHeight={window.innerWidth < 1024 ? 40 : 50}
+                        rowHeight={isMobile ? 60 : 80}
+                        headerHeight={isMobile ? 40 : 50}
                         pagination={true}
                         paginationPageSize={10}
-                        paginationPageSizeSelector={[5, 10, 20, 50]}
-                        overlayNoRowsTemplate='<span class="p-4">No trips found</span>'
-                        animateRows={true}
+                        paginationPageSizeSelector={[10, 20, 50]}
                         theme="legacy"
                         onGridReady={(params) => {
                             if (window.innerWidth >= 1024) {

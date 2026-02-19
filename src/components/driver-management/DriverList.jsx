@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../../styles/agGridMobileStyles.css';
@@ -24,10 +25,18 @@ const DriverList = ({
     viewMode,
     onSelectionChanged
 }) => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     return (
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Unified Table View */}
-            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
+            <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
                 <div className="ag-theme-quartz w-full custom-ag-grid" style={{
                     height: 'calc(100vh - 140px)',
                     '--ag-header-background-color': '#f0f4ff',
@@ -236,10 +245,10 @@ const DriverList = ({
                         defaultColDef={{
                             sortable: true,
                             resizable: true,
-                            headerClass: "font-bold uppercase text-xs tracking-wide",
+                            headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
                         }}
-                        rowHeight={window.innerWidth < 1024 ? 60 : 80}
-                        headerHeight={window.innerWidth < 1024 ? 40 : 50}
+                        rowHeight={isMobile ? 60 : 80}
+                        headerHeight={isMobile ? 40 : 50}
                         pagination={true}
                         paginationPageSize={10}
                         paginationPageSizeSelector={[10, 20, 50]}

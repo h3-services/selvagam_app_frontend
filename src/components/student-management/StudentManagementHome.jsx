@@ -440,7 +440,7 @@ const StudentManagementHome = () => {
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header - Hidden when viewing details to save space */}
             {!selectedStudent && (
-                <div className="bg-white border-b border-gray-200 px-0 lg:px-8 py-4 sticky top-0 z-30">
+                <div className="bg-white border-b border-gray-200 px-0 py-4 sticky top-0 z-30">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 lg:px-0">
                         <div className='ml-20 lg:ml-0'>
                             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
@@ -489,7 +489,7 @@ const StudentManagementHome = () => {
             )}
 
             {/* Grid Content */}
-            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
+            <div className="flex-1 px-0 pt-2 pb-8 overflow-hidden flex flex-col w-full">
                 {loading ? (
                     <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-gray-100">
                         <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">

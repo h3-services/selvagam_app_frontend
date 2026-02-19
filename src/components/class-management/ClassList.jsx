@@ -2,25 +2,22 @@ import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../../styles/agGridMobileStyles.css';
 import { 
-    faInbox, faUsers, faUserGraduate, faEllipsisV, 
-    faEdit, faEye, faCheckCircle, faBan 
+    faInbox, faUserGraduate, faEllipsisV, 
+    faEdit, faCheckCircle, faBan 
 } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
-const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdateStatus, onEditClass }) => {
-    const navigate = useNavigate();
+const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onEditClass }) => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
-    if (classes.length === 0) {
-        return (
-            <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-[40px] border-2 border-dashed border-gray-100 animate-in fade-in duration-700">
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4 shadow-inner">
-                    <FontAwesomeIcon icon={faInbox} className="text-3xl" />
-                </div>
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No classes found</p>
-            </div>
-        );
-    }
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const columnDefs = useMemo(() => [
         {
@@ -136,10 +133,21 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
         }
     ], []);
 
+    if (classes.length === 0) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-[40px] border-2 border-dashed border-gray-100 animate-in fade-in duration-700">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4 shadow-inner">
+                    <FontAwesomeIcon icon={faInbox} className="text-3xl" />
+                </div>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No classes found</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 animate-in fade-in slide-in-from-bottom-4 duration-700 mobile-full-width-table">
+        <div className="flex flex-col flex-1 bg-white rounded-none shadow-none overflow-hidden p-0 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 mobile-full-width-table">
             <div className="ag-theme-quartz w-full custom-ag-grid" style={{
-                height: 'calc(100vh - 180px)',
+                height: 'calc(100vh - 140px)',
                 '--ag-header-background-color': '#f0f4ff',
                 '--ag-header-foreground-color': '#3A7BFF',
                 '--ag-font-family': 'inherit',
@@ -153,13 +161,13 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                         sortable: true,
                         filter: false,
                         resizable: true,
-                        headerClass: "font-black uppercase text-[10px] tracking-wider ag-center-header",
+                        headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
                     }}
                     pagination={true}
                     paginationPageSize={10}
                     paginationPageSizeSelector={[10, 20, 50, 100]}
-                    rowHeight={window.innerWidth < 1024 ? 60 : 80}
-                    headerHeight={window.innerWidth < 1024 ? 40 : 50}
+                    rowHeight={isMobile ? 60 : 80}
+                    headerHeight={isMobile ? 40 : 50}
                     theme="legacy"
                     context={{ activeMenuId, setActiveMenuId, onEditClass, onUpdateStatus }}
                     getRowStyle={params => {
@@ -169,49 +177,17 @@ const ClassList = ({ classes, onRefresh, activeMenuId, setActiveMenuId, onUpdate
                         return { zIndex: 1 };
                     }}
                     onGridReady={(params) => {
-                        if (window.innerWidth >= 1024) {
+                        if (!isMobile) {
                             params.api.sizeColumnsToFit();
                         }
                     }}
                     onGridSizeChanged={(params) => {
-                        if (window.innerWidth >= 1024) {
+                        if (!isMobile) {
                             params.api.sizeColumnsToFit();
                         }
                     }}
                 />
             </div>
-            <style>{`
-                .ag-theme-legacy .ag-header-cell-label {
-                    justify-content: center !important;
-                }
-                .custom-ag-grid .ag-cell {
-                    border: none !important;
-                    justify-content: center !important;
-                }
-                .custom-ag-grid .ag-row {
-                    border-bottom: 1px solid #f1f5f9 !important;
-                }
-                .custom-ag-grid .ag-row-hover {
-                    background-color: #f5f8ff !important;
-                }
-                .custom-ag-grid .ag-header {
-                    border-bottom: 2px solid #eef2ff !important;
-                }
-                .custom-ag-grid .ag-header-cell {
-                    text-align: center !important;
-                }
-                .ag-center-header .ag-header-cell-label {
-                    justify-content: center !important;
-                }
-                .custom-ag-grid .ag-header-cell-text {
-                    font-weight: 900 !important;
-                }
-                .custom-ag-grid .ag-pinned-right-header { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-cols-container { border-left: none !important; }
-                .custom-ag-grid .ag-pinned-right-header::before, .custom-ag-grid .ag-pinned-right-cols-container::before { display: none !important; }
-                .custom-ag-grid .ag-cell { border: none !important; }
-                .custom-ag-grid .ag-root-wrapper { border: none !important; }
-            `}</style>
         </div>
     );
 };
