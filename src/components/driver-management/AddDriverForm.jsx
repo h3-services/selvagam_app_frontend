@@ -193,15 +193,15 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                 {/* Form Environment */}
                 <div className="flex-1 overflow-y-auto px-8 pb-32 space-y-8 custom-scrollbar">
                     
-                    {/* Crew Identity Bento */}
+                    {/* Driver Info Section */}
                     <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                         <div className="flex items-center gap-5 mb-10">
                             <div className="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                 <FontAwesomeIcon icon={faFingerprint} className="text-2xl" />
                             </div>
                             <div>
-                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Crew Identity</h4>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Personnel Core Metrics</p>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Driver Info</h4>
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Basic Details</p>
                             </div>
                         </div>
 

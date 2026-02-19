@@ -277,9 +277,9 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                                 value={busData.status} 
                                 onChange={(e) => setBusData({...busData, status: e.target.value})} 
                                 options={[
-                                    { value: 'Active', label: 'Active Service' },
-                                    { value: 'Maintenance', label: 'Maintenance Bay' },
-                                    { value: 'Inactive', label: 'Decommissioned' }
+                                    { value: 'Active', label: 'Active' },
+                                    { value: 'Maintenance', label: 'Maintenance' },
+                                    { value: 'Inactive', label: 'Inactive' }
                                 ]} 
                             />
                         </div>

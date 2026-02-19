@@ -293,7 +293,7 @@ const DriverManagementHome = () => {
                                         : 'text-gray-500 hover:text-gray-700'
                                     }`}
                                 >
-                                    Active Personnel
+                                    Active Drivers
                                 </button>
                                 <button
                                     onClick={() => setViewMode('resigned')}
@@ -323,14 +323,14 @@ const DriverManagementHome = () => {
             )}
 
             {/* Grid Content */}
-            <div className="flex-1 px-0 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col w-full">
+            <div className="flex-1 px-2 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col w-full">
                 <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                                 <FontAwesomeIcon icon={faSpinner} spin className="text-2xl text-blue-600" />
                             </div>
-                            <p className="text-gray-500 font-medium tracking-wide">Syncing Personnel Registry...</p>
+                            <p className="text-gray-500 font-medium tracking-wide">Loading...</p>
                         </div>
                     ) : error ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
@@ -430,7 +430,7 @@ const DriverManagementHome = () => {
                                     {selectedRows.length} Selected
                                 </span>
                                 <span className={`text-[12px] font-black mt-0.5 ${showBulkMenu ? 'text-white' : 'text-slate-900'}`}>
-                                    {showBulkMenu ? 'Close Protocol' : 'Personnel Actions'}
+                                    {showBulkMenu ? 'Close' : 'Actions'}
                                 </span>
                             </div>
                             <FontAwesomeIcon 
@@ -475,9 +475,9 @@ const DriverManagementHome = () => {
                             <div className="w-20 h-20 rounded-[2rem] bg-rose-50 flex items-center justify-center mb-6">
                                 <FontAwesomeIcon icon={faTrash} className="text-3xl text-rose-600" />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Archive Personnel</h3>
+                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Deactivate Driver</h3>
                             <p className="text-slate-500 text-sm mb-8 leading-relaxed font-medium">
-                                Are you sure you want to <span className="font-black text-rose-600">Archive</span> this personnel? This action will move them from the active fleet to the archived registry.
+                                Are you sure you want to <span className="font-black text-rose-600">deactivate</span> this driver? They will be moved to the inactive list.
                             </p>
                             <div className="flex gap-4 w-full">
                                 <button

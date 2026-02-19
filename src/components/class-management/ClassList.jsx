@@ -66,7 +66,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             headerName: "ACTIONS",
             field: "class_id",
             width: 100,
-            pinned: 'right',
+
             sortable: false,
             filter: false,
             filter: false,

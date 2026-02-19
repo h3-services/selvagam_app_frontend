@@ -129,10 +129,10 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-none mb-1 sm:mb-1.5">{initialData ? 'Update Profile' : 'Parent Onboarding'}</h3>
+                                    <h3 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-none mb-1 sm:mb-1.5">{initialData ? 'Edit Parent' : 'Add Parent'}</h3>
                                     <div className="flex items-center gap-2">
                                         <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${initialData ? 'bg-amber-500' : 'bg-blue-600'}`}></span>
-                                        <p className="text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]">{initialData ? 'Modify Registry' : 'New Guardian Registry'}</p>
+                                        <p className="text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]">{initialData ? 'Update Details' : 'Fill in parent details'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -166,8 +166,8 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                         <FontAwesomeIcon icon={faSignature} className="text-lg" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Identity Core</h4>
-                                        <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Registry Information</p>
+                                        <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Parent Info</h4>
+                                        <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Basic Info</p>
                                     </div>
                                 </div>
 
@@ -328,7 +328,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                         ) : (
                             <>
                                 <FontAwesomeIcon icon={faCheck} className="text-[10px] sm:text-xs" />
-                                <span>{initialData ? 'Save Changes' : 'Commit to Registry'}</span>
+                                <span>{initialData ? 'Save Changes' : 'Save Parent'}</span>
                             </>
                         )}
                     </button>

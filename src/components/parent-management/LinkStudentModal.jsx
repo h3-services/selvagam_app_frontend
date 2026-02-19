@@ -102,8 +102,8 @@ const LinkStudentModal = ({ show, onClose, parent, onRefresh }) => {
                             <FontAwesomeIcon icon={faLink} className="text-xl" />
                         </div>
                         <div>
-                            <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5 font-['Outfit']">Connect Family Link</h3>
-                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Registry Synchronization for {parent?.name}</p>
+                            <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5 font-['Outfit']">Link Student</h3>
+                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Link students to {parent?.name}</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all active:scale-90">
@@ -147,7 +147,7 @@ const LinkStudentModal = ({ show, onClose, parent, onRefresh }) => {
                     {loading ? (
                         <div className="h-64 flex flex-col items-center justify-center text-slate-400">
                             <FontAwesomeIcon icon={faCircleNotch} spin className="text-3xl mb-4" />
-                            <p className="text-[10px] font-black uppercase tracking-widest">Accessing Student Registry...</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest">Loading students...</p>
                         </div>
                     ) : filteredStudents.length === 0 ? (
                         <div className="h-64 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-100 rounded-[2rem]">

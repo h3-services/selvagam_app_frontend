@@ -61,7 +61,7 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
             // But we'll leave it empty for user to enter as it's critical
         } catch (error) {
             console.error("Failed to load classes:", error);
-            setError("Could not establish connection to Academic Registry.");
+            setError("Could not load classes. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -201,7 +201,7 @@ const PromoteStudentsModal = ({ show, onClose, onRefresh }) => {
                             {promoting ? (
                                 <>
                                     <FontAwesomeIcon icon={faCircleNotch} spin />
-                                    <span>Synchronizing Personnel...</span>
+                                    <span>Processing...</span>
                                 </>
                             ) : (
                                 <>

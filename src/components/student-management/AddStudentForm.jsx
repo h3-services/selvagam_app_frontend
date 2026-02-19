@@ -354,13 +354,13 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
         }
 
         if (formData.s_parent_id && formData.parent_id === formData.s_parent_id) {
-            alert("Security Conflict: The same person cannot be assigned as both Primary and Secondary guardian for this student.");
+            alert("Primary and Secondary parent cannot be the same person.");
             return;
         }
 
         if (formData.is_transport_user) {
             if (!formData.pickup_route_id || !formData.pickup_stop_id || !formData.drop_route_id || !formData.drop_stop_id) {
-                alert("For Transport Users, please select both Pickup and Drop routes/stops.");
+                alert("Please select pickup and drop route & stop.");
                 return;
             }
         }
@@ -491,12 +491,12 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                     </div>
                                     <div>
                                         <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">
-                                            {initialData ? 'Update Profile' : 'Register Enrollment'}
+                                            {initialData ? 'Edit Student' : 'Add Student'}
                                         </h3>
                                         <div className="flex items-center gap-2">
                                             <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
                                             <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">
-                                                {initialData ? 'Modify System Records' : 'New Student Onboarding'}
+                                                {initialData ? 'Update Details' : 'Fill in student details'}
                                             </p>
                                         </div>
                                     </div>
@@ -505,10 +505,10 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                     <button 
                                         onClick={handleAutoFill}
                                         className="h-12 px-6 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center text-blue-600 font-black text-[10px] uppercase tracking-widest gap-2.5 transition-all active:scale-95 shadow-sm"
-                                        title="Auto Pilot Data"
+                                        title="Auto Fill"
                                     >
                                         <FontAwesomeIcon icon={faMagic} className="opacity-70" /> 
-                                        <span>Auto Pilot</span>
+                                        <span>Auto Fill</span>
                                     </button>
                                     <button 
                                         onClick={handleClose} 
@@ -528,18 +528,18 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                             <FontAwesomeIcon icon={faChild} className="text-2xl" />
                                         </div>
                                         <div>
-                                            <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Student Information</h4>
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Personal Identity Data</p>
+                                            <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Student Info</h4>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Basic Details</p>
                                         </div>
                                     </div>
                                     
                                     <div className="space-y-6">
                                         <InputField 
-                                            label="Full Name" 
+                                            label="Name" 
                                             icon={faUser} 
                                             value={formData.name} 
                                             onChange={(e) => handleChange('name', e.target.value)} 
-                                            placeholder="Enter student's full name" 
+                                            placeholder="Enter student name" 
                                         />
 
                                         <div className="grid grid-cols-2 gap-5">
@@ -551,7 +551,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                 onChange={(e) => handleChange('dob', e.target.value)} 
                                             />
                                             <SelectField 
-                                                label="Gender Identity" 
+                                                label="Gender" 
                                                 icon={faUser} 
                                                 value={formData.gender} 
                                                 onChange={(e) => handleChange('gender', e.target.value)} 
@@ -565,7 +565,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                         </div>
                                         <div className="grid grid-cols-1">
                                             <YearRangePicker 
-                                                label="Academic Tenure"
+                                                label="Academic Year"
                                                 start={formData.yearStart}
                                                 end={formData.yearEnd}
                                                 onStartChange={(val) => handleChange('yearStart', val)}
@@ -574,10 +574,10 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                         </div>
 
                                         <ClassSelector 
-                                            label="Class & Section Assignment" 
+                                            label="Class & Section" 
                                             value={formData.class_id} 
                                             onChange={(val) => handleChange('class_id', val)} 
-                                            placeholder="Search & Select Class"
+                                            placeholder="Select Class"
                                             options={classes.filter(c => c.status === 'ACTIVE').map(c => ({
                                                 value: c.class_id, 
                                                 className: c.class_name,
@@ -591,7 +591,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                             type="number"
                                             value={formData.emergency_contact}
                                             onChange={(e) => handleChange('emergency_contact', e.target.value)}
-                                            placeholder="Guardian contact for emergency" 
+                                            placeholder="Phone number" 
                                         />
                                     </div>
                                 </div>
@@ -603,8 +603,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                             <FontAwesomeIcon icon={faUserTie} className="text-2xl" />
                                         </div>
                                         <div>
-                                            <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Primary Linkage</h4>
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Guardian Association</p>
+                                            <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Primary Parent</h4>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Select or add parent</p>
                                         </div>
                                     </div>
 
@@ -643,7 +643,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                             onClick={() => { handleChange('parent_id', ''); }}
                                                             className="text-[10px] font-black text-rose-400/60 hover:text-rose-400 uppercase tracking-widest transition-all hover:tracking-[0.2em] py-2"
                                                         >
-                                                            Disconnect Profile
+                                                            Remove
                                                         </button>
                                                     </div>
                                                 </div>
@@ -657,8 +657,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                     <div className="w-16 h-16 rounded-[22px] bg-white border border-slate-100 text-slate-400 flex items-center justify-center mb-5 shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-12 transition-all duration-500">
                                                         <FontAwesomeIcon icon={faSearch} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Find Existing</h5>
-                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Database Search</p>
+                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Search Parent</h5>
+                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">From list</p>
                                                 </button>
 
                                                 <button 
@@ -668,8 +668,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                     <div className="w-16 h-16 rounded-[22px] bg-white border border-slate-100 text-slate-400 flex items-center justify-center mb-5 shadow-sm group-hover:bg-indigo-600 group-hover:text-white group-hover:-rotate-12 transition-all duration-500">
                                                         <FontAwesomeIcon icon={faUserPlus} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Register New</h5>
-                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Creator Wizard</p>
+                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Add New</h5>
+                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Create parent</p>
                                                 </button>
                                             </div>
                                         )}
@@ -684,7 +684,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-gray-900 text-lg">Secondary Parent (Optional)</h4>
-                                            <p className="text-xs text-gray-500 font-medium">Additional guardian details</p>
+                                            <p className="text-xs text-gray-500 font-medium">Add another parent</p>
                                         </div>
                                     </div>
 
@@ -723,7 +723,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                              onClick={() => { handleChange('s_parent_id', ''); }}
                                                              className="text-[10px] font-black text-rose-400/60 hover:text-rose-400 uppercase tracking-widest transition-all hover:tracking-[0.2em] py-2"
                                                          >
-                                                             Disconnect Profile
+                                                             Remove
                                                          </button>
                                                     </div>
                                                 </div>
@@ -737,8 +737,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                     <div className="w-16 h-16 rounded-[22px] bg-white border border-slate-100 text-slate-400 flex items-center justify-center mb-5 shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:rotate-12 transition-all duration-500">
                                                         <FontAwesomeIcon icon={faSearch} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Find Existing</h5>
-                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Database Search</p>
+                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Search Parent</h5>
+                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">From list</p>
                                                 </button>
 
                                                 <button 
@@ -748,8 +748,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                     <div className="w-16 h-16 rounded-[22px] bg-white border border-slate-100 text-slate-400 flex items-center justify-center mb-5 shadow-sm group-hover:bg-indigo-600 group-hover:text-white group-hover:-rotate-12 transition-all duration-500">
                                                         <FontAwesomeIcon icon={faUserPlus} className="text-xl" />
                                                     </div>
-                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Register New</h5>
-                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Creator Wizard</p>
+                                                    <h5 className="font-black text-slate-900 text-[13px] uppercase tracking-wider">Add New</h5>
+                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mt-2 italic">Create parent</p>
                                                 </button>
                                             </div>
                                         )}
@@ -764,8 +764,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                 <FontAwesomeIcon icon={faBus} className="text-2xl" />
                                             </div>
                                             <div>
-                                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Transport Asset</h4>
-                                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Logistics Configuration</p>
+                                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Bus Details</h4>
+                                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Pickup & Drop Info</p>
                                             </div>
                                         </div>
                                         
@@ -780,7 +780,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                 onClick={() => handleChange('is_transport_user', false)}
                                                 className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${!formData.is_transport_user ? 'bg-white text-slate-600 shadow-md transform scale-[1.05]' : 'text-slate-400 hover:text-slate-600'}`}
                                             >
-                                                Bypassed
+                                                No Bus
                                             </button>
                                         </div>
                                     </div>
@@ -790,7 +790,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                             {/* Pickup Sub-Section */}
                                             <div className="space-y-3">
                                                 <div className="flex items-center gap-2 text-teal-700 font-bold text-xs uppercase tracking-wider">
-                                                    <FontAwesomeIcon icon={faArrowRight} /> Pickup Details
+                                                    <FontAwesomeIcon icon={faArrowRight} /> Pickup
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <SelectField 
@@ -802,7 +802,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                         options={routes.map(r => ({value: r.route_id, label: r.name}))} 
                                                     />
                                                     <SelectField 
-                                                        label="Stop Content" 
+                                                        label="Stop" 
                                                         icon={faMapMarkerAlt} 
                                                         value={formData.pickup_stop_id} 
                                                         onChange={(e) => handleChange('pickup_stop_id', e.target.value)} 
@@ -818,7 +818,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                             {/* Drop Sub-Section */}
                                             <div className="space-y-3">
                                                 <div className="flex items-center gap-2 text-orange-700 font-bold text-xs uppercase tracking-wider">
-                                                    <FontAwesomeIcon icon={faHome} /> Drop Details
+                                                    <FontAwesomeIcon icon={faHome} /> Drop
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <SelectField 
@@ -830,7 +830,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                         options={routes.map(r => ({value: r.route_id, label: r.name}))} 
                                                     />
                                                     <SelectField 
-                                                        label="Stop Point" 
+                                                        label="Stop" 
                                                         icon={faMapMarkerAlt} 
                                                         value={formData.drop_stop_id} 
                                                         onChange={(e) => handleChange('drop_stop_id', e.target.value)} 
@@ -843,7 +843,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                         </div>
                                     ) : (
                                         <div className="text-center py-8">
-                                            <p className="text-sm text-gray-400 font-medium">Transport services are disabled for this student.</p>
+                                            <p className="text-sm text-gray-400 font-medium">This student does not use the school bus.</p>
                                         </div>
                                     )}
                                 </div>
@@ -868,20 +868,20 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                         <div className="space-y-8 max-w-lg mx-auto pt-2">
 
                                             <div className="grid grid-cols-1 gap-6">
-                                                <InputField label="Parent Name" icon={faUserTie} value={newParent.name} onChange={(e) => handleParentChange('name', e.target.value)} placeholder="Full Legal Name" />
+                                                <InputField label="Parent Name" icon={faUserTie} value={newParent.name} onChange={(e) => handleParentChange('name', e.target.value)} placeholder="Enter parent name" />
                                                 <div className="grid grid-cols-2 gap-5">
                                                     <SelectField 
                                                         label="Role" icon={faUser} value={newParent.parent_role} onChange={(e) => handleParentChange('parent_role', e.target.value)} placeholder="Role"
                                                         options={[{value: 'GUARDIAN', label: 'Guardian'}, {value: 'FATHER', label: 'Father'}, {value: 'MOTHER', label: 'Mother'}]}
                                                     />
-                                                    <InputField label="Phone Number" icon={faPhone} type="number" value={newParent.phone} onChange={(e) => handleParentChange('phone', e.target.value)} placeholder="10-digit Mobile" />
+                                                    <InputField label="Phone" icon={faPhone} type="number" value={newParent.phone} onChange={(e) => handleParentChange('phone', e.target.value)} placeholder="Phone number" />
                                                 </div>
-                                                <InputField label="Email Address" icon={faEnvelope} type="email" value={newParent.email} onChange={(e) => handleParentChange('email', e.target.value)} placeholder="email@example.com" />
+                                                <InputField label="Email" icon={faEnvelope} type="email" value={newParent.email} onChange={(e) => handleParentChange('email', e.target.value)} placeholder="email@example.com" />
                                                 <InputField label="Password" icon={faLock} type="password" value={newParent.password} onChange={(e) => handleParentChange('password', e.target.value)} placeholder="Set Password" />
                                             </div>
 
                                             <div className="space-y-4">
-                                                <h5 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">Residential Address</h5>
+                                                <h5 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">Address</h5>
                                                 <div className="grid grid-cols-3 gap-4">
                                                     <div className="col-span-1"><InputField label="Door No" icon={faHome} value={newParent.door_no} onChange={(e) => handleParentChange('door_no', e.target.value)} /></div>
                                                     <div className="col-span-2"><InputField label="Street" icon={faMapMarkerAlt} value={newParent.street} onChange={(e) => handleParentChange('street', e.target.value)} /></div>
@@ -897,7 +897,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                 onClick={handleCreateParent} disabled={loadingParent}
                                                 className="w-full py-4 rounded-xl font-bold bg-gray-900 text-white shadow-lg shadow-gray-900/20 hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-3 mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
                                             >
-                                                {loadingParent ? 'Processing...' : 'Save & Link Parent'}
+                                                {loadingParent ? 'Saving...' : 'Save Parent'}
                                                 {!loadingParent && <FontAwesomeIcon icon={faArrowRight} />}
                                             </button>
                                         </div>
@@ -922,7 +922,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                     <input 
                                                         type="text" 
                                                         autoFocus
-                                                        placeholder="Search by parent name, phone, or email..." 
+                                                        placeholder="Search by name or phone..." 
                                                         value={parentSearchQuery}
                                                         onChange={(e) => setParentSearchQuery(e.target.value)}
                                                         className="w-full px-4 py-3 bg-transparent text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none"
@@ -991,13 +991,13 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
                                                                 <FontAwesomeIcon icon={faSearch} className="text-2xl" />
                                                             </div>
-                                                            <h5 className="text-gray-900 font-bold text-lg mb-1">No parents found</h5>
-                                                            <p className="text-gray-500 text-sm">We couldn't find any parents matching "{parentSearchQuery}".</p>
+                                                            <h5 className="text-gray-900 font-bold text-lg mb-1">No results</h5>
+                                                            <p className="text-gray-500 text-sm">No parent found for "{parentSearchQuery}"</p>
                                                             <button 
                                                                 onClick={() => { setIsSearchingParent(false); setIsAddingNewParent(true); }}
                                                                 className="mt-6 text-blue-600 font-bold hover:underline"
                                                             >
-                                                                Create a new parent instead?
+                                                                Add new parent?
                                                             </button>
                                                         </div>
                                                     )}
@@ -1021,7 +1021,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                         {/* Shimmer Effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                         
-                        <span className="relative z-10">Secure Registration</span>
+                        <span className="relative z-10">{initialData ? 'Save Changes' : 'Save Student'}</span>
                         <div className="w-8 h-8 bg-white/15 rounded-full flex items-center justify-center group-hover:rotate-[360deg] transition-transform duration-700 relative z-10 border border-white/20">
                             <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
                         </div>

@@ -149,7 +149,7 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                             }
                             return { zIndex: 'auto' };
                         }}
-                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No trips recorded in fleet logs</span>'
+                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No trips found</span>'
                     />
                 </div>
             </div>

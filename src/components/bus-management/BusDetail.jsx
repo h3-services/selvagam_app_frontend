@@ -32,7 +32,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
 
     return (
         <div className="flex-1 h-full flex flex-col bg-[#F1F5F9] overflow-hidden rounded-3xl border border-slate-200 shadow-xl">
-            {/* Enterprise Header Bar */}
+            {/* Header Bar */}
             <div className="bg-white border-b border-slate-200 px-8 h-20 flex items-center justify-between flex-shrink-0 z-20">
                 <div className="flex items-center gap-6">
                     <button 
@@ -57,7 +57,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
                                 </span>
                             </div>
                             <p className="text-xs font-medium text-slate-500 mt-1.5 focus-within:">
-                                <span className="text-slate-400 font-bold tracking-widest uppercase text-[10px]">Registry No:</span> <span className="text-slate-900 font-bold">{selectedBus.registration_number || selectedBus.busNumber}</span> • <span className="text-slate-400 font-bold tracking-widest uppercase text-[10px]">Type:</span> <span className="text-indigo-600 font-black">{selectedBus.vehicle_type || 'Standard'}</span>
+                                <span className="text-slate-400 font-bold tracking-widest uppercase text-[10px]">Reg. No:</span> <span className="text-slate-900 font-bold">{selectedBus.registration_number || selectedBus.busNumber}</span> • <span className="text-slate-400 font-bold tracking-widest uppercase text-[10px]">Type:</span> <span className="text-indigo-600 font-black">{selectedBus.vehicle_type || 'Standard'}</span>
                             </p>
                         </div>
                     </div>
@@ -69,7 +69,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
                         className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
                     >
                         <FontAwesomeIcon icon={faEdit} className="text-xs" />
-                        Edit Profile
+                        Edit
                     </button>
                 </div>
             </div>
@@ -87,7 +87,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <DataRow label="Bus Name" value={selectedBus.bus_name} />
-                                    <DataRow label="Registry No" value={selectedBus.registration_number} />
+                                    <DataRow label="Reg. No" value={selectedBus.registration_number} />
                                     <DataRow label="Make / Brand" value={selectedBus.bus_brand} />
                                     <DataRow label="Model" value={selectedBus.bus_model} />
                                     <DataRow label="Seats" value={`${selectedBus.seating_capacity || selectedBus.capacity} Seats`} />
@@ -118,7 +118,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
                                                 <p className="text-xs font-bold text-slate-900">
                                                     {drivers.find(d => d.driver_id === selectedBus.driver_id)?.phone || 'N/A'}
                                                 </p>
-                                                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Contact Line</p>
+                                                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Phone</p>
                                             </div>
                                         </div>
                                     )}
@@ -190,12 +190,12 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Active Route</p>
-                                        <p className="text-sm font-bold text-slate-900">{selectedBus.route || 'Standby / Unassigned'}</p>
+                                        <p className="text-sm font-bold text-slate-900">{selectedBus.route || 'Not Assigned'}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fleet Status</p>
-                                    <p className="text-xs font-bold text-slate-900">Assigned to School Network</p>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</p>
+                                    <p className="text-xs font-bold text-slate-900">In Use</p>
                                 </div>
                             </div>
                         </div>

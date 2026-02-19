@@ -234,7 +234,7 @@ const StudentDirectory = () => {
             width: 90,
             sortable: false,
             filter: false,
-            pinned: 'right',
+
             cellStyle: { overflow: 'visible' },
             cellRenderer: (params) => {
                 const isOpen = activeMenuId === params.data.id;
@@ -348,7 +348,7 @@ const StudentDirectory = () => {
                 </div>
             </div>
 
-            <div className="flex-1 px-0 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col mobile-full-width-container">
+            <div className="flex-1 px-2 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col mobile-full-width-container">
                 <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden mobile-full-width-table">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">

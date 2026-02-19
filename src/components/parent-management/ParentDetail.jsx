@@ -78,7 +78,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete, onEdit, onLi
                         className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-slate-900 text-white text-[11px] sm:text-sm font-bold hover:bg-black transition-all shadow-xl shadow-slate-200 flex items-center justify-center gap-2 active:scale-95"
                     >
                         <FontAwesomeIcon icon={faEdit} className="text-[10px] sm:text-xs" />
-                        Modify Profile
+                        Edit
                     </button>
                 </div>
             </div>
@@ -90,7 +90,7 @@ const ParentDetail = ({ selectedParent, onBack, onUpdate, onDelete, onEdit, onLi
                     {/* Left Column - Core Profile */}
                     <div className="col-span-12 md:col-span-12 lg:col-span-4 space-y-6 sm:space-y-8">
                         <div className="bg-white rounded-[2rem] border border-slate-200 p-6 sm:p-8 shadow-sm">
-                            <SectionHeader icon={faIdCard} title="Parent Profile" subtitle="Identity Registry" />
+                            <SectionHeader icon={faIdCard} title="Parent Profile" subtitle="Basic Details" />
                             <div className="space-y-6 pt-2">
                                 <div className="grid grid-cols-1 gap-4 sm:gap-6">
                                     <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">

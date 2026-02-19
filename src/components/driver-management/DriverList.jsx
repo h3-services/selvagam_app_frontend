@@ -141,7 +141,7 @@ const DriverList = ({
                                 minWidth: 90,
                                 sortable: false,
                                 filter: false,
-                                pinned: 'right',
+
                                 cellStyle: { overflow: 'visible' },
                                 cellRenderer: (params) => {
                                     const isOpen = activeMenuId === params.data.id;
@@ -197,7 +197,7 @@ const DriverList = ({
                                                                     className="w-full text-left px-3 py-2 text-xs font-bold text-rose-500 hover:bg-rose-50 rounded-lg flex items-center gap-2 transition-colors"
                                                                 >
                                                                     <FontAwesomeIcon icon={faTrash} className="w-4" />
-                                                                    Archive Personnel
+                                                                    Deactivate Driver
                                                                 </button>
                                                             </>
                                                         )}
@@ -249,7 +249,7 @@ const DriverList = ({
                         pagination={true}
                         paginationPageSize={10}
                         paginationPageSizeSelector={[10, 20, 50]}
-                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No personnel detected in registry</span>'
+                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No drivers found</span>'
                         theme="legacy"
                         onGridReady={(params) => {
                             if (window.innerWidth >= 1024) {

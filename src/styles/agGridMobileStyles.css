@@ -53,16 +53,14 @@
 /* Full Width Utility for Mobile */
 @media (max-width: 1023px) {
     .mobile-full-width-container {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
     }
     
     .mobile-full-width-table {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        border-radius: 0 !important;
-        border-left: none !important;
-        border-right: none !important;
+        margin-left: 4px !important;
+        margin-right: 4px !important;
+        border-radius: 12px !important;
     }
 
     .custom-ag-grid {
@@ -170,7 +168,7 @@
     
     /* Remove rounded corners on mobile */
     .custom-ag-grid .ag-root-wrapper {
-        border-radius: 0 !important;
+        border-radius: 12px !important;
     }
     
     /* Pinned columns styling */

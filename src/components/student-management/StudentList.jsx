@@ -235,7 +235,7 @@ const StudentList = ({
                                 }
                                 return { zIndex: 'auto' };
                             }}
-                            overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No student profiles found in registry</span>'
+                            overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No students found</span>'
                         />
                     </div>
                 </div>

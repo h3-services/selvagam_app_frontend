@@ -120,7 +120,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate, onDelete, onEdit, onSt
                                 <div className="fixed inset-0 z-30" onClick={() => setShowStatusMenu(false)} />
                                 <div className="absolute top-full right-0 mt-3 w-56 bg-white border border-slate-100 rounded-3xl shadow-2xl p-2 z-40 animate-in fade-in slide-in-from-top-2 duration-200">
                                     <div className="px-4 py-3 mb-2 border-b border-slate-50">
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Update Registry Status</p>
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Change Status</p>
                                     </div>
                                     {statuses.map((status) => (
                                         <button
@@ -158,7 +158,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate, onDelete, onEdit, onSt
                         className="px-8 py-3.5 rounded-2xl bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-200 flex items-center gap-3 active:scale-95 group"
                     >
                         <FontAwesomeIcon icon={faEdit} className="group-hover:rotate-12 transition-transform" />
-                        Modify Profile
+                        Edit
                     </button>
                 </div>
             </div>
@@ -171,7 +171,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate, onDelete, onEdit, onSt
                     <div className="col-span-12 lg:col-span-5 space-y-10">
                         <div className="bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-bl-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-700" />
-                            <SectionHeader icon={faIdCard} title="Personnel Dossier" color="blue" />
+                            <SectionHeader icon={faIdCard} title="Driver Info" color="blue" />
                             
                             <div className="space-y-6">
                                 <InsightCard label="Primary Contact" value={selectedDriver.phone || selectedDriver.mobile} icon={faPhone} color="blue" />

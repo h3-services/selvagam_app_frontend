@@ -149,7 +149,7 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 </h3>
                                 <div className="flex items-center gap-2">
                                     <span className="bg-indigo-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
-                                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Academic Cell Registry</p>
+                                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Class Details</p>
                                 </div>
                             </div>
                         </div>

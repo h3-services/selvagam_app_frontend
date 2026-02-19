@@ -136,7 +136,7 @@ const ParentList = ({
             field: 'parent_id',
             width: 80,
             minWidth: 80,
-            pinned: 'right',
+
             sortable: false,
             filter: false,
             suppressMovable: true,
@@ -247,7 +247,7 @@ const ParentList = ({
                             return { zIndex: 1 };
                         }}
                         theme="legacy"
-                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No parent records found in directory</span>'
+                        overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No parents found</span>'
                         onGridReady={(params) => {
                             if (window.innerWidth >= 1024) {
                                 params.api.sizeColumnsToFit();

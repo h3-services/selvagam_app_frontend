@@ -103,11 +103,11 @@ const ParentViewDrawer = ({ show, onClose, parentData }) => {
                         />
                     </div>
 
-                    {/* Verified Location Block */}
+                    {/* Address Block */}
                     <div className="group">
                         <div className="flex items-center gap-3 mb-6 px-2">
                             <FontAwesomeIcon icon={faShieldHalved} className="text-indigo-400 text-sm" />
-                            <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em]">Verified Residence</h4>
+                            <h4 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em]">Address</h4>
                         </div>
                         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-6 opacity-5">

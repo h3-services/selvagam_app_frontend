@@ -174,7 +174,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
 
     return (
         <div className="flex-1 h-full flex flex-col bg-[#F8FAFC] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
-            {/* Enterprise Header Bar */}
+            {/* Header Bar */}
             <div className="bg-white border-b border-slate-200 px-8 h-20 flex items-center justify-between flex-shrink-0 z-20">
                 <div className="flex items-center gap-6">
                     <button 
@@ -195,7 +195,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                 </span>
                             </div>
                             <p className="text-[11px] font-bold text-slate-400 mt-1.5 uppercase tracking-widest">
-                                Student ID: <span className="text-slate-900 font-black">#STU-{selectedStudent.id?.toString().padStart(4, '0')}</span>
+                                ID: <span className="text-slate-900 font-black">#{selectedStudent.id?.toString().padStart(4, '0')}</span>
                             </p>
                         </div>
                     </div>
@@ -207,7 +207,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                         className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-black transition-all shadow-xl shadow-slate-200 flex items-center gap-2 active:scale-95"
                     >
                         <FontAwesomeIcon icon={faEdit} className="text-xs" />
-                        Modify Profile
+                        Edit
                     </button>
                 </div>
             </div>
@@ -219,16 +219,16 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                     {/* Left Column - Core Identity */}
                     <div className="col-span-12 lg:col-span-4 space-y-8">
                         <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
-                            <SectionHeader icon={faIdCard} title="Identity Core" subtitle="Verified Meta Data" />
+                            <SectionHeader icon={faIdCard} title="Student Info" subtitle="Basic Details" />
                             <div className="space-y-6 pt-2">
                                 <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                                    <DataRow label="Academic Year" value={selectedStudent.studyYear} />
-                                    <DataRow label="Academy" value={selectedStudent.className} />
+                                    <DataRow label="Year" value={selectedStudent.studyYear} />
+                                    <DataRow label="Class" value={selectedStudent.className} />
                                     <DataRow label="Gender" value={selectedStudent.originalData?.gender || 'NOT PROVIDED'} />
                                     <DataRow label="D.O.B" value={selectedStudent.originalData?.dob ? new Date(selectedStudent.originalData.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not Provided'} />
                                     <div className="col-span-2 pt-2">
                                         <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100/50">
-                                            <DataRow label="Primary Emergency Contact" value={selectedStudent.emergencyContact} />
+                                            <DataRow label="Emergency Contact" value={selectedStudent.emergencyContact} />
                                         </div>
                                     </div>
                                 </div>
@@ -241,9 +241,9 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                             <FontAwesomeIcon icon={faMapMarkerAlt} className="text-sm" />
                                         </div>
                                         <div>
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Residential Address</p>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Address</p>
                                             <p className="text-xs font-bold text-slate-700 leading-relaxed italic">
-                                                "{selectedStudent.location || 'No verified address on record.'}"
+                                                "{selectedStudent.location || 'No address added.'}"
                                             </p>
                                         </div>
                                     </div>
@@ -254,10 +254,10 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
 
                     {/* Right Column - Logistics & Parents */}
                     <div className="col-span-12 lg:col-span-8 space-y-8">
-                        {/* Fleet Intelligence */}
+                        {/* Bus Details */}
                         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                                <SectionHeader icon={faBus} title="Fleet Intelligence" subtitle="Real-time Transit Metrics" />
+                                <SectionHeader icon={faBus} title="Bus Details" subtitle="Pickup & Drop Info" />
                                 <button 
                                     onClick={() => onTransportStatusUpdate(selectedStudent.id, selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')}
                                     className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all border ${
@@ -266,7 +266,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                         : 'bg-slate-100 text-slate-400 border-slate-200'
                                     }`}
                                 >
-                                    {selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'Transit Active' : 'Transit Inactive'}
+                                    {selectedStudent.originalData?.transport_status === 'ACTIVE' ? 'Bus Active' : 'Bus Inactive'}
                                 </button>
                             </div>
                             
@@ -278,11 +278,11 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                 <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-indigo-600">
                                                     <FontAwesomeIcon icon={faClock} className="text-xs" />
                                                 </div>
-                                                <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Morning Connection</h4>
+                                                <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Pickup</h4>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
-                                                <DataRow label="Protocol Route" value={transportData.pickupRoute?.name || transportData.pickupRoute?.route_name} />
-                                                <DataRow label="Target Station" value={transportData.pickupStop?.stop_name} />
+                                                <DataRow label="Route" value={transportData.pickupRoute?.name || transportData.pickupRoute?.route_name} />
+                                                <DataRow label="Stop" value={transportData.pickupStop?.stop_name} />
                                             </div>
                                         </div>
                                         <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 space-y-6">
@@ -290,11 +290,11 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                 <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center">
                                                     <FontAwesomeIcon icon={faLocationDot} className="text-xs" />
                                                 </div>
-                                                <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Evening Transit</h4>
+                                                <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Drop</h4>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
-                                                <DataRow label="Protocol Route" value={transportData.dropRoute?.name || transportData.dropRoute?.route_name} />
-                                                <DataRow label="Target Station" value={transportData.dropStop?.stop_name} />
+                                                <DataRow label="Route" value={transportData.dropRoute?.name || transportData.dropRoute?.route_name} />
+                                                <DataRow label="Stop" value={transportData.dropStop?.stop_name} />
                                             </div>
                                         </div>
                                     </div>
@@ -303,18 +303,18 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                         <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-4 text-slate-200 shadow-sm">
                                             <FontAwesomeIcon icon={faWalking} size="xl" />
                                         </div>
-                                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Manual Transport</h4>
-                                        <p className="text-[11px] font-bold text-slate-400 mt-2 max-w-[280px]">This student is configured for manual parent pickup. Direct parent-to-school handover active.</p>
+                                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">No Bus Service</h4>
+                                        <p className="text-[11px] font-bold text-slate-400 mt-2 max-w-[280px]">This student does not use the school bus. Parent picks up and drops off directly.</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Parent Network Section */}
+                        {/* Parents Section */}
                         <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
                             <div className="flex items-center justify-between mb-8">
                                 <div className="flex items-center gap-6">
-                                    <SectionHeader icon={faUserTie} title="Verified Parent Network" subtitle="Parent Network" />
+                                    <SectionHeader icon={faUserTie} title="Parents" subtitle="Family Contacts" />
                                 </div>
                                 {parent1 && parent2 && (
                                     <button 
@@ -323,7 +323,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                         title="Swap Primary & Secondary Roles"
                                     >
                                         <FontAwesomeIcon icon={faRightLeft} className="text-xs" />
-                                        Role Swap
+                                        Swap
                                     </button>
                                 )}
                             </div>
@@ -376,7 +376,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                                         return roleUpper === 'GUARDIAN' ? 'PARENT' : roleUpper;
                                                                     })()}
                                                                 </span>
-                                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.label} Connection</p>
+                                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.label} Parent</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -404,7 +404,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                                 <FontAwesomeIcon icon={faMapMarkerAlt} className="text-[10px]" />
                                                             </div>
                                                             <p className="text-xs font-bold text-slate-700 truncate">
-                                                                {p.data.city ? `${p.data.city}, ${p.data.district}` : 'Address not verified'}
+                                                                {p.data.city ? `${p.data.city}, ${p.data.district}` : 'No address'}
                                                             </p>
                                                         </div>
                                                     </div>
@@ -418,7 +418,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                         }}
                                                         className="w-full mt-4 py-3 rounded-xl bg-indigo-50/50 text-indigo-600 border border-dashed border-indigo-200 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white hover:border-solid hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
                                                     >
-                                                        Replace Connection
+                                                        Change Parent
                                                     </button>
                                                 </div>
                                             </div>
@@ -438,7 +438,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                 </div>
                                                 <div className="text-center">
                                                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Assign Secondary Parent</p>
-                                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-1">Add Family Link</p>
+                                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-1">Add Parent</p>
                                                 </div>
                                             </button>
                                         );
@@ -450,7 +450,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                             <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-red-200 shadow-sm">
                                                 <FontAwesomeIcon icon={faTimes} className="text-lg" />
                                             </div>
-                                            <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Primary Contact Missing</p>
+                                            <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">No Primary Parent</p>
                                         </div>
                                     );
                                 })}
@@ -477,7 +477,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
                                 <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Assign {selectingParentRole.charAt(0) + selectingParentRole.slice(1).toLowerCase()} Parent</h3>
-                                <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Connect authorized family registry</p>
+                                <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Select a parent from the list</p>
                             </div>
                             <button 
                                 onClick={() => setSelectingParentRole(null)}
@@ -491,7 +491,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                             <div className="relative group">
                                 <input 
                                     type="text" 
-                                    placeholder="Search registry by name or contact..."
+                                    placeholder="Search by name or phone..."
                                     value={parentSearchQuery}
                                     onChange={(e) => setParentSearchQuery(e.target.value)}
                                     className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-300 transition-all outline-none"
@@ -504,7 +504,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                             {loadingAllParents ? (
                                 <div className="py-12 flex flex-col items-center justify-center text-slate-300">
                                     <FontAwesomeIcon icon={faFingerprint} className="text-4xl mb-4 animate-pulse" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest">Scanning Registry...</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest">Loading parents...</p>
                                 </div>
                             ) : filteredParentsForSelection.length > 0 ? (
                                 filteredParentsForSelection.map((parent) => (
@@ -533,7 +533,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                             </div>
                                         </div>
                                         <button className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 text-[9px] font-black uppercase tracking-widest group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                                            Connect
+                                            Assign
                                         </button>
                                     </div>
                                 ))
