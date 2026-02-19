@@ -348,8 +348,8 @@ const StudentDirectory = () => {
                 </div>
             </div>
 
-            <div className="flex-1 px-0 lg:px-8 pt-0 pb-8 overflow-hidden flex flex-col mobile-full-width-container">
-                <div className="flex-1 bg-white rounded-none lg:rounded-3xl shadow-xl overflow-hidden p-0 lg:p-6 border border-gray-100 mt-4 mobile-full-width-table">
+            <div className="flex-1 px-0 lg:px-8 pt-2 pb-4 overflow-hidden flex flex-col mobile-full-width-container">
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-6 lg:pb-3 overflow-hidden mobile-full-width-table">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
@@ -358,13 +358,13 @@ const StudentDirectory = () => {
                             <p className="text-gray-500 font-medium">Accessing Archives...</p>
                         </div>
                     ) : (
-                        <div className="ag-theme-quartz w-full custom-ag-grid" style={{
-                            height: 'calc(100vh - 140px)',
-                            '--ag-header-background-color': '#f0f4ff',
-                            '--ag-header-foreground-color': '#3A7BFF',
+                        <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{
+                            height: 'calc(100vh - 165px)',
+                            '--ag-header-background-color': '#f8fafc',
+                            '--ag-header-foreground-color': '#3b82f6',
                             '--ag-font-family': 'inherit',
-                            '--ag-border-radius': '16px',
-                            '--ag-row-hover-color': '#f5f8ff',
+                            '--ag-border-radius': '24px',
+                            '--ag-row-hover-color': '#f1f5f9',
                         }}>
                             <AgGridReact
                                 rowData={filteredStudents}

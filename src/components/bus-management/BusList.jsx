@@ -31,13 +31,13 @@ const BusList = ({
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Unified Table View */}
             <div className="flex flex-col flex-1 bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl overflow-hidden p-0 lg:p-6 mobile-full-width-table">
-                <div className="ag-theme-quartz w-full custom-ag-grid" style={{
-                    height: 'calc(100vh - 140px)',
-                    '--ag-header-background-color': '#f0f4ff',
-                    '--ag-header-foreground-color': '#3A7BFF',
+                <div className="ag-theme-quartz w-full custom-ag-grid overflow-hidden" style={{
+                    height: 'calc(100vh - 165px)',
+                    '--ag-header-background-color': '#f8fafc',
+                    '--ag-header-foreground-color': '#3b82f6',
                     '--ag-font-family': 'inherit',
-                    '--ag-border-radius': '16px',
-                    '--ag-row-hover-color': '#f5f8ff',
+                    '--ag-border-radius': '24px',
+                    '--ag-row-hover-color': '#f1f5f9',
                 }}>
                     <AgGridReact
                         rowData={filteredBuses}

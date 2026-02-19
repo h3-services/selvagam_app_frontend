@@ -342,46 +342,48 @@ const BusManagementHome = () => {
 
             {/* Grid Content */}
             <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
-                {loading ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl border-0 lg:border border-gray-100/50">
-                        <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
-                            <FontAwesomeIcon icon={faSpinner} spin className="text-2xl text-blue-600" />
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:p-6 overflow-hidden">
+                    {loading ? (
+                        <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
+                            <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
+                                <FontAwesomeIcon icon={faSpinner} spin className="text-2xl text-blue-600" />
+                            </div>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Fleet Registry...</p>
                         </div>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Fleet Registry...</p>
-                    </div>
-                ) : error ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl border-0 lg:border border-red-50">
-                         <p className="text-red-500 font-bold mb-4">{error}</p>
-                         <button onClick={fetchData} className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-95">Retry Sync</button>
-                    </div>
-                ) : selectedBus ? (
-                    <BusDetail
-                        selectedBus={selectedBus}
-                        drivers={drivers}
-                        onBack={() => setSelectedBus(null)}
-                        onEdit={(bus) => {
-                            setEditingBus(bus);
-                            setShowModal(true);
-                        }}
-                        onUpdate={handleUpdate}
-                        getStatusColor={getStatusColor}
-                    />
-                ) : (
-                    <BusList
-                        filteredBuses={filteredBuses}
-                        drivers={drivers}
-                        routes={routes}
-                        setSelectedBus={setSelectedBus}
-                        handleStatusChange={handleStatusChange}
-                        handleDriverChange={handleDriverChange}
-                        handleRouteChange={handleRouteChange}
-                        handleDelete={handleDelete}
-                        activeMenuId={activeMenuId}
-                        setActiveMenuId={setActiveMenuId}
-                        getStatusColor={getStatusColor}
-                        onSelectionChanged={setSelectedRows}
-                    />
-                )}
+                    ) : error ? (
+                        <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
+                             <p className="text-red-500 font-bold mb-4">{error}</p>
+                             <button onClick={fetchData} className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-95">Retry Sync</button>
+                        </div>
+                    ) : selectedBus ? (
+                        <BusDetail
+                            selectedBus={selectedBus}
+                            drivers={drivers}
+                            onBack={() => setSelectedBus(null)}
+                            onEdit={(bus) => {
+                                setEditingBus(bus);
+                                setShowModal(true);
+                            }}
+                            onUpdate={handleUpdate}
+                            getStatusColor={getStatusColor}
+                        />
+                    ) : (
+                        <BusList
+                            filteredBuses={filteredBuses}
+                            drivers={drivers}
+                            routes={routes}
+                            setSelectedBus={setSelectedBus}
+                            handleStatusChange={handleStatusChange}
+                            handleDriverChange={handleDriverChange}
+                            handleRouteChange={handleRouteChange}
+                            handleDelete={handleDelete}
+                            activeMenuId={activeMenuId}
+                            setActiveMenuId={setActiveMenuId}
+                            getStatusColor={getStatusColor}
+                            onSelectionChanged={setSelectedRows}
+                        />
+                    )}
+                </div>
             </div>
 
             {/* Bulk Actions Floating Pill */}

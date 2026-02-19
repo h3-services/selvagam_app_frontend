@@ -462,34 +462,36 @@ const RouteManagementHome = () => {
 
             {/* Grid Content */}
             <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
-                {loading ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl border-0 lg:border border-gray-100/50">
-                        <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
-                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:p-6 overflow-hidden">
+                    {loading ? (
+                        <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
+                            <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
+                            </div>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Mapping Registry...</p>
                         </div>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Mapping Registry...</p>
-                    </div>
-                ) : selectedRoute ? (
-                    <RouteDetail
-                        selectedRoute={selectedRoute}
-                        onBack={() => setSelectedRoute(null)}
-                        onUpdate={handleUpdate}
-                        isSaving={isSaving}
-                    />
-                ) : (
-                    <RouteList
-                        filteredRoutes={filteredRoutes}
-                        setSelectedRoute={setSelectedRoute}
-                        handleDelete={handleDelete}
-                        handleRestore={handleRestore}
-                        activeMenuId={activeMenuId}
-                        setActiveMenuId={setActiveMenuId}
-                        openBusReassignModal={openBusReassignModal}
-                        COLORS={COLORS}
-                        activeTab={activeTab}
-                        onSelectionChanged={setSelectedRoutes}
-                    />
-                )}
+                    ) : selectedRoute ? (
+                        <RouteDetail
+                            selectedRoute={selectedRoute}
+                            onBack={() => setSelectedRoute(null)}
+                            onUpdate={fetchData}
+                            onDelete={handleDelete}
+                            onEdit={(route) => {
+                                setEditingRoute(route);
+                                setShowModal(true);
+                            }}
+                        />
+                    ) : (
+                        <RouteList
+                            filteredRoutes={filteredRoutes}
+                            setSelectedRoute={setSelectedRoute}
+                            handleDelete={handleDelete}
+                            activeMenuId={activeMenuId}
+                            setActiveMenuId={setActiveMenuId}
+                            onSelectionChanged={setSelectedRows}
+                        />
+                    )}
+                </div>
             </div>
 
             {!selectedRoute && !loading && !showBulkMenu && (

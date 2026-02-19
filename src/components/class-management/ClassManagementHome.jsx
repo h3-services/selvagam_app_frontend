@@ -89,10 +89,10 @@ const ClassManagementHome = () => {
     }, [classes, searchQuery]);
 
     return (
-        <div className="h-full flex flex-col bg-[#f1f5f9] relative animate-fade-in">
+        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-0 py-4 sticky top-0 z-30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 lg:px-0">
+            <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className='ml-20 lg:ml-0'>
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
                             <FontAwesomeIcon icon={faShapes} className="text-blue-600 text-xl" />
@@ -125,14 +125,14 @@ const ClassManagementHome = () => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 flex flex-col min-h-0 overflow-hidden w-full">
-                <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 px-0 lg:px-8 pt-4 pb-4 flex flex-col min-h-0 overflow-hidden w-full">
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
                     {loading ? (
-                        <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-none lg:rounded-3xl shadow-none lg:shadow-xl border-0 lg:border border-slate-50">
+                        <div className="flex-1 flex flex-col items-center justify-center">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
                                 <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
                             </div>
-                            <p className="text-slate-400 font-semibold uppercase tracking-wider text-xs">Loading Class Structure...</p>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Syncing Academic Structure...</p>
                         </div>
                     ) : (
                         <ClassList 

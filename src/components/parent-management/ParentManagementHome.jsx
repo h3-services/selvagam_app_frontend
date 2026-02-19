@@ -232,8 +232,8 @@ const ParentManagementHome = () => {
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header */}
             {!selectedParent && (
-                <div className="bg-white border-b border-gray-200 px-0 py-4 sm:py-6 sticky top-0 z-30">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 px-4 lg:px-0">
+                <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
                         <div className='flex items-center justify-between'>
                             <div className='ml-14 lg:ml-0'>
                                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
@@ -286,37 +286,36 @@ const ParentManagementHome = () => {
             )}
 
             {/* Content */}
-            {/* Content Area with Bento Background padding */}
-            <div className="flex-1 px-4 sm:px-10 py-6 overflow-hidden flex flex-col w-full bg-slate-50/30">
-                <div className="flex-1 bg-white rounded-[40px] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] border border-gray-100/50 overflow-hidden flex flex-col">
-                {loading ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl border-0 lg:border border-gray-100/50">
-                        <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
-                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
+            <div className="flex-1 px-0 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col w-full">
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
+                    {loading ? (
+                        <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
+                            <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
+                            </div>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Registry...</p>
                         </div>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Registry...</p>
-                    </div>
-                ) : selectedParent ? (
-                    <ParentDetail 
-                        selectedParent={selectedParent}
-                        onBack={() => setSelectedParent(null)}
-                        onDelete={handleDelete}
-                        onUpdate={() => fetchData()}
-                        onEdit={handleEditParent}
-                        onLink={() => setShowLinkModal(true)}
-                    />
-                ) : (
-                    <ParentList 
-                        filteredParents={filteredParents} 
-                        handleDelete={handleDelete}
-                        activeMenuId={activeMenuId}
-                        setActiveMenuId={setActiveMenuId}
-                        onSelectionChanged={setSelectedRows}
-                        onViewParent={setSelectedParent}
-                    />
-                )}
+                    ) : selectedParent ? (
+                        <ParentDetail 
+                            selectedParent={selectedParent}
+                            onBack={() => setSelectedParent(null)}
+                            onDelete={handleDelete}
+                            onUpdate={() => fetchData()}
+                            onEdit={handleEditParent}
+                            onLink={() => setShowLinkModal(true)}
+                        />
+                    ) : (
+                        <ParentList 
+                            filteredParents={filteredParents} 
+                            handleDelete={handleDelete}
+                            activeMenuId={activeMenuId}
+                            setActiveMenuId={setActiveMenuId}
+                            onSelectionChanged={setSelectedRows}
+                            onViewParent={setSelectedParent}
+                        />
+                    )}
+                </div>
             </div>
-        </div>
 
             {/* Bulk Actions Floating Pill */}
             {selectedRows.length > 0 && !selectedParent && (

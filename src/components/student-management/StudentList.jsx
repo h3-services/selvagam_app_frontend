@@ -41,9 +41,9 @@ const StudentList = ({
                     onClick={() => { setSelectedStudent(params.data); setShowForm(false); }}
                 >
                     <div className="flex flex-col overflow-hidden">
-                        <p className="font-semibold text-gray-900 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
-                        <div className="flex items-center gap-1 mt-1">
-                            <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">View Profile</span>
+                        <p className="font-bold text-gray-950 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
+                        <div className="flex items-center gap-1 mt-1.5">
+                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.15em] group-hover:text-blue-400 transition-colors">View Details</span>
                         </div>
                     </div>
                 </div>
@@ -198,16 +198,16 @@ const StudentList = ({
     ];
 
     return (
-        <div className="flex flex-col flex-1 min-h-0 overflow-hidden w-full">
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden w-full lg:bg-transparent">
             {/* Unified Table View for All Screen Sizes */}
-            <div className="flex flex-col flex-1 bg-white rounded-none shadow-none overflow-hidden p-0 w-full">
-                <div className="ag-theme-quartz w-full custom-ag-grid" style={{
-                    height: 'calc(100vh - 140px)',
-                    '--ag-header-background-color': '#f0f4ff',
-                    '--ag-header-foreground-color': '#3A7BFF',
+            <div className="flex flex-col flex-1 overflow-hidden p-0 w-full">
+                <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{
+                    height: 'calc(100vh - 165px)',
+                    '--ag-header-background-color': '#f8fafc',
+                    '--ag-header-foreground-color': '#3b82f6',
                     '--ag-font-family': 'inherit',
-                    '--ag-border-radius': '16px',
-                    '--ag-row-hover-color': '#f5f8ff',
+                    '--ag-border-radius': '24px',
+                    '--ag-row-hover-color': '#f1f5f9',
                 }}>
                         <AgGridReact
                             rowData={filteredStudents}

@@ -59,3 +59,11 @@ body,
 .ag-checkbox-input-wrapper {
   transform: scale(1.4) !important;
 }
+
+/* Right align pagination for desktop */
+@media (min-width: 1024px) {
+  .ag-paging-panel {
+    justify-content: flex-end !important;
+    padding-right: 2rem !important;
+  }
+}

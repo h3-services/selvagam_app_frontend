@@ -117,10 +117,18 @@ const TripManagementHome = () => {
 
             {/* Grid Content */}
             <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
-                <TripList
-                    filteredTrips={filteredTrips}
-                    handleStatusChange={handleStatusChange}
-                />
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:p-6 overflow-hidden">
+                    {loading ? (
+                         <div className="flex-1 flex flex-col items-center justify-center">
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Logistics Registry...</p>
+                        </div>
+                    ) : (
+                        <TripList
+                            filteredTrips={filteredTrips}
+                            handleStatusChange={handleStatusChange}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );

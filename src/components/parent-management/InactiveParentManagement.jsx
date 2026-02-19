@@ -220,21 +220,23 @@ const InactiveParentManagement = () => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 px-8 pt-2 pb-8 overflow-hidden flex flex-col">
-                {loading ? (
-                    <div className="h-full flex flex-col items-center justify-center min-h-[400px] bg-white rounded-3xl shadow-xl border border-gray-100">
-                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
-                            <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
+            <div className="flex-1 px-0 lg:px-8 pt-2 pb-8 overflow-hidden flex flex-col w-full">
+                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:p-6 overflow-hidden">
+                    {loading ? (
+                        <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
+                            <div className="w-16 h-16 rounded-[24px] bg-blue-50 flex items-center justify-center mb-4">
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600" />
+                            </div>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Syncing Archive...</p>
                         </div>
-                        <p className="text-gray-500 font-medium">Loading inactive parents...</p>
-                    </div>
-                ) : (
-                    <ParentList 
-                        filteredParents={filteredParents} 
-                        handleDelete={handleActivate}
-                        isInactiveView={true}
-                    />
-                )}
+                    ) : (
+                        <ParentList 
+                            filteredParents={filteredParents} 
+                            handleDelete={handleActivate}
+                            isInactiveView={true}
+                        />
+                    )}
+                </div>
             </div>
 
             {/* Activate Confirmation Modal */}
