@@ -125,5 +125,18 @@ export const studentService = {
             console.error(`Error fetching student count for route ${routeId}:`, error);
             throw error;
         }
+    },
+
+    // Get students by route
+    getStudentsByRoute: async (routeId, activeFilter = 'ACTIVE_ONLY') => {
+        try {
+            const response = await api.get(`/students/by-route/${routeId}`, {
+                params: { active_filter: activeFilter }
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error fetching students for route ${routeId}:`, error);
+            throw error;
+        }
     }
 };

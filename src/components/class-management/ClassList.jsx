@@ -1,13 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../../styles/agGridMobileStyles.css';
 import { 
     faInbox, faUserGraduate, faEllipsisV, 
-    faEdit, faCheckCircle, faBan 
+    faEdit, faCheckCircle, faBan, faEye 
 } from '@fortawesome/free-solid-svg-icons';
 import { useMemo, useState, useEffect } from 'react';
 
 const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onEditClass }) => {
+    const navigate = useNavigate();
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
     useEffect(() => {
@@ -65,7 +67,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
         {
             headerName: "ACTIONS",
             field: "class_id",
-            width: 100,
+            width: 130,
 
             sortable: false,
             filter: false,
@@ -77,7 +79,24 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
                 const isActive = params.data.status === 'ACTIVE';
                 
                 return (
-                    <div className="relative flex items-center justify-center h-full">
+                    <div className="relative flex items-center justify-center gap-2 h-full">
+                        {/* View Students Button */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                const className = `${params.data.class_name} - ${params.data.section}`;
+                                navigate(`/students?search=${encodeURIComponent(className)}`);
+                            }}
+                            className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-500 hover:text-white transition-all duration-300 active:scale-90 shadow-sm hover:shadow-lg flex items-center justify-center group"
+                            title="View Students"
+                        >
+                            <FontAwesomeIcon 
+                                icon={faUserGraduate} 
+                                className="text-[13px] transition-all duration-500 group-hover:scale-110" 
+                            />
+                        </button>
+
+                        {/* Kebab Menu */}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -170,7 +189,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
                     headerHeight={isMobile ? 40 : 50}
                     theme="legacy"
                     suppressRowTransform={true}
-                    context={{ activeMenuId, setActiveMenuId, onEditClass, onUpdateStatus }}
+                    context={{ activeMenuId, setActiveMenuId, onEditClass, onUpdateStatus, navigate }}
                     getRowStyle={params => {
                         if (params.data.class_id === activeMenuId) {
                             return { zIndex: 999, overflow: 'visible' };

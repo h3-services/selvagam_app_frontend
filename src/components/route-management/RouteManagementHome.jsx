@@ -471,7 +471,7 @@ const RouteManagementHome = () => {
                         <RouteDetail
                             selectedRoute={selectedRoute}
                             onBack={() => setSelectedRoute(null)}
-                            onUpdate={fetchData}
+                            onUpdate={fetchAllData}
                             onDelete={handleDelete}
                             onEdit={(route) => {
                                 setEditingRoute(route);

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faMapLocationDot, faBus, faCircle, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faMapLocationDot, faBus, faCircle, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, faCircleNotch, faMars, faVenus } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { routeService } from '../../services/routeService';
+import { studentService } from '../../services/studentService';
+import { classService } from '../../services/classService';
 import { LocationMarker, createStopIcon } from './RouteMapUtils';
 
 const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
@@ -16,6 +18,30 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
     const [editingStopIndex, setEditingStopIndex] = useState(null);
     const [editingStopName, setEditingStopName] = useState('');
     const [localLoading, setLocalLoading] = useState(false);
+    const [showStudentsModal, setShowStudentsModal] = useState(false);
+    const [routeStudents, setRouteStudents] = useState([]);
+    const [loadingStudents, setLoadingStudents] = useState(false);
+    const [classMap, setClassMap] = useState({});
+
+    const handleViewStudents = async () => {
+        setShowStudentsModal(true);
+        setLoadingStudents(true);
+        try {
+            const [students, classes] = await Promise.all([
+                studentService.getStudentsByRoute(selectedRoute.id),
+                classService.getAllClasses().catch(() => [])
+            ]);
+            const cMap = {};
+            classes.forEach(c => { cMap[c.class_id] = `${c.class_name} - ${c.section}`; });
+            setClassMap(cMap);
+            setRouteStudents(students || []);
+        } catch (error) {
+            console.error('Failed to fetch route students:', error);
+            setRouteStudents([]);
+        } finally {
+            setLoadingStudents(false);
+        }
+    };
 
     const handleStartStopEdit = (index, name) => {
         setEditingStopIndex(index);
@@ -185,9 +211,15 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                             </button>
                         </div>
                     ) : (
-                        <button onClick={handleStartEditing} className="px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium">
-                            <FontAwesomeIcon icon={faEdit} className="mr-1" />Edit
-                        </button>
+                        <div className="flex gap-2">
+                            <button onClick={handleViewStudents} className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium flex items-center gap-2">
+                                <FontAwesomeIcon icon={faUserGraduate} />
+                                Students
+                            </button>
+                            <button onClick={handleStartEditing} className="px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium">
+                                <FontAwesomeIcon icon={faEdit} className="mr-1" />Edit
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -353,6 +385,80 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Students Modal */}
+            {showStudentsModal && (
+                <>
+                    <div 
+                        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2005] transition-opacity duration-500" 
+                        onClick={() => setShowStudentsModal(false)} 
+                    />
+                    <div className="fixed inset-0 z-[2006] flex items-center justify-center p-4">
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                            {/* Modal Header */}
+                            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner">
+                                        <FontAwesomeIcon icon={faUserGraduate} className="text-lg" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-black text-lg text-slate-900 tracking-tight leading-none">{selectedRoute.routeName}</h3>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] mt-1">{routeStudents.length} Students</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => setShowStudentsModal(false)} 
+                                    className="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all active:scale-90"
+                                >
+                                    <FontAwesomeIcon icon={faTimes} className="text-base" />
+                                </button>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                                {loadingStudents ? (
+                                    <div className="flex flex-col items-center justify-center py-16">
+                                        <FontAwesomeIcon icon={faCircleNotch} spin className="text-2xl text-blue-600 mb-3" />
+                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Loading...</p>
+                                    </div>
+                                ) : routeStudents.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-16">
+                                        <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center mb-3">
+                                            <FontAwesomeIcon icon={faUserGraduate} className="text-xl text-slate-300" />
+                                        </div>
+                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">No students on this route</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {routeStudents.map((student, idx) => (
+                                            <div 
+                                                key={student.student_id || idx} 
+                                                className="flex items-center gap-4 px-4 py-3.5 bg-slate-50/80 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-md transition-all duration-300 group"
+                                            >
+                                                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-black border border-blue-100 shrink-0 group-hover:scale-110 transition-transform">
+                                                    {idx + 1}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-bold text-sm text-slate-900 truncate">{student.name}</p>
+                                                    <p className="text-[11px] text-slate-400 font-medium mt-0.5">{classMap[student.class_id] || 'N/A'}</p>
+                                                </div>
+                                                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                                                    student.gender === 'MALE' 
+                                                        ? 'bg-sky-50 text-sky-600 border border-sky-100' 
+                                                        : 'bg-pink-50 text-pink-600 border border-pink-100'
+                                                }`}>
+                                                    <FontAwesomeIcon icon={student.gender === 'MALE' ? faMars : faVenus} className="text-[11px]" />
+                                                    {student.gender === 'MALE' ? 'M' : 'F'}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

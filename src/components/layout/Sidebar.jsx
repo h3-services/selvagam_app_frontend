@@ -178,8 +178,11 @@ const Sidebar = () => {
             <h1 className="text-white uppercase leading-tight" style={{ fontFamily: "'Outfit', sans-serif" }}>
               <span className="block text-[24px] font-black tracking-[3px] mb-0.5">Selvagam</span>
               <div className="mt-1">
-                <span className="text-[9px] font-light tracking-[0.3px] opacity-80 block">
-                  Selvagam Santhanalakshmi Noble School in Tirukalikundram
+                <span className="text-[9px] font-bold tracking-[0.3px] opacity-80 block">
+                  Selvagam Santhanalakshmi Noble School
+                </span>
+                <span className="text-[9px] font-bold tracking-[0.3px] opacity-60 block mt-0.5">
+                  Tirukalikundram
                 </span>
               </div>
             </h1>
