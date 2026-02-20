@@ -98,7 +98,7 @@ const Sidebar = () => {
         { icon: faCalendarCheck, label: 'Trips', path: '/trips' },
       ]
     },
-    { icon: faUsers, label: 'Directory', path: '/student-directory' },
+
 
     { icon: faComments, label: 'Communication', path: '/communication' },
     { icon: faUserShield, label: 'Settings', path: '/admin' },

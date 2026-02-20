@@ -22,6 +22,8 @@ const StudentManagementHome = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
+    const [showMoreDropdown, setShowMoreDropdown] = useState(false);
+    const moreDropdownRef = useRef(null);
 
     // Actions State
     const [activeMenuId, setActiveMenuId] = useState(null);
@@ -36,17 +38,35 @@ const StudentManagementHome = () => {
     const [pendingBulkUpdate, setPendingBulkUpdate] = useState(null);
     const [bulkParentSelection, setBulkParentSelection] = useState([]);
 
-    // Fetch students and parents on mount
+    // Fetch students when tab changes
     useEffect(() => {
         fetchAllData();
-    }, []);
+    }, [activeTab]);
+
+    // Map tab to API filter params
+    const getFiltersForTab = (tab) => {
+        switch (tab) {
+            case 'Active':
+                return { active_filter: 'ACTIVE_ONLY' };
+            case 'LongAbsent':
+                return { student_status: 'LONG_ABSENT' };
+            case 'NonBusUsers':
+                return { transport_status: 'INACTIVE' };
+            case 'Discontinue':
+                return { student_status: 'DISCONTINUED' };
+            case 'Alumni':
+                return { student_status: 'ALUMNI' };
+            default:
+                return {};
+        }
+    };
 
     const fetchAllData = async () => {
         setLoading(true);
         try {
-            // Fetch data with individual error handling to prevent 500s from blocking the whole view
+            const filters = getFiltersForTab(activeTab);
             const [studentData, parentData, classData] = await Promise.all([
-                studentService.getAllStudents().catch(err => {
+                studentService.getAllStudents(filters).catch(err => {
                     console.error("Error fetching students:", err);
                     return [];
                 }),
@@ -117,19 +137,28 @@ const StudentManagementHome = () => {
         return () => window.removeEventListener('mousedown', handleClickOutside);
     }, [activeMenuId]);
 
+    // Close more dropdown on outside click
+    useEffect(() => {
+        const handleDropdownOutside = (event) => {
+            if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target)) {
+                setShowMoreDropdown(false);
+            }
+        };
+        window.addEventListener('mousedown', handleDropdownOutside);
+        return () => window.removeEventListener('mousedown', handleDropdownOutside);
+    }, []);
+
+    const moreTabOptions = [
+        { key: 'LongAbsent', label: 'Long Absent', icon: faClock, color: 'text-amber-500' },
+        { key: 'NonBusUsers', label: 'Non-Bus Users', icon: faWalking, color: 'text-orange-500' },
+        { key: 'Discontinue', label: 'Discontinue', icon: faBan, color: 'text-rose-500' },
+        { key: 'Alumni', label: 'Alumni', icon: faGraduationCap, color: 'text-indigo-500' },
+    ];
+
     const filteredStudents = useMemo(() => {
         let result = [...students];
         
-        if (activeTab === "Active") {
-            // Active Students tab now strictly shows students with ACTIVE transport status
-            result = result.filter(student => 
-                student.studentStatus === 'CURRENT' && 
-                student.originalData?.transport_status === 'ACTIVE'
-            );
-        } else if (activeTab === "LongAbsent") {
-            // Only show students marked as Long Absent
-            result = result.filter(student => student.studentStatus === 'LONG_ABSENT');
-        }
+        // No client-side tab filtering needed — API returns filtered data
         if (searchQuery) {
             const lowerQuery = searchQuery.toLowerCase();
             result = result.filter(
@@ -140,7 +169,7 @@ const StudentManagementHome = () => {
             );
         }
         return result;
-    }, [students, searchQuery, activeTab]);
+    }, [students, searchQuery]);
 
     const handleAddStudent = async (newStudentData) => {
         try {
@@ -461,16 +490,50 @@ const StudentManagementHome = () => {
                                 >
                                     Active Students
                                 </button>
-                                <button
-                                    onClick={() => setActiveTab('LongAbsent')}
-                                    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
-                                        activeTab === 'LongAbsent' 
-                                        ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
-                                        : 'text-gray-500 hover:text-gray-700'
-                                    }`}
-                                >
-                                    Long Absent
-                                </button>
+
+                                {/* More Dropdown */}
+                                <div className="relative" ref={moreDropdownRef}>
+                                    <button
+                                        onClick={() => setShowMoreDropdown(!showMoreDropdown)}
+                                        className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-2 ${
+                                            moreTabOptions.some(opt => opt.key === activeTab)
+                                            ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
+                                            : 'text-gray-500 hover:text-gray-700'
+                                        }`}
+                                    >
+                                        {moreTabOptions.find(opt => opt.key === activeTab)?.label || 'More'}
+                                        <FontAwesomeIcon icon={faChevronDown} className={`text-[10px] transition-transform duration-300 ${showMoreDropdown ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {showMoreDropdown && (
+                                        <div className="absolute top-full right-0 mt-3 w-52 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl shadow-slate-200/60 border border-slate-100 p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] px-3 pt-2 pb-1.5">Filter by</p>
+                                            {moreTabOptions.map(opt => (
+                                                <button
+                                                    key={opt.key}
+                                                    onClick={() => { setActiveTab(opt.key); setShowMoreDropdown(false); }}
+                                                    className={`w-full text-left px-3 py-2.5 text-[11px] font-bold rounded-xl flex items-center gap-3 transition-all duration-200 group ${
+                                                        activeTab === opt.key 
+                                                        ? 'text-blue-600 bg-blue-50 shadow-sm' 
+                                                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                                    }`}
+                                                >
+                                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] transition-all ${
+                                                        activeTab === opt.key
+                                                        ? 'bg-blue-100 text-blue-600'
+                                                        : `bg-slate-50 ${opt.color} group-hover:scale-110`
+                                                    }`}>
+                                                        <FontAwesomeIcon icon={opt.icon} />
+                                                    </div>
+                                                    {opt.label}
+                                                    {activeTab === opt.key && (
+                                                        <FontAwesomeIcon icon={faCheck} className="ml-auto text-[9px] text-blue-500" />
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="relative group">

@@ -132,7 +132,6 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                     <h3 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-none mb-1 sm:mb-1.5">{initialData ? 'Edit Parent' : 'Add Parent'}</h3>
                                     <div className="flex items-center gap-2">
                                         <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${initialData ? 'bg-amber-500' : 'bg-blue-600'}`}></span>
-                                        <p className="text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]">{initialData ? 'Update Details' : 'Fill in parent details'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -173,7 +172,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
 
                                 <div className="space-y-6">
                                     <InputField 
-                                        label="Full Legal Name" 
+                                        label="Full Name" 
                                         icon={faUser} 
                                         value={formData.name} 
                                         onChange={(e) => handleChange('name', e.target.value)} 
@@ -220,15 +219,14 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 </div>
                             </div>
 
-                            {/* Geo Data Section */}
+                            {/* Location Section */}
                             <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-100 group hover:shadow-xl transition-all duration-500">
                                 <div className="flex items-center gap-4 mb-8">
                                     <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
                                         <FontAwesomeIcon icon={faMapMarkerAlt} className="text-lg" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Geo Data</h4>
-                                        <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Resident Address</p>
+                                        <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Location</h4>
                                     </div>
                                 </div>
 
@@ -287,7 +285,6 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                         </div>
                                         <div>
                                             <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Access Control</h4>
-                                            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Account Credentials</p>
                                         </div>
                                     </div>
 

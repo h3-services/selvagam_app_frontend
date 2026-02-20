@@ -206,7 +206,7 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                         </div>
 
                         <div className="space-y-6">
-                            <InputField label="Full Name" icon={faUser} value={newDriver.name} onChange={(e) => updateField('name', e.target.value)} placeholder="Legal Name" error={touched.name && errors.name} />
+                            <InputField label="Full Name" icon={faUser} value={newDriver.name} onChange={(e) => updateField('name', e.target.value)} placeholder="Full Name" error={touched.name && errors.name} />
                             
                             <div className="grid grid-cols-2 gap-5">
                                 <InputField label="Contact Terminal" icon={faPhone} value={newDriver.phone} onChange={(e) => updateField('phone', e.target.value)} type="tel" maxLength={10} placeholder="10-Digit Mobile" error={touched.phone && errors.phone} />

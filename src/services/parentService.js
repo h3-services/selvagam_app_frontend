@@ -2,10 +2,13 @@ import api from './api';
 import { securityUtils } from '../utils/security';
 
 export const parentService = {
-    // Get all parents
-    getAllParents: async () => {
+    // Get all parents with optional filters
+    // filters: { active_filter: 'ALL' | 'ACTIVE_ONLY' }
+    getAllParents: async (filters = {}) => {
         try {
-            const response = await api.get('/parents');
+            const params = {};
+            if (filters.active_filter) params.active_filter = filters.active_filter;
+            const response = await api.get('/parents', { params });
             return response.data;
         } catch (error) {
             console.error("Error fetching parents:", error);

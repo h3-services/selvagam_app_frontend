@@ -55,7 +55,7 @@ const ParentManagementHome = () => {
         try {
             // Fetch data with individual error handling to prevent 500s from blocking the whole view
             const [parentsData, studentsData, classData] = await Promise.all([
-                parentService.getAllParents().catch(err => {
+                parentService.getAllParents({ active_filter: 'ACTIVE_ONLY' }).catch(err => {
                     console.error("Error fetching parents:", err);
                     return [];
                 }),

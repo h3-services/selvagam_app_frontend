@@ -1,10 +1,15 @@
 import api from './api';
 
 export const studentService = {
-    // Get all students
-    getAllStudents: async () => {
+    // Get all students with optional filters
+    // filters: { student_status, transport_status, active_filter }
+    getAllStudents: async (filters = {}) => {
         try {
-            const response = await api.get('/students');
+            const params = {};
+            if (filters.student_status) params.student_status = filters.student_status;
+            if (filters.transport_status) params.transport_status = filters.transport_status;
+            if (filters.active_filter) params.active_filter = filters.active_filter;
+            const response = await api.get('/students', { params });
             return response.data;
         } catch (error) {
             console.error("Error fetching students:", error);

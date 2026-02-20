@@ -42,12 +42,13 @@ const InactiveParentManagement = () => {
         setLoading(true);
         try {
             const [parentsData, studentsData, classData] = await Promise.all([
+                // API only supports ALL and ACTIVE_ONLY, so fetch ALL then filter for INACTIVE
                 parentService.getAllParents(),
                 studentService.getAllStudents(),
                 classService.getAllClasses()
             ]);
 
-            // Filter for INACTIVE parents only
+            // Filter for INACTIVE parents (API doesn't have INACTIVE_ONLY filter)
             const inactiveParentsOnly = parentsData.filter(p => p.parents_active_status === 'INACTIVE');
 
             // Extract unique class names for filter
