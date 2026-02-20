@@ -4,14 +4,12 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '../../styles/agGridMobileStyles.css';
-import { faTrash, faEllipsisV, faCheckCircle, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faCheckCircle, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 const ParentList = ({ 
     filteredParents, 
     handleDelete,
     isInactiveView = false,
-    activeMenuId,
-    setActiveMenuId,
     onSelectionChanged,
     onViewParent
 }) => {
@@ -136,61 +134,34 @@ const ParentList = ({
             field: 'parent_id',
             width: 80,
             minWidth: 80,
-
             sortable: false,
             filter: false,
             suppressMovable: true,
             suppressSizeToFit: true,
-            cellStyle: { overflow: 'visible' },
-            cellRenderer: params => {
-                const isOpen = activeMenuId === params.data.parent_id;
-                return (
-                    <div className="relative flex items-center justify-center h-full">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveMenuId(isOpen ? null : params.data.parent_id);
-                            }}
-                            className={`action-menu-trigger w-8 h-8 rounded-full transition-all flex items-center justify-center text-sm ${
-                                isOpen ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-100'
-                            }`}
-                        >
-                            <FontAwesomeIcon icon={faEllipsisV} />
-                        </button>
-
-                        {isOpen && (
-                            <div className="action-menu-container absolute right-0 top-10 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 z-[9999] overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
-                                <div className="p-1">
-                                    <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
-                                        Management Actions
-                                    </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDelete(params.data.parent_id);
-                                            setActiveMenuId(null);
-                                        }}
-                                        className={`w-full text-left px-3 py-2 text-xs font-bold rounded-lg flex items-center gap-2 transition-colors ${
-                                            isInactiveView 
-                                                ? 'text-emerald-700 hover:bg-emerald-50' 
-                                                : 'text-red-600 hover:bg-red-50'
-                                        }`}
-                                    >
-                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                                            isInactiveView ? 'bg-emerald-50' : 'bg-red-50'
-                                        }`}>
-                                            <FontAwesomeIcon icon={isInactiveView ? faCheckCircle : faTrash} />
-                                        </div>
-                                        {isInactiveView ? 'Activate Parent' : 'Deactivate Parent'}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                );
-            }
+            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+            cellRenderer: params => (
+                <div className="flex items-center justify-center">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(params.data.parent_id);
+                        }}
+                        className={`w-9 h-9 rounded-xl transition-all duration-300 active:scale-90 shadow-sm hover:shadow-lg flex items-center justify-center group ${
+                            isInactiveView 
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-500 hover:text-white' 
+                                : 'bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-500 hover:text-white'
+                        }`}
+                        title={isInactiveView ? 'Activate Parent' : 'Deactivate Parent'}
+                    >
+                        <FontAwesomeIcon 
+                            icon={isInactiveView ? faCheckCircle : faTrash} 
+                            className="text-[13px] transition-all duration-500 group-hover:scale-110 group-hover:rotate-12" 
+                        />
+                    </button>
+                </div>
+            )
         }
-    ], [handleDelete, isInactiveView, activeMenuId, setActiveMenuId, onViewParent, isMobile]);
+    ], [handleDelete, isInactiveView, onViewParent, isMobile]);
 
     return (
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden w-full lg:bg-transparent">
@@ -240,12 +211,7 @@ const ParentList = ({
                         headerHeight={isMobile ? 40 : 50}
                         animateRows={true}
                         suppressRowTransform={true}
-                        getRowStyle={params => {
-                            if (params.data.parent_id === activeMenuId) {
-                                return { zIndex: 999, overflow: 'visible' };
-                            }
-                            return { zIndex: 1 };
-                        }}
+                        getRowStyle={params => ({ zIndex: 1, overflow: 'visible' })}
                         theme="legacy"
                         overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No parents found</span>'
                         onGridReady={(params) => {

@@ -25,7 +25,6 @@ const ParentManagementHome = () => {
     const [showLinkModal, setShowLinkModal] = useState(false);
 
     // Actions State
-    const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
@@ -36,18 +35,6 @@ const ParentManagementHome = () => {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            const isActionMenuClick = event.target.closest('.action-menu-container');
-            const isActionMenuTrigger = event.target.closest('.action-menu-trigger');
-
-            if (!isActionMenuClick && !isActionMenuTrigger) {
-                if (activeMenuId) setActiveMenuId(null);
-            }
-        };
-        window.addEventListener('mousedown', handleClickOutside);
-        return () => window.removeEventListener('mousedown', handleClickOutside);
-    }, [activeMenuId]);
 
 
     const fetchData = async () => {
@@ -303,8 +290,6 @@ const ParentManagementHome = () => {
                         <ParentList 
                             filteredParents={filteredParents} 
                             handleDelete={handleDelete}
-                            activeMenuId={activeMenuId}
-                            setActiveMenuId={setActiveMenuId}
                             onSelectionChanged={setSelectedRows}
                             onViewParent={setSelectedParent}
                         />
