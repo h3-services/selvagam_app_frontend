@@ -418,7 +418,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                         }}
                                                         className="w-full mt-4 py-3 rounded-xl bg-indigo-50/50 text-indigo-600 border border-dashed border-indigo-200 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white hover:border-solid hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
                                                     >
-                                                        Change Parent
+                                                        Change
                                                     </button>
                                                 </div>
                                             </div>

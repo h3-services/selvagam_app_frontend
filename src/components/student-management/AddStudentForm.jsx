@@ -612,28 +612,28 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                         {formData.parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.parent_id);
                                             return selectedParent ? (
-                                                <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 relative group/card transition-all duration-500 hover:shadow-2xl hover:shadow-slate-900/20">
+                                                <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 relative group/card transition-all duration-500 hover:shadow-xl shadow-sm">
                                                     <div className="flex items-start justify-between mb-8">
                                                         <div className="flex items-center gap-5">
                                                             <div className="relative">
-                                                                <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full"></div>
-                                                                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-900 font-black text-2xl shadow-xl relative z-10 border-4 border-slate-800">
+                                                                <div className="absolute inset-0 bg-blue-500 blur-xl opacity-10 rounded-full"></div>
+                                                                <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-black text-2xl shadow-sm relative z-10 border-2 border-blue-100">
                                                                     {selectedParent.name.charAt(0)}
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <div className="font-black text-xl text-white mb-2">{selectedParent.name}</div>
+                                                                <div className="font-black text-xl text-slate-900 mb-2">{selectedParent.name}</div>
                                                                 <div className="flex flex-wrap gap-2">
                                                                     <span className="bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">
                                                                         {selectedParent.parent_role || 'GUARDIAN'}
                                                                     </span>
-                                                                    <span className="bg-slate-800 text-slate-400 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
-                                                                        <FontAwesomeIcon icon={faPhone} className="text-[9px] text-blue-400" /> {selectedParent.phone}
+                                                                    <span className="bg-slate-50 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-2">
+                                                                        <FontAwesomeIcon icon={faPhone} className="text-[9px] text-blue-500" /> {selectedParent.phone}
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                                        <div className="h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
                                                             <FontAwesomeIcon icon={faCheck} className="text-xs" />
                                                         </div>
                                                     </div>
@@ -641,7 +641,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                     <div className="flex justify-center">
                                                         <button 
                                                             onClick={() => { handleChange('parent_id', ''); }}
-                                                            className="text-[10px] font-black text-rose-400/60 hover:text-rose-400 uppercase tracking-widest transition-all hover:tracking-[0.2em] py-2"
+                                                            className="text-[10px] font-black text-rose-400/60 hover:text-rose-500 uppercase tracking-widest transition-all hover:tracking-[0.2em] py-2"
                                                         >
                                                             Remove
                                                         </button>
@@ -692,28 +692,28 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                         {formData.s_parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.s_parent_id);
                                             return selectedParent ? (
-                                                 <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 relative group/card transition-all duration-500 hover:shadow-2xl hover:shadow-slate-900/20">
+                                                 <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 relative group/card transition-all duration-500 hover:shadow-xl shadow-sm">
                                                      <div className="flex items-start justify-between mb-8">
                                                          <div className="flex items-center gap-5">
                                                              <div className="relative">
-                                                                 <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 rounded-full"></div>
-                                                                 <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center text-slate-900 font-black text-2xl shadow-xl relative z-10 border-4 border-slate-800">
+                                                                 <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-10 rounded-full"></div>
+                                                                 <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-2xl shadow-sm relative z-10 border-2 border-indigo-100">
                                                                      {selectedParent.name.charAt(0)}
                                                                  </div>
                                                              </div>
                                                              <div>
-                                                                 <div className="font-black text-xl text-white mb-2">{selectedParent.name}</div>
+                                                                 <div className="font-black text-xl text-slate-900 mb-2">{selectedParent.name}</div>
                                                                  <div className="flex flex-wrap gap-2">
                                                                      <span className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">
                                                                          {selectedParent.parent_role || 'GUARDIAN'}
                                                                      </span>
-                                                                     <span className="bg-slate-800 text-slate-400 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
-                                                                         <FontAwesomeIcon icon={faPhone} className="text-[9px] text-blue-400" /> {selectedParent.phone}
+                                                                     <span className="bg-slate-50 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-2">
+                                                                         <FontAwesomeIcon icon={faPhone} className="text-[9px] text-indigo-500" /> {selectedParent.phone}
                                                                      </span>
                                                                  </div>
                                                              </div>
                                                          </div>
-                                                         <div className="h-10 w-10 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                                                         <div className="h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
                                                              <FontAwesomeIcon icon={faCheck} className="text-xs" />
                                                          </div>
                                                      </div>
@@ -721,7 +721,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                      <div className="flex justify-center">
                                                          <button 
                                                              onClick={() => { handleChange('s_parent_id', ''); }}
-                                                             className="text-[10px] font-black text-rose-400/60 hover:text-rose-400 uppercase tracking-widest transition-all hover:tracking-[0.2em] py-2"
+                                                             className="text-[10px] font-black text-rose-400/60 hover:text-rose-500 uppercase tracking-widest transition-all hover:tracking-[0.2em] py-2"
                                                          >
                                                              Remove
                                                          </button>
