@@ -116,16 +116,17 @@ const ParentList = ({
         {
             headerName: 'Address',
             field: 'street',
-            flex: 1.2,
-            minWidth: 160,
+            flex: 1.5,
+            minWidth: 220,
             hide: isMobile && window.innerWidth < 640,
             filter: false,
             cellDataType: false,
             cellStyle: { display: 'flex', alignItems: 'center', height: '100%' },
             cellRenderer: params => (
-                <div className="flex flex-col justify-center min-w-0">
-                    <span className="text-gray-950 font-light text-[12px] tracking-tight truncate">{params.data.street}</span>
-                    <span className="text-slate-400 font-light text-[10px] uppercase tracking-widest mt-0.5">{params.data.city}</span>
+                <div className="flex items-center min-w-0 w-full">
+                    <span className="text-gray-950 font-light text-[12px] tracking-tight">
+                        {[params.data.door_no, params.data.street].filter(Boolean).join(', ')}
+                    </span>
                 </div>
             )
         },

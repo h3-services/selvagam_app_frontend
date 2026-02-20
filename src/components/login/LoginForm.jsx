@@ -5,7 +5,6 @@ import { COLORS } from '../../constants/colors';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../../config/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import Logo from '../../assets/Logo.png';
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -53,25 +52,19 @@ const LoginForm = () => {
     };
 
     return (
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-16 h-full overflow-y-auto bg-slate-50">
-            <div className="max-w-[420px] w-full">
-                {/* Mobile Logo - Only on small screens */}
-                <div className="flex items-center justify-center mb-8 lg:hidden">
-                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-xl border border-slate-100 bg-white p-3">
-                        <img src={Logo} alt="Selvagam Logo" className="w-full h-full object-contain" />
-                    </div>
-                </div>
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-5 sm:p-8 lg:p-16 flex-1 lg:flex-none lg:h-full overflow-y-auto bg-slate-50">
+            <div className="max-w-[420px] w-full py-4 sm:py-6 lg:py-0">
 
                 {/* Header */}
-                <div className="mb-10">
-                    <div className="flex items-center gap-2 mb-3">
+                <div className="mb-8 sm:mb-10">
+                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
                         <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: COLORS.SIDEBAR_BG }}></div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Admin Portal</span>
+                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Admin Portal</span>
                     </div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none mb-2">
+                    <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2">
                         Welcome Back
                     </h1>
-                    <p className="text-sm text-slate-400 font-medium">
+                    <p className="text-xs sm:text-sm text-slate-400 font-medium">
                         Sign in to your <span className="font-bold" style={{ color: COLORS.SIDEBAR_BG }}>Selvagam</span> account
                     </p>
                 </div>
@@ -87,16 +80,16 @@ const LoginForm = () => {
                 )}
 
                 {/* Form */}
-                <form onSubmit={handleLogin} className="space-y-5">
+                <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
                     {/* Mobile Input */}
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-2 ml-1">Mobile Number</label>
-                        <div className={`relative flex items-center bg-white rounded-2xl border-2 transition-all duration-500 ${
+                        <div className={`relative flex items-center bg-white rounded-xl sm:rounded-2xl border-2 transition-all duration-500 ${
                             focusedField === 'mobile' 
                                 ? 'border-blue-500 shadow-lg shadow-blue-500/10' 
                                 : 'border-slate-100 hover:border-slate-200'
                         }`}>
-                            <div className={`w-14 h-14 flex items-center justify-center pointer-events-none transition-all duration-500 ${
+                            <div className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center pointer-events-none transition-all duration-500 ${
                                 focusedField === 'mobile' ? 'text-blue-600 scale-110' : 'text-slate-300'
                             }`}>
                                 <FontAwesomeIcon icon={faPhone} className="text-sm" />
@@ -108,7 +101,7 @@ const LoginForm = () => {
                                 onFocus={() => setFocusedField('mobile')}
                                 onBlur={() => setFocusedField(null)}
                                 placeholder="Enter mobile number"
-                                className="w-full pr-5 py-4 bg-transparent rounded-2xl text-sm font-bold text-slate-700 placeholder-slate-300 focus:outline-none"
+                                className="w-full pr-5 py-3.5 sm:py-4 bg-transparent rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 placeholder-slate-300 focus:outline-none"
                                 required
                             />
                         </div>
@@ -117,12 +110,12 @@ const LoginForm = () => {
                     {/* Password Input */}
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-2 ml-1">Password</label>
-                        <div className={`relative flex items-center bg-white rounded-2xl border-2 transition-all duration-500 ${
+                        <div className={`relative flex items-center bg-white rounded-xl sm:rounded-2xl border-2 transition-all duration-500 ${
                             focusedField === 'password' 
                                 ? 'border-blue-500 shadow-lg shadow-blue-500/10' 
                                 : 'border-slate-100 hover:border-slate-200'
                         }`}>
-                            <div className={`w-14 h-14 flex items-center justify-center pointer-events-none transition-all duration-500 ${
+                            <div className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center pointer-events-none transition-all duration-500 ${
                                 focusedField === 'password' ? 'text-blue-600 scale-110' : 'text-slate-300'
                             }`}>
                                 <FontAwesomeIcon icon={faLock} className="text-sm" />
@@ -134,7 +127,7 @@ const LoginForm = () => {
                                 onFocus={() => setFocusedField('password')}
                                 onBlur={() => setFocusedField(null)}
                                 placeholder="Enter your password"
-                                className="w-full pr-14 py-4 bg-transparent rounded-2xl text-sm font-bold text-slate-700 placeholder-slate-300 focus:outline-none"
+                                className="w-full pr-14 py-3.5 sm:py-4 bg-transparent rounded-xl sm:rounded-2xl text-sm font-bold text-slate-700 placeholder-slate-300 focus:outline-none"
                                 required
                             />
                             <button
@@ -158,7 +151,7 @@ const LoginForm = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full h-14 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-3 group relative overflow-hidden"
+                        className="w-full h-12 sm:h-14 text-white rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-[0.2em] shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-3 group relative overflow-hidden"
                         style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG} 0%, #1e3a8a 100%)` }}
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
@@ -176,7 +169,7 @@ const LoginForm = () => {
                 </form>
 
                 {/* Divider */}
-                <div className="relative my-8">
+                <div className="relative my-6 sm:my-8">
                     <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t border-slate-100"></div>
                     </div>
@@ -188,14 +181,13 @@ const LoginForm = () => {
                 {/* Quick Access */}
                 <button
                     onClick={handleQuickAccess}
-                    className="w-full h-14 bg-white hover:bg-slate-900 text-slate-600 hover:text-white rounded-2xl font-bold text-sm border-2 border-slate-100 hover:border-slate-900 transition-all duration-500 flex items-center justify-center gap-3 group active:scale-95"
+                    className="w-full h-12 sm:h-14 bg-white hover:bg-slate-900 text-slate-600 hover:text-white rounded-xl sm:rounded-2xl font-bold text-sm border-2 border-slate-100 hover:border-slate-900 transition-all duration-500 flex items-center justify-center gap-3 group active:scale-95"
                 >
                     <FontAwesomeIcon icon={faBolt} className="text-amber-500 group-hover:text-amber-400 group-hover:scale-125 transition-all duration-500" />
                     <span className="tracking-wide">Quick Access</span>
                 </button>
 
-                {/* Footer */}
-                <p className="text-center mt-8 text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em]">
+                <p className="text-center mt-6 sm:mt-8 text-[9px] sm:text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em]">
                     Selvagam Santhanalakshmi Noble School
                 </p>
             </div>
