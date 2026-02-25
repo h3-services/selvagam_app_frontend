@@ -8,6 +8,13 @@ body,
   padding: 0;
   overflow: hidden;
   font-family: "Outfit", sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth scrolling for all scrollable areas */
+* {
+  -webkit-overflow-scrolling: touch;
 }
 
 @keyframes fadeIn {
@@ -82,3 +89,44 @@ body,
   z-index: 10000 !important;
 }
 
+/* ============================
+   MOBILE RESPONSIVE OVERRIDES
+   ============================ */
+
+/* Mobile: Reduce grid height for smaller viewports */
+@media (max-width: 1023px) {
+  .ag-theme-quartz .ag-root-wrapper,
+  .ag-theme-quartz-dark .ag-root-wrapper {
+    border-radius: 12px !important;
+  }
+
+  /* Reduce checkbox scale on mobile */
+  .ag-checkbox-input-wrapper {
+    transform: scale(1.2) !important;
+  }
+
+  /* Ensure modal backdrops cover mobile nav */
+  .fixed.inset-0 {
+    z-index: 9999;
+  }
+}
+
+/* Small mobile: Extra refinements */
+@media (max-width: 640px) {
+  .ag-checkbox-input-wrapper {
+    transform: scale(1.1) !important;
+  }
+
+  /* Tighter spacing for compact modals */
+  .ag-paging-panel {
+    font-size: 10px !important;
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .fixed.bottom-6,
+  .fixed.bottom-8 {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

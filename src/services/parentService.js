@@ -1,5 +1,4 @@
 import api from './api';
-import { securityUtils } from '../utils/security';
 
 export const parentService = {
     // Get all parents with optional filters
@@ -30,15 +29,14 @@ export const parentService = {
     // Create a new parent
     createParent: async (parentData) => {
         try {
-            // Encrypt password if provided
-            const payload = { ...parentData };
-            if (payload.password) {
-                payload.password = securityUtils.encrypt(payload.password);
-            }
-            const response = await api.post('/parents', payload);
+            // Send payload as-is — the backend handles password hashing
+            const response = await api.post('/parents', parentData);
             return response.data;
         } catch (error) {
             console.error("Error creating parent:", error);
+            if (error.response?.data) {
+                console.error("API Validation Details:", JSON.stringify(error.response.data, null, 2));
+            }
             throw error;
         }
     },
@@ -46,15 +44,14 @@ export const parentService = {
     // Update parent
     updateParent: async (parentId, parentData) => {
         try {
-            // Encrypt password if provided
-            const payload = { ...parentData };
-            if (payload.password) {
-                payload.password = securityUtils.encrypt(payload.password);
-            }
-            const response = await api.put(`/parents/${parentId}`, payload);
+            // Send payload as-is — the backend handles password hashing
+            const response = await api.put(`/parents/${parentId}`, parentData);
             return response.data;
         } catch (error) {
             console.error(`Error updating parent ${parentId}:`, error);
+            if (error.response?.data) {
+                console.error("API Validation Details:", JSON.stringify(error.response.data, null, 2));
+            }
             throw error;
         }
     },

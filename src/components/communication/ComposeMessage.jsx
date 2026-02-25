@@ -114,7 +114,7 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
 
     return (
         <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col animate-fade-in">
-            <form onSubmit={handleSendMessage} className="p-10 lg:p-12 flex flex-col gap-10">
+            <form onSubmit={handleSendMessage} className="p-5 sm:p-8 lg:p-12 flex flex-col gap-6 sm:gap-10">
                 {/* Mechanism Section */}
                 <div className="flex flex-col gap-3 max-w-md">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1 flex items-center gap-2">

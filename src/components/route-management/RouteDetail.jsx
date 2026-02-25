@@ -165,28 +165,28 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
 
     return (
         <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-            <div className="relative p-5 shrink-0" style={{ backgroundColor: '#3A7BFF' }}>
-                <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+            <div className="relative p-3 sm:p-5 shrink-0" style={{ backgroundColor: '#3A7BFF' }}>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                         <button
                             onClick={() => { onBack(); setIsEditing(false); }}
-                            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-all mr-2"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex-shrink-0 flex items-center justify-center text-white hover:bg-white/30 transition-all mr-1 sm:mr-2"
                         >
                             <FontAwesomeIcon icon={faArrowLeft} />
                         </button>
-                        <div className="ml-1 flex flex-col items-start gap-1">
+                        <div className="ml-1 flex flex-col items-start gap-1 min-w-0">
                             {isEditing ? (
                                 <input
                                     type="text"
                                     value={editData?.routeName}
                                     onChange={(e) => setEditData({ ...editData, routeName: e.target.value })}
-                                    className="bg-transparent border-b border-white text-white font-bold text-2xl focus:outline-none placeholder-white/50"
+                                    className="bg-transparent border-b border-white text-white font-bold text-lg sm:text-2xl focus:outline-none placeholder-white/50 w-full"
                                 />
                             ) : (
                                 <>
-                                    <h2 className="text-2xl font-bold text-white">{selectedRoute.routeName}</h2>
+                                    <h2 className="text-lg sm:text-2xl font-bold text-white truncate max-w-[200px] sm:max-w-none">{selectedRoute.routeName}</h2>
                                     <div className="px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30">
-                                        <span className="text-white font-bold text-xs uppercase tracking-widest">{selectedRoute.assignedBus}</span>
+                                        <span className="text-white font-bold text-[10px] sm:text-xs uppercase tracking-widest">{selectedRoute.assignedBus}</span>
                                     </div>
                                 </>
                             )}
@@ -224,10 +224,10 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                 </div>
             </div>
 
-            <div className="flex-1 p-5 relative min-h-[600px]">
-                <div className="flex flex-col md:flex-row h-full gap-4">
+            <div className="flex-1 p-3 sm:p-5 relative min-h-[400px] sm:min-h-[600px]">
+                <div className="flex flex-col md:flex-row h-full gap-3 sm:gap-4">
                     {/* Stops List */}
-                    <div className="w-full md:w-1/3 bg-gray-50 rounded-2xl p-4 overflow-y-auto max-h-[600px]">
+                    <div className="w-full md:w-1/3 bg-gray-50 rounded-2xl p-3 sm:p-4 overflow-y-auto max-h-[250px] md:max-h-[600px]">
                         <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-gray-500">Route Stops</h3>
 
                         {isEditing && (

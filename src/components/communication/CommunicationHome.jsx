@@ -51,7 +51,7 @@ const CommunicationHome = () => {
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-4 sticky top-0 z-30">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 max-w-7xl mx-auto w-full">
-                    <div className='ml-16 lg:ml-0'>
+                    <div className='ml-14 lg:ml-0'>
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">
                             Communication Hub
                         </h1>
