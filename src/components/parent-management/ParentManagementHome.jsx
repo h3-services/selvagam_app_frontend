@@ -188,29 +188,37 @@ const ParentManagementHome = () => {
         }
     };
 
-    const handleDelete = (id) => {
+    const [statusToSet, setStatusToSet] = useState('INACTIVE');
+
+    const handleStatusChangeRequest = (id, targetStatus = 'INACTIVE') => {
         setItemToDelete(id);
+        setStatusToSet(targetStatus);
         setShowDeleteConfirm(true);
     };
 
-    const confirmDelete = async () => {
+    const confirmStatusChange = async () => {
         if (itemToDelete) {
             try {
-                // Set status to INACTIVE instead of deleting
-                await parentService.updateParentStatus(itemToDelete, 'INACTIVE');
+                setLoading(true);
+                await parentService.updateParentStatus(itemToDelete, statusToSet);
                 
-                // Update local state immediately so they move to the Archive tab
+                // Update local state immediately
                 setParents(prev => prev.map(p => 
                     p.parent_id === itemToDelete 
-                    ? { ...p, parents_active_status: 'INACTIVE' } 
+                    ? { ...p, parents_active_status: statusToSet } 
                     : p
                 ));
                 
                 setItemToDelete(null);
                 setShowDeleteConfirm(false);
+                
+                // Refresh data to be safe
+                await fetchData();
             } catch (error) {
-                console.error("Error deactivating parent:", error);
-                alert("Failed to deactivate parent.");
+                console.error(`Error changing parent status to ${statusToSet}:`, error);
+                alert(`Failed to ${statusToSet === 'ACTIVE' ? 'activate' : 'deactivate'} parent.`);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -281,7 +289,7 @@ const ParentManagementHome = () => {
                         <ParentDetail 
                             selectedParent={selectedParent}
                             onBack={() => setSelectedParent(null)}
-                            onDelete={handleDelete}
+                            onDelete={(id) => handleStatusChangeRequest(id, 'INACTIVE')}
                             onUpdate={() => fetchData()}
                             onEdit={handleEditParent}
                             onLink={() => setShowLinkModal(true)}
@@ -289,7 +297,8 @@ const ParentManagementHome = () => {
                     ) : (
                         <ParentList 
                             filteredParents={filteredParents} 
-                            handleDelete={handleDelete}
+                            handleDelete={(id) => handleStatusChangeRequest(id, activeTab === 'Active' ? 'INACTIVE' : 'ACTIVE')}
+                            isInactiveView={activeTab === 'Archive'}
                             onSelectionChanged={setSelectedRows}
                             onViewParent={setSelectedParent}
                         />
@@ -404,7 +413,7 @@ const ParentManagementHome = () => {
                 onRefresh={fetchData}
             />
 
-            {/* Delete Confirmation Modal */}
+            {/* Status Change Confirmation Modal */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                     <div
@@ -413,25 +422,36 @@ const ParentManagementHome = () => {
                     />
                     <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                                <FontAwesomeIcon icon={faTrash} className="text-2xl text-red-600" />
+                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${statusToSet === 'ACTIVE' ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                                <FontAwesomeIcon 
+                                    icon={statusToSet === 'ACTIVE' ? faCheck : faTrash} 
+                                    className={`text-2xl ${statusToSet === 'ACTIVE' ? 'text-emerald-600' : 'text-red-600'}`} 
+                                />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Deactivate Parent</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                {statusToSet === 'ACTIVE' ? 'Activate Parent' : 'Deactivate Parent'}
+                            </h3>
                             <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-                                Are you sure you want to deactivate this parent? They will be moved to the <span className="font-bold text-blue-600">Archived Records</span> list.
+                                {statusToSet === 'ACTIVE' 
+                                    ? 'Are you sure you want to restore this parent profile to the active list?' 
+                                    : 'Are you sure you want to deactivate this parent? They will be moved to the Archived Records list.'}
                             </p>
                             <div className="flex gap-3 w-full">
                                 <button
                                     onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                                    className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95 uppercase tracking-widest"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={confirmDelete}
-                                    className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-lg shadow-red-200 transition-all active:scale-95"
+                                    onClick={confirmStatusChange}
+                                    className={`flex-1 px-4 py-3 rounded-xl text-white font-bold text-sm shadow-lg transition-all active:scale-95 uppercase tracking-widest ${
+                                        statusToSet === 'ACTIVE' 
+                                            ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' 
+                                            : 'bg-red-600 hover:bg-red-700 shadow-red-200'
+                                    }`}
                                 >
-                                    Deactivate
+                                    {statusToSet === 'ACTIVE' ? 'Activate' : 'Deactivate'}
                                 </button>
                             </div>
                         </div>

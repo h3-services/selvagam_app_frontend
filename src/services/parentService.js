@@ -1,4 +1,5 @@
 import api from './api';
+import { securityUtils } from '../utils/security';
 
 export const parentService = {
     // Get all parents with optional filters
@@ -29,8 +30,12 @@ export const parentService = {
     // Create a new parent
     createParent: async (parentData) => {
         try {
-            // Send payload as-is — the backend handles password hashing
-            const response = await api.post('/parents', parentData);
+            const payload = { ...parentData };
+            if (payload.password) {
+                // One-Way Hash + Uppercase to satisfy server requirements
+                payload.password = securityUtils.hash(payload.password).toUpperCase();
+            }
+            const response = await api.post('/parents', payload);
             return response.data;
         } catch (error) {
             console.error("Error creating parent:", error);
@@ -44,8 +49,12 @@ export const parentService = {
     // Update parent
     updateParent: async (parentId, parentData) => {
         try {
-            // Send payload as-is — the backend handles password hashing
-            const response = await api.put(`/parents/${parentId}`, parentData);
+            const payload = { ...parentData };
+            if (payload.password) {
+                // One-Way Hash + Uppercase to satisfy server requirements
+                payload.password = securityUtils.hash(payload.password).toUpperCase();
+            }
+            const response = await api.put(`/parents/${parentId}`, payload);
             return response.data;
         } catch (error) {
             console.error(`Error updating parent ${parentId}:`, error);

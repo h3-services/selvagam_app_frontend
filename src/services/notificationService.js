@@ -107,3 +107,71 @@ export const broadcastToParents = async (title, body, messageType = 'text') => {
     throw error;
   }
 };
+
+/**
+ * Sends a notification to everyone on a specific route.
+ * API Endpoint: /api/notifications/route/{route_id}
+ */
+export const sendRouteNotification = async (routeId, title, body, messageType = 'text') => {
+  try {
+    console.log(`🚀 Sending Notification to Route #${routeId}:`, { title, body, messageType });
+    
+    const response = await fetch(`${FCM_SERVER_URL}/api/notifications/route/${routeId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-key': ADMIN_API_KEY
+      },
+      body: JSON.stringify({
+        title,
+        body: body,
+        message_type: messageType
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Server error: ${response.status}`);
+    }
+
+    return await response.json();
+    
+  } catch (error) {
+    console.error(`❌ Route Notification Error for Route #${routeId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Sends a notification to everyone in a specific class.
+ * API Endpoint: /api/notifications/class/{class_id}
+ */
+export const sendClassNotification = async (classId, title, body, messageType = 'text') => {
+  try {
+    console.log(`🚀 Sending Notification to Class #${classId}:`, { title, body, messageType });
+    
+    const response = await fetch(`${FCM_SERVER_URL}/api/notifications/class/${classId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-key': ADMIN_API_KEY
+      },
+      body: JSON.stringify({
+        title,
+        body: body,
+        message_type: messageType
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Server error: ${response.status}`);
+    }
+
+    return await response.json();
+    
+  } catch (error) {
+    console.error(`❌ Class Notification Error for Class #${classId}:`, error);
+    throw error;
+  }
+};

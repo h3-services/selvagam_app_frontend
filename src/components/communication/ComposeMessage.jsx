@@ -13,7 +13,7 @@ import {
     faRoute,
     faTruck
 } from '@fortawesome/free-solid-svg-icons';
-import { sendNotification, sendBroadcastNotification, broadcastToParents } from '../../services/notificationService';
+import { sendNotification, sendBroadcastNotification, broadcastToParents, sendRouteNotification, sendClassNotification } from '../../services/notificationService';
 import { parentService } from '../../services/parentService';
 import { routeService } from '../../services/routeService';
 
@@ -68,21 +68,19 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
                     messageType
                 );
             } else if (targetCategory === 'ROUTE') {
-                // Broadcast to a route-specific topic (e.g., 'route_1_users')
-                const topic = `route_${targetId}_users`;
-                await sendBroadcastNotification(
+                // Use specific route notification API
+                await sendRouteNotification(
+                    targetId,
                     title.trim(), 
                     messageText.trim(), 
-                    topic, 
                     messageType
                 );
             } else if (targetCategory === 'CLASS') {
-                // Broadcast to a class-specific topic (e.g., 'class_1_users')
-                const topic = `class_${targetId}_users`;
-                await sendBroadcastNotification(
+                // Use specific class notification API
+                await sendClassNotification(
+                    targetId,
                     title.trim(), 
                     messageText.trim(), 
-                    topic, 
                     messageType
                 );
             }
