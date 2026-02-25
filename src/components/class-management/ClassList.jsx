@@ -183,8 +183,10 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
                         headerClass: "font-black uppercase text-[12px] tracking-wider ag-center-header",
                     }}
                     pagination={true}
-                    paginationPageSize={10}
+                    paginationPageSize={20}
                     paginationPageSizeSelector={[10, 20, 50, 100]}
+                    suppressPaginationPanel={false}
+                    paginateChildRows={true}
                     rowHeight={isMobile ? 60 : 80}
                     headerHeight={isMobile ? 40 : 50}
                     theme="legacy"

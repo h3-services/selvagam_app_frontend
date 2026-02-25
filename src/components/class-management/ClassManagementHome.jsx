@@ -93,7 +93,7 @@ const ClassManagementHome = () => {
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className='ml-20 lg:ml-0'>
+                    <div className='ml-14 lg:ml-0'>
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                             Class Management
                         </h1>
@@ -114,7 +114,7 @@ const ClassManagementHome = () => {
                                 placeholder="Search classes..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-64 md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                             />
                             <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                         </div>
@@ -150,10 +150,10 @@ const ClassManagementHome = () => {
                     setEditingClass(null);
                     setShowAddModal(true);
                 }}
-                className="fixed bottom-8 right-8 w-16 h-16 text-white rounded-full shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
+                className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
                 style={{ backgroundColor: COLORS.SIDEBAR_BG }}
             >
-                <FontAwesomeIcon icon={faPlus} className="text-2xl" />
+                <FontAwesomeIcon icon={faPlus} className="text-xl sm:text-2xl" />
             </button>
 
             <AddClassForm 

@@ -129,8 +129,10 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                         rowHeight={isMobile ? 60 : 80}
                         headerHeight={isMobile ? 40 : 50}
                         pagination={true}
-                        paginationPageSize={10}
-                        paginationPageSizeSelector={[10, 20, 50]}
+                        paginationPageSize={20}
+                        paginationPageSizeSelector={[10, 20, 50, 100]}
+                        suppressPaginationPanel={false}
+                        paginateChildRows={true}
                         theme="legacy"
                         onGridReady={(params) => {
                             if (window.innerWidth >= 1024) {

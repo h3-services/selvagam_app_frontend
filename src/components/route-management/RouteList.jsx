@@ -163,8 +163,10 @@ const RouteList = ({
                         rowHeight={isMobile ? 60 : 80}
                         headerHeight={isMobile ? 40 : 50}
                         pagination={true}
-                        paginationPageSize={10}
-                        paginationPageSizeSelector={[10, 20, 50]}
+                        paginationPageSize={20}
+                        paginationPageSizeSelector={[10, 20, 50, 100]}
+                        suppressPaginationPanel={false}
+                        paginateChildRows={true}
                         overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No routes found</span>'
                         theme="legacy"
                         suppressRowTransform={true}

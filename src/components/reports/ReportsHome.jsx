@@ -25,7 +25,7 @@ import { useState } from 'react';
                 {/* Header */}
                 <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className='ml-20 lg:ml-0'>
+                        <div className='ml-14 lg:ml-0'>
                             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Reports</h1>
                         </div>
     
@@ -36,7 +36,7 @@ import { useState } from 'react';
                                     placeholder="Search reports..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-64 md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                    className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
                             </div>

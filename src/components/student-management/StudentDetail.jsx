@@ -175,21 +175,21 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
     return (
         <div className="flex-1 h-full flex flex-col bg-[#F8FAFC] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
             {/* Header Bar */}
-            <div className="bg-white border-b border-slate-200 px-8 h-20 flex items-center justify-between flex-shrink-0 z-20">
-                <div className="flex items-center gap-6">
+            <div className="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 sm:h-20 flex items-center justify-between flex-shrink-0 z-20">
+                <div className="flex items-center gap-3 sm:gap-6 min-w-0">
                     <button 
                         onClick={onBack}
-                        className="w-10 h-10 flex items-center justify-center hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90"
+                        className="w-10 h-10 flex-shrink-0 flex items-center justify-center hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-all active:scale-90"
                     >
                         <FontAwesomeIcon icon={faArrowLeft} />
                     </button>
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white text-xl font-black shadow-xl shadow-slate-200">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 flex-shrink-0 flex items-center justify-center text-white text-lg sm:text-xl font-black shadow-xl shadow-slate-200">
                             {selectedStudent.name.charAt(0)}
                         </div>
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h2 className="text-xl font-black text-slate-900 leading-none tracking-tight">{selectedStudent.name}</h2>
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <h2 className="text-base sm:text-xl font-black text-slate-900 leading-none tracking-tight truncate">{selectedStudent.name}</h2>
                                 <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
                                     {selectedStudent.studentStatus || 'Active'}
                                 </span>
@@ -213,8 +213,8 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
-                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-8">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8">
+                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-4 sm:gap-8">
                     
                     {/* Left Column - Core Identity */}
                     <div className="col-span-12 lg:col-span-4 space-y-8">

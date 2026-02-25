@@ -17,10 +17,8 @@ import { sendNotification, sendBroadcastNotification, broadcastToParents } from 
 import { parentService } from '../../services/parentService';
 import { routeService } from '../../services/routeService';
 
-const ComposeMessage = () => {
+const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
     const [parents, setParents] = useState([]);
-    const [routes, setRoutes] = useState([]);
-    const [selectedTarget, setSelectedTarget] = useState('topic:parents');
     const [messageType, setMessageType] = useState('text'); // 'text' | 'audio'
     const [messageText, setMessageText] = useState('');
     const [isSending, setIsSending] = useState(false);
@@ -31,11 +29,7 @@ const ComposeMessage = () => {
         const fetchData = async () => {
             try {
                 setLoadingData(true);
-                const [parentRes, routeRes] = await Promise.all([
-                    parentService.getAllParentFcmTokens(),
-                    routeService.getAllRoutes()
-                ]);
-
+                const parentRes = await parentService.getAllParentFcmTokens();
                 const parentData = parentRes.parents || [];
                 const mappedParents = parentData.map(p => ({
                     id: p.parent_id,
@@ -44,11 +38,6 @@ const ComposeMessage = () => {
                     name: p.name || 'Unknown Parent'
                 }));
                 setParents(mappedParents);
-                const mappedRoutes = (routeRes || []).map(r => ({
-                    id: r.route_id,
-                    name: r.name || r.route_name
-                }));
-                setRoutes(mappedRoutes);
             } catch (error) {
                 console.error("Failed to fetch communication data:", error);
             } finally {
@@ -61,51 +50,47 @@ const ComposeMessage = () => {
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!title.trim() || !messageText.trim()) return;
+        
+        // Validation for selection
+        if (targetCategory !== 'ALL' && !targetId) {
+            alert(`⚠️ Selection Required: Please choose a ${targetCategory.toLowerCase()} from the selector above.`);
+            return;
+        }
+
         setIsSending(true);
 
         try {
-            if (selectedTarget === 'topic:parents') {
+            if (targetCategory === 'ALL') {
                 // Specialized broadcast for all parents using specific API endpoint
                 await broadcastToParents(
                     title.trim(), 
                     messageText.trim(), 
                     messageType
                 );
-            } else if (selectedTarget.startsWith('topic:')) {
-                // Broadcast to other generic topics
-                const topic = selectedTarget.split(':')[1];
-                await sendBroadcastNotification(
-                    title.trim(), 
-                    messageText.trim(), 
-                    topic, 
-                    messageType
-                );
-            } else if (selectedTarget.startsWith('route:')) {
+            } else if (targetCategory === 'ROUTE') {
                 // Broadcast to a route-specific topic (e.g., 'route_1_users')
-                const routeId = selectedTarget.split(':')[1];
-                const topic = `route_${routeId}_users`;
+                const topic = `route_${targetId}_users`;
                 await sendBroadcastNotification(
                     title.trim(), 
                     messageText.trim(), 
                     topic, 
                     messageType
                 );
-            } else {
-                // Individual Direct Message
-                const targetTokens = parents
-                    .filter(p => p.id === selectedTarget && p.fcm)
-                    .map(p => p.fcm);
-
-                if (targetTokens.length === 0) throw new Error('No valid mobile tokens found for this recipient');
-
-                await Promise.all(targetTokens.map(token => 
-                    sendNotification(title.trim(), messageText.trim(), 'parent', messageType, token)
-                ));
+            } else if (targetCategory === 'CLASS') {
+                // Broadcast to a class-specific topic (e.g., 'class_1_users')
+                const topic = `class_${targetId}_users`;
+                await sendBroadcastNotification(
+                    title.trim(), 
+                    messageText.trim(), 
+                    topic, 
+                    messageType
+                );
             }
             
             // Notification dispatched successfully
             setTitle('');
             setMessageText('');
+            alert('🚀 Message dispatched successfully!');
         } catch (error) {
             console.error('Dispatch error:', error);
             alert(`⚠️ Delivery Failed: ${error.message}`);

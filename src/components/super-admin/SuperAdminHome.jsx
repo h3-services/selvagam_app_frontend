@@ -118,7 +118,7 @@ const SuperAdminHome = () => {
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className='ml-20 lg:ml-0'>
+                    <div className='ml-14 lg:ml-0'>
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">System Administration</h1>
                     </div>
                 </div>

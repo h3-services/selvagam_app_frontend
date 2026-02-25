@@ -70,21 +70,21 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate, onDelete, onEdit, onSt
     return (
         <div className="flex-1 h-full flex flex-col bg-[#F8FAFC] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
             {/* Enterprise Header Bar */}
-            <div className="bg-white border-b border-slate-200 px-10 h-24 flex items-center justify-between flex-shrink-0 z-20">
-                <div className="flex items-center gap-8">
+            <div className="bg-white border-b border-slate-200 px-4 sm:px-10 py-4 sm:h-24 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 flex-shrink-0 z-20">
+                <div className="flex items-center gap-4 sm:gap-8 min-w-0">
                     <button 
                         onClick={onBack}
-                        className="w-12 h-12 flex items-center justify-center hover:bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-all active:scale-95 border border-transparent hover:border-slate-100"
+                        className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 flex items-center justify-center hover:bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-all active:scale-95 border border-transparent hover:border-slate-100"
                     >
                         <FontAwesomeIcon icon={faArrowLeft} />
                     </button>
-                    <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-[2rem] bg-slate-900 flex items-center justify-center text-white text-2xl font-black shadow-2xl shadow-slate-300 transform -rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-[1.5rem] sm:rounded-[2rem] bg-slate-900 flex-shrink-0 flex items-center justify-center text-white text-xl sm:text-2xl font-black shadow-2xl shadow-slate-300 transform -rotate-3 hover:rotate-0 transition-transform duration-500">
                             {selectedDriver.name?.charAt(0)}
                         </div>
-                        <div>
-                            <div className="flex items-center gap-4">
-                                <h2 className="text-2xl font-black text-slate-900 leading-none tracking-tight">{selectedDriver.name}</h2>
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                                <h2 className="text-lg sm:text-2xl font-black text-slate-900 leading-none tracking-tight truncate">{selectedDriver.name}</h2>
                                 <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] border shadow-sm ${
                                     selectedDriver.status === 'Active' || selectedDriver.status === 'ACTIVE'
                                     ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
@@ -164,8 +164,8 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate, onDelete, onEdit, onSt
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-12">
-                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-12">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 lg:p-12">
+                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-4 sm:gap-8 lg:gap-12">
                     
                     {/* Left Column - Core Identity */}
                     <div className="col-span-12 lg:col-span-5 space-y-10">
@@ -186,7 +186,7 @@ const DriverDetail = ({ selectedDriver, onBack, onUpdate, onDelete, onEdit, onSt
                         {/* Operational Card */}
                         <div className="bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm group">
                             <SectionHeader icon={faCheck} title="License Information" color="emerald" />
-                            <div className="grid grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                                 <div className="p-8 bg-slate-50/50 rounded-[2.5rem] border border-slate-100 hover:border-emerald-200 transition-all duration-500">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">License Number</p>
                                     <div className="flex items-center gap-4">

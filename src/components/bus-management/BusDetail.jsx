@@ -33,21 +33,21 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
     return (
         <div className="flex-1 h-full flex flex-col bg-[#F1F5F9] overflow-hidden rounded-3xl border border-slate-200 shadow-xl">
             {/* Header Bar */}
-            <div className="bg-white border-b border-slate-200 px-8 h-20 flex items-center justify-between flex-shrink-0 z-20">
-                <div className="flex items-center gap-6">
+            <div className="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 sm:h-20 flex items-center justify-between flex-shrink-0 z-20">
+                <div className="flex items-center gap-3 sm:gap-6 min-w-0">
                     <button 
                         onClick={onBack}
-                        className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                        className="p-2 flex-shrink-0 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
                     >
                         <FontAwesomeIcon icon={faArrowLeft} />
                     </button>
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-indigo-100">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-600 flex-shrink-0 flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-lg shadow-indigo-100">
                             <FontAwesomeIcon icon={faBus} />
                         </div>
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h2 className="text-xl font-bold text-slate-900 leading-none">{selectedBus.bus_name || selectedBus.busNumber}</h2>
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                <h2 className="text-base sm:text-xl font-bold text-slate-900 leading-none truncate">{selectedBus.bus_name || selectedBus.busNumber}</h2>
                                 <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
                                     (selectedBus.status || '').toUpperCase() === 'ACTIVE' 
                                     ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
@@ -56,7 +56,7 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
                                     {selectedBus.status}
                                 </span>
                             </div>
-                            <p className="text-xs font-medium text-slate-500 mt-1.5 focus-within:">
+                            <p className="text-[10px] sm:text-xs font-medium text-slate-500 mt-1.5 truncate">
                                 <span className="text-slate-400 font-bold tracking-widest uppercase text-[10px]">Reg. No:</span> <span className="text-slate-900 font-bold">{selectedBus.registration_number || selectedBus.busNumber}</span> • <span className="text-slate-400 font-bold tracking-widest uppercase text-[10px]">Type:</span> <span className="text-indigo-600 font-black">{selectedBus.vehicle_type || 'Standard'}</span>
                             </p>
                         </div>
@@ -75,8 +75,8 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
-                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-8">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8">
+                <div className="max-w-[1400px] mx-auto grid grid-cols-12 gap-4 sm:gap-8">
                     
                     {/* Sidebar (Left) */}
                     <div className="col-span-12 lg:col-span-4 space-y-8">
