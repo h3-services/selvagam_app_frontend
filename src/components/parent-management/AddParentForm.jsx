@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUser, faPhone, faEnvelope, faMapMarkerAlt, faLock, faUserPlus, faMagic, faCheck, faShieldAlt, faSignature, faEdit, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUser, faPhone, faEnvelope, faMapMarkerAlt, faLock, faUserPlus, faMagic, faCheck, faShieldAlt, faSignature, faEdit, faChevronDown, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 
 const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false }) => (
@@ -319,7 +319,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                     >
                         {isSubmitting ? (
                             <>
-                                <FontAwesomeIcon icon={faMagic} spin className="text-[10px] sm:text-xs" />
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-[10px] sm:text-xs" />
                                 <span>Processing...</span>
                             </>
                         ) : (

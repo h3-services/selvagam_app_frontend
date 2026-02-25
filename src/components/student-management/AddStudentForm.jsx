@@ -1,16 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import { routeService } from '../../services/routeService';
 import { parentService } from '../../services/parentService';
 import { classService } from '../../services/classService';
 
-const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false }) => (
+const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false, error, maxLength }) => (
     <div className="relative group/field">
-        <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 ${disabled ? 'bg-slate-50 border-slate-100' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/5 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500'}`}>
-            <div className="w-12 h-12 flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:text-blue-600 group-focus-within/field:scale-110">
+        <div className="flex justify-between items-center mb-1.5 ml-1">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
+            {error && <span className="text-[9px] font-bold text-rose-500 animate-pulse uppercase tracking-wider">{error}</span>}
+        </div>
+        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 ${disabled ? 'bg-slate-50 border-slate-100' : error ? 'border-rose-400 ring-4 ring-rose-500/5' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/5 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500'}`}>
+            <div className={`w-12 h-12 flex items-center justify-center absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:scale-110 ${error ? 'text-rose-400' : 'text-slate-400 group-focus-within/field:text-blue-600'}`}>
                 <FontAwesomeIcon icon={icon} className="text-sm" />
             </div>
             <input
@@ -18,6 +21,7 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
+                maxLength={maxLength}
                 className="w-full pl-12 pr-4 py-4 bg-transparent rounded-2xl text-[13px] font-bold text-slate-700 placeholder-slate-300 focus:outline-none disabled:text-slate-400"
                 placeholder={placeholder}
             />
@@ -25,11 +29,14 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
     </div>
 );
 
-const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false }) => (
+const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false, error }) => (
     <div className="relative group/field">
-        <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 ${disabled ? 'bg-slate-50 border-slate-100' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/5 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500'}`}>
-            <div className="w-12 h-12 flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:text-blue-600 group-focus-within/field:scale-110">
+        <div className="flex justify-between items-center mb-1.5 ml-1">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
+            {error && <span className="text-[9px] font-bold text-rose-500 animate-pulse uppercase tracking-wider">{error}</span>}
+        </div>
+        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 ${disabled ? 'bg-slate-50 border-slate-100' : error ? 'border-rose-400 ring-4 ring-rose-500/5' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/5 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500'}`}>
+            <div className={`w-12 h-12 flex items-center justify-center absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:scale-110 ${error ? 'text-rose-400' : 'text-slate-400 group-focus-within/field:text-blue-600'}`}>
                 <FontAwesomeIcon icon={icon} className="text-sm" />
             </div>
             <select
@@ -82,7 +89,7 @@ const YearRangePicker = ({ label, start, end, onStartChange, onEndChange }) => {
     );
 };
 
-const ClassSelector = ({ label, value, options, onChange, placeholder }) => {
+const ClassSelector = ({ label, value, options, onChange, placeholder, error }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
 
@@ -100,51 +107,48 @@ const ClassSelector = ({ label, value, options, onChange, placeholder }) => {
 
     return (
         <div className={`relative group/field ${isOpen ? 'z-[3000]' : 'z-10'}`} ref={containerRef}>
-            <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
+            <div className="flex justify-between items-center mb-1.5 ml-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
+                {error && <span className="text-[9px] font-bold text-rose-500 animate-pulse uppercase tracking-wider">{error}</span>}
+            </div>
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                className={`relative flex items-center justify-between bg-white rounded-3xl border p-4 cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/5 ${isOpen ? 'ring-4 ring-blue-500/10 border-blue-500 shadow-2xl shadow-blue-900/10' : 'border-slate-200'}`}
+                className={`relative flex items-center justify-between bg-white rounded-2xl border cursor-pointer transition-all duration-300 px-4 py-3 ${isOpen ? 'ring-4 ring-blue-500/10 border-blue-500 shadow-lg' : error ? 'border-rose-400 ring-4 ring-rose-500/5' : 'border-slate-200 hover:border-blue-400 hover:shadow-md'}`}
             >
-                <div className="flex items-center gap-5">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${selectedOption ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 rotate-3' : 'bg-slate-50 text-slate-400'}`}>
-                        <FontAwesomeIcon icon={faSchool} className="text-sm" />
+                <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedOption ? 'bg-blue-600 text-white shadow-sm' : error ? 'bg-rose-50 text-rose-400' : 'bg-slate-100 text-slate-400'}`}>
+                        <FontAwesomeIcon icon={faSchool} className="text-xs" />
                     </div>
-                    <div>
-                        {selectedOption ? (
-                            <div className="flex flex-col">
-                                <span className="text-sm font-black text-slate-900 leading-none">Class {selectedOption.className}</span>
-                                <span className="text-[9px] text-blue-600 font-black uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-lg inline-block mt-1.5 w-fit border border-blue-100">Section {selectedOption.section}</span>
-                            </div>
-                        ) : (
-                            <span className="text-[13px] font-bold text-slate-400">{placeholder}</span>
-                        )}
-                    </div>
+                    {selectedOption ? (
+                        <div className="flex items-center gap-2">
+                            <span className="text-[13px] font-bold text-slate-800">Class {selectedOption.className}</span>
+                            <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100 uppercase tracking-wider">Sec {selectedOption.section}</span>
+                        </div>
+                    ) : (
+                        <span className="text-[13px] font-bold text-slate-400">{placeholder}</span>
+                    )}
                 </div>
-                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 text-[10px] transition-transform duration-500 mr-2 ${isOpen ? 'rotate-180' : ''}`} />
+                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 text-[10px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </div>
 
             {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-4 p-4 bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,0.15)] border border-white/60 z-[3001] max-h-80 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-6 zoom-in duration-300">
-                    <div className="grid grid-cols-1 gap-3">
+                <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-white rounded-2xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] border border-slate-100 z-[3001] max-h-56 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="grid grid-cols-2 gap-1">
                         {options.map((opt) => (
                             <div 
                                 key={opt.value}
                                 onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                                className={`group/item flex items-center justify-between p-5 rounded-[2rem] cursor-pointer transition-all duration-500 ${value == opt.value ? 'bg-blue-600 text-white shadow-xl shadow-blue-900/30' : 'hover:bg-slate-50 text-slate-600 hover:translate-x-1'}`}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all duration-200 ${value == opt.value ? 'bg-blue-600 text-white shadow-sm' : 'hover:bg-slate-50 text-slate-700'}`}
                             >
-                                <div className="flex items-center gap-6">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transition-all duration-500 ${value == opt.value ? 'bg-white/20' : 'bg-white border border-slate-100 text-slate-400 group-hover/item:text-blue-600 group-hover/item:shadow-lg'}`}>
-                                        {opt.className.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <div className={`text-base font-black tracking-tight ${value == opt.value ? 'text-white' : 'text-slate-900'}`}>Class {opt.className}</div>
-                                        <div className={`text-[11px] font-black uppercase tracking-[0.2em] leading-none mt-1.5 ${value == opt.value ? 'text-blue-100' : 'text-slate-400'}`}>Section {opt.section}</div>
-                                    </div>
+                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${value == opt.value ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                    {opt.className}
+                                </div>
+                                <div className="flex flex-col leading-none min-w-0">
+                                    <span className={`text-[11px] font-bold truncate ${value == opt.value ? 'text-white' : 'text-slate-800'}`}>Class {opt.className}</span>
+                                    <span className={`text-[8px] font-bold uppercase tracking-wider mt-0.5 ${value == opt.value ? 'text-blue-200' : 'text-slate-400'}`}>Sec {opt.section}</span>
                                 </div>
                                 {value == opt.value && (
-                                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30 animate-in zoom-in spin-in-12 duration-500">
-                                        <FontAwesomeIcon icon={faCheck} className="text-xs" />
-                                    </div>
+                                    <FontAwesomeIcon icon={faCheck} className="text-[8px] ml-auto shrink-0" />
                                 )}
                             </div>
                         ))}
@@ -155,13 +159,24 @@ const ClassSelector = ({ label, value, options, onChange, placeholder }) => {
     );
 };
 
-const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }) => {
+const STORAGE_KEY = 'addStudentFormDefaults';
+
+const getSavedDefaults = () => {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+};
+
+const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, preloadedClasses, preloadedRoutes, preloadedStops }) => {
+    const saved = getSavedDefaults();
+    
     const defaultStudentState = {
         name: '',
         parent_id: '',
         s_parent_id: '',
-        dob: '',
-        class_id: '',
+        dob: saved.dobYear ? `${saved.dobYear}-01-01` : '',
+        class_id: saved.class_id || '',
         pickup_route_id: '',
         drop_route_id: '',
         pickup_stop_id: '',
@@ -169,10 +184,10 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
         emergency_contact: '',
         student_photo_url: '',
         study_year: '',
-        yearStart: new Date().getFullYear().toString(),
-        yearEnd: (new Date().getFullYear() + 1).toString(),
+        yearStart: saved.yearStart || new Date().getFullYear().toString(),
+        yearEnd: saved.yearEnd || (new Date().getFullYear() + 1).toString(),
         is_transport_user: true,
-        gender: 'MALE'
+        gender: saved.gender || 'MALE'
     };
 
     const defaultParentState = {
@@ -206,6 +221,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
     const [filteredDropStops, setFilteredDropStops] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
     const [loadingParent, setLoadingParent] = useState(false);
+    const [loadingSave, setLoadingSave] = useState(false);
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (parents) {
@@ -251,11 +268,19 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
         }
     }, [initialData, show]);
 
+    // Use preloaded data from parent, fetch only if not available
     useEffect(() => {
         if (show) {
-            fetchRoutesAndStops();
+            if (preloadedClasses?.length) setClasses(preloadedClasses);
+            if (preloadedRoutes?.length) setRoutes(preloadedRoutes);
+            if (preloadedStops?.length) setStops(preloadedStops);
+            
+            // Only fetch if preloaded data is missing
+            if (!preloadedClasses?.length || !preloadedRoutes?.length || !preloadedStops?.length) {
+                fetchRoutesAndStops();
+            }
         }
-    }, [show]);
+    }, [show, preloadedClasses, preloadedRoutes, preloadedStops]);
 
     const fetchRoutesAndStops = async () => {
         setLoadingData(true);
@@ -284,19 +309,48 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
         setFilteredDropStops(formData.drop_route_id ? stops.filter(s => s.route_id === formData.drop_route_id) : []);
     }, [formData.drop_route_id, stops]);
 
+    // Save defaults to localStorage when key fields change
+    const saveDefaults = (field, value) => {
+        try {
+            const current = getSavedDefaults();
+            if (field === 'gender') current.gender = value;
+            if (field === 'yearStart') current.yearStart = value;
+            if (field === 'yearEnd') current.yearEnd = value;
+            if (field === 'class_id') current.class_id = value;
+            if (field === 'dob' && value) current.dobYear = value.split('-')[0];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+        } catch (e) { console.warn('Could not save form defaults', e); }
+    };
+
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+        // Persist key fields
+        if (['gender', 'yearStart', 'yearEnd', 'class_id', 'dob'].includes(field)) {
+            saveDefaults(field, value);
+        }
     };
 
     const handleParentChange = (field, value) => {
         setNewParent(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleCreateParent = async () => {
-        if (!newParent.name || !newParent.phone || !newParent.parent_role) {
-            alert("Please fill required parent fields (Name, Phone, Role)");
-            return;
+    const validateParent = () => {
+        const newErrors = {};
+        if (!newParent.name) newErrors.parentName = "Name Required";
+        if (!newParent.phone) {
+            newErrors.parentPhone = "Phone Required";
+        } else if (!/^\d{10}$/.test(newParent.phone)) {
+            newErrors.parentPhone = "Must be 10 digits";
         }
+        if (!newParent.parent_role) newErrors.parentRole = "Role Required";
+        if (!newParent.password) newErrors.parentPassword = "Password Required";
+        
+        setErrors(prev => ({ ...prev, ...newErrors }));
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleCreateParent = async () => {
+        if (!validateParent()) return;
         
         setLoadingParent(true);
         try {
@@ -341,68 +395,88 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                     errorMessage = typeof apiError.detail === 'string' ? apiError.detail : JSON.stringify(apiError.detail);
                 }
             }
-            alert(errorMessage);
+            setErrors(prev => ({ ...prev, apiError: errorMessage }));
         } finally {
             setLoadingParent(false);
         }
     };
 
-    const handleSaveStudent = () => {
-        if (!formData.name || !formData.parent_id || !formData.dob) {
-            alert("Please fill in required fields: Name, Primary Parent, DOB");
-            return;
+    const validateStudent = () => {
+        const newErrors = {};
+        if (!formData.name) newErrors.name = "Required";
+        if (!formData.parent_id) newErrors.parent_id = "Required";
+        if (!formData.dob) newErrors.dob = "Required";
+        if (!formData.class_id) newErrors.class_id = "Required";
+        
+        if (formData.emergency_contact && !/^\d{10}$/.test(formData.emergency_contact)) {
+            newErrors.emergency_contact = "10 Digits Only";
         }
 
         if (formData.s_parent_id && formData.parent_id === formData.s_parent_id) {
-            alert("Primary and Secondary parent cannot be the same person.");
-            return;
+            newErrors.s_parent_id = "Cannot be same as primary";
         }
 
         if (formData.is_transport_user) {
-            if (!formData.pickup_route_id || !formData.pickup_stop_id || !formData.drop_route_id || !formData.drop_stop_id) {
-                alert("Please select pickup and drop route & stop.");
-                return;
+            if (!formData.pickup_route_id) newErrors.pickup_route_id = "Required";
+            if (!formData.pickup_stop_id) newErrors.pickup_stop_id = "Required";
+            if (!formData.drop_route_id) newErrors.drop_route_id = "Required";
+            if (!formData.drop_stop_id) newErrors.drop_stop_id = "Required";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSaveStudent = async () => {
+        if (!validateStudent()) return;
+
+        setLoadingSave(true);
+        try {
+            const combinedStudyYear = formData.yearStart && formData.yearEnd ? `${formData.yearStart}-${formData.yearEnd}` : '';
+
+            // Build payload matching the working Swagger example exactly
+            const payload = {
+                name: formData.name,
+                parent_id: formData.parent_id,
+                dob: formData.dob,
+                gender: formData.gender || 'MALE',
+                s_parent_id: formData.s_parent_id || null, 
+                is_transport_user: formData.is_transport_user,
+                study_year: combinedStudyYear,
+                emergency_contact: formData.emergency_contact ? Number(formData.emergency_contact) : 0
+            };
+
+            // Add optional fields only if they have actual values
+            if (formData.class_id) payload.class_id = formData.class_id;
+            
+            // Only include transport details if transport user is true
+            if (formData.is_transport_user) {
+                payload.pickup_route_id = formData.pickup_route_id;
+                payload.drop_route_id = formData.drop_route_id;
+                payload.pickup_stop_id = formData.pickup_stop_id;
+                payload.drop_stop_id = formData.drop_stop_id;
             }
+
+            if (formData.student_photo_url) payload.student_photo_url = formData.student_photo_url;
+
+            console.log("Saving Student Payload:", JSON.stringify(payload, null, 2));
+            
+            if (initialData) {
+                await onUpdate(initialData.student_id, payload);
+            } else {
+                await onAdd(payload);
+            }
+            
+            setFormData(defaultStudentState);
+            setIsAddingNewParent(false);
+            setIsSearchingParent(false);
+        } catch (error) {
+            console.error("Save Student Error:", error);
+            // Error handling is mostly done in parent via alert, 
+            // but we need to stop loading here if use stays on form
+        } finally {
+            setLoadingSave(false);
         }
-
-        const combinedStudyYear = formData.yearStart && formData.yearEnd ? `${formData.yearStart}-${formData.yearEnd}` : '';
-
-        // Build payload matching the working Swagger example exactly
-        const payload = {
-            name: formData.name,
-            parent_id: formData.parent_id,
-            dob: formData.dob,
-            gender: formData.gender || 'MALE',
-            s_parent_id: formData.s_parent_id || null, 
-            is_transport_user: formData.is_transport_user,
-            study_year: combinedStudyYear,
-            emergency_contact: formData.emergency_contact ? Number(formData.emergency_contact) : 0
-        };
-
-        // Add optional fields only if they have actual values
-        if (formData.class_id) payload.class_id = formData.class_id;
-        
-        // Only include transport details if transport user is true
-        if (formData.is_transport_user) {
-            payload.pickup_route_id = formData.pickup_route_id;
-            payload.drop_route_id = formData.drop_route_id;
-            payload.pickup_stop_id = formData.pickup_stop_id;
-            payload.drop_stop_id = formData.drop_stop_id;
-        }
-
-        if (formData.student_photo_url) payload.student_photo_url = formData.student_photo_url;
-
-        console.log("Saving Student Payload:", JSON.stringify(payload, null, 2));
-        
-        if (initialData) {
-            onUpdate(initialData.student_id, payload);
-        } else {
-            onAdd(payload);
-        }
-        
-        setFormData(defaultStudentState);
-        setIsAddingNewParent(false);
-        setIsSearchingParent(false);
     };
 
 
@@ -538,8 +612,12 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                             label="Name" 
                                             icon={faUser} 
                                             value={formData.name} 
-                                            onChange={(e) => handleChange('name', e.target.value)} 
-                                            placeholder="Enter student name" 
+                                            onChange={(e) => { 
+                                                handleChange('name', e.target.value);
+                                                if(errors.name) setErrors(prev => ({...prev, name: null}));
+                                            }} 
+                                            placeholder="Enter student name"
+                                            error={errors.name} 
                                         />
 
                                         <div className="grid grid-cols-2 gap-5">
@@ -548,19 +626,27 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                 icon={faCalendar} 
                                                 type="date"
                                                 value={formData.dob} 
-                                                onChange={(e) => handleChange('dob', e.target.value)} 
+                                                onChange={(e) => {
+                                                    handleChange('dob', e.target.value);
+                                                    if(errors.dob) setErrors(prev => ({...prev, dob: null}));
+                                                }}
+                                                error={errors.dob} 
                                             />
                                             <SelectField 
                                                 label="Gender" 
                                                 icon={faUser} 
                                                 value={formData.gender} 
-                                                onChange={(e) => handleChange('gender', e.target.value)} 
+                                                onChange={(e) => {
+                                                    handleChange('gender', e.target.value);
+                                                    if(errors.gender) setErrors(prev => ({...prev, gender: null}));
+                                                }} 
                                                 placeholder="Select Gender"
                                                 options={[
                                                     { value: 'MALE', label: 'Male' },
                                                     { value: 'FEMALE', label: 'Female' },
                                                     { value: 'OTHER', label: 'Other' }
                                                 ]}
+                                                error={errors.gender}
                                             />
                                         </div>
                                         <div className="grid grid-cols-1">
@@ -576,22 +662,32 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                         <ClassSelector 
                                             label="Class & Section" 
                                             value={formData.class_id} 
-                                            onChange={(val) => handleChange('class_id', val)} 
+                                            onChange={(val) => {
+                                                handleChange('class_id', val);
+                                                if(errors.class_id) setErrors(prev => ({...prev, class_id: null}));
+                                            }} 
                                             placeholder="Select Class"
                                             options={classes.filter(c => c.status === 'ACTIVE').map(c => ({
                                                 value: c.class_id, 
                                                 className: c.class_name,
                                                 section: c.section
                                             }))} 
+                                            error={errors.class_id}
                                         />
                                         
                                         <InputField 
-                                            label="Emergency Contact" 
+                                            label="Contact" 
                                             icon={faPhone} 
-                                            type="number"
+                                            type="tel"
                                             value={formData.emergency_contact}
-                                            onChange={(e) => handleChange('emergency_contact', e.target.value)}
-                                            placeholder="Phone number" 
+                                            onChange={(e) => {
+                                                const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                                handleChange('emergency_contact', val);
+                                                if(errors.emergency_contact) setErrors(prev => ({...prev, emergency_contact: null}));
+                                            }}
+                                            placeholder="10-digit phone number"
+                                            error={errors.emergency_contact}
+                                            maxLength={10}
                                         />
                                     </div>
                                 </div>
@@ -609,6 +705,14 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                     </div>
 
                                     <div>
+                                        {errors.parent_id && (
+                                            <div className="mb-4 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center gap-3 animate-pulse">
+                                                <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-500">
+                                                    <FontAwesomeIcon icon={faWarning} className="text-xs" />
+                                                </div>
+                                                <p className="text-[11px] font-black text-rose-600 uppercase tracking-widest">Primary Parent Selection Required</p>
+                                            </div>
+                                        )}
                                         {formData.parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.parent_id);
                                             return selectedParent ? (
@@ -689,6 +793,14 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                     </div>
 
                                     <div>
+                                        {errors.s_parent_id && (
+                                            <div className="mb-4 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center gap-3 animate-pulse">
+                                                <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-500">
+                                                    <FontAwesomeIcon icon={faWarning} className="text-xs" />
+                                                </div>
+                                                <p className="text-[11px] font-black text-rose-600 uppercase tracking-widest">{errors.s_parent_id}</p>
+                                            </div>
+                                        )}
                                         {formData.s_parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.s_parent_id);
                                             return selectedParent ? (
@@ -797,18 +909,26 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                         label="Route" 
                                                         icon={faBus} 
                                                         value={formData.pickup_route_id} 
-                                                        onChange={(e) => handleChange('pickup_route_id', e.target.value)} 
+                                                        onChange={(e) => {
+                                                            handleChange('pickup_route_id', e.target.value);
+                                                            if(errors.pickup_route_id) setErrors(prev => ({...prev, pickup_route_id: null}));
+                                                        }} 
                                                         placeholder="Select Route"
                                                         options={routes.map(r => ({value: r.route_id, label: r.name}))} 
+                                                        error={errors.pickup_route_id}
                                                     />
                                                     <SelectField 
                                                         label="Stop" 
                                                         icon={faMapMarkerAlt} 
                                                         value={formData.pickup_stop_id} 
-                                                        onChange={(e) => handleChange('pickup_stop_id', e.target.value)} 
+                                                        onChange={(e) => {
+                                                            handleChange('pickup_stop_id', e.target.value);
+                                                            if(errors.pickup_stop_id) setErrors(prev => ({...prev, pickup_stop_id: null}));
+                                                        }} 
                                                         placeholder={formData.pickup_route_id ? "Select Stop" : "Select Route First"}
                                                         disabled={!formData.pickup_route_id}
                                                         options={filteredPickupStops.map(s => ({value: s.stop_id, label: `${s.stop_name} (Order: ${s.pickup_stop_order})`}))} 
+                                                        error={errors.pickup_stop_id}
                                                     />
                                                 </div>
                                             </div>
@@ -825,18 +945,26 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                                         label="Route" 
                                                         icon={faBus} 
                                                         value={formData.drop_route_id} 
-                                                        onChange={(e) => handleChange('drop_route_id', e.target.value)} 
+                                                        onChange={(e) => {
+                                                            handleChange('drop_route_id', e.target.value);
+                                                            if(errors.drop_route_id) setErrors(prev => ({...prev, drop_route_id: null}));
+                                                        }} 
                                                         placeholder="Select Route"
                                                         options={routes.map(r => ({value: r.route_id, label: r.name}))} 
+                                                        error={errors.drop_route_id}
                                                     />
                                                     <SelectField 
                                                         label="Stop" 
                                                         icon={faMapMarkerAlt} 
                                                         value={formData.drop_stop_id} 
-                                                        onChange={(e) => handleChange('drop_stop_id', e.target.value)} 
+                                                        onChange={(e) => {
+                                                            handleChange('drop_stop_id', e.target.value);
+                                                            if(errors.drop_stop_id) setErrors(prev => ({...prev, drop_stop_id: null}));
+                                                        }} 
                                                         placeholder={formData.drop_route_id ? "Select Stop" : "Select Route First"}
                                                         disabled={!formData.drop_route_id}
                                                         options={filteredDropStops.map(s => ({value: s.stop_id, label: `${s.stop_name} (Order: ${s.drop_stop_order})`}))} 
+                                                        error={errors.drop_stop_id}
                                                     />
                                                 </div>
                                             </div>
@@ -866,18 +994,37 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                                             <FontAwesomeIcon icon={faTimes} className="text-xl" />
                                         </button>
                                         <div className="space-y-8 max-w-lg mx-auto pt-2">
+                                            {errors.apiError && (
+                                                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center gap-3 animate-bounce">
+                                                    <div className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center">
+                                                        <FontAwesomeIcon icon={faWarning} className="text-xs" />
+                                                    </div>
+                                                    <p className="text-[11px] font-black text-rose-600 uppercase tracking-widest">{errors.apiError}</p>
+                                                </div>
+                                            )}
 
                                             <div className="grid grid-cols-1 gap-6">
-                                                <InputField label="Parent Name" icon={faUserTie} value={newParent.name} onChange={(e) => handleParentChange('name', e.target.value)} placeholder="Enter parent name" />
+                                                <InputField label="Parent Name" icon={faUserTie} value={newParent.name} onChange={(e) => { handleParentChange('name', e.target.value); if(errors.parentName) setErrors(prev => ({...prev, parentName: null})); }} placeholder="Enter parent name" error={errors.parentName} />
                                                 <div className="grid grid-cols-2 gap-5">
                                                     <SelectField 
-                                                        label="Role" icon={faUser} value={newParent.parent_role} onChange={(e) => handleParentChange('parent_role', e.target.value)} placeholder="Role"
+                                                        label="Role" icon={faUser} value={newParent.parent_role} onChange={(e) => { handleParentChange('parent_role', e.target.value); if(errors.parentRole) setErrors(prev => ({...prev, parentRole: null})); }} placeholder="Role"
                                                         options={[{value: 'GUARDIAN', label: 'Guardian'}, {value: 'FATHER', label: 'Father'}, {value: 'MOTHER', label: 'Mother'}]}
+                                                        error={errors.parentRole}
                                                     />
-                                                    <InputField label="Phone" icon={faPhone} type="number" value={newParent.phone} onChange={(e) => handleParentChange('phone', e.target.value)} placeholder="Phone number" />
+                                                    <InputField 
+                                                        label="Phone" icon={faPhone} type="tel" value={newParent.phone} 
+                                                        onChange={(e) => { 
+                                                            const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                                            handleParentChange('phone', val); 
+                                                            if(errors.parentPhone) setErrors(prev => ({...prev, parentPhone: null})); 
+                                                        }} 
+                                                        placeholder="10-digit number" 
+                                                        error={errors.parentPhone}
+                                                        maxLength={10}
+                                                    />
                                                 </div>
                                                 <InputField label="Email" icon={faEnvelope} type="email" value={newParent.email} onChange={(e) => handleParentChange('email', e.target.value)} placeholder="email@example.com" />
-                                                <InputField label="Password" icon={faLock} type="password" value={newParent.password} onChange={(e) => handleParentChange('password', e.target.value)} placeholder="Set Password" />
+                                                <InputField label="Password" icon={faLock} type="password" value={newParent.password} onChange={(e) => { handleParentChange('password', e.target.value); if(errors.parentPassword) setErrors(prev => ({...prev, parentPassword: null})); }} placeholder="Set Password" error={errors.parentPassword} />
                                             </div>
 
                                             <div className="space-y-4">
@@ -1015,15 +1162,22 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData }
                 <div className="px-10 py-6 border-t border-slate-100 bg-white/80 backdrop-blur-2xl flex-shrink-0 z-20 flex justify-center">
                     <button
                         onClick={handleSaveStudent}
-                        className="px-8 py-3.5 rounded-full font-black uppercase tracking-[0.2em] text-[10px] text-white shadow-[0_15px_30px_rgba(58,123,255,0.2)] hover:shadow-[0_20px_40px_rgba(58,123,255,0.3)] hover:-translate-y-0.5 active:scale-95 transition-all duration-500 flex items-center gap-3 group relative overflow-hidden"
+                        disabled={loadingSave}
+                        className={`px-8 py-3.5 rounded-full font-black uppercase tracking-[0.2em] text-[10px] text-white shadow-[0_15px_30px_rgba(58,123,255,0.2)] hover:shadow-[0_20px_40px_rgba(58,123,255,0.3)] hover:-translate-y-0.5 active:scale-95 transition-all duration-500 flex items-center gap-3 group relative overflow-hidden ${loadingSave ? 'opacity-70 cursor-not-allowed' : ''}`}
                         style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}
                     >
                         {/* Shimmer Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        {!loadingSave && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>}
                         
-                        <span className="relative z-10">{initialData ? 'Save Changes' : 'Save Student'}</span>
-                        <div className="w-8 h-8 bg-white/15 rounded-full flex items-center justify-center group-hover:rotate-[360deg] transition-transform duration-700 relative z-10 border border-white/20">
-                            <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                        <span className="relative z-10">
+                            {loadingSave ? 'Saving...' : (initialData ? 'Save Changes' : 'Save Student')}
+                        </span>
+                        <div className={`w-8 h-8 ${loadingSave ? '' : 'bg-white/15'} rounded-full flex items-center justify-center group-hover:rotate-[360deg] transition-transform duration-700 relative z-10 border border-white/20`}>
+                            {loadingSave ? (
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-[10px]" />
+                            ) : (
+                                <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                            )}
                         </div>
                     </button>
                 </div>

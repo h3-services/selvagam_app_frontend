@@ -228,7 +228,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                     <DataRow label="D.O.B" value={selectedStudent.originalData?.dob ? new Date(selectedStudent.originalData.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not Provided'} />
                                     <div className="col-span-2 pt-2">
                                         <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100/50">
-                                            <DataRow label="Emergency Contact" value={selectedStudent.emergencyContact} />
+                                            <DataRow label="Contact" value={selectedStudent.emergencyContact} />
                                         </div>
                                     </div>
                                 </div>

@@ -10,12 +10,17 @@ import AddStudentForm from './AddStudentForm';
 import { studentService } from '../../services/studentService';
 import { parentService } from '../../services/parentService';
 import { classService } from '../../services/classService';
+import { routeService } from '../../services/routeService';
+import { busService } from '../../services/busService';
 
 const StudentManagementHome = () => {
     const navigate = useNavigate();
     // State
     const [students, setStudents] = useState([]);
     const [parents, setParents] = useState([]);
+    const [allClasses, setAllClasses] = useState([]);
+    const [allRoutes, setAllRoutes] = useState([]);
+    const [allStops, setAllStops] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchParams] = useSearchParams();
     const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
@@ -66,7 +71,7 @@ const StudentManagementHome = () => {
         setLoading(true);
         try {
             const filters = getFiltersForTab(activeTab);
-            const [studentData, parentData, classData] = await Promise.all([
+            const [studentData, parentData, classData, routeData, busData, stopsData] = await Promise.all([
                 studentService.getAllStudents(filters).catch(err => {
                     console.error("Error fetching students:", err);
                     return [];
@@ -78,16 +83,43 @@ const StudentManagementHome = () => {
                 classService.getAllClasses().catch(err => {
                     console.error("Error fetching classes:", err);
                     return [];
+                }),
+                routeService.getAllRoutes().catch(err => {
+                    console.error("Error fetching routes:", err);
+                    return [];
+                }),
+                busService.getAllBuses().catch(err => {
+                    console.error("Error fetching buses:", err);
+                    return [];
+                }),
+                routeService.getAllRouteStops().catch(err => {
+                    console.error("Error fetching stops:", err);
+                    return [];
                 })
             ]);
             
-            setParents(parentData);
+            // Handle potential wrapped response from API (e.g. { success: true, data: [...] })
+            const sList = Array.isArray(studentData) ? studentData : (studentData.data || []);
+            const pList = Array.isArray(parentData) ? parentData : (parentData.data || []);
+            const cList = Array.isArray(classData) ? classData : (classData.data || []);
+            const rList = Array.isArray(routeData) ? routeData : (routeData.data || []);
+            const bList = Array.isArray(busData) ? busData : (busData.data || []);
+            const stopsList = Array.isArray(stopsData) ? stopsData : (stopsData.data || []);
+            
+            setParents(pList);
+            setAllClasses(cList);
+            setAllRoutes(rList);
+            setAllStops(stopsList);
 
             // Map API data to UI structure, linking parents and classes
-            const mappedStudents = studentData.map(s => {
-                const parent1 = parentData.find(p => p.parent_id === s.parent_id);
-                const parent2 = s.s_parent_id ? parentData.find(p => p.parent_id === s.s_parent_id) : null;
-                const studentClass = classData.find(c => c.class_id === s.class_id);
+            const mappedStudents = sList.map(s => {
+                const parent1 = pList.find(p => p.parent_id == s.parent_id);
+                const parent2 = s.s_parent_id ? pList.find(p => p.parent_id == s.s_parent_id) : null;
+                const studentClass = cList.find(c => c.class_id == s.class_id);
+                
+                // Lookup route and then bus associated with that route
+                const route = rList.find(r => r.route_id == s.pickup_route_id);
+                const bus = bList.find(b => b.route_id == s.pickup_route_id);
                 
                 return {
                     id: s.student_id,
@@ -100,7 +132,9 @@ const StudentManagementHome = () => {
                     mobile: parent1 ? parent1.phone : (s.emergency_contact || 'N/A'),
                     emergencyContact: s.emergency_contact || 'N/A',
                     studyYear: s.study_year || 'N/A',
-                    location: parent1 ? `${parent1.street}, ${parent1.city}, ${parent1.district}` : 'Route: ' + (s.pickup_route_id ? s.pickup_route_id.substring(0, 8) : 'None'),
+                    location: parent1 ? `${parent1.street}, ${parent1.city}, ${parent1.district}` : 'Route: ' + (s.pickup_route_id ? String(s.pickup_route_id).substring(0, 8) : 'None'),
+                    routeName: route ? (route.route_name || route.name) : 'No Route',
+                    busName: bus ? (bus.bus_name || bus.name || bus.registration_number || bus.bus_number) : 'No Bus',
                     date: s.created_at ? s.created_at.split('T')[0] : 'N/A',
                     status: s.transport_status === 'ACTIVE' ? 'Approved' : 'Inactive',
                     studentStatus: s.status || s.student_status || 'CURRENT',
@@ -166,7 +200,9 @@ const StudentManagementHome = () => {
                 (student) =>
                     (student.name || "").toLowerCase().includes(lowerQuery) ||
                     (student.primaryParent || "").toLowerCase().includes(lowerQuery) ||
-                    (student.className || "").toLowerCase().includes(lowerQuery)
+                    (student.className || "").toLowerCase().includes(lowerQuery) ||
+                    (student.routeName || "").toLowerCase().includes(lowerQuery) ||
+                    (student.busName || "").toLowerCase().includes(lowerQuery)
             );
         }
         return result;
@@ -699,6 +735,9 @@ const StudentManagementHome = () => {
                 onUpdate={handleUpdateAction}
                 parents={parents}
                 initialData={editingStudent}
+                preloadedClasses={allClasses}
+                preloadedRoutes={allRoutes}
+                preloadedStops={allStops}
             />
 
             {/* Floating Add Button */}

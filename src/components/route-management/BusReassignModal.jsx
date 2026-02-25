@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExchangeAlt, faTimes, faBus } from '@fortawesome/free-solid-svg-icons';
+import { faExchangeAlt, faTimes, faBus, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
 const BusReassignModal = ({
     show,
@@ -10,7 +11,20 @@ const BusReassignModal = ({
     reassigningRouteId,
     getStatusColor
 }) => {
+    const [isReassigning, setIsReassigning] = useState(false);
+
     if (!show) return null;
+
+    const handleReassign = async (routeId, bus) => {
+        setIsReassigning(true);
+        try {
+            await onReassign(routeId, bus);
+            setIsReassigning(false);
+        } catch (error) {
+            console.error("Reassignment failed:", error);
+            setIsReassigning(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-[1500]">
@@ -43,14 +57,14 @@ const BusReassignModal = ({
                             return (
                                 <button
                                     key={bus.busNumber}
-                                    onClick={() => onReassign(reassigningRouteId, bus)}
-                                    disabled={bus.status !== 'Active'}
+                                    onClick={() => handleReassign(reassigningRouteId, bus)}
+                                    disabled={bus.status !== 'Active' || isReassigning}
                                     className={`w-full p-4 rounded-xl border-2 transition-all text-left ${isCurrentBus
                                         ? 'border-blue-500 bg-blue-50'
                                         : bus.status === 'Active'
                                             ? 'border-gray-100 hover:border-purple-300 hover:bg-blue-50'
                                             : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                                        }`}
+                                        } ${isReassigning ? 'cursor-not-allowed' : ''}`}
                                 >
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
@@ -58,7 +72,11 @@ const BusReassignModal = ({
                                                 ? 'bg-gradient-to-r from-blue-500 to-blue-600'
                                                 : 'bg-gray-300'
                                                 }`}>
-                                                <FontAwesomeIcon icon={faBus} className="text-white text-sm" />
+                                                {isReassigning ? (
+                                                     <FontAwesomeIcon icon={faCircleNotch} spin className="text-white text-sm" />
+                                                ) : (
+                                                     <FontAwesomeIcon icon={faBus} className="text-white text-sm" />
+                                                )}
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2">

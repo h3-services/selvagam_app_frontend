@@ -1,7 +1,7 @@
 import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking, faRoute } from '@fortawesome/free-solid-svg-icons';
 
 import '../../styles/agGridMobileStyles.css';
 
@@ -83,7 +83,29 @@ const StudentList = ({
             }
         },
         {
-            headerName: "Emergency Contact",
+            headerName: "Route & Bus",
+            flex: 1.5,
+            minWidth: 200,
+            cellStyle: { display: 'flex', alignItems: 'center' },
+            cellRenderer: (params) => (
+                <div className="flex flex-col justify-center py-2 h-full gap-1.5 max-w-full">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                        <FontAwesomeIcon icon={faRoute} className="text-[10px] text-blue-500 shrink-0" />
+                        <p className="font-semibold text-gray-900 truncate tracking-tight text-[11px] leading-none">
+                            {params.data.routeName || 'No Route'}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2 overflow-hidden">
+                        <FontAwesomeIcon icon={faBus} className="text-[10px] text-indigo-500 shrink-0" />
+                        <p className="font-medium text-slate-500 truncate tracking-tight text-[11px] leading-none">
+                            {params.data.busName || 'No Bus'}
+                        </p>
+                    </div>
+                </div>
+            )
+        },
+        {
+            headerName: "Contact",
             field: "emergencyContact",
             flex: 1.2,
             minWidth: 150,
@@ -225,8 +247,10 @@ const StudentList = ({
                             rowHeight={isMobile ? 60 : 80}
                             headerHeight={isMobile ? 40 : 50}
                             pagination={true}
-                            paginationPageSize={10}
-                            paginationPageSizeSelector={[10, 20, 50]}
+                            paginationPageSize={20}
+                            paginationPageSizeSelector={[10, 20, 50, 100]}
+                            suppressPaginationPanel={false}
+                            paginateChildRows={true}
                             theme="legacy"
                             suppressRowTransform={true}
                             getRowStyle={params => {

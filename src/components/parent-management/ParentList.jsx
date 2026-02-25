@@ -206,10 +206,12 @@ const ParentList = ({
                             onSelectionChanged(params.api.getSelectedNodes().map(node => node.data));
                         }}
                         pagination={true}
-                        paginationPageSize={10}
-                        paginationPageSizeSelector={[10, 20, 50]}
-                        rowHeight={isMobile ? 60 : 80}
-                        headerHeight={isMobile ? 40 : 50}
+                        paginationPageSize={20}
+                        paginationPageSizeSelector={[10, 20, 50, 100]}
+                        suppressPaginationPanel={false}
+                        paginateChildRows={true}
+                        rowHeight={isMobile ? 65 : 85}
+                        headerHeight={isMobile ? 45 : 55}
                         animateRows={true}
                         suppressRowTransform={true}
                         getRowStyle={params => ({ zIndex: 1, overflow: 'visible' })}

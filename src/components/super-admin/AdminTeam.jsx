@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEnvelope, faPhone, faPlus, faCheck, faTimes, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faEnvelope, faPhone, faPlus, faCheck, faTimes, faPen, faTrash, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
 const AdminTeam = ({
     admins,
@@ -13,15 +13,24 @@ const AdminTeam = ({
     const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '', password: '' });
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (newAdmin.name && newAdmin.email && newAdmin.password) {
-            onAddAdmin({
-                ...newAdmin,
-                phone: Number(newAdmin.phone) // Ensure phone is sent as Number
-            });
-            setNewAdmin({ name: '', email: '', phone: '', password: '' });
-            setIsAddOpen(false);
+            setIsSubmitting(true);
+            try {
+                await onAddAdmin({
+                    ...newAdmin,
+                    phone: Number(newAdmin.phone) // Ensure phone is sent as Number
+                });
+                setNewAdmin({ name: '', email: '', phone: '', password: '' });
+                setIsAddOpen(false);
+            } catch (error) {
+                console.error("Failed to add admin:", error);
+                alert("Failed to create admin account.");
+            } finally {
+                setIsSubmitting(false);
+            }
         } else {
              alert("Please fill in all required fields (Name, Email, Password)");
         }
@@ -87,9 +96,17 @@ const AdminTeam = ({
                                 />
                                 <button
                                     onClick={handleAdd}
-                                    className="w-full py-2.5 bg-blue-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-sm shadow-md mt-2"
+                                    disabled={isSubmitting}
+                                    className={`w-full py-2.5 bg-blue-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-sm shadow-md mt-2 flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 >
-                                    Create Account
+                                    {isSubmitting ? (
+                                        <>
+                                            <FontAwesomeIcon icon={faCircleNotch} spin />
+                                            <span>Creating...</span>
+                                        </>
+                                    ) : (
+                                        'Create Account'
+                                    )}
                                 </button>
                             </div>
                         </div>

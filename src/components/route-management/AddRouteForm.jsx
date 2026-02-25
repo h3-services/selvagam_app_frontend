@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faMapLocationDot, faSearch, faSpinner, faChevronDown, faRoute, faLocationDot, faPlus, faBus } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faMapLocationDot, faSearch, faCircleNotch, faChevronDown, faRoute, faLocationDot, faPlus, faBus } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { COLORS } from '../../constants/colors';
 import { LocationMarker, createSchoolIcon, createStopIcon } from './RouteMapUtils';
@@ -144,7 +144,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                         className="flex-1 px-4 py-2 rounded-xl border border-purple-200 shadow-lg focus:outline-none focus:border-blue-500 text-sm bg-white/90 backdrop-blur-sm"
                                     />
                                     <div className="w-10 h-10 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center">
-                                        <FontAwesomeIcon icon={isSearchingLocation ? faSpinner : faSearch} className={isSearchingLocation ? "animate-spin" : ""} />
+                                        <FontAwesomeIcon icon={isSearchingLocation ? faCircleNotch : faSearch} className={isSearchingLocation ? "animate-spin" : ""} />
                                     </div>
                                 </div>
                                 {/* Suggestions Dropdown */}
@@ -367,7 +367,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                         className="w-full py-4 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all text-base disabled:bg-gray-400 disabled:shadow-none flex items-center justify-center gap-2"
                         style={{ backgroundColor: isSaving ? undefined : COLORS.SIDEBAR_BG }}
                     >
-                        {isSaving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : null}
+                        {isSaving ? <FontAwesomeIcon icon={faCircleNotch} spin /> : null}
                         {isSaving ? 'Creating Route...' : 'Add Route'}
                     </button>
                 </div>

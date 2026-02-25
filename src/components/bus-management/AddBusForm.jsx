@@ -18,7 +18,8 @@ import {
     faChevronDown,
     faCogs,
     faShieldAlt,
-    faClipboardList
+    faClipboardList,
+    faCircleNotch
 } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 
@@ -83,6 +84,8 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
         fc_certificate_url: ''
     });
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     useEffect(() => {
         if (show && editingBus) {
             setBusData({
@@ -134,15 +137,23 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
         setTouched({ registration_number: true, bus_name: true, vehicle_type: true });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         setTouched({ registration_number: true, bus_name: true, vehicle_type: true });
         if (isValid) {
-            if (editingBus) {
-                onUpdate({ ...editingBus, ...busData });
-            } else {
-                onAdd(busData);
+            setIsSubmitting(true);
+            try {
+                if (editingBus) {
+                    await onUpdate({ ...editingBus, ...busData });
+                } else {
+                    await onAdd(busData);
+                }
+                onClose();
+            } catch (error) {
+                console.error("Failed to process bus data:", error);
+                alert("Operation failed. Please check registry protocols.");
+            } finally {
+                setIsSubmitting(false);
             }
-            onClose();
         }
     };
 
@@ -342,16 +353,21 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-20">
                     <button
                         onClick={handleSubmit}
-                        className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${!isValid && Object.keys(touched).length > 0 ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
+                        disabled={(!isValid && Object.keys(touched).length > 0) || isSubmitting}
+                        className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${(!isValid && Object.keys(touched).length > 0) || isSubmitting ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
                         style={{ 
-                            background: isValid || Object.keys(touched).length === 0 
+                            background: (isValid || Object.keys(touched).length === 0) && !isSubmitting
                                 ? 'linear-gradient(135deg, #3A7BFF 0%, #1e3a8a 100%)' 
                                 : '' 
                         }}
                     >
-                        <span>{editingBus ? 'Update Profile' : 'Add Bus'}</span>
-                        <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform">
-                            <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                        <span>{isSubmitting ? 'Processing...' : (editingBus ? 'Update Details' : 'Add Bus')}</span>
+                        <div className={`w-9 h-9 ${isSubmitting ? '' : 'bg-white/10'} rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform`}>
+                            {isSubmitting ? (
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-xs" />
+                            ) : (
+                                <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                            )}
                         </div>
                     </button>
                 </div>

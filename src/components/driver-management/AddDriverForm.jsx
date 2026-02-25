@@ -17,7 +17,8 @@ import {
     faBriefcase,
     faCameraRetro,
     faIdBadge,
-    faChevronDown
+    faChevronDown,
+    faCircleNotch
 } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 
@@ -50,6 +51,7 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         licence_expiry: '', fcm_token: 'string', password: ''
     });
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [touched, setTouched] = useState({});
 
     useEffect(() => {
@@ -90,30 +92,38 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
     const errors = validate(newDriver);
     const isValid = Object.keys(errors).length === 0;
 
-    const handleAction = () => {
+    const handleAction = async () => {
         const allTouched = Object.keys(newDriver).reduce((acc, key) => ({ ...acc, [key]: true }), {});
         setTouched(allTouched);
 
         const currentErrors = validate(newDriver);
         if (Object.keys(currentErrors).length === 0) {
-            if (initialData) {
-                onUpdate({
-                    ...newDriver,
-                    id: initialData.id,
-                    phone: Number(newDriver.phone)
+            setIsSubmitting(true);
+            try {
+                if (initialData) {
+                    await onUpdate({
+                        ...newDriver,
+                        id: initialData.id,
+                        phone: Number(newDriver.phone)
+                    });
+                } else {
+                    await onAdd({
+                        ...newDriver,
+                        phone: Number(newDriver.phone)
+                    });
+                }
+                onClose();
+                setNewDriver({
+                    name: '', phone: '', email: '', licence_number: '',
+                    licence_expiry: '', fcm_token: 'string', password: ''
                 });
-            } else {
-                onAdd({
-                    ...newDriver,
-                    phone: Number(newDriver.phone)
-                });
+                setTouched({});
+            } catch (error) {
+                console.error("Failed to process driver protocol:", error);
+                alert("Operation failed. Please check registry protocols.");
+            } finally {
+                setIsSubmitting(false);
             }
-            onClose();
-            setNewDriver({
-                name: '', phone: '', email: '', licence_number: '',
-                licence_expiry: '', fcm_token: 'string', password: ''
-            });
-            setTouched({});
         }
     };
 
@@ -242,16 +252,21 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-20">
                     <button
                         onClick={handleAction}
-                        className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${!isValid && Object.keys(touched).length > 0 ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
+                        disabled={!isValid && Object.keys(touched).length > 0 || isSubmitting}
+                        className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${(!isValid && Object.keys(touched).length > 0) || isSubmitting ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
                         style={{ 
-                            background: isValid || Object.keys(touched).length === 0 
+                            background: (isValid || Object.keys(touched).length === 0) && !isSubmitting
                                 ? 'linear-gradient(135deg, #3A7BFF 0%, #1e3a8a 100%)' 
                                 : '' 
                         }}
                     >
-                        <span>{initialData ? 'Update Profile' : 'Register Driver'}</span>
-                        <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform">
-                            <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                        <span>{isSubmitting ? 'Processing...' : (initialData ? 'Update Profile' : 'Register Driver')}</span>
+                        <div className={`w-9 h-9 ${isSubmitting ? '' : 'bg-white/10'} rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform`}>
+                            {isSubmitting ? (
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-xs" />
+                            ) : (
+                                <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                            )}
                         </div>
                     </button>
                 </div>
