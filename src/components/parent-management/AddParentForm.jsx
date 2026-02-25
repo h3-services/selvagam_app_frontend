@@ -69,7 +69,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
             name: 'Vikram Seth',
             email: `vikram.seth${randomSuffix}@example.com`,
             phone: `998877${randomSuffix}`,
-            password: 'parent@secure',
+            password: 'Parent@secure123',
             street: '45/A, Sterling Towers, MG Road',
             city: 'Bangalore',
             district: 'Urban',
