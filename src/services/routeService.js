@@ -48,18 +48,12 @@ export const routeService = {
     // Create route stop
     createRouteStop: async (stopData) => {
         try {
-            const response = await api.post('/route-stops', stopData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
+            const response = await api.post('/route-stops', stopData);
             return response.data;
         } catch (error) {
             console.error("Error creating route stop:", error);
-            // Log server response details if available
-            if (error.response) {
-                console.error("Server Response Data:", error.response.data);
+            if (error.response?.data) {
+                console.error("API Validation Details:", JSON.stringify(error.response.data, null, 2));
             }
             throw error;
         }

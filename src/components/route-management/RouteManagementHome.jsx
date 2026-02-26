@@ -232,9 +232,14 @@ const RouteManagementHome = () => {
             if (newRouteData.stopPoints && newRouteData.stopPoints.length > 0) {
                 for (let index = 0; index < newRouteData.stopPoints.length; index++) {
                     const stop = newRouteData.stopPoints[index];
+                    let stopName = (stop.name || 'Stop').trim();
+                    if (stopName.length < 3) {
+                        stopName = `${stopName} Stop`;
+                    }
+
                     const stopData = {
                         route_id: createdRoute.route_id,
-                        stop_name: (stop.name || 'Stop').trim(),
+                        stop_name: stopName,
                         latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                         longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
                         pickup_stop_order: index + 1,

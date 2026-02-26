@@ -319,9 +319,10 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                     />
                                     <button
                                         onClick={handleAddStop}
-                                        disabled={!currentStopName.trim() || !selectedPosition}
-                                        className={`w-12 rounded-xl flex items-center justify-center text-white shadow-md transition-all ${(!currentStopName.trim() || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'hover:shadow-lg'}`}
-                                        style={{ backgroundColor: (!currentStopName.trim() || !selectedPosition) ? undefined : COLORS.SIDEBAR_BG }}
+                                        disabled={currentStopName.trim().length < 3 || !selectedPosition}
+                                        className={`w-12 rounded-xl flex items-center justify-center text-white shadow-md transition-all ${(currentStopName.trim().length < 3 || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'hover:shadow-lg'}`}
+                                        style={{ backgroundColor: (currentStopName.trim().length < 3 || !selectedPosition) ? undefined : COLORS.SIDEBAR_BG }}
+                                        title={selectedPosition && currentStopName.trim().length < 3 ? "Stop name must be at least 3 characters" : ""}
                                     >
                                         <FontAwesomeIcon icon={faPlus} />
                                     </button>
