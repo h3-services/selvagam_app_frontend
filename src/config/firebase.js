@@ -1,5 +1,4 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -13,20 +12,20 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Validate config to prevent initialization with undefined values
+const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.appId);
 
-// Initialize Analytics safely - only in production to avoid console noise in dev
-let analytics;
-if (import.meta.env.PROD) {
-    isSupported().then(yes => {
-        if (yes) {
-            analytics = getAnalytics(app);
-        }
-    }).catch(err => {
-        // Silently fail in the background for analytics
-    });
+let app;
+let auth;
+let db;
+let analytics = null; // Disabled to prevent 404 console noise
+
+if (isConfigValid) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+} else {
+    console.warn("⚠️ Firebase configuration is missing or incomplete. Check your .env file.");
 }
 
 export { app, analytics, auth, db };
