@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faMapLocationDot, faBus, faCircle, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, faCircleNotch, faMars, faVenus } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faMapLocationDot, faBus, faCircle, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, faCircleNotch, faMars, faVenus, faGripVertical } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { routeService } from '../../services/routeService';
 import { studentService } from '../../services/studentService';
@@ -23,6 +23,11 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
     const [loadingStudents, setLoadingStudents] = useState(false);
     const [classMap, setClassMap] = useState({});
     const [errorMessage, setErrorMessage] = useState(null);
+    const [newStopPickupOrder, setNewStopPickupOrder] = useState(1);
+    const [newStopDropOrder, setNewStopDropOrder] = useState(1);
+    const [draggedItem, setDraggedItem] = useState(null);
+    const [dragOverItem, setDragOverItem] = useState(null);
+    const [dragType, setDragType] = useState(null); // 'pickup' or 'drop'
 
     const handleViewStudents = async () => {
         setShowStudentsModal(true);
@@ -96,6 +101,15 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
         setSearchSuggestions([]);
     };
 
+    // Keep "New Stop" orders synchronized while editing: Next sequential for Pickup, always 1 for Drop
+    useEffect(() => {
+        if (isEditing && editData?.stopPoints) {
+            const nextOrder = (editData.stopPoints || []).length + 1;
+            setNewStopPickupOrder(nextOrder);
+            setNewStopDropOrder(1);
+        }
+    }, [isEditing, editData?.stopPoints?.length]);
+
     const handleSaveEdit = async () => {
         if (localLoading || isSaving) return;
         setLocalLoading(true);
@@ -119,16 +133,14 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
         if (currentStopName.trim() && selectedPosition) {
             // Determine order locally
             const currentStops = editData.stopPoints || [];
-            const maxOrder = currentStops.length > 0 ? (currentStops.length) : 0;
-            const order = maxOrder + 1;
-
+            
             setEditData(prev => ({
                 ...prev,
                 stopPoints: [...(prev.stopPoints || []), { 
                     name: currentStopName.trim(), 
                     position: [selectedPosition.lat, selectedPosition.lng],
-                    pickupOrder: order,
-                    dropOrder: order,
+                    pickupOrder: parseInt(newStopPickupOrder) || (prev.stopPoints.length + 1),
+                    dropOrder: parseInt(newStopDropOrder) || (prev.stopPoints.length + 1),
                     id: null // Explicitly null so handleUpdate knows it's a new stop
                 }],
                 stops: (prev.stops || 0) + 1
@@ -141,11 +153,14 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
     };
 
     const handleEditRemoveStop = (index) => {
-        setEditData(prev => ({
-            ...prev,
-            stopPoints: prev.stopPoints.filter((_, i) => i !== index),
-            stops: Math.max(0, (prev.stops || 0) - 1)
-        }));
+        setEditData(prev => {
+            const updatedStops = prev.stopPoints.filter((_, i) => i !== index);
+            return {
+                ...prev,
+                stopPoints: updatedStops,
+                stops: Math.max(0, (prev.stops || 0) - 1)
+            };
+        });
     };
 
     const handleStartEditing = () => {
@@ -163,10 +178,67 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                     dropOrder: s.dropOrder !== undefined ? s.dropOrder : (i+1)
                 }))
             });
+        } else {
+            setNewStopPickupOrder(1);
+            setNewStopDropOrder(1);
         }
     }
 
     if (!selectedRoute) return null;
+
+    const handleDragStart = (e, index, type) => {
+        setDraggedItem(index);
+        setDragType(type);
+        e.dataTransfer.effectAllowed = "move";
+        // Customize drag ghost
+        const ghost = e.currentTarget.cloneNode(true);
+        ghost.style.opacity = '0.5';
+    };
+
+    const handleDragOver = (e, index) => {
+        e.preventDefault();
+        if (draggedItem === index) return;
+        setDragOverItem(index);
+    };
+
+    const handleDrop = (e, targetIndex) => {
+        e.preventDefault();
+        if (draggedItem === null || draggedItem === targetIndex) {
+            setDraggedItem(null);
+            setDragOverItem(null);
+            return;
+        }
+
+        const currentStops = [...editData.stopPoints];
+        
+        // Find the items being sorted by current dragType
+        const sortedItems = currentStops
+            .map((s, i) => ({ ...s, originalIndex: i }))
+            .sort((a, b) => {
+                const orderKey = dragType === 'pickup' ? 'pickupOrder' : 'dropOrder';
+                return (a[orderKey] || 0) - (b[orderKey] || 0);
+            });
+
+        const movedItem = sortedItems[draggedItem];
+        const remainingItems = sortedItems.filter((_, i) => i !== draggedItem);
+        
+        // Insert at new position
+        remainingItems.splice(targetIndex, 0, movedItem);
+
+        // Update orders for all items based on new positions
+        remainingItems.forEach((item, idx) => {
+            const orderKey = dragType === 'pickup' ? 'pickupOrder' : 'dropOrder';
+            currentStops[item.originalIndex] = {
+                ...currentStops[item.originalIndex],
+                [orderKey]: idx + 1
+            };
+        });
+
+        setEditData({ ...editData, stopPoints: currentStops });
+        setDraggedItem(null);
+        setDragOverItem(null);
+        setDragType(null);
+    };
 
     const handleMapClick = (latlng) => {
         if (editingStopIndex !== null) {
@@ -266,14 +338,44 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                             <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-blue-600 shrink-0">Pickup Order</h3>
 
                             {isEditing && (
-                                <div className="mb-4 space-y-2 border-b border-blue-200 pb-4 shrink-0">
+                                <div className="mb-6 space-y-3 bg-white p-4 rounded-xl border border-blue-100 shadow-inner shrink-0">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[10px] font-black text-blue-600 uppercase tracking-[0.15em] ml-1">Pickup Order</label>
+                                            <input 
+                                                type="number"
+                                                value={newStopPickupOrder}
+                                                onChange={(e) => setNewStopPickupOrder(e.target.value)}
+                                                className="w-full bg-slate-50 border border-blue-100 rounded-lg px-3 py-2 text-sm font-bold text-blue-700 focus:border-blue-500 focus:outline-none focus:bg-white transition-all shadow-sm"
+                                                placeholder="Order"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col gap-1">
+                                            <label className="text-[10px] font-black text-purple-600 uppercase tracking-[0.15em] ml-1">Drop Order</label>
+                                            <input 
+                                                type="number"
+                                                value={newStopDropOrder}
+                                                onChange={(e) => setNewStopDropOrder(e.target.value)}
+                                                className="w-full bg-slate-50 border border-purple-100 rounded-lg px-3 py-2 text-sm font-bold text-purple-700 focus:border-purple-500 focus:outline-none focus:bg-white transition-all shadow-sm"
+                                                placeholder="Order"
+                                            />
+                                        </div>
+                                    </div>
                                     <div className="flex flex-col sm:flex-row gap-2">
                                         <input
                                             type="text"
                                             placeholder={selectedPosition ? "Stop name..." : "Select on map"}
                                             value={currentStopName}
-                                            onChange={(e) => setCurrentStopName(e.target.value)}
-                                            className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 shadow-sm"
+                                            onChange={(e) => {
+                                                setCurrentStopName(e.target.value);
+                                                // Sync orders to next available if they are defaults
+                                                if (newStopPickupOrder <= 1 && (editData?.stopPoints?.length || 0) >= 1) {
+                                                    const nextOrder = (editData.stopPoints.length) + 1;
+                                                    setNewStopPickupOrder(nextOrder);
+                                                    setNewStopDropOrder(nextOrder);
+                                                }
+                                            }}
+                                            className="flex-1 bg-slate-50 border border-blue-100 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm"
                                             disabled={!selectedPosition}
                                         />
                                         <button
@@ -284,83 +386,88 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                                             <FontAwesomeIcon icon={faPlus} className="sm:mr-0 mr-2" /><span className="sm:hidden font-medium">Add Stop</span>
                                         </button>
                                     </div>
-                                    <p className="text-[10px] text-blue-500 font-medium ml-1">
+                                    <p className="text-[10px] text-blue-400 font-bold ml-1 flex items-center gap-1.5 capitalize">
                                         {!selectedPosition 
-                                            ? "1. Search & Select location on map" 
-                                            : `2. Name the stop and click + (${selectedPosition.lat.toFixed(5)}, ${selectedPosition.lng.toFixed(5)})`}
+                                            ? <><FontAwesomeIcon icon={faMapLocationDot} /> Select location on map first</> 
+                                            : <><FontAwesomeIcon icon={faCheck} className="text-green-500" /> Location selected (Ready to add)</>}
                                     </p>
                                 </div>
                             )}
 
                             <div className="space-y-3 flex-col">
-                                {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
-                                    (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
-                                        <div key={`pickup-${index}`} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-blue-50">
-                                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                {isEditing ? (
-                                                    <div className="flex flex-col items-center justify-center shrink-0">
-                                                        <label className="text-[8px] font-bold text-blue-500 uppercase tracking-widest mb-0.5">Order</label>
-                                                        <input 
-                                                            type="number"
-                                                            value={stop.pickupOrder !== undefined ? stop.pickupOrder : index + 1}
-                                                            onChange={(e) => {
-                                                                const newStops = [...editData.stopPoints];
-                                                                newStops[index] = { ...newStops[index], pickupOrder: parseInt(e.target.value) || 0 };
-                                                                setEditData({ ...editData, stopPoints: newStops });
-                                                            }}
-                                                            className="w-10 bg-white border border-blue-200 text-center focus:border-blue-500 focus:outline-none rounded-md py-1 font-bold text-blue-700 text-xs shadow-inner"
-                                                            min="0"
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
-                                                        {stop.pickupOrder !== undefined ? stop.pickupOrder : index + 1}
-                                                    </div>
-                                                )}
-                                                
-                                                {isEditing && <div className="w-px h-8 bg-blue-100 mx-1"></div>}
-                                                {editingStopIndex === index ? (
-                                                    <div className="flex flex-col gap-1 flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <input 
-                                                                type="text" 
-                                                                value={editingStopName}
-                                                                onChange={(e) => setEditingStopName(e.target.value)}
-                                                                className="flex-1 bg-gray-50 border border-blue-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500 min-w-0"
-                                                                autoFocus
-                                                            />
-                                                            <button onClick={() => handleSaveStopEdit(index)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors shrink-0">
-                                                                <FontAwesomeIcon icon={faCheck} />
-                                                            </button>
+                                {(isEditing ? editData.stopPoints : (selectedRoute?.stopPoints || [])) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
+                                    [...(isEditing ? editData.stopPoints : selectedRoute.stopPoints)]
+                                        .map((stop, originalIndex) => ({ ...stop, originalIndex }))
+                                        .sort((a, b) => (a.pickupOrder || 0) - (b.pickupOrder || 0))
+                                        .map((stop, displayIndex) => (
+                                            <div 
+                                                key={`pickup-${stop.originalIndex}`} 
+                                                className={`flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border transition-all duration-200 ${draggedItem === displayIndex && dragType === 'pickup' ? 'opacity-40 scale-95 border-blue-300' : 'border-blue-50'} ${dragOverItem === displayIndex && dragType === 'pickup' ? 'border-t-4 border-t-blue-500 pt-2' : ''}`}
+                                                draggable={isEditing && editingStopIndex === null}
+                                                onDragStart={(e) => handleDragStart(e, displayIndex, 'pickup')}
+                                                onDragOver={(e) => handleDragOver(e, displayIndex)}
+                                                onDrop={(e) => handleDrop(e, displayIndex)}
+                                                onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                                            >
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    {isEditing ? (
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            <div className="cursor-grab active:cursor-grabbing text-blue-300 hover:text-blue-500 px-1 py-2">
+                                                                <FontAwesomeIcon icon={faGripVertical} />
+                                                            </div>
+                                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
+                                                                {stop.pickupOrder !== undefined ? stop.pickupOrder : stop.originalIndex + 1}
+                                                            </div>
                                                         </div>
-                                                        <span className="text-[10px] text-blue-600 font-medium ml-1 animate-pulse">
-                                                            * Click map to update location
-                                                        </span>
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
+                                                            {stop.pickupOrder !== undefined ? stop.pickupOrder : stop.originalIndex + 1}
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {isEditing && <div className="w-px h-8 bg-blue-100 mx-1"></div>}
+                                                    {editingStopIndex === stop.originalIndex ? (
+                                                        <div className="flex flex-col gap-1 flex-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <input 
+                                                                    type="text" 
+                                                                    value={editingStopName}
+                                                                    onChange={(e) => setEditingStopName(e.target.value)}
+                                                                    className="flex-1 bg-gray-50 border border-blue-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500 min-w-0"
+                                                                    autoFocus
+                                                                />
+                                                                <button onClick={() => handleSaveStopEdit(stop.originalIndex)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors shrink-0">
+                                                                    <FontAwesomeIcon icon={faCheck} />
+                                                                </button>
+                                                            </div>
+                                                            <span className="text-[10px] text-blue-600 font-medium ml-1 animate-pulse">
+                                                                * Click map to update location
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm font-bold text-gray-800">{stop.name}</p>
+                                                    )}
+                                                </div>
+                                                {isEditing && (
+                                                    <div className="flex gap-2 pl-2">
+                                                        {editingStopIndex !== stop.originalIndex && (
+                                                            <button
+                                                                onClick={() => handleStartStopEdit(stop.originalIndex, stop.name)}
+                                                                className="text-gray-400 hover:text-blue-600 transition-colors"
+                                                            >
+                                                                <FontAwesomeIcon icon={faEdit} />
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleEditRemoveStop(stop.originalIndex)}
+                                                            className="text-gray-400 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <FontAwesomeIcon icon={faTimes} />
+                                                        </button>
                                                     </div>
-                                                ) : (
-                                                    <p className="text-sm font-bold text-gray-800">{stop.name}</p>
                                                 )}
                                             </div>
-                                            {isEditing && (
-                                                <div className="flex gap-2 pl-2">
-                                                    {editingStopIndex !== index && (
-                                                        <button
-                                                            onClick={() => handleStartStopEdit(index, stop.name)}
-                                                            className="text-gray-400 hover:text-blue-600 transition-colors"
-                                                        >
-                                                            <FontAwesomeIcon icon={faEdit} />
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => handleEditRemoveStop(index)}
-                                                        className="text-gray-400 hover:text-red-500 transition-colors"
-                                                    >
-                                                        <FontAwesomeIcon icon={faTimes} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))
+                                        ))
                                 ) : (
                                     <div className="text-center py-8 text-blue-400 text-sm">No stops added</div>
                                 )}
@@ -371,36 +478,41 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                         <div className="bg-purple-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-purple-100 shadow-sm shrink-0 mb-4">
                             <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-purple-600 shrink-0">Drop Order</h3>
                             <div className="space-y-3 flex-col">
-                                {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
-                                    (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
-                                        <div key={`drop-${index}`} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-purple-50">
-                                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                {isEditing ? (
-                                                    <div className="flex flex-col items-center justify-center shrink-0">
-                                                        <label className="text-[8px] font-bold text-purple-500 uppercase tracking-widest mb-0.5">Order</label>
-                                                        <input 
-                                                            type="number"
-                                                            value={stop.dropOrder !== undefined ? stop.dropOrder : index + 1}
-                                                            onChange={(e) => {
-                                                                const newStops = [...editData.stopPoints];
-                                                                newStops[index] = { ...newStops[index], dropOrder: parseInt(e.target.value) || 0 };
-                                                                setEditData({ ...editData, stopPoints: newStops });
-                                                            }}
-                                                            className="w-10 bg-white border border-purple-200 text-center focus:border-purple-500 focus:outline-none rounded-md py-1 font-bold text-purple-700 text-xs shadow-inner"
-                                                            min="0"
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
-                                                        {stop.dropOrder !== undefined ? stop.dropOrder : index + 1}
-                                                    </div>
-                                                )}
-                                                
-                                                {isEditing && <div className="w-px h-8 bg-purple-100 mx-1"></div>}
-                                                <p className="text-sm font-bold text-gray-800 truncate">{stop.name}</p>
+                                {(isEditing ? editData.stopPoints : (selectedRoute?.stopPoints || [])) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
+                                    [...(isEditing ? editData.stopPoints : selectedRoute.stopPoints)]
+                                        .map((stop, originalIndex) => ({ ...stop, originalIndex }))
+                                        .sort((a, b) => (a.dropOrder || 0) - (b.dropOrder || 0))
+                                        .map((stop, displayIndex) => (
+                                            <div 
+                                                key={`drop-${stop.originalIndex}`} 
+                                                className={`flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border transition-all duration-200 ${draggedItem === displayIndex && dragType === 'drop' ? 'opacity-40 scale-95 border-purple-300' : 'border-purple-50'} ${dragOverItem === displayIndex && dragType === 'drop' ? 'border-t-4 border-t-purple-500 pt-2' : ''}`}
+                                                draggable={isEditing && editingStopIndex === null}
+                                                onDragStart={(e) => handleDragStart(e, displayIndex, 'drop')}
+                                                onDragOver={(e) => handleDragOver(e, displayIndex)}
+                                                onDrop={(e) => handleDrop(e, displayIndex)}
+                                                onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                                            >
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    {isEditing ? (
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            <div className="cursor-grab active:cursor-grabbing text-purple-300 hover:text-purple-500 px-1 py-2">
+                                                                <FontAwesomeIcon icon={faGripVertical} />
+                                                            </div>
+                                                            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
+                                                                {stop.dropOrder !== undefined ? stop.dropOrder : stop.originalIndex + 1}
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
+                                                            {stop.dropOrder !== undefined ? stop.dropOrder : stop.originalIndex + 1}
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {isEditing && <div className="w-px h-8 bg-purple-100 mx-1"></div>}
+                                                    <p className="text-sm font-bold text-gray-800 truncate">{stop.name}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        ))
                                 ) : (
                                     <div className="text-center py-8 text-purple-400 text-sm">No stops added</div>
                                 )}
