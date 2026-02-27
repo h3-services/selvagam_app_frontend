@@ -33,7 +33,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         district: '',
         pincode: '',
         door_no: '',
-        parent_role: 'GUARDIAN'
+        parent_role: 'MOTHER'
     };
 
     const [formData, setFormData] = useState(defaultState);
@@ -50,7 +50,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                 district: initialData.district || '',
                 pincode: initialData.pincode || '',
                 door_no: initialData.door_no || '',
-                parent_role: initialData.parent_role || 'GUARDIAN'
+                parent_role: initialData.parent_role || 'MOTHER'
             });
         } else {
             setFormData(defaultState);
@@ -128,9 +128,6 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 </div>
                                 <div>
                                     <h3 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-none mb-1 sm:mb-1.5">{initialData ? 'Edit Parent' : 'Add Parent'}</h3>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${initialData ? 'bg-amber-500' : 'bg-blue-600'}`}></span>
-                                    </div>
                                 </div>
                             </div>
                         

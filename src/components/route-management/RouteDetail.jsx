@@ -28,6 +28,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
     const [draggedItem, setDraggedItem] = useState(null);
     const [dragOverItem, setDragOverItem] = useState(null);
     const [dragType, setDragType] = useState(null); // 'pickup' or 'drop'
+    const [activeOrderTab, setActiveOrderTab] = useState('pickup'); // 'pickup' | 'drop'
 
     const handleViewStudents = async () => {
         setShowStudentsModal(true);
@@ -131,16 +132,29 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
 
     const handleEditAddStop = () => {
         if (currentStopName.trim() && selectedPosition) {
-            // Determine order locally
-            const currentStops = editData.stopPoints || [];
-            
+            const currentStopsCount = (editData.stopPoints || []).length;
+            const intendedPickupOrder = parseInt(newStopPickupOrder) || (currentStopsCount + 1);
+            const intendedDropOrder = parseInt(newStopDropOrder) || (currentStopsCount + 1);
+
+            // Validate sequence gaps: Cannot enter order > current count + 1
+            if (intendedPickupOrder > currentStopsCount + 1) {
+                setErrorMessage(`Invalid Pickup Order: You cannot skip sequence numbers. The next available maximum order is ${currentStopsCount + 1}.`);
+                return;
+            }
+            if (intendedDropOrder > currentStopsCount + 1) {
+                setErrorMessage(`Invalid Drop Order: You cannot skip sequence numbers. The next available maximum order is ${currentStopsCount + 1}.`);
+                return;
+            }
+
+            setErrorMessage(null); // Clear any previous errors
+
             setEditData(prev => ({
                 ...prev,
                 stopPoints: [...(prev.stopPoints || []), { 
                     name: currentStopName.trim(), 
                     position: [selectedPosition.lat, selectedPosition.lng],
-                    pickupOrder: parseInt(newStopPickupOrder) || (prev.stopPoints.length + 1),
-                    dropOrder: parseInt(newStopDropOrder) || (prev.stopPoints.length + 1),
+                    pickupOrder: intendedPickupOrder,
+                    dropOrder: intendedDropOrder,
                     id: null // Explicitly null so handleUpdate knows it's a new stop
                 }],
                 stops: (prev.stops || 0) + 1
@@ -347,8 +361,25 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                     {/* Stops List */}
                     <div className="w-full lg:w-1/3 flex flex-col gap-4 shrink-0 lg:h-full lg:overflow-y-auto custom-scrollbar pr-2">
                         
+                        {/* Order Tabs */}
+                        <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
+                            <button
+                                onClick={() => setActiveOrderTab('pickup')}
+                                className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeOrderTab === 'pickup' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                            >
+                                Pickup Sequence
+                            </button>
+                            <button
+                                onClick={() => setActiveOrderTab('drop')}
+                                className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeOrderTab === 'drop' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                            >
+                                Drop Sequence
+                            </button>
+                        </div>
+
                         {/* Pickup Order Card */}
-                        <div className="bg-blue-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-blue-100 shadow-sm shrink-0">
+                        {activeOrderTab === 'pickup' && (
+                        <div className="bg-blue-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-blue-100 shadow-sm shrink-0 mb-4 lg:mb-0">
                             <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-blue-600 shrink-0">Pickup Order</h3>
                             
 
@@ -488,9 +519,11 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                 )}
                             </div>
                         </div>
+                        )}
 
                         {/* Drop Order Card */}
-                        <div className="bg-purple-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-purple-100 shadow-sm shrink-0 mb-4">
+                        {activeOrderTab === 'drop' && (
+                        <div className="bg-purple-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-purple-100 shadow-sm shrink-0 mb-4 lg:mb-0">
                             <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-purple-600 shrink-0">Drop Order</h3>
                             
 
@@ -529,6 +562,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                 )}
                             </div>
                         </div>
+                        )}
 
                     </div>
 
@@ -593,20 +627,29 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                 />
                             )}
 
-                            {/* Render all stop points */}
-                            {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
-                                <Marker 
-                                    key={index} 
-                                    position={stop.position} 
-                                    opacity={isEditing ? 0.7 : 1}
-                                    icon={createStopIcon(index + 1)}
-                                >
-                                    <Popup>
-                                        <div className="font-bold">{stop.name}</div>
-                                        <div className="text-xs text-gray-400">Stop #{index + 1}</div>
-                                    </Popup>
-                                </Marker>
-                            ))}
+                            {/* Render all stop points sequence aware */}
+                            {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && [...(isEditing ? editData.stopPoints : selectedRoute.stopPoints)]
+                                .sort((a, b) => activeOrderTab === 'pickup' ? ((a.pickupOrder || 0) - (b.pickupOrder || 0)) : ((a.dropOrder || 0) - (b.dropOrder || 0)))
+                                .map((stop, index) => {
+                                    const sequenceNum = activeOrderTab === 'pickup' ? (stop.pickupOrder !== undefined ? stop.pickupOrder : index + 1) : (stop.dropOrder !== undefined ? stop.dropOrder : index + 1);
+                                    
+                                    return (
+                                        <Marker 
+                                            key={stop.id || index} 
+                                            position={stop.position} 
+                                            opacity={isEditing ? 0.7 : 1}
+                                            icon={createStopIcon(sequenceNum)}
+                                        >
+                                            <Popup>
+                                                <div className="font-bold">{stop.name}</div>
+                                                <div className="text-xs text-gray-400 font-bold uppercase tracking-wider mt-1">
+                                                    {activeOrderTab === 'pickup' ? 'Pickup' : 'Drop'} Stop #{sequenceNum}
+                                                </div>
+                                            </Popup>
+                                        </Marker>
+                                    );
+                                })
+                            }
 
 
                             {/* Optional Route Line if needed, can connect all points */}

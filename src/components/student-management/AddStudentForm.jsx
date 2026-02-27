@@ -45,7 +45,7 @@ const SelectField = ({ label, icon, value, onChange, options, placeholder, disab
                 disabled={disabled}
                 className="w-full pl-12 pr-10 py-4 bg-transparent rounded-2xl text-[13px] font-bold text-slate-700 focus:outline-none appearance-none disabled:text-slate-400 cursor-pointer"
             >
-                <option value="">{placeholder}</option>
+                {placeholder && <option value="" disabled hidden={Boolean(value)}>{placeholder}</option>}
                 {options.map((opt, idx) => (
                     <option key={idx} value={opt.value}>{opt.label}</option>
                 ))}
@@ -248,7 +248,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
         name: '',
         phone: '',
         email: '',
-        parent_role: 'Mother', // Default per schema
+        parent_role: 'MOTHER', // Default per schema
         door_no: '',
         street: '',
         city: '',
@@ -571,7 +571,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
             name: "Rajesh Sharma",
             phone: `987654${randomSuffix}`, // Unique phone
             email: `rajesh.sharma${randomSuffix}@example.com`, // Unique email
-            parent_role: "GUARDIAN", 
+            parent_role: "MOTHER", 
             password: "password123",
             door_no: "45/2",
             street: "Green Avenue",
@@ -795,7 +795,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                                 <div className="font-black text-xl text-slate-900 mb-2">{selectedParent.name}</div>
                                                                 <div className="flex flex-wrap gap-2">
                                                                     <span className="bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">
-                                                                        {selectedParent.parent_role || 'GUARDIAN'}
+                                                                        {selectedParent.parent_role || 'MOTHER'}
                                                                     </span>
                                                                     <span className="bg-slate-50 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-2">
                                                                         <FontAwesomeIcon icon={faPhone} className="text-[9px] text-blue-500" /> {selectedParent.phone}
@@ -883,7 +883,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                                  <div className="font-black text-xl text-slate-900 mb-2">{selectedParent.name}</div>
                                                                  <div className="flex flex-wrap gap-2">
                                                                      <span className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">
-                                                                         {selectedParent.parent_role || 'GUARDIAN'}
+                                                                         {selectedParent.parent_role || 'MOTHER'}
                                                                      </span>
                                                                      <span className="bg-slate-50 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-2">
                                                                          <FontAwesomeIcon icon={faPhone} className="text-[9px] text-indigo-500" /> {selectedParent.phone}
@@ -1073,8 +1073,8 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                 <InputField label="Parent Name" icon={faUserTie} value={newParent.name} onChange={(e) => { handleParentChange('name', e.target.value); if(errors.parentName) setErrors(prev => ({...prev, parentName: null})); }} placeholder="Enter parent name" error={errors.parentName} />
                                                 <div className="grid grid-cols-2 gap-5">
                                                     <SelectField 
-                                                        label="Role" icon={faUser} value={newParent.parent_role} onChange={(e) => { handleParentChange('parent_role', e.target.value); if(errors.parentRole) setErrors(prev => ({...prev, parentRole: null})); }} placeholder="Role"
-                                                        options={[{value: 'GUARDIAN', label: 'Guardian'}, {value: 'FATHER', label: 'Father'}, {value: 'MOTHER', label: 'Mother'}]}
+                                                        label="Role" icon={faUser} value={newParent.parent_role} onChange={(e) => { handleParentChange('parent_role', e.target.value); if(errors.parentRole) setErrors(prev => ({...prev, parentRole: null})); }} 
+                                                        options={[{value: 'MOTHER', label: 'Mother'}, {value: 'FATHER', label: 'Father'}, {value: 'GUARDIAN', label: 'Guardian'}]}
                                                         error={errors.parentRole}
                                                     />
                                                     <InputField 
