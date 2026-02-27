@@ -1,19 +1,20 @@
 import React from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking, faRoute } from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight, faEllipsisV, faUserSlash, faUserCheck, faUserClock, faBan, faBus, faWalking, faRoute, faEdit } from '@fortawesome/free-solid-svg-icons';
 
 import '../../styles/agGridMobileStyles.css';
 
 const StudentList = ({
     filteredStudents,
-    setSelectedStudent,
+    onSelectStudent,
     setShowForm,
     handleStatusUpdate,
     handleTransportStatusUpdate,
     activeMenuId,
     setActiveMenuId,
-    onSelectionChanged
+    onSelectionChanged,
+    onEdit
 }) => {
     const [isMobile, setIsMobile] = React.useState(window.innerWidth < 1024);
 
@@ -34,7 +35,7 @@ const StudentList = ({
             cellRenderer: (params) => (
                 <div
                     className="flex items-center gap-3 w-full cursor-pointer group"
-                    onClick={() => { setSelectedStudent(params.data); setShowForm(false); }}
+                    onClick={() => { onSelectStudent(params.data); setShowForm(false); }}
                 >
                     <div className="w-10 h-10 rounded-xl bg-slate-900 flex-shrink-0 flex items-center justify-center text-white text-[13px] font-black shadow-sm overflow-hidden border border-slate-100 transition-transform group-hover:scale-105">
                         {params.data.originalData?.student_photo_url ? (
@@ -197,6 +198,21 @@ const StudentList = ({
                                             className={`w-4 ${params.data.originalData?.transport_status === 'ACTIVE' ? 'text-amber-600' : 'text-emerald-600'}`} 
                                         />
                                         {params.data.originalData?.transport_status === 'ACTIVE' ? 'Stop Transport' : 'Start Transport'}
+                                    </button>
+
+                                    <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50 rounded-lg mb-1">
+                                        Management
+                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onEdit(params.data);
+                                            setActiveMenuId(null);
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 rounded-lg flex items-center gap-2 transition-colors"
+                                    >
+                                        <FontAwesomeIcon icon={faEdit} className="w-4 text-slate-600" />
+                                        Edit Details
                                     </button>
                                 </div>
                             </div>

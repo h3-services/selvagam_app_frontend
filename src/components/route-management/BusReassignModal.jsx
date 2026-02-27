@@ -27,9 +27,9 @@ const BusReassignModal = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[1500]">
+        <div className="fixed inset-0 z-[99999]">
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-md bg-white rounded-3xl shadow-2xl z-[1501] overflow-hidden">
+            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-md bg-white rounded-3xl shadow-2xl z-[99999] overflow-hidden">
                 <div className="p-6 border-b border-blue-100" style={{ backgroundColor: '#3A7BFF' }}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

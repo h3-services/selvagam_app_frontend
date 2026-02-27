@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faEnvelope, faPhone, faPlus, faCheck, faTimes, faPen, faTrash, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
 
@@ -7,13 +8,30 @@ const AdminTeam = ({
     onAddAdmin,
     onUpdateAdmin,
     onDeleteAdmin,
-    onToggleStatus
+    onToggleStatus,
+    isAddPath,
+    isEditPath
 }) => {
+    const navigate = useNavigate();
+    const { adminId } = useParams();
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '', password: '' });
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Synchronize editing state when URL changes
+    useEffect(() => {
+        if (isEditPath && adminId && admins.length > 0) {
+            const admin = admins.find(a => a.id === adminId);
+            if (admin) {
+                setEditingId(admin.id);
+                setEditData({ ...admin });
+            }
+        } else {
+            setEditingId(null);
+        }
+    }, [isEditPath, adminId, admins]);
 
     const handleAdd = async () => {
         if (newAdmin.name && newAdmin.email && newAdmin.password) {
@@ -24,7 +42,6 @@ const AdminTeam = ({
                     phone: Number(newAdmin.phone) // Ensure phone is sent as Number
                 });
                 setNewAdmin({ name: '', email: '', phone: '', password: '' });
-                setIsAddOpen(false);
             } catch (error) {
                 console.error("Failed to add admin:", error);
                 alert("Failed to create admin account.");
@@ -37,13 +54,11 @@ const AdminTeam = ({
     };
 
     const startEdit = (admin) => {
-        setEditingId(admin.id);
-        setEditData({ ...admin });
+        navigate(`/admin/${admin.id}/edit`);
     };
 
     const saveEdit = () => {
         onUpdateAdmin(editingId, editData);
-        setEditingId(null);
     };
 
     return (
@@ -54,16 +69,16 @@ const AdminTeam = ({
                     School Management Team
                 </h2>
                 <button
-                    onClick={() => setIsAddOpen(!isAddOpen)}
+                    onClick={() => navigate(isAddPath ? '/admin' : '/admin/add')}
                     className="text-sm font-semibold text-blue-600 hover:text-indigo-800 transition-colors"
                 >
-                    {isAddOpen ? 'Close Form' : '+ Add New Admin'}
+                    {isAddPath ? 'Close Form' : '+ Add New Admin'}
                 </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Add New Admin Card */}
-                {isAddOpen && (
+                {isAddPath && (
                     <div className="bg-white rounded-xl shadow-lg border border-indigo-100 overflow-hidden relative group animate-fade-in-up">
                         <div className="h-1 bg-blue-500 w-full absolute top-0 left-0"></div>
                         <div className="p-6">
@@ -141,7 +156,7 @@ const AdminTeam = ({
                                     {editingId === admin.id ? (
                                         <>
                                             <button onClick={saveEdit} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faCheck} /></button>
-                                            <button onClick={() => setEditingId(null)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faTimes} /></button>
+                                            <button onClick={() => navigate('/admin')} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><FontAwesomeIcon icon={faTimes} /></button>
                                         </>
                                     ) : (
                                         <>
@@ -185,9 +200,9 @@ const AdminTeam = ({
                     </div>
                 ))}
 
-                {!isAddOpen && (
+                {!isAddPath && (
                     <button
-                        onClick={() => setIsAddOpen(true)}
+                        onClick={() => navigate('/admin/add')}
                         className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-6 text-gray-400 hover:border-indigo-400 hover:text-blue-600 hover:bg-blue-50/50 transition-all min-h-[250px]"
                     >
                         <div className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">

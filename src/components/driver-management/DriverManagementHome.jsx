@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faUserPlus, faTrash, faArrowLeft, faSpinner, faUsers, faChevronDown, faCheck, faUserCheck, faUserClock } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
@@ -11,18 +12,47 @@ import { busService } from '../../services/busService';
 import { routeService } from '../../services/routeService';
 
 const DriverManagementHome = () => {
+    const navigate = useNavigate();
+    const { driverId, status: statusSlug } = useParams();
+
+    const statusSlugMap = useMemo(() => ({
+        'active': 'active',
+        'resigned': 'resigned'
+    }), []);
+
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [viewMode, setViewMode] = useState('active'); // 'active' or 'resigned'
+
+    // Sync viewMode with URL status parameter
+    useEffect(() => {
+        if (statusSlug && statusSlugMap[statusSlug]) {
+            setViewMode(statusSlugMap[statusSlug]);
+        } else if (!statusSlug && location.pathname === '/drivers') {
+            setViewMode('active');
+        }
+    }, [statusSlug, location.pathname, statusSlugMap]);
+
+    const handleTabChange = (mode) => {
+        const slug = mode === 'active' ? 'active' : 'resigned';
+        navigate(`/drivers/view/${slug}`);
+    };
+
+    // Derived States
+    const isAddPath = location.pathname === '/drivers/add';
+    const isEditPath = !!driverId && location.pathname.endsWith('/edit');
+    const isDetailPath = !!driverId && location.pathname.endsWith('/detail');
+    const search = searchParams.get('search') || "";
+
     const [drivers, setDrivers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [showModal, setShowModal] = useState(false);
-    const [search, setSearch] = useState('');
-    const [selectedDriver, setSelectedDriver] = useState(null);
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
-    const [viewMode, setViewMode] = useState('active'); // 'active' or 'resigned'
     const [editingDriver, setEditingDriver] = useState(null);
+    const [selectedDriver, setSelectedDriver] = useState(null);
     
     // Bulk Actions State
     const [selectedRows, setSelectedRows] = useState([]);
@@ -87,6 +117,27 @@ const DriverManagementHome = () => {
     useEffect(() => {
         fetchDrivers();
     }, []);
+
+    // Synchronize selectedDriver and editingDriver when URL changes
+    useEffect(() => {
+        if (drivers.length > 0) {
+            if (driverId) {
+                const driver = drivers.find(d => d.id === driverId);
+                if (driver) {
+                    if (isEditPath) {
+                        setEditingDriver(driver);
+                        setSelectedDriver(null);
+                    } else if (isDetailPath) {
+                        setSelectedDriver(driver);
+                        setEditingDriver(null);
+                    }
+                }
+            } else {
+                setSelectedDriver(null);
+                setEditingDriver(null);
+            }
+        }
+    }, [driverId, isEditPath, isDetailPath, drivers]);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -178,7 +229,7 @@ const DriverManagementHome = () => {
             };
             await driverService.createDriver(payload);
             await fetchDrivers(); 
-            setShowModal(false);
+            navigate('/drivers');
         } catch (err) {
             console.error(err);
         } finally {
@@ -256,8 +307,7 @@ const DriverManagementHome = () => {
                 }
             }
             
-            setShowModal(false);
-            setEditingDriver(null);
+            navigate(isDetailPath ? `/drivers/${updatedData.id}/detail` : '/drivers');
         } catch (err) {
             console.error(err);
         } finally {
@@ -266,8 +316,19 @@ const DriverManagementHome = () => {
     };
 
     const handleEdit = (driver) => {
-        setEditingDriver(driver);
-        setShowModal(true);
+        navigate(`/drivers/${driver.id}/edit`);
+    };
+
+    const handleViewDetail = (driver) => {
+        navigate(`/drivers/${driver.id}/detail`);
+    };
+
+    const handleSearchChange = (value) => {
+        if (value) {
+            setSearchParams({ search: value });
+        } else {
+            setSearchParams({});
+        }
     };
 
     return (
@@ -286,7 +347,7 @@ const DriverManagementHome = () => {
                             {/* Premium Tab System */}
                             <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
                                 <button
-                                    onClick={() => setViewMode('active')}
+                                    onClick={() => handleTabChange('active')}
                                     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         viewMode === 'active' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
@@ -296,7 +357,7 @@ const DriverManagementHome = () => {
                                     Active Drivers
                                 </button>
                                 <button
-                                    onClick={() => setViewMode('resigned')}
+                                    onClick={() => handleTabChange('resigned')}
                                     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         viewMode === 'resigned' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
@@ -312,7 +373,7 @@ const DriverManagementHome = () => {
                                     type="text"
                                     placeholder="Search driver fleet..."
                                     value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
@@ -340,7 +401,7 @@ const DriverManagementHome = () => {
                     ) : selectedDriver ? (
                         <DriverDetail
                             selectedDriver={selectedDriver}
-                            onBack={() => setSelectedDriver(null)}
+                            onBack={() => navigate('/drivers')}
                             onUpdate={handleUpdate}
                             onDelete={handleDelete}
                             onEdit={handleEdit}
@@ -349,7 +410,7 @@ const DriverManagementHome = () => {
                     ) : (
                         <DriverList
                             filteredDrivers={filteredDrivers}
-                            setSelectedStudent={setSelectedDriver}
+                            setSelectedStudent={handleViewDetail}
                             handleToggleStatus={handleToggleStatus}
                             handleDelete={handleDelete}
                             activeMenuId={activeMenuId}
@@ -366,7 +427,7 @@ const DriverManagementHome = () => {
                 <>
                     {showBulkMenu && (
                         <div 
-                            className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[20000] animate-in fade-in duration-500"
+                            className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] animate-in fade-in duration-500"
                             onClick={() => setShowBulkMenu(false)}
                         />
                     )}
@@ -444,7 +505,7 @@ const DriverManagementHome = () => {
 
             {!selectedDriver && !loading && viewMode === 'active' && (
                 <button
-                    onClick={() => setShowModal(true)}
+                    onClick={() => navigate('/drivers/add')}
                     className="fixed bottom-8 right-8 w-16 h-16 text-white rounded-[2rem] shadow-2xl hover:shadow-blue-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
@@ -453,9 +514,9 @@ const DriverManagementHome = () => {
             )}
 
             <AddDriverForm
-                show={showModal}
+                show={isAddPath || isEditPath}
                 onClose={() => {
-                    setShowModal(false);
+                    navigate(isEditPath ? `/drivers/${driverId}/detail` : '/drivers');
                     setEditingDriver(null);
                 }}
                 onAdd={handleAdd}
@@ -465,7 +526,7 @@ const DriverManagementHome = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300"
                         onClick={() => setShowDeleteConfirm(false)}

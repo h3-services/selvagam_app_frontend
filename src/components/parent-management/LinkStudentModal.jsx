@@ -90,7 +90,7 @@ const LinkStudentModal = ({ show, onClose, parent, onRefresh }) => {
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-[2005] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose} />
             
             <div className="relative bg-white rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border border-slate-100 w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in slide-in-from-bottom-8 duration-500">

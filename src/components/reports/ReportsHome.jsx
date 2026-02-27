@@ -1,11 +1,27 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
     import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
     import { faSearch } from '@fortawesome/free-solid-svg-icons';
     import ReportCard from './ReportCard';
     
     const ReportsHome = () => {
-        const [activeTab, setActiveTab] = useState('daily');
-        const [searchQuery, setSearchQuery] = useState('');
+        const [searchParams, setSearchParams] = useSearchParams();
+        
+        const activeTab = searchParams.get('tab') || 'daily';
+        const searchQuery = searchParams.get('search') || '';
+
+        const handleTabChange = (tab) => {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.set('tab', tab);
+            setSearchParams(newParams);
+        };
+
+        const handleSearchChange = (value) => {
+            const newParams = new URLSearchParams(searchParams);
+            if (value) newParams.set('search', value);
+            else newParams.delete('search');
+            setSearchParams(newParams);
+        };
     
         const [reportData] = useState([
             { id: 'RPT-2024-001', name: 'Daily Trip Summary', type: 'Trip', date: '2024-01-24', status: 'Generated', size: '1.2 MB' },
@@ -35,7 +51,7 @@ import { useState } from 'react';
                                     type="text"
                                     placeholder="Search reports..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
@@ -53,7 +69,7 @@ import { useState } from 'react';
                                 {['daily', 'weekly', 'monthly'].map((tab) => (
                                     <button
                                         key={tab}
-                                        onClick={() => setActiveTab(tab)}
+                                        onClick={() => handleTabChange(tab)}
                                         className={`px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-300 ${
                                             activeTab === tab 
                                             ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 

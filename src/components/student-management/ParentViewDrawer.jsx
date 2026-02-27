@@ -25,10 +25,10 @@ const ParentViewDrawer = ({ show, onClose, parentData }) => {
     return (
         <>
             {/* 🌌 High-Performance Backdrop */}
-            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[3000] animate-in fade-in duration-500" onClick={onClose}></div>
+            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[99999] animate-in fade-in duration-500" onClick={onClose}></div>
 
             {/* 🛸 Elite Sidebar Matrix */}
-            <div className="fixed right-0 top-0 h-screen w-full sm:w-[550px] bg-[#FDFEFE] shadow-[0_0_100px_rgba(0,0,0,0.15)] z-[3001] flex flex-col p-0 transition-transform duration-500 animate-slide-in overflow-hidden rounded-l-[3.5rem] border-l border-white">
+            <div className="fixed right-0 top-0 h-screen w-full sm:w-[550px] bg-[#FDFEFE] shadow-[0_0_100px_rgba(0,0,0,0.15)] z-[100000] flex flex-col p-0 transition-transform duration-500 animate-slide-in overflow-hidden rounded-l-[3.5rem] border-l border-white">
                 
                 {/* 🎨 Immersive Hero Header */}
                 <div className="relative p-12 overflow-hidden bg-slate-900">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faUser, faTimes, faCheck, faEdit, faChild, faPhone, 
@@ -8,7 +9,7 @@ import {
     faCalendarDay, faIdCard, faVenusMars,
     faChevronLeft, faEllipsisVertical, faBuilding,
     faFingerprint, faCircleCheck, faArrowUpRightFromSquare,
-    faGraduationCap, faMap, faPaperclip, faSchool, faWalking, faUserPlus, faRightLeft
+    faGraduationCap, faMap, faPaperclip, faSchool, faWalking, faUserPlus, faRightLeft, faUsers
 } from '@fortawesome/free-solid-svg-icons';
 import ParentViewDrawer from './ParentViewDrawer';
 import { parentService } from '../../services/parentService';
@@ -16,6 +17,10 @@ import { routeService } from '../../services/routeService';
 import { studentService } from '../../services/studentService';
 
 const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportStatusUpdate }) => {
+    const { role } = useParams();
+    const navigate = useNavigate();
+    const currentRole = role ? role.toUpperCase() : null;
+
     const [parent1, setParent1] = useState(null);
     const [parent2, setParent2] = useState(null);
     const [loadingParents, setLoadingParents] = useState(false);
@@ -31,7 +36,6 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
     const [loadingTransport, setLoadingTransport] = useState(false);
     
     // Parent Selection State
-    const [selectingParentRole, setSelectingParentRole] = useState(null); // 'PRIMARY', 'SECONDARY', or null
     const [allParents, setAllParents] = useState([]);
     const [loadingAllParents, setLoadingAllParents] = useState(false);
     const [parentSearchQuery, setParentSearchQuery] = useState("");
@@ -48,6 +52,13 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
             }
         }
     }, [selectedStudent]);
+
+    // Handle URL-based parent selection modal
+    useEffect(() => {
+        if (currentRole && selectedStudent) {
+            fetchAllParents(currentRole);
+        }
+    }, [currentRole, selectedStudent]);
 
     const fetchParents = async (p1Id, p2Id) => {
         setLoadingParents(true);
@@ -108,25 +119,25 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
 
     const handleAssignParent = async (parentId) => {
         try {
-            if (selectingParentRole === 'PRIMARY') {
+            if (currentRole === 'PRIMARY') {
                 await studentService.updatePrimaryParent(selectedStudent.id, parentId);
             } else {
                 await studentService.updateSecondaryParent(selectedStudent.id, parentId);
             }
             
-            setSelectingParentRole(null);
+            navigate(`/students/${selectedStudent.id}/detail`);
             
             // Re-fetch parent data immediately after assignment to ensure sync
             // Both IDs are needed to update parent1 and parent2 state
-            const p1Id = selectingParentRole === 'PRIMARY' ? parentId : selectedStudent.originalData?.parent_id;
-            const p2Id = selectingParentRole === 'SECONDARY' ? parentId : selectedStudent.originalData?.s_parent_id;
+            const p1Id = currentRole === 'PRIMARY' ? parentId : selectedStudent.originalData?.parent_id;
+            const p2Id = currentRole === 'SECONDARY' ? parentId : selectedStudent.originalData?.s_parent_id;
             
             await fetchParents(p1Id, p2Id);
 
             // Trigger parent update in list view if needed
             if (onUpdate) onUpdate();
         } catch (error) {
-            console.error(`${selectingParentRole} parent assignment failed:`, error);
+            console.error(`${currentRole} parent assignment failed:`, error);
         }
     };
 
@@ -425,9 +436,8 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                                     <button 
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            const role = p.label === "Primary" ? 'PRIMARY' : 'SECONDARY';
-                                                            setSelectingParentRole(role);
-                                                            fetchAllParents(role);
+                                                            const roleType = p.label === "Primary" ? 'primary' : 'secondary';
+                                                            navigate(`/students/${selectedStudent.id}/detail/parent/${roleType}`);
                                                         }}
                                                         className="w-full mt-4 py-3 rounded-xl bg-indigo-50/50 text-indigo-600 border border-dashed border-indigo-200 text-[9px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white hover:border-solid hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
                                                     >
@@ -443,7 +453,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                         return (
                                             <button 
                                                 key={idx}
-                                                onClick={() => { setSelectingParentRole('SECONDARY'); fetchAllParents('SECONDARY'); }}
+                                                onClick={() => navigate(`/students/${selectedStudent.id}/detail/parent/secondary`)}
                                                 className="p-6 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/30 hover:bg-white hover:border-indigo-300 transition-all flex flex-col items-center justify-center gap-3 group"
                                             >
                                                 <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-slate-300 group-hover:text-indigo-600 group-hover:scale-110 transition-all shadow-sm">
@@ -480,20 +490,20 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
             />
 
             {/* Parent Selection Modal */}
-            {selectingParentRole && (
+            {currentRole && (
                 <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div 
                         className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-500"
-                        onClick={() => setSelectingParentRole(null)}
+                        onClick={() => navigate(`/students/${selectedStudent.id}/detail`)}
                     />
                     <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-white w-full max-w-xl animate-in zoom-in slide-in-from-bottom-8 duration-500 overflow-hidden flex flex-col max-h-[80vh] z-[100000]">
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Assign {selectingParentRole.charAt(0) + selectingParentRole.slice(1).toLowerCase()} Parent</h3>
+                                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Assign {currentRole.charAt(0) + currentRole.slice(1).toLowerCase()} Parent</h3>
                                 <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Select a parent from the list</p>
                             </div>
                             <button 
-                                onClick={() => setSelectingParentRole(null)}
+                                onClick={() => navigate(`/students/${selectedStudent.id}/detail`)}
                                 className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all"
                             >
                                 <FontAwesomeIcon icon={faTimes} />

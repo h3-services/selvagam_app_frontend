@@ -5,9 +5,9 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import { routeService } from '../../services/routeService';
 import { studentService } from '../../services/studentService';
 import { classService } from '../../services/classService';
-import { LocationMarker, createStopIcon } from './RouteMapUtils';
+import { LocationMarker, createStopIcon, createSchoolIcon } from './RouteMapUtils';
 
-const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
+const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
     const [currentStopName, setCurrentStopName] = useState('');
@@ -209,7 +209,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
             return;
         }
 
-        const currentStops = [...editData.stopPoints];
+        const currentStops = [...(isEditing ? editData.stopPoints : selectedRoute.stopPoints)];
         
         // Find the items being sorted by current dragType
         const sortedItems = currentStops
@@ -226,15 +226,29 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
         remainingItems.splice(targetIndex, 0, movedItem);
 
         // Update orders for all items based on new positions
+        const orderKey = dragType === 'pickup' ? 'pickupOrder' : 'dropOrder';
+        const finalStops = [...currentStops];
+        
         remainingItems.forEach((item, idx) => {
-            const orderKey = dragType === 'pickup' ? 'pickupOrder' : 'dropOrder';
-            currentStops[item.originalIndex] = {
-                ...currentStops[item.originalIndex],
+            finalStops[item.originalIndex] = {
+                ...finalStops[item.originalIndex],
                 [orderKey]: idx + 1
             };
         });
 
-        setEditData({ ...editData, stopPoints: currentStops });
+        if (isEditing) {
+            setEditData({ ...editData, stopPoints: finalStops });
+        } else if (onReorderStop) {
+            const stopToUpdate = finalStops[movedItem.originalIndex];
+            onReorderStop(stopToUpdate.id, {
+                stop_name: stopToUpdate.name,
+                latitude: parseFloat(parseFloat(stopToUpdate.position[0]).toFixed(6)),
+                longitude: parseFloat(parseFloat(stopToUpdate.position[1]).toFixed(6)),
+                pickup_stop_order: stopToUpdate.pickupOrder,
+                drop_stop_order: stopToUpdate.dropOrder
+            });
+        }
+
         setDraggedItem(null);
         setDragOverItem(null);
         setDragType(null);
@@ -256,29 +270,29 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
     };
 
     return (
-        <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="h-full bg-white lg:rounded-3xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative p-3 sm:p-5 shrink-0" style={{ backgroundColor: '#3A7BFF' }}>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 w-full sm:w-auto">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                         <button
                             onClick={() => { onBack(); setIsEditing(false); }}
                             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex-shrink-0 flex items-center justify-center text-white hover:bg-white/30 transition-all"
                         >
                             <FontAwesomeIcon icon={faArrowLeft} />
                         </button>
-                        <div className="flex flex-col items-start gap-1 min-w-0 flex-1">
+                        <div className="flex flex-col items-start min-w-0">
                             {isEditing ? (
                                 <input
                                     type="text"
                                     value={editData?.routeName}
                                     onChange={(e) => setEditData({ ...editData, routeName: e.target.value })}
-                                    className="bg-transparent border-b border-white text-white font-bold text-lg sm:text-2xl focus:outline-none placeholder-white/50 w-full min-w-[200px]"
+                                    className="bg-transparent border-b border-white text-white font-bold text-lg sm:text-2xl focus:outline-none placeholder-white/50 w-full"
                                 />
                             ) : (
                                 <>
-                                    <h2 className="text-lg sm:text-2xl font-bold text-white truncate max-w-full">{selectedRoute.routeName}</h2>
-                                    <div className="px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 truncate max-w-full inline-block">
-                                        <span className="text-white font-bold text-[10px] sm:text-xs uppercase tracking-widest truncate block">{selectedRoute.assignedBus}</span>
+                                    <h2 className="text-base sm:text-2xl font-bold text-white truncate">{selectedRoute.routeName}</h2>
+                                    <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30">
+                                        <span className="text-white font-bold text-[8px] sm:text-xs uppercase tracking-widest">{selectedRoute.assignedBus}</span>
                                     </div>
                                 </>
                             )}
@@ -328,7 +342,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                         </button>
                     </div>
                 )}
-                <div className="flex flex-col-reverse lg:flex-row h-full gap-3 sm:gap-4 overflow-y-auto lg:overflow-hidden">
+                <div className="flex flex-col lg:flex-row h-full gap-3 sm:gap-4 overflow-y-auto lg:overflow-hidden">
                     {/* Stops List */}
                     {/* Stops List */}
                     <div className="w-full lg:w-1/3 flex flex-col gap-4 shrink-0 lg:h-full lg:overflow-y-auto custom-scrollbar pr-2">
@@ -336,6 +350,8 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                         {/* Pickup Order Card */}
                         <div className="bg-blue-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-blue-100 shadow-sm shrink-0">
                             <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-blue-600 shrink-0">Pickup Order</h3>
+                            
+
 
                             {isEditing && (
                                 <div className="mb-6 space-y-3 bg-white p-4 rounded-xl border border-blue-100 shadow-inner shrink-0">
@@ -403,44 +419,43 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                                             <div 
                                                 key={`pickup-${stop.originalIndex}`} 
                                                 className={`flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border transition-all duration-200 ${draggedItem === displayIndex && dragType === 'pickup' ? 'opacity-40 scale-95 border-blue-300' : 'border-blue-50'} ${dragOverItem === displayIndex && dragType === 'pickup' ? 'border-t-4 border-t-blue-500 pt-2' : ''}`}
-                                                draggable={isEditing && editingStopIndex === null}
+                                                draggable={editingStopIndex === null}
                                                 onDragStart={(e) => handleDragStart(e, displayIndex, 'pickup')}
                                                 onDragOver={(e) => handleDragOver(e, displayIndex)}
                                                 onDrop={(e) => handleDrop(e, displayIndex)}
                                                 onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
                                             >
                                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                    {isEditing ? (
-                                                        <div className="flex items-center gap-2 shrink-0">
-                                                            <div className="cursor-grab active:cursor-grabbing text-blue-300 hover:text-blue-500 px-1 py-2">
-                                                                <FontAwesomeIcon icon={faGripVertical} />
-                                                            </div>
-                                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
-                                                                {stop.pickupOrder !== undefined ? stop.pickupOrder : stop.originalIndex + 1}
-                                                            </div>
+                                                    <div className="flex items-center gap-2 shrink-0">
+                                                        <div className="cursor-grab active:cursor-grabbing text-blue-300 hover:text-blue-500 px-1 py-2">
+                                                            <FontAwesomeIcon icon={faGripVertical} />
                                                         </div>
-                                                    ) : (
                                                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
                                                             {stop.pickupOrder !== undefined ? stop.pickupOrder : stop.originalIndex + 1}
                                                         </div>
-                                                    )}
+                                                    </div>
                                                     
                                                     {isEditing && <div className="w-px h-8 bg-blue-100 mx-1"></div>}
                                                     {editingStopIndex === stop.originalIndex ? (
-                                                        <div className="flex flex-col gap-1 flex-1">
-                                                            <div className="flex items-center gap-2">
+                                                        <div className="flex flex-col gap-1 flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 w-full">
                                                                 <input 
                                                                     type="text" 
                                                                     value={editingStopName}
                                                                     onChange={(e) => setEditingStopName(e.target.value)}
-                                                                    className="flex-1 bg-gray-50 border border-blue-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500 min-w-0"
+                                                                    className="flex-1 bg-white border border-blue-500 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-100 min-w-0 shadow-sm text-gray-900"
                                                                     autoFocus
                                                                 />
-                                                                <button onClick={() => handleSaveStopEdit(stop.originalIndex)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors shrink-0">
-                                                                    <FontAwesomeIcon icon={faCheck} />
-                                                                </button>
+                                                                <div className="flex items-center gap-1 shrink-0">
+                                                                    <button onClick={() => { setEditingStopIndex(null); setEditingStopName(''); }} className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors flex items-center justify-center">
+                                                                        <FontAwesomeIcon icon={faTimes} className="text-base sm:text-lg" />
+                                                                    </button>
+                                                                    <button onClick={() => handleSaveStopEdit(stop.originalIndex)} className="text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 p-1.5 rounded-lg transition-colors flex items-center justify-center">
+                                                                        <FontAwesomeIcon icon={faCheck} className="text-base sm:text-lg" />
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <span className="text-[10px] text-blue-600 font-medium ml-1 animate-pulse">
+                                                            <span className="text-[10px] text-blue-500 font-medium ml-1">
                                                                 * Click map to update location
                                                             </span>
                                                         </div>
@@ -477,6 +492,8 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                         {/* Drop Order Card */}
                         <div className="bg-purple-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-purple-100 shadow-sm shrink-0 mb-4">
                             <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-purple-600 shrink-0">Drop Order</h3>
+                            
+
                             <div className="space-y-3 flex-col">
                                 {(isEditing ? editData.stopPoints : (selectedRoute?.stopPoints || [])) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
                                     [...(isEditing ? editData.stopPoints : selectedRoute.stopPoints)]
@@ -486,27 +503,21 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                                             <div 
                                                 key={`drop-${stop.originalIndex}`} 
                                                 className={`flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border transition-all duration-200 ${draggedItem === displayIndex && dragType === 'drop' ? 'opacity-40 scale-95 border-purple-300' : 'border-purple-50'} ${dragOverItem === displayIndex && dragType === 'drop' ? 'border-t-4 border-t-purple-500 pt-2' : ''}`}
-                                                draggable={isEditing && editingStopIndex === null}
+                                                draggable={editingStopIndex === null}
                                                 onDragStart={(e) => handleDragStart(e, displayIndex, 'drop')}
                                                 onDragOver={(e) => handleDragOver(e, displayIndex)}
                                                 onDrop={(e) => handleDrop(e, displayIndex)}
                                                 onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
                                             >
                                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                    {isEditing ? (
-                                                        <div className="flex items-center gap-2 shrink-0">
-                                                            <div className="cursor-grab active:cursor-grabbing text-purple-300 hover:text-purple-500 px-1 py-2">
-                                                                <FontAwesomeIcon icon={faGripVertical} />
-                                                            </div>
-                                                            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
-                                                                {stop.dropOrder !== undefined ? stop.dropOrder : stop.originalIndex + 1}
-                                                            </div>
+                                                    <div className="flex items-center gap-2 shrink-0">
+                                                        <div className="cursor-grab active:cursor-grabbing text-purple-300 hover:text-purple-500 px-1 py-2">
+                                                            <FontAwesomeIcon icon={faGripVertical} />
                                                         </div>
-                                                    ) : (
                                                         <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
                                                             {stop.dropOrder !== undefined ? stop.dropOrder : stop.originalIndex + 1}
                                                         </div>
-                                                    )}
+                                                    </div>
                                                     
                                                     {isEditing && <div className="w-px h-8 bg-purple-100 mx-1"></div>}
                                                     <p className="text-sm font-bold text-gray-800 truncate">{stop.name}</p>
@@ -521,8 +532,8 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
 
                     </div>
 
-                    {/* Map Container */}
-                    <div className="flex-1 relative rounded-2xl overflow-hidden shadow-inner border border-gray-200 min-h-[40vh] sm:min-h-[500px] lg:min-h-0 shrink-0 lg:shrink">
+                    {/* Map Container - Moved to top on mobile for better visibility */}
+                    <div className="order-first lg:order-none flex-1 relative rounded-2xl overflow-hidden shadow-inner border border-gray-200 min-h-[300px] sm:min-h-[400px] lg:min-h-0 shrink-0 lg:shrink">
                         {isEditing && (
                             <div className="absolute top-4 left-16 right-4 z-[9999] flex flex-col gap-1">
                                 <div className="flex gap-2">
@@ -554,8 +565,8 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                             </div>
                         )}
                         <MapContainer
-                            center={selectedRoute.coordinates?.start || [12.6083, 80.0528]} 
-                            zoom={13}
+                            center={[12.6083, 80.0528]} 
+                            zoom={11}
                             style={{ height: '100%', width: '100%' }}
                             scrollWheelZoom={true}
                         >
@@ -563,6 +574,17 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                             />
+
+                            {/* School/Campus Marker (Start/End Point) */}
+                            <Marker position={[12.6083, 80.0528]} icon={createSchoolIcon()}>
+                                <Popup>
+                                    <div className="text-center">
+                                        <b className="text-indigo-900 text-sm">School Campus</b>
+                                        <br />
+                                        <span className="text-xs text-gray-500">Route Start & End Point</span>
+                                    </div>
+                                </Popup>
+                            </Marker>
 
                             {isEditing && (
                                 <LocationMarker 
@@ -598,10 +620,10 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
             {showStudentsModal && (
                 <>
                     <div 
-                        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2005] transition-opacity duration-500" 
+                        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[99999] transition-opacity duration-500" 
                         onClick={() => setShowStudentsModal(false)} 
                     />
-                    <div className="fixed inset-0 z-[2006] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                         <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-300">
                             {/* Modal Header */}
                             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">

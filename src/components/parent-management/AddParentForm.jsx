@@ -28,6 +28,10 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         name: '',
         email: '',
         phone: '',
+        street: '',
+        city: '',
+        district: '',
+        pincode: '',
         door_no: '',
         parent_role: 'GUARDIAN'
     };
@@ -41,6 +45,9 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                 name: initialData.name || '',
                 email: initialData.email || '',
                 phone: initialData.phone || '',
+                street: initialData.street || '',
+                city: initialData.city || '',
+                district: initialData.district || '',
                 pincode: initialData.pincode || '',
                 door_no: initialData.door_no || '',
                 parent_role: initialData.parent_role || 'GUARDIAN'

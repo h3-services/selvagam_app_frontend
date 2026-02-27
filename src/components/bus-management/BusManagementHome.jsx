@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faBus, faArrowLeft, faTrash, faSpinner, faUsers, faChevronDown, faCheck, faWrench, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
@@ -10,19 +11,28 @@ import { driverService } from '../../services/driverService';
 import { routeService } from '../../services/routeService';
 
 const BusManagementHome = () => {
+    const navigate = useNavigate();
+    const { busId } = useParams();
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Derived States
+    const isAddPath = location.pathname === '/buses/add';
+    const isEditPath = !!busId && location.pathname.endsWith('/edit');
+    const isDetailPath = !!busId && location.pathname.endsWith('/detail');
+    const search = searchParams.get('search') || "";
+
     const [buses, setBuses] = useState([]);
     const [drivers, setDrivers] = useState([]);
     const [routes, setRoutes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [showModal, setShowModal] = useState(false);
-    const [search, setSearch] = useState('');
-    const [selectedBus, setSelectedBus] = useState(null);
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [editingBus, setEditingBus] = useState(null);
+    const [selectedBus, setSelectedBus] = useState(null);
 
     // Bulk Actions State
     const [selectedRows, setSelectedRows] = useState([]);
@@ -70,6 +80,27 @@ const BusManagementHome = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Synchronize selectedBus and editingBus when URL changes
+    useEffect(() => {
+        if (buses.length > 0) {
+            if (busId) {
+                const bus = buses.find(b => b.id === busId);
+                if (bus) {
+                    if (isEditPath) {
+                        setEditingBus(bus);
+                        setSelectedBus(null);
+                    } else if (isDetailPath) {
+                        setSelectedBus(bus);
+                        setEditingBus(null);
+                    }
+                }
+            } else {
+                setSelectedBus(null);
+                setEditingBus(null);
+            }
+        }
+    }, [busId, isEditPath, isDetailPath, buses]);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -124,8 +155,7 @@ const BusManagementHome = () => {
             }
 
             await fetchData();
-            setShowModal(false);
-            setEditingBus(null);
+            navigate('/buses');
             return createdBus;
         } catch (err) {
             console.error(err);
@@ -293,12 +323,27 @@ const BusManagementHome = () => {
                 }
             }
             
-            setShowModal(false);
-            setEditingBus(null);
+            navigate(isDetailPath ? `/buses/${bus_id}/detail` : '/buses');
         } catch (err) {
             console.error("Failed to update bus:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleEdit = (bus) => {
+        navigate(`/buses/${bus.id}/edit`);
+    };
+
+    const handleViewDetail = (bus) => {
+        navigate(`/buses/${bus.id}/detail`);
+    };
+
+    const handleSearchChange = (value) => {
+        if (value) {
+            setSearchParams({ search: value });
+        } else {
+            setSearchParams({});
         }
     };
 
@@ -355,7 +400,7 @@ const BusManagementHome = () => {
                                     type="text"
                                     placeholder="Search fleet..."
                                     value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
@@ -384,11 +429,8 @@ const BusManagementHome = () => {
                         <BusDetail
                             selectedBus={selectedBus}
                             drivers={drivers}
-                            onBack={() => setSelectedBus(null)}
-                            onEdit={(bus) => {
-                                setEditingBus(bus);
-                                setShowModal(true);
-                            }}
+                            onBack={() => navigate('/buses')}
+                            onEdit={(bus) => navigate(`/buses/${bus.id}/edit`)}
                             onUpdate={handleUpdate}
                             getStatusColor={getStatusColor}
                         />
@@ -397,7 +439,7 @@ const BusManagementHome = () => {
                             filteredBuses={filteredBuses}
                             drivers={drivers}
                             routes={routes}
-                            setSelectedBus={setSelectedBus}
+                            setSelectedBus={handleViewDetail}
                             handleStatusChange={handleStatusChange}
                             handleDriverChange={handleDriverChange}
                             handleRouteChange={handleRouteChange}
@@ -495,7 +537,7 @@ const BusManagementHome = () => {
 
             {!selectedBus && !loading && !showBulkMenu && (
                 <button
-                    onClick={() => setShowModal(true)}
+                    onClick={() => navigate('/buses/add')}
                     className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-[24px] shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-40"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
@@ -504,9 +546,9 @@ const BusManagementHome = () => {
             )}
 
             <AddBusForm
-                show={showModal}
+                show={isAddPath || isEditPath}
                 onClose={() => {
-                    setShowModal(false);
+                    navigate(isEditPath ? `/buses/${busId}/detail` : '/buses');
                     setEditingBus(null);
                 }}
                 onAdd={handleAdd}
@@ -518,7 +560,7 @@ const BusManagementHome = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setShowDeleteConfirm(false)}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import AdminTeam from './AdminTeam';
@@ -7,6 +8,14 @@ import DeactivationReasonModal from './DeactivationReasonModal';
 import { adminService } from '../../services/adminService';
 
 const SuperAdminHome = () => {
+    const navigate = useNavigate();
+    const { adminId } = useParams();
+    const location = useLocation();
+
+    // Derived States
+    const isAddPath = location.pathname === '/admin/add';
+    const isEditPath = !!adminId && location.pathname.endsWith('/edit');
+
     // Admin Data State
     const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -44,7 +53,8 @@ const SuperAdminHome = () => {
     const handleAddAdmin = async (newAdmin) => {
         try {
             await adminService.createAdmin(newAdmin);
-            fetchAdmins();
+            await fetchAdmins();
+            navigate('/admin');
         } catch (error) {
             console.error("Failed to add admin:", error);
             alert("Failed to create admin");
@@ -54,7 +64,8 @@ const SuperAdminHome = () => {
     const handleUpdateAdmin = async (id, updatedData) => {
         try {
             await adminService.updateAdmin(id, updatedData);
-            fetchAdmins();
+            await fetchAdmins();
+            navigate('/admin');
         } catch (error) {
            console.error("Failed to update admin:", error);
         }
@@ -133,6 +144,8 @@ const SuperAdminHome = () => {
                         onUpdateAdmin={handleUpdateAdmin}
                         onDeleteAdmin={handleDeleteAdminRequest}
                         onToggleStatus={handleToggleAdminStatus}
+                        isAddPath={isAddPath}
+                        isEditPath={isEditPath}
                     />
                 </div>
             </div>

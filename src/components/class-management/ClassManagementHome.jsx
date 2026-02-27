@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faSearch, 
@@ -17,19 +18,38 @@ import ClassList from './ClassList';
 import AddClassForm from './AddClassForm';
 import PromoteStudentsModal from './PromoteStudentsModal';
 import { COLORS } from '../../constants/colors';
-
 const ClassManagementHome = () => {
+    const navigate = useNavigate();
+    const { classId } = useParams();
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+    
+    // Derived States
+    const isAddPath = location.pathname === '/classes/add';
+    const isEditPath = !!classId && location.pathname.endsWith('/edit');
+    const isPromotePath = location.pathname === '/classes/promote';
+    const searchQuery = searchParams.get('search') || "";
+
     const [classes, setClasses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [showPromoteModal, setShowPromoteModal] = useState(false);
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [editingClass, setEditingClass] = useState(null);
 
     useEffect(() => {
         fetchClasses();
     }, []);
+
+    // Synchronize editingClass when URL changes
+    useEffect(() => {
+        if (isEditPath && classId && classes.length > 0) {
+            const cls = classes.find(c => c.class_id === classId);
+            if (cls) {
+                setEditingClass(cls);
+            }
+        } else if (!isEditPath) {
+            setEditingClass(null);
+        }
+    }, [isEditPath, classId, classes]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -66,8 +86,15 @@ const ClassManagementHome = () => {
     };
 
     const handleEditClass = (classData) => {
-        setEditingClass(classData);
-        setShowAddModal(true);
+        navigate(`/classes/${classData.class_id}/edit`);
+    };
+
+    const handleSearchChange = (value) => {
+        if (value) {
+            setSearchParams({ search: value });
+        } else {
+            setSearchParams({});
+        }
     };
 
     const filteredClasses = useMemo(() => {
@@ -101,7 +128,7 @@ const ClassManagementHome = () => {
 
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <button 
-                            onClick={() => setShowPromoteModal(true)}
+                            onClick={() => navigate('/classes/promote')}
                             className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-xs hover:bg-slate-50 hover:text-blue-600 transition-all shadow-sm order-2 md:order-1"
                         >
                             <FontAwesomeIcon icon={faArrowTrendUp} className="text-indigo-400 group-hover:text-blue-500" />
@@ -113,7 +140,7 @@ const ClassManagementHome = () => {
                                 type="text"
                                 placeholder="Search classes..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => handleSearchChange(e.target.value)}
                                 className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                             />
                             <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
@@ -146,10 +173,7 @@ const ClassManagementHome = () => {
 
             {/* Floating Action Button */}
             <button
-                onClick={() => {
-                    setEditingClass(null);
-                    setShowAddModal(true);
-                }}
+                onClick={() => navigate('/classes/add')}
                 className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
                 style={{ backgroundColor: COLORS.SIDEBAR_BG }}
             >
@@ -157,16 +181,17 @@ const ClassManagementHome = () => {
             </button>
 
             <AddClassForm 
-                show={showAddModal} 
-                onClose={() => {
-                    setShowAddModal(false);
-                    setEditingClass(null);
-                }} 
+                show={isAddPath || isEditPath} 
+                onClose={() => navigate('/classes')} 
                 onAdd={fetchClasses}
                 onUpdate={fetchClasses}
                 initialData={editingClass}
             />
-            <PromoteStudentsModal show={showPromoteModal} onClose={() => setShowPromoteModal(false)} onRefresh={fetchClasses} />
+            <PromoteStudentsModal 
+                show={isPromotePath} 
+                onClose={() => navigate('/classes')} 
+                onRefresh={fetchClasses} 
+            />
         </div>
     );
 };

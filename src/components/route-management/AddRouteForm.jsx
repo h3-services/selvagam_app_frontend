@@ -192,9 +192,9 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-[20000]">
+        <div className="fixed inset-0 z-[99999]">
             <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md" onClick={onClose}></div>
-            <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-blue-50 to-white shadow-2xl z-[20001] flex flex-col transition-all">
+            <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-blue-50 to-white shadow-2xl z-[100000] flex flex-col transition-all">
                 <div className="relative p-6 sm:p-8 border-b border-blue-100 flex-shrink-0">
                     <button
                         onClick={onClose}

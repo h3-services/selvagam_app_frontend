@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBroadcastTower, faUsers, faGraduationCap, faRoute, faChevronDown, faCheck } from '@fortawesome/free-solid-svg-icons';
 import ComposeMessage from './ComposeMessage';
@@ -6,7 +7,32 @@ import { classService } from '../../services/classService';
 import { routeService } from '../../services/routeService';
 
 const CommunicationHome = () => {
+    const navigate = useNavigate();
+    const { category: categorySlug } = useParams();
+    const location = useLocation();
+
+    const categorySlugMap = useMemo(() => ({
+        'all': 'ALL',
+        'class': 'CLASS',
+        'route': 'ROUTE'
+    }), []);
+
     const [category, setCategory] = useState('ALL'); // 'ALL' | 'CLASS' | 'ROUTE'
+
+    // Sync category with URL parameter
+    useEffect(() => {
+        if (categorySlug && categorySlugMap[categorySlug]) {
+            setCategory(categorySlugMap[categorySlug]);
+        } else if (!categorySlug && location.pathname === '/communication') {
+            setCategory('ALL');
+        }
+    }, [categorySlug, location.pathname, categorySlugMap]);
+
+    const handleCategoryChange = (cat) => {
+        const slug = cat.toLowerCase();
+        navigate(`/communication/view/${slug}`);
+    };
+
     const [classes, setClasses] = useState([]);
     const [routes, setRoutes] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
@@ -36,7 +62,7 @@ const CommunicationHome = () => {
     const CategoryButton = ({ id, label, icon, current }) => (
         <button
             onClick={() => {
-                setCategory(id);
+                handleCategoryChange(id);
                 setShowDropdown(false);
             }}
             className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl border-2 transition-all font-black text-[11px] uppercase tracking-[0.2em] relative overflow-hidden group

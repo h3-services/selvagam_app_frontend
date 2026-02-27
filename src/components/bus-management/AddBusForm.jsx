@@ -231,9 +231,9 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
 
     return (
         <>
-            <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-[20000] transition-opacity duration-300" onClick={handleClose} />
+            <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-[99999] transition-opacity duration-300" onClick={handleClose} />
             
-            <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-2xl z-[20001] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
+            <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-2xl z-[100000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
                 
                 {/* Header Substrate - Now Sticky */}
                 <div className="sticky top-0 px-8 py-7 bg-slate-50/80 backdrop-blur-xl flex justify-between items-center z-30 border-b border-slate-100/50">

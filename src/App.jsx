@@ -26,15 +26,43 @@ function App() {
         <Route element={<Dashboard />}>
           <Route path="/dashboard" element={<DashboardOverview />} />
           <Route path="/students" element={<StudentManagement />} />
+          <Route path="/students/view/:status" element={<StudentManagement />} />
+          <Route path="/students/add" element={<StudentManagement />} />
+          <Route path="/students/:studentId/detail" element={<StudentManagement />} />
+          <Route path="/students/:studentId/detail/parent/:role" element={<StudentManagement />} />
+          <Route path="/students/:studentId/edit" element={<StudentManagement />} />
           <Route path="/parents" element={<ParentManagement />} />
+          <Route path="/parents/view/:status" element={<ParentManagement />} />
+          <Route path="/parents/add" element={<ParentManagement />} />
+          <Route path="/parents/:parentId/detail" element={<ParentManagement />} />
+          <Route path="/parents/:parentId/detail/link" element={<ParentManagement />} />
+          <Route path="/parents/:parentId/edit" element={<ParentManagement />} />
           <Route path="/parents/inactive" element={<InactiveParentManagement />} />
           <Route path="/classes" element={<ClassManagement />} />
+          <Route path="/classes/add" element={<ClassManagement />} />
+          <Route path="/classes/:classId/edit" element={<ClassManagement />} />
+          <Route path="/classes/promote" element={<ClassManagement />} />
           <Route path="/drivers" element={<DriverManagement />} />
+          <Route path="/drivers/view/:status" element={<DriverManagement />} />
+          <Route path="/drivers/add" element={<DriverManagement />} />
+          <Route path="/drivers/:driverId/detail" element={<DriverManagement />} />
+          <Route path="/drivers/:driverId/edit" element={<DriverManagement />} />
           <Route path="/buses" element={<BusManagement />} />
+          <Route path="/buses/add" element={<BusManagement />} />
+          <Route path="/buses/:busId/detail" element={<BusManagement />} />
+          <Route path="/buses/:busId/edit" element={<BusManagement />} />
           <Route path="/routes" element={<RouteManagement />} />
+          <Route path="/routes/view/:status" element={<RouteManagement />} />
+          <Route path="/routes/add" element={<RouteManagement />} />
+          <Route path="/routes/:routeId/detail" element={<RouteManagement />} />
+          <Route path="/routes/:routeId/edit" element={<RouteManagement />} />
           <Route path="/trips" element={<TripManagement />} />
+          <Route path="/trips/:tripId/detail" element={<TripManagement />} />
           <Route path="/communication" element={<Communication />} />
+          <Route path="/communication/view/:category" element={<Communication />} />
           <Route path="/admin" element={<SuperAdmin />} />
+          <Route path="/admin/add" element={<SuperAdmin />} />
+          <Route path="/admin/:adminId/edit" element={<SuperAdmin />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="*" element={<ComingSoon />} />
         </Route>

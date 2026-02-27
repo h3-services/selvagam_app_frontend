@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers, faBus, faWalking, faUserCheck, faUserSlash, faUserTie, faBan } from '@fortawesome/free-solid-svg-icons';
@@ -15,6 +15,10 @@ import { busService } from '../../services/busService';
 
 const StudentManagementHome = () => {
     const navigate = useNavigate();
+    const { studentId, status: statusSlug } = useParams();
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+
     // State
     const [students, setStudents] = useState([]);
     const [parents, setParents] = useState([]);
@@ -22,9 +26,46 @@ const StudentManagementHome = () => {
     const [allRoutes, setAllRoutes] = useState([]);
     const [allStops, setAllStops] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchParams] = useSearchParams();
-    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
+    const searchQuery = searchParams.get('search') || "";
+
+    const handleSearchChange = (value) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (value) newParams.set('search', value);
+        else newParams.delete('search');
+        setSearchParams(newParams);
+    };
+
+    const statusSlugMap = useMemo(() => ({
+        'active': 'Active',
+        'long-absent': 'LongAbsent',
+        'non-bus': 'NonBusUsers',
+        'discontinued': 'Discontinue',
+        'alumni': 'Alumni'
+    }), []);
+
     const [activeTab, setActiveTab] = useState("Active");
+
+    // Sync activeTab with URL status parameter
+    useEffect(() => {
+        if (statusSlug && statusSlugMap[statusSlug]) {
+            setActiveTab(statusSlugMap[statusSlug]);
+        } else if (!statusSlug && location.pathname === '/students') {
+            setActiveTab('Active');
+        }
+    }, [statusSlug, location.pathname, statusSlugMap]);
+
+    const handleTabChange = (tabKey) => {
+        const slugMap = {
+            'Active': 'active',
+            'LongAbsent': 'long-absent',
+            'NonBusUsers': 'non-bus',
+            'Discontinue': 'discontinued',
+            'Alumni': 'alumni'
+        };
+        const slug = slugMap[tabKey] || 'active';
+        navigate(`/students/view/${slug}`);
+    };
+
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
@@ -152,9 +193,10 @@ const StudentManagementHome = () => {
             });
             setStudents(mappedStudents);
             
-            // Sync current selection if viewing a detail
-            if (selectedStudent) {
-                const refreshedStudent = mappedStudents.find(s => s.id === selectedStudent.id);
+            // Sync current selection if viewing a detail via URL or state
+            const targetId = studentId || (selectedStudent ? selectedStudent.id : null);
+            if (targetId) {
+                const refreshedStudent = mappedStudents.find(s => s.id === targetId);
                 if (refreshedStudent) {
                     setSelectedStudent(refreshedStudent);
                 }
@@ -162,9 +204,42 @@ const StudentManagementHome = () => {
         } catch (error) {
             console.error("Failed to fetch data:", error);
         } finally {
+            setLoading(true); // Temporary wait to trigger the detail effect if needed
             setLoading(false);
         }
     };
+
+    // Sync form state with URL
+    useEffect(() => {
+        const isAdding = location.pathname === '/students/add';
+        const isEditing = location.pathname.endsWith('/edit');
+
+        if (isAdding) {
+            setShowForm(true);
+            setEditingStudent(null);
+        } else if (isEditing && studentId && students.length > 0) {
+            const student = students.find(s => String(s.id) === String(studentId));
+            if (student) {
+                setEditingStudent(student.originalData);
+                setShowForm(true);
+            }
+        } else {
+            setShowForm(false);
+            setEditingStudent(null);
+        }
+    }, [location.pathname, studentId, students]);
+
+    // Effect to handle URL-based student selection (Details)
+    useEffect(() => {
+        if (studentId && !location.pathname.endsWith('/edit') && students.length > 0) {
+            const student = students.find(s => String(s.id) === String(studentId));
+            if (student) {
+                setSelectedStudent(student);
+            }
+        } else if (!studentId) {
+            setSelectedStudent(null);
+        }
+    }, [studentId, location.pathname, students]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -507,12 +582,13 @@ const StudentManagementHome = () => {
             }
             
             await fetchAllData();
-            setShowForm(false);
-            setEditingStudent(null);
             
-            // If we're currently viewing this student's details, refresh that view too
-            if (selectedStudent && selectedStudent.id === studentId) {
-                setSelectedStudent(null); // Return to list for best UX consistency
+            // Navigate based on context
+            if (location.pathname.includes('/detail')) {
+                // If we edited from detail page, stay on detail
+                navigate(`/students/${studentId}/detail`);
+            } else {
+                navigate('/students');
             }
         } catch (error) {
             console.error("Error updating student:", error);
@@ -523,8 +599,7 @@ const StudentManagementHome = () => {
     };
 
     const handleEditStudent = (student) => {
-        setEditingStudent(student.originalData);
-        setShowForm(true);
+        navigate(`/students/${student.id}/edit`);
     };
 
 
@@ -559,7 +634,7 @@ const StudentManagementHome = () => {
                             {/* View Mode Toggle (Segmented Control) */}
                             <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
                                 <button
-                                    onClick={() => setActiveTab('Active')}
+                                    onClick={() => handleTabChange('Active')}
                                     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         activeTab === 'Active' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
@@ -589,7 +664,7 @@ const StudentManagementHome = () => {
                                             {moreTabOptions.map(opt => (
                                                 <button
                                                     key={opt.key}
-                                                    onClick={() => { setActiveTab(opt.key); setShowMoreDropdown(false); }}
+                                                    onClick={() => { handleTabChange(opt.key); setShowMoreDropdown(false); }}
                                                     className={`w-full text-left px-3 py-2.5 text-[11px] font-bold rounded-xl flex items-center gap-3 transition-all duration-200 group ${
                                                         activeTab === opt.key 
                                                         ? 'text-blue-600 bg-blue-50 shadow-sm' 
@@ -619,7 +694,7 @@ const StudentManagementHome = () => {
                                     type="text"
                                     placeholder="Search students..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
@@ -642,7 +717,7 @@ const StudentManagementHome = () => {
                     ) : selectedStudent ? (
                         <StudentDetail
                             selectedStudent={selectedStudent}
-                            onBack={() => setSelectedStudent(null)}
+                            onBack={() => navigate('/students')}
                             onUpdate={fetchAllData}
                             onEdit={handleEditStudent}
                             onTransportStatusUpdate={handleTransportStatusUpdate}
@@ -650,7 +725,7 @@ const StudentManagementHome = () => {
                     ) : (
                         <StudentList
                             filteredStudents={filteredStudents}
-                            setSelectedStudent={setSelectedStudent}
+                            onSelectStudent={(s) => navigate(`/students/${s.id}/detail`)}
                             setShowForm={setShowForm}
                             handleStatusUpdate={handleStatusUpdate}
                             handleTransportStatusUpdate={handleTransportStatusUpdate}
@@ -769,8 +844,17 @@ const StudentManagementHome = () => {
             <AddStudentForm
                 show={showForm}
                 onClose={() => {
-                    setShowForm(false);
-                    setEditingStudent(null);
+                    if (location.pathname.includes('/edit') && studentId) {
+                        // If editing, go back to where we were (either detail or list)
+                        if (selectedStudent) {
+                            navigate(`/students/${studentId}/detail`);
+                        } else {
+                            navigate('/students');
+                        }
+                    } else {
+                        // If adding, just go back to list
+                        navigate('/students');
+                    }
                 }}
                 onAdd={handleAddStudent}
                 onUpdate={handleUpdateAction}
@@ -784,7 +868,7 @@ const StudentManagementHome = () => {
             {/* Floating Add Button */}
             {!showForm && !selectedStudent && (
                 <button
-                    onClick={() => setShowForm(true)}
+                    onClick={() => navigate('/students/add')}
                     className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >

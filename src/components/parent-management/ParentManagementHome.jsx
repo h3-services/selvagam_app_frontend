@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faUserPlus, faArrowLeft, faCircleNotch, faTrash, faUserGraduate, faFilter, faChevronDown, faGraduationCap, faCheck, faBan, faUsers } from '@fortawesome/free-solid-svg-icons';
@@ -14,11 +14,45 @@ import { COLORS } from '../../constants/colors';
 
 const ParentManagementHome = () => {
     const navigate = useNavigate();
-    // State
+    const location = useLocation();
+    const { parentId, status: statusSlug } = useParams();
+
+    const statusSlugMap = useMemo(() => ({
+        'active': 'Active',
+        'archive': 'Archive'
+    }), []);
+
+    const [activeTab, setActiveTab] = useState("Active");
+
+    // Sync activeTab with URL status parameter
+    useEffect(() => {
+        if (statusSlug && statusSlugMap[statusSlug]) {
+            setActiveTab(statusSlugMap[statusSlug]);
+        } else if (!statusSlug && location.pathname === '/parents') {
+            setActiveTab('Active');
+        }
+    }, [statusSlug, location.pathname, statusSlugMap]);
+
+    const handleTabChange = (tabKey) => {
+        const slugMap = {
+            'Active': 'active',
+            'Archive': 'archive'
+        };
+        const slug = slugMap[tabKey] || 'active';
+        navigate(`/parents/view/${slug}`);
+    };
+
     const [parents, setParents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [activeTab, setActiveTab] = useState("Active");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchQuery = searchParams.get('search') || "";
+
+    const handleSearchChange = (value) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (value) newParams.set('search', value);
+        else newParams.delete('search');
+        setSearchParams(newParams);
+    };
     const [showForm, setShowForm] = useState(false);
     const [selectedParent, setSelectedParent] = useState(null);
     const [editingParent, setEditingParent] = useState(null);
@@ -34,6 +68,45 @@ const ParentManagementHome = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Sync state with URL
+    useEffect(() => {
+        if (!loading && parents.length > 0) {
+            if (parentId) {
+                const parent = parents.find(p => p.parent_id === parentId);
+                if (parent) {
+                    setSelectedParent(parent);
+                    
+                    // Handle modals/forms within detail view
+                    if (location.pathname.endsWith('/edit')) {
+                        setEditingParent(parent);
+                        setShowForm(true);
+                        setShowLinkModal(false);
+                    } else if (location.pathname.endsWith('/link')) {
+                        setShowLinkModal(true);
+                        setShowForm(false);
+                        setEditingParent(null);
+                    } else {
+                        setShowForm(false);
+                        setShowLinkModal(false);
+                        setEditingParent(null);
+                    }
+                }
+            } else {
+                setSelectedParent(null);
+                
+                // Handle global forms
+                if (location.pathname === '/parents/add') {
+                    setShowForm(true);
+                    setEditingParent(null);
+                } else {
+                    setShowForm(false);
+                    setEditingParent(null);
+                }
+                setShowLinkModal(false);
+            }
+        }
+    }, [location.pathname, parentId, loading, parents]);
 
 
 
@@ -90,14 +163,6 @@ const ParentManagementHome = () => {
             });
 
             setParents(parentsWithStudents);
-
-            // Sync current selection if viewing a detail
-            if (selectedParent) {
-                const refreshedParent = parentsWithStudents.find(p => p.parent_id === selectedParent.parent_id);
-                if (refreshedParent) {
-                    setSelectedParent(refreshedParent);
-                }
-            }
         } catch (error) {
             console.error("Failed to fetch data:", error);
         } finally {
@@ -161,13 +226,11 @@ const ParentManagementHome = () => {
     };
 
     const handleEditParent = (parent) => {
-        setEditingParent(parent);
-        setShowForm(true);
+        navigate(`/parents/${parent.parent_id}/edit`);
     };
 
     const handleLinkStudent = (parent) => {
-        setSelectedParent(parent);
-        setShowLinkModal(true);
+        navigate(`/parents/${parent.parent_id}/detail/link`);
     };
 
     const handleBulkStatusUpdate = async (newStatus) => {
@@ -239,7 +302,7 @@ const ParentManagementHome = () => {
                             {/* View Mode Toggle (Segmented Control) */}
                             <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
                                 <button
-                                    onClick={() => setActiveTab('Active')}
+                                    onClick={() => handleTabChange('Active')}
                                     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         activeTab === 'Active' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
@@ -249,7 +312,7 @@ const ParentManagementHome = () => {
                                     Active Parents
                                 </button>
                                 <button
-                                    onClick={() => setActiveTab('Archive')}
+                                    onClick={() => handleTabChange('Archive')}
                                     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         activeTab === 'Archive' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
@@ -265,7 +328,7 @@ const ParentManagementHome = () => {
                                     type="text"
                                     placeholder="Search parents..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
@@ -288,11 +351,11 @@ const ParentManagementHome = () => {
                     ) : selectedParent ? (
                         <ParentDetail 
                             selectedParent={selectedParent}
-                            onBack={() => setSelectedParent(null)}
+                            onBack={() => navigate('/parents')}
                             onDelete={(id) => handleStatusChangeRequest(id, 'INACTIVE')}
                             onUpdate={() => fetchData()}
                             onEdit={handleEditParent}
-                            onLink={() => setShowLinkModal(true)}
+                            onLink={() => navigate(`/parents/${selectedParent.parent_id}/detail/link`)}
                         />
                     ) : (
                         <ParentList 
@@ -300,7 +363,7 @@ const ParentManagementHome = () => {
                             handleDelete={(id) => handleStatusChangeRequest(id, activeTab === 'Active' ? 'INACTIVE' : 'ACTIVE')}
                             isInactiveView={activeTab === 'Archive'}
                             onSelectionChanged={setSelectedRows}
-                            onViewParent={setSelectedParent}
+                            onViewParent={(p) => navigate(`/parents/${p.parent_id}/detail`)}
                         />
                     )}
                 </div>
@@ -385,7 +448,7 @@ const ParentManagementHome = () => {
             {/* Floating Add Button */}
             {!showForm && !showBulkMenu && (
                 <button
-                    onClick={() => setShowForm(true)}
+                    onClick={() => navigate('/parents/add')}
                     className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-[24px] shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-40"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
@@ -397,8 +460,8 @@ const ParentManagementHome = () => {
             <AddParentForm 
                 show={showForm} 
                 onClose={() => {
-                    setShowForm(false);
-                    setEditingParent(null);
+                    const backPath = selectedParent ? `/parents/${selectedParent.parent_id}/detail` : '/parents';
+                    navigate(backPath);
                 }} 
                 onAdd={handleAddParent} 
                 onUpdate={handleUpdateParent}
@@ -408,14 +471,14 @@ const ParentManagementHome = () => {
             {/* Link Student Modal */}
             <LinkStudentModal
                 show={showLinkModal}
-                onClose={() => setShowLinkModal(false)}
+                onClose={() => navigate(`/parents/${selectedParent.parent_id}/detail`)}
                 parent={selectedParent}
                 onRefresh={fetchData}
             />
 
             {/* Status Change Confirmation Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setShowDeleteConfirm(false)}

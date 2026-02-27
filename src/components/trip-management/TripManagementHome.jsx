@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import TripList from './TripList';
@@ -8,8 +9,13 @@ import { busService } from '../../services/busService';
 import { routeService } from '../../services/routeService';
 
 const TripManagementHome = () => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Derived States
+    const searchQuery = searchParams.get('search') || "";
+    const selectedDate = searchParams.get('date') || new Date().toISOString().split('T')[0];
+
     const [trips, setTrips] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -57,6 +63,20 @@ const TripManagementHome = () => {
             setLoading(false);
         }
     };
+    const handleSearchChange = (value) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (value) newParams.set('search', value);
+        else newParams.delete('search');
+        setSearchParams(newParams);
+    };
+
+    const handleDateChange = (value) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (value) newParams.set('date', value);
+        else newParams.delete('date');
+        setSearchParams(newParams);
+    };
+
 
     const filteredTrips = trips.filter(trip => {
         const matchesSearch = trip.route.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,7 +115,7 @@ const TripManagementHome = () => {
                             <input
                                 type="date"
                                 value={selectedDate}
-                                onChange={(e) => setSelectedDate(e.target.value)}
+                                onChange={(e) => handleDateChange(e.target.value)}
                                 className="pl-10 pr-4 py-2.5 w-full sm:w-44 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none"
                             />
                             <FontAwesomeIcon icon={faCalendarAlt} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
@@ -105,7 +125,7 @@ const TripManagementHome = () => {
                                 type="text"
                                 placeholder="Search trips..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => handleSearchChange(e.target.value)}
                                 className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                             />
                             <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />

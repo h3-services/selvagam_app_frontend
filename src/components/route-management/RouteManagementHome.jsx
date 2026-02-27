@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faArrowLeft, faTrash, faMapLocationDot, faCircleNotch, faArchive, faRoute, faUndo, faCheck, faChevronDown, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
@@ -13,12 +14,47 @@ import { busService } from '../../services/busService';
 import { studentService } from '../../services/studentService';
 
 const RouteManagementHome = () => {
+    const navigate = useNavigate();
+    const { routeId, status: statusSlug } = useParams();
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Derived States
+    const isAddPath = location.pathname === '/routes/add';
+    const isEditPath = !!routeId && location.pathname.endsWith('/edit');
+    const isDetailPath = !!routeId && location.pathname.endsWith('/detail');
+    const search = searchParams.get('search') || "";
+
+    const statusSlugMap = useMemo(() => ({
+        'active': 'Active',
+        'archived': 'Archived'
+    }), []);
+
+    // Sync activeTab with URL status parameter
+    useEffect(() => {
+        if (statusSlug && statusSlugMap[statusSlug]) {
+            setActiveTab(statusSlugMap[statusSlug]);
+        } else if (!statusSlug && location.pathname === '/routes') {
+            setActiveTab('Active');
+        }
+    }, [statusSlug, location.pathname, statusSlugMap]);
+
+    const handleTabChange = (tabKey) => {
+        const slugMap = {
+            'Active': 'active',
+            'Archived': 'archived'
+        };
+        const slug = slugMap[tabKey] || 'active';
+        navigate(`/routes/view/${slug}`);
+    };
+
+    const [activeTab, setActiveTab] = useState('Active'); // New state for tabs
     const [routes, setRoutes] = useState([]);
     const [activeBuses, setActiveBuses] = useState([]); // Renamed to avoid confusion, mapped for modal
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('Active'); // New state for tabs
     const [selectedRoutes, setSelectedRoutes] = useState([]); // New state for checkboxes
     const [showBulkMenu, setShowBulkMenu] = useState(false); // New state for bulk menu
+    const [selectedRoute, setSelectedRoute] = useState(null);
 
     useEffect(() => {
         fetchAllData();
@@ -129,14 +165,37 @@ const RouteManagementHome = () => {
     };
 
     const [isSaving, setIsSaving] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [search, setSearch] = useState('');
-    const [selectedRoute, setSelectedRoute] = useState(null);
     const [showBusReassignModal, setShowBusReassignModal] = useState(false);
     const [reassigningRouteId, setReassigningRouteId] = useState(null);
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
+
+    const handleViewDetail = (route) => {
+        navigate(`/routes/${route.id}/detail`);
+    };
+
+    const handleSearchChange = (value) => {
+        if (value) {
+            setSearchParams({ search: value });
+        } else {
+            setSearchParams({});
+        }
+    };
+
+    // Synchronize selectedRoute when URL changes
+    useEffect(() => {
+        if (routes.length > 0) {
+            if (routeId) {
+                const route = routes.find(r => r.id === routeId);
+                if (route) {
+                    setSelectedRoute(route);
+                }
+            } else {
+                setSelectedRoute(null);
+            }
+        }
+    }, [routeId, routes]);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -261,7 +320,7 @@ const RouteManagementHome = () => {
             }
 
             await fetchAllData();
-            setShowModal(false);
+            navigate('/routes');
         } catch (error) {
             console.error("Failed to create route:", error);
         } finally {
@@ -401,12 +460,23 @@ const RouteManagementHome = () => {
 
             // Refresh Data
             await fetchAllData();
-            setSelectedRoute(null);
+            navigate(`/routes/${updatedData.id}/detail`);
         } catch (error) {
             console.error("Error updating route:", error);
             throw error;
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleReorderStop = async (stopId, newOrderData) => {
+        try {
+            console.log(`🔄 [REORDER STOP] Live update for stop ${stopId}:`, JSON.stringify(newOrderData, null, 2));
+            await routeService.updateRouteStop(stopId, newOrderData);
+            // Refresh all data to get the new shifted order from backend
+            await fetchAllData();
+        } catch (error) {
+            console.error("Failed to live reorder stop:", error);
         }
     };
 
@@ -427,7 +497,7 @@ const RouteManagementHome = () => {
                             {/* View Mode Toggle (Segmented Control) */}
                             <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
                                 <button
-                                    onClick={() => setActiveTab('Active')}
+                                    onClick={() => handleTabChange('Active')}
                                     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         activeTab === 'Active' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
@@ -437,7 +507,7 @@ const RouteManagementHome = () => {
                                     Total routes
                                 </button>
                                 <button
-                                    onClick={() => setActiveTab('Archived')}
+                                    onClick={() => handleTabChange('Archived')}
                                     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
                                         activeTab === 'Archived' 
                                         ? 'bg-white text-blue-600 shadow-md transform scale-[1.02]' 
@@ -453,7 +523,7 @@ const RouteManagementHome = () => {
                                     type="text"
                                     placeholder="Search routes..."
                                     value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
                                 />
                                 <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
@@ -478,14 +548,16 @@ const RouteManagementHome = () => {
                     ) : selectedRoute ? (
                         <RouteDetail
                             selectedRoute={selectedRoute}
-                            onBack={() => setSelectedRoute(null)}
+                            onBack={() => navigate('/routes')}
                             onUpdate={handleUpdate}
+                            onReorderStop={handleReorderStop}
                             onDelete={handleDelete}
+                            isSaving={isSaving}
                         />
                     ) : (
                         <RouteList
                             filteredRoutes={filteredRoutes}
-                            setSelectedRoute={setSelectedRoute}
+                            setSelectedRoute={handleViewDetail}
                             handleDelete={handleDelete}
                             handleRestore={handleRestore}
                             activeMenuId={activeMenuId}
@@ -500,7 +572,7 @@ const RouteManagementHome = () => {
 
             {!selectedRoute && !loading && !showBulkMenu && (
                 <button
-                    onClick={() => setShowModal(true)}
+                    onClick={() => navigate('/routes/add')}
                     className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-[24px] shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-40"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
@@ -509,8 +581,8 @@ const RouteManagementHome = () => {
             )}
 
             <AddRouteForm
-                show={showModal}
-                onClose={() => setShowModal(false)}
+                show={isAddPath}
+                onClose={() => navigate('/routes')}
                 onAdd={handleAdd}
                 schoolLocations={schoolLocations}
                 availableBuses={activeBuses}
@@ -529,7 +601,7 @@ const RouteManagementHome = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setShowDeleteConfirm(false)}

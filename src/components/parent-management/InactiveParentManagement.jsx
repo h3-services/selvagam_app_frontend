@@ -241,7 +241,7 @@ const InactiveParentManagement = () => {
 
             {/* Activate Confirmation Modal */}
             {showActivateConfirm && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setShowActivateConfirm(false)}
