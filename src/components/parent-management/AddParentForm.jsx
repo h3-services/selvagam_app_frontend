@@ -28,11 +28,6 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         name: '',
         email: '',
         phone: '',
-        password: '',
-        street: '',
-        city: '',
-        district: '',
-        pincode: '',
         door_no: '',
         parent_role: 'GUARDIAN'
     };
@@ -46,10 +41,6 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                 name: initialData.name || '',
                 email: initialData.email || '',
                 phone: initialData.phone || '',
-                password: '', // Don't pre-fill password for security
-                street: initialData.street || '',
-                city: initialData.city || '',
-                district: initialData.district || '',
                 pincode: initialData.pincode || '',
                 door_no: initialData.door_no || '',
                 parent_role: initialData.parent_role || 'GUARDIAN'
@@ -110,12 +101,12 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         <>
             {/* Backdrop */}
             <div 
-                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2005] transition-opacity duration-500" 
+                className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-opacity duration-500" 
                 onClick={onClose} 
             />
             
             {/* Drawer */}
-            <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] md:w-[600px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[2006] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) animate-in slide-in-from-right-full">
+            <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] md:w-[600px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) animate-in slide-in-from-right-full">
                 
                 {/* Scrollable Content Area */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
@@ -277,27 +268,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 </div>
                             </div>
 
-                            {!initialData && (
-                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 group hover:shadow-xl transition-all duration-500">
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                            <FontAwesomeIcon icon={faShieldAlt} className="text-lg" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Access Control</h4>
-                                        </div>
-                                    </div>
 
-                                    <InputField 
-                                        label="Secure Password" 
-                                        icon={faLock} 
-                                        type="password"
-                                        value={formData.password} 
-                                        onChange={(e) => handleChange('password', e.target.value)} 
-                                        placeholder="••••••••" 
-                                    />
-                                </div>
-                            )}
                         </form>
                     </div>
                 </div>

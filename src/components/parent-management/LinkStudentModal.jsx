@@ -30,7 +30,7 @@ const LinkStudentModal = ({ show, onClose, parent, onRefresh }) => {
         setLoading(true);
         try {
             const [studentsData, classesData] = await Promise.all([
-                studentService.getAllStudents(),
+                studentService.getAllStudents({ active_filter: 'ACTIVE_ONLY' }),
                 classService.getAllClasses()
             ]);
             setStudents(Array.isArray(studentsData) ? studentsData : (studentsData.data || []));

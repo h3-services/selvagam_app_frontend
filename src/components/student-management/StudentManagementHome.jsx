@@ -76,7 +76,7 @@ const StudentManagementHome = () => {
                     console.error("Error fetching students:", err);
                     return [];
                 }),
-                parentService.getAllParents().catch(err => {
+                parentService.getAllParents({ active_filter: 'ACTIVE_ONLY' }).catch(err => {
                     console.error("Error fetching parents:", err);
                     return [];
                 }),
@@ -112,7 +112,15 @@ const StudentManagementHome = () => {
             setAllStops(stopsList);
 
             // Map API data to UI structure, linking parents and classes
-            const mappedStudents = sList.map(s => {
+            const mappedStudents = sList
+                .filter(s => {
+                    if (activeTab === 'Active') {
+                        const status = (s.status || s.student_status || 'CURRENT').toUpperCase();
+                        return status === 'CURRENT';
+                    }
+                    return true;
+                })
+                .map(s => {
                 const parent1 = pList.find(p => p.parent_id == s.parent_id);
                 const parent2 = s.s_parent_id ? pList.find(p => p.parent_id == s.s_parent_id) : null;
                 const studentClass = cList.find(c => c.class_id == s.class_id);
@@ -208,10 +216,19 @@ const StudentManagementHome = () => {
         return result;
     }, [students, searchQuery]);
 
-    const handleAddStudent = async (newStudentData) => {
+    const handleAddStudent = async (newStudentData, files = {}) => {
         try {
             // newStudentData now contains the full payload from AddStudentForm
-            await studentService.createStudent(newStudentData);
+            const response = await studentService.createStudent(newStudentData);
+            
+            // Normalize student_id from API response
+            const studentId = response.student_id || response.id || response.data?.student_id;
+            
+            // Handle Photo Upload if file provided
+            if (files.photoFile && studentId) {
+                await studentService.uploadPhoto(studentId, files.photoFile);
+            }
+            
             await fetchAllData(); // Refresh list
             setShowForm(false);
         } catch (error) {
@@ -452,26 +469,50 @@ const StudentManagementHome = () => {
         }
     };
 
-    const handleUpdateAction = async (studentId, studentData) => {
+    const handleUpdateAction = async (studentId, studentData, files = {}) => {
         try {
             setLoading(true);
+            // 1. Update main student info (PUT already sends parent_id & s_parent_id in the body)
             await studentService.updateStudent(studentId, studentData);
+            
+            // 2. Only call separate parent-update endpoints if the parent actually changed
+            //    from the original data, as the PUT may not always update associations.
+            const originalStudent = editingStudent;
+            
+            if (studentData.parent_id && originalStudent && studentData.parent_id !== originalStudent.parent_id) {
+                try {
+                    await studentService.updatePrimaryParent(studentId, studentData.parent_id);
+                } catch (parentErr) {
+                    console.warn("Primary parent endpoint failed (non-critical, PUT already sent parent_id):", parentErr);
+                }
+            }
+            
+            // Only call secondary-parent endpoint if the value actually changed
+            if (originalStudent && Object.prototype.hasOwnProperty.call(studentData, 's_parent_id')) {
+                const oldSecondary = originalStudent.s_parent_id || null;
+                const newSecondary = studentData.s_parent_id || null;
+                
+                if (newSecondary !== oldSecondary && newSecondary !== null) {
+                    try {
+                        await studentService.updateSecondaryParent(studentId, newSecondary);
+                    } catch (sParentErr) {
+                        console.warn("Secondary parent endpoint failed (non-critical, PUT already sent s_parent_id):", sParentErr);
+                    }
+                }
+            }
+            
+            // 3. Handle Photo Upload if file provided
+            if (files.photoFile) {
+                await studentService.uploadPhoto(studentId, files.photoFile);
+            }
+            
             await fetchAllData();
             setShowForm(false);
             setEditingStudent(null);
             
             // If we're currently viewing this student's details, refresh that view too
-            if (activeTab === "Active" || activeTab === "LongAbsent") {
-                // The fetchAllData handles students state, but we might need to update selectedStudent if open
-                if (selectedStudent && selectedStudent.id === studentId) {
-                    const updated = (await studentService.getAllStudents()).find(s => s.student_id === studentId);
-                    if (updated) {
-                         // Find parent/class to maintain UI structure
-                         // For simplicity, we can just trigger a back-to-list or re-map
-                         // but standard practice is usually closing details or full refresh
-                    }
-                    setSelectedStudent(null); // Return to list for best UX consistency
-                }
+            if (selectedStudent && selectedStudent.id === studentId) {
+                setSelectedStudent(null); // Return to list for best UX consistency
             }
         } catch (error) {
             console.error("Error updating student:", error);
@@ -628,12 +669,12 @@ const StudentManagementHome = () => {
                     {/* Full Screen Backdrop Blur when menu is open */}
                     {showBulkMenu && (
                         <div 
-                            className="fixed inset-0 bg-slate-900/10 backdrop-blur-md z-[2001] animate-in fade-in duration-500"
+                            className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] animate-in fade-in duration-500"
                             onClick={() => setShowBulkMenu(false)}
                         />
                     )}
                     
-                    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[2002] flex flex-col items-center gap-4">
+                    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[100000] flex flex-col items-center gap-4">
                     {showBulkMenu && (
                         <div className="bg-white/95 backdrop-blur-2xl border border-white/60 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-2 w-64 animate-in slide-in-from-bottom-8 zoom-in duration-300 origin-bottom">
                             <div className="px-4 py-3 text-[11px] font-black text-slate-800 uppercase tracking-widest border-b border-slate-100 flex items-center justify-between mb-2">
@@ -754,9 +795,9 @@ const StudentManagementHome = () => {
 
             {/* Deactivation Reason Modal */}
             {showDeactivateModal && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div
-                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300"
                         onClick={() => setShowDeactivateModal(false)}
                     />
                     <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300 text-center">
@@ -798,9 +839,9 @@ const StudentManagementHome = () => {
                     {/* Parent Status Update Modal */}
                     {/* Parent Status Update Modal */}
             {showParentStatusModal && pendingStudentStatusUpdate && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div
-                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300"
                         onClick={() => setShowParentStatusModal(false)}
                     />
                     <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300 text-center">
@@ -856,9 +897,9 @@ const StudentManagementHome = () => {
             )}
             {/* Bulk Parent Status Update Modal */}
             {showBulkParentStatusModal && pendingBulkUpdate && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div
-                        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300"
                         onClick={() => setShowBulkParentStatusModal(false)}
                     />
                     <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-6 w-full max-w-2xl animate-in zoom-in slide-in-from-bottom-4 duration-300 flex flex-col max-h-[85vh]">

@@ -366,7 +366,7 @@ const DriverManagementHome = () => {
                 <>
                     {showBulkMenu && (
                         <div 
-                            className="fixed inset-0 bg-slate-900/10 backdrop-blur-md z-[2001] animate-in fade-in duration-500"
+                            className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[20000] animate-in fade-in duration-500"
                             onClick={() => setShowBulkMenu(false)}
                         />
                     )}
@@ -465,9 +465,9 @@ const DriverManagementHome = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4">
                     <div
-                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300"
                         onClick={() => setShowDeleteConfirm(false)}
                     />
                     <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">

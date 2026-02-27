@@ -140,14 +140,14 @@ const Sidebar = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="lg:hidden fixed top-4 left-4 z-[1001] p-2.5 bg-white/10 backdrop-blur-md rounded-xl text-black shadow-lg hover:bg-white/20 transition-all active:scale-95 border border-white/10"
+          className="lg:hidden fixed top-4 left-4 z-[9999] p-2.5 bg-white/10 backdrop-blur-md rounded-xl text-black shadow-lg hover:bg-white/20 transition-all active:scale-95 border border-white/10"
         >
           <RiMenu4Fill size={24} />
         </button>
       )}
 
       <div
-        className={`w-64 h-screen fixed left-0 top-0 flex flex-col transition-transform duration-500 ease-out z-[1000] ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+        className={`w-64 h-screen fixed left-0 top-0 flex flex-col transition-transform duration-500 ease-out z-[10000] pointer-events-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
         style={{ 
           background: `linear-gradient(180deg, ${COLORS.SIDEBAR_BG} 0%, ${COLORS.SIDEBAR_GRADIENT_END} 100%)` 
         }}
@@ -155,7 +155,7 @@ const Sidebar = () => {
         {isOpen && (
           <button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden absolute top-4 right-4 z-[1001] p-2 text-white hover:text-blue-200 transition-colors"
+            className="lg:hidden absolute top-4 right-4 z-[300] p-2 text-white hover:text-blue-200 transition-colors"
           >
             <RiCloseFill size={28} />
           </button>
@@ -189,7 +189,7 @@ const Sidebar = () => {
           </div>
         </div>
 
-        <nav className="flex-1 py-4 space-y-1.5 overflow-y-auto custom-scrollbar relative z-10 text-blue-950">
+        <nav className="flex-1 py-4 space-y-1.5 overflow-y-auto custom-scrollbar relative z-10 text-blue-950 pointer-events-auto">
           {menuItems.map((item, index) => {
             const hasSubItems = !!item.subItems;
             const subActive = hasSubItems && isSubItemActive(item.subItems);
@@ -464,7 +464,7 @@ const Sidebar = () => {
 
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-[999]"
+          className="lg:hidden fixed inset-0 bg-black/50 z-[199]"
           onClick={() => setIsOpen(false)}
         />
       )}

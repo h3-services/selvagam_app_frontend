@@ -4,7 +4,6 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || 'https://api.selvagam.com/api/v1',
     headers: {
-        'Content-Type': 'application/json',
         'X-Admin-API-Key': import.meta.env.VITE_ADMIN_API_KEY
     },
 });
@@ -15,7 +14,12 @@ api.interceptors.request.use(
         // Ensure the API Key is injected into every request header
         config.headers['X-Admin-API-Key'] = import.meta.env.VITE_ADMIN_API_KEY;
         
-        if (!config.headers['Content-Type']) {
+        // Handle Content-Type intelligently
+        if (config.data instanceof FormData) {
+            // For FormData, we MUST NOT set Content-Type manually. 
+            // The browser needs to set it to include the boundary string.
+            delete config.headers['Content-Type'];
+        } else if (!config.headers['Content-Type'] && config.data) {
             config.headers['Content-Type'] = 'application/json';
         }
         

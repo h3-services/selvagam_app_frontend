@@ -19,7 +19,9 @@ import {
     faCogs,
     faShieldAlt,
     faClipboardList,
-    faCircleNotch
+    faCircleNotch,
+    faFilePdf,
+    faFileUpload
 } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 
@@ -67,6 +69,45 @@ const SelectField = ({ label, icon, value, onChange, options, placeholder, disab
     </div>
 );
 
+const FileUploadField = ({ label, icon, onFileSelect, fileName, disabled = false, error }) => (
+    <div className="relative group/field">
+        <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
+        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 min-h-[52px] ${disabled ? 'bg-slate-50 border-slate-100' : error ? 'border-rose-200 bg-rose-50/10' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg focus-within:ring-4 focus-within:ring-blue-500/10'}`}>
+            <div className="w-12 h-12 flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:text-blue-600 group-focus-within/field:scale-110">
+                <FontAwesomeIcon icon={icon} className="text-sm" />
+            </div>
+            <div className="flex-1 pl-12 pr-4 py-3 flex items-center justify-between overflow-hidden">
+                <span className={`text-[13px] font-bold truncate ${fileName ? 'text-slate-700' : 'text-slate-300'}`}>
+                    {fileName || "No file chosen"}
+                </span>
+                <label className="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shrink-0 ml-2">
+                    {fileName ? 'Change' : 'Upload'}
+                    <input 
+                        type="file" 
+                        className="hidden" 
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+
+                            // Check file size (2MB limit)
+                            const maxSize = 2 * 1024 * 1024; // 2MB
+                            if (file.size > maxSize) {
+                                alert("File is too large. Please select a document smaller than 2MB.");
+                                e.target.value = ''; // Reset input
+                                return;
+                            }
+
+                            onFileSelect(file);
+                        }}
+                        disabled={disabled}
+                        accept=".pdf,.jpg,.jpeg,.png"
+                    />
+                </label>
+            </div>
+        </div>
+    </div>
+);
+
 const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], routes = [] }) => {
     const [busData, setBusData] = useState({ 
         registration_number: '', 
@@ -84,6 +125,8 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
         fc_certificate_url: ''
     });
 
+    const [rcFile, setRcFile] = useState(null);
+    const [fcFile, setFcFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
@@ -93,6 +136,8 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                 seating_capacity: editingBus.seating_capacity || editingBus.capacity || '',
                 registration_number: editingBus.registration_number || editingBus.busNumber || ''
             });
+            setRcFile(null);
+            setFcFile(null);
         } else if (show && !editingBus) {
             setBusData({ 
                 registration_number: '', 
@@ -109,6 +154,8 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                 rc_book_url: '',
                 fc_certificate_url: ''
             });
+            setRcFile(null);
+            setFcFile(null);
         }
     }, [show, editingBus]);
 
@@ -142,10 +189,11 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
         if (isValid) {
             setIsSubmitting(true);
             try {
+                const files = { rcFile, fcFile };
                 if (editingBus) {
-                    await onUpdate({ ...editingBus, ...busData });
+                    await onUpdate({ ...editingBus, ...busData }, files);
                 } else {
-                    await onAdd(busData);
+                    await onAdd(busData, files);
                 }
                 onClose();
             } catch (error) {
@@ -173,6 +221,8 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
             rc_book_url: '',
             fc_certificate_url: ''
         });
+        setRcFile(null);
+        setFcFile(null);
         setTouched({});
         onClose();
     };
@@ -181,9 +231,9 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
 
     return (
         <>
-            <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[1999] transition-opacity duration-300" onClick={handleClose} />
+            <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-[20000] transition-opacity duration-300" onClick={handleClose} />
             
-            <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-2xl z-[2001] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
+            <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-2xl z-[20001] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
                 
                 {/* Header Substrate - Now Sticky */}
                 <div className="sticky top-0 px-8 py-7 bg-slate-50/80 backdrop-blur-xl flex justify-between items-center z-30 border-b border-slate-100/50">
@@ -314,7 +364,12 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                                 value={busData.driver_id} 
                                 onChange={(e) => setBusData({...busData, driver_id: e.target.value})} 
                                 placeholder="Select Driver"
-                                options={drivers.map(d => ({ value: d.driver_id, label: d.name }))} 
+                                options={drivers
+                                    .filter(d => {
+                                        const status = (d.status || d.active_status || '').toUpperCase();
+                                        return status === 'ACTIVE' || d.driver_id === busData.driver_id;
+                                    })
+                                    .map(d => ({ value: d.driver_id, label: d.name }))} 
                             />
                             <SelectField 
                                 label="Route" 
@@ -322,7 +377,12 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                                 value={busData.route_id} 
                                 onChange={(e) => setBusData({...busData, route_id: e.target.value})} 
                                 placeholder="Select Route"
-                                options={routes.map(r => ({ value: r.route_id, label: r.name }))} 
+                                options={routes
+                                    .filter(r => {
+                                        const status = (r.status || r.active_status || r.routes_active_status || '').toUpperCase();
+                                        return status === 'ACTIVE' || r.route_id === busData.route_id;
+                                    })
+                                    .map(r => ({ value: r.route_id, label: r.name }))} 
                             />
                         </div>
                     </div>
@@ -343,8 +403,20 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                                 <InputField label="RC Expiry" icon={faCalendarAlt} type="date" value={busData.rc_expiry_date} onChange={(e) => setBusData({...busData, rc_expiry_date: e.target.value})} />
                                 <InputField label="FC Expiry" icon={faCalendarAlt} type="date" value={busData.fc_expiry_date} onChange={(e) => setBusData({...busData, fc_expiry_date: e.target.value})} />
                             </div>
-                            <InputField label="RC URL" icon={faLink} value={busData.rc_book_url} onChange={(e) => setBusData({...busData, rc_book_url: e.target.value})} placeholder="https://..." />
-                            <InputField label="FC URL" icon={faLink} value={busData.fc_certificate_url} onChange={(e) => setBusData({...busData, fc_certificate_url: e.target.value})} placeholder="https://..." />
+                            <div className="grid grid-cols-2 gap-5">
+                                <FileUploadField 
+                                    label="RC Book (PDF/JPG)" 
+                                    icon={faFilePdf} 
+                                    onFileSelect={setRcFile} 
+                                    fileName={rcFile?.name || (busData.rc_book_url ? "Current RC Book" : "")} 
+                                />
+                                <FileUploadField 
+                                    label="FC Certificate (PDF/JPG)" 
+                                    icon={faShieldAlt} 
+                                    onFileSelect={setFcFile} 
+                                    fileName={fcFile?.name || (busData.fc_certificate_url ? "Current FC Certificate" : "")} 
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

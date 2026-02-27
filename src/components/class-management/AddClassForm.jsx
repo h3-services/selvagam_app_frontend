@@ -124,12 +124,12 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         <>
             {/* Ambient Backdrop */}
             <div 
-                className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2005] transition-opacity duration-500" 
+                className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-opacity duration-500" 
                 onClick={onClose} 
             />
             
             {/* Premium Drawer Container */}
-            <div className="fixed right-0 top-0 h-full w-full md:w-[550px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[2006] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) animate-in slide-in-from-right-full">
+            <div className="fixed right-0 top-0 h-full w-full md:w-[550px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) animate-in slide-in-from-right-full">
                 
                 {/* Scrollable Intelligence Core */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">

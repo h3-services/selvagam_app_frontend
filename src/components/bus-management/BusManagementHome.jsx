@@ -95,7 +95,7 @@ const BusManagementHome = () => {
         );
     }, [buses, search, activeTab]);
 
-    const handleAdd = async (newBusData) => {
+    const handleAdd = async (newBusData, files = {}) => {
         setLoading(true);
         try {
             const payload = {
@@ -108,17 +108,26 @@ const BusManagementHome = () => {
                 seating_capacity: parseInt(newBusData.seating_capacity || 0),
                 rc_expiry_date: newBusData.rc_expiry_date || null,
                 fc_expiry_date: newBusData.fc_expiry_date || null,
-                rc_book_url: newBusData.rc_book_url || null,
-                fc_certificate_url: newBusData.fc_certificate_url || null,
                 bus_name: newBusData.bus_name
             };
 
-            await busService.createBus(payload);
+            const createdBus = await busService.createBus(payload);
+            const bus_id = createdBus.bus_id;
+
+            // Handle uploads if files provided
+            const uploadPromises = [];
+            if (files.rcFile) uploadPromises.push(busService.uploadRCBook(bus_id, files.rcFile));
+            if (files.fcFile) uploadPromises.push(busService.uploadFCCertificate(bus_id, files.fcFile));
+            
+            if (uploadPromises.length > 0) {
+                await Promise.all(uploadPromises);
+            }
+
             await fetchData();
             setShowModal(false);
             setEditingBus(null);
+            return createdBus;
         } catch (err) {
-            console.error(err);
             console.error(err);
         } finally {
             setLoading(false);
@@ -234,7 +243,7 @@ const BusManagementHome = () => {
         }
     };
 
-    const handleUpdate = async (updatedData) => {
+    const handleUpdate = async (updatedData, files = {}) => {
         setLoading(true);
         try {
             const payload = {
@@ -247,26 +256,45 @@ const BusManagementHome = () => {
                 seating_capacity: parseInt(updatedData.seating_capacity || updatedData.capacity || 0),
                 rc_expiry_date: updatedData.rc_expiry_date || null,
                 fc_expiry_date: updatedData.fc_expiry_date || null,
-                rc_book_url: updatedData.rc_book_url || null,
-                fc_certificate_url: updatedData.fc_certificate_url || null,
                 status: (updatedData.status || 'ACTIVE').toUpperCase(),
                 bus_name: updatedData.bus_name
             };
 
-            const response = await busService.updateBus(updatedData.id, payload);
+            const bus_id = updatedData.bus_id || updatedData.id;
+            await busService.updateBus(bus_id, payload);
             
-            // Refetch or update local state with response
-            // For now, simpler to just update local state slightly to match view model
-            const newBusModel = {
-                ...updatedData,
-                // ensure we keep the view model consistent
-                busNumber: response.registration_number || updatedData.busNumber,
-                capacity: response.seating_capacity || updatedData.capacity,
-                status: response.status ? (response.status.charAt(0).toUpperCase() + response.status.slice(1).toLowerCase()) : updatedData.status
-            };
+            // Handle uploads if files provided
+            const uploadPromises = [];
+            if (files.rcFile) uploadPromises.push(busService.uploadRCBook(bus_id, files.rcFile));
+            if (files.fcFile) uploadPromises.push(busService.uploadFCCertificate(bus_id, files.fcFile));
+            
+            if (uploadPromises.length > 0) {
+                await Promise.all(uploadPromises);
+            }
 
-            setBuses(buses.map(b => b.id === updatedData.id ? newBusModel : b));
-            setSelectedBus(newBusModel);
+            // Always fetchData to get latest URLs and mapped names
+            await fetchData();
+            
+            // Re-sync selected bus if it's the one we updated
+            if (selectedBus && (selectedBus.id === bus_id)) {
+                // Fetch fresh list to find the updated one
+                const freshBuses = await busService.getAllBuses();
+                const refreshed = freshBuses.find(b => b.bus_id === bus_id);
+                if (refreshed) {
+                    setSelectedBus({
+                        ...refreshed,
+                        id: refreshed.bus_id,
+                        busNumber: refreshed.registration_number,
+                        capacity: refreshed.seating_capacity,
+                        status: refreshed.status ? (refreshed.status.charAt(0).toUpperCase() + refreshed.status.slice(1).toLowerCase()) : 'Inactive',
+                        driverName: refreshed.driver_name || (refreshed.driver_id ? drivers.find(d => d.driver_id === refreshed.driver_id)?.name || 'Assigned' : 'Unassigned'),
+                        route: refreshed.route_name || (refreshed.route_id ? routes.find(r => r.route_id === refreshed.route_id)?.name || 'Assigned' : 'Unassigned'),
+                    });
+                }
+            }
+            
+            setShowModal(false);
+            setEditingBus(null);
         } catch (err) {
             console.error("Failed to update bus:", err);
         } finally {
@@ -490,7 +518,7 @@ const BusManagementHome = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[20000] flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
                         onClick={() => setShowDeleteConfirm(false)}

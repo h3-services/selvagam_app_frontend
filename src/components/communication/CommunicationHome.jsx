@@ -20,8 +20,12 @@ const CommunicationHome = () => {
                     classService.getAllClasses(),
                     routeService.getAllRoutes()
                 ]);
-                setClasses(classRes || []);
-                setRoutes(routeRes || []);
+                
+                const activeClasses = (classRes || []).filter(c => (c.status || '').toUpperCase() === 'ACTIVE');
+                const activeRoutes = (routeRes || []).filter(r => (r.routes_active_status || r.status || '').toUpperCase() === 'ACTIVE');
+
+                setClasses(activeClasses);
+                setRoutes(activeRoutes);
             } catch (error) {
                 console.error("Failed to fetch categorized data:", error);
             }

@@ -167,56 +167,56 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
         <div className="h-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
             <div className="relative p-3 sm:p-5 shrink-0" style={{ backgroundColor: '#3A7BFF' }}>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 w-full sm:w-auto">
                         <button
                             onClick={() => { onBack(); setIsEditing(false); }}
-                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex-shrink-0 flex items-center justify-center text-white hover:bg-white/30 transition-all mr-1 sm:mr-2"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex-shrink-0 flex items-center justify-center text-white hover:bg-white/30 transition-all"
                         >
                             <FontAwesomeIcon icon={faArrowLeft} />
                         </button>
-                        <div className="ml-1 flex flex-col items-start gap-1 min-w-0">
+                        <div className="flex flex-col items-start gap-1 min-w-0 flex-1">
                             {isEditing ? (
                                 <input
                                     type="text"
                                     value={editData?.routeName}
                                     onChange={(e) => setEditData({ ...editData, routeName: e.target.value })}
-                                    className="bg-transparent border-b border-white text-white font-bold text-lg sm:text-2xl focus:outline-none placeholder-white/50 w-full"
+                                    className="bg-transparent border-b border-white text-white font-bold text-lg sm:text-2xl focus:outline-none placeholder-white/50 w-full min-w-[200px]"
                                 />
                             ) : (
                                 <>
-                                    <h2 className="text-lg sm:text-2xl font-bold text-white truncate max-w-[200px] sm:max-w-none">{selectedRoute.routeName}</h2>
-                                    <div className="px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30">
-                                        <span className="text-white font-bold text-[10px] sm:text-xs uppercase tracking-widest">{selectedRoute.assignedBus}</span>
+                                    <h2 className="text-lg sm:text-2xl font-bold text-white truncate max-w-full">{selectedRoute.routeName}</h2>
+                                    <div className="px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 truncate max-w-full inline-block">
+                                        <span className="text-white font-bold text-[10px] sm:text-xs uppercase tracking-widest truncate block">{selectedRoute.assignedBus}</span>
                                     </div>
                                 </>
                             )}
                         </div>
                     </div>
                     {isEditing ? (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end shrink-0">
                             <button 
                                 onClick={() => setIsEditing(false)} 
                                 disabled={isSaving}
-                                className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium disabled:opacity-50"
+                                className="flex-1 sm:flex-none px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium disabled:opacity-50 text-center"
                             >
                                 <FontAwesomeIcon icon={faTimes} className="mr-1" />Cancel
                             </button>
                             <button 
                                 onClick={handleSaveEdit} 
                                 disabled={isSaving}
-                                className="px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium disabled:bg-gray-200 flex items-center gap-2"
+                                className="flex-1 sm:flex-none px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium disabled:bg-gray-200 flex items-center justify-center gap-2"
                             >
                                 {isSaving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faCheck} />}
                                 {isSaving ? 'Saving...' : 'Save'}
                             </button>
                         </div>
                     ) : (
-                        <div className="flex gap-2">
-                            <button onClick={handleViewStudents} className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium flex items-center gap-2">
+                        <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end shrink-0">
+                            <button onClick={handleViewStudents} className="flex-1 sm:flex-none px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium flex items-center justify-center gap-2">
                                 <FontAwesomeIcon icon={faUserGraduate} />
                                 Students
                             </button>
-                            <button onClick={handleStartEditing} className="px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium">
+                            <button onClick={handleStartEditing} className="flex-1 sm:flex-none px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium flex items-center justify-center">
                                 <FontAwesomeIcon icon={faEdit} className="mr-1" />Edit
                             </button>
                         </div>
@@ -224,15 +224,15 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                 </div>
             </div>
 
-            <div className="flex-1 p-3 sm:p-5 relative min-h-[400px] sm:min-h-[600px]">
-                <div className="flex flex-col md:flex-row h-full gap-3 sm:gap-4">
+            <div className="flex-1 p-3 sm:p-5 relative min-h-0 flex flex-col">
+                <div className="flex flex-col-reverse lg:flex-row h-full gap-3 sm:gap-4 overflow-y-auto lg:overflow-hidden">
                     {/* Stops List */}
-                    <div className="w-full md:w-1/3 bg-gray-50 rounded-2xl p-3 sm:p-4 overflow-y-auto max-h-[250px] md:max-h-[600px]">
-                        <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-gray-500">Route Stops</h3>
+                    <div className="w-full lg:w-1/3 bg-gray-50 rounded-2xl p-3 sm:p-4 flex flex-col shrink-0 lg:h-full lg:overflow-hidden">
+                        <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-gray-500 shrink-0">Route Stops</h3>
 
                         {isEditing && (
-                            <div className="mb-4 space-y-2 border-b border-gray-200 pb-4">
-                                <div className="flex gap-2">
+                            <div className="mb-4 space-y-2 border-b border-gray-200 pb-4 shrink-0">
+                                <div className="flex flex-col sm:flex-row gap-2">
                                     <input
                                         type="text"
                                         placeholder={selectedPosition ? "Stop name..." : "Select on map"}
@@ -244,9 +244,9 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                                     <button
                                         onClick={handleEditAddStop}
                                         disabled={!currentStopName.trim() || !selectedPosition}
-                                        className={`px-3 rounded-lg text-white shadow-sm transition-all ${(!currentStopName.trim() || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md'}`}
+                                        className={`w-full sm:w-auto px-4 py-2 sm:px-3 text-white rounded-lg shadow-sm transition-all flex justify-center items-center ${(!currentStopName.trim() || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md'}`}
                                     >
-                                        <FontAwesomeIcon icon={faPlus} />
+                                        <FontAwesomeIcon icon={faPlus} className="sm:mr-0 mr-2" /><span className="sm:hidden font-medium">Add Stop</span>
                                     </button>
                                 </div>
                                 <p className="text-[10px] text-gray-500 font-medium ml-1">
@@ -257,7 +257,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                             </div>
                         )}
 
-                        <div className="space-y-3">
+                        <div className="space-y-3 flex-1 lg:overflow-y-auto custom-scrollbar pr-1">
                             {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
                                 (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
                                     <div key={index} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-gray-100">
@@ -272,10 +272,10 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                                                             type="text" 
                                                             value={editingStopName}
                                                             onChange={(e) => setEditingStopName(e.target.value)}
-                                                            className="flex-1 bg-gray-50 border border-purple-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+                                                            className="flex-1 bg-gray-50 border border-purple-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500 min-w-0"
                                                             autoFocus
                                                         />
-                                                        <button onClick={() => handleSaveStopEdit(index)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors">
+                                                        <button onClick={() => handleSaveStopEdit(index)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors shrink-0">
                                                             <FontAwesomeIcon icon={faCheck} />
                                                         </button>
                                                     </div>
@@ -314,7 +314,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                     </div>
 
                     {/* Map Container */}
-                    <div className="flex-1 relative rounded-2xl overflow-hidden shadow-inner border border-gray-200 min-h-[500px]">
+                    <div className="flex-1 relative rounded-2xl overflow-hidden shadow-inner border border-gray-200 min-h-[40vh] sm:min-h-[500px] lg:min-h-0 shrink-0 lg:shrink">
                         {isEditing && (
                             <div className="absolute top-4 left-16 right-4 z-[9999] flex flex-col gap-1">
                                 <div className="flex gap-2">

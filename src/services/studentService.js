@@ -138,5 +138,18 @@ export const studentService = {
             console.error(`Error fetching students for route ${routeId}:`, error);
             throw error;
         }
+    },
+
+    // Upload Student Photo
+    uploadPhoto: async (studentId, file) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await api.post(`/uploads/student/${studentId}/photo`, formData);
+            return response.data;
+        } catch (error) {
+            console.error(`Error uploading photo for student ${studentId}:`, error);
+            throw error;
+        }
     }
 };

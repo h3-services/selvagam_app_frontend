@@ -105,9 +105,10 @@ body,
     transform: scale(1.2) !important;
   }
 
-  /* Ensure modal backdrops cover mobile nav */
-  .fixed.inset-0 {
-    z-index: 9999;
+  /* Use .modal-backdrop class for modals — do NOT target .fixed.inset-0 broadly
+     as it would override the sidebar overlay and block all sidebar clicks */
+  .modal-backdrop {
+    z-index: 10001;
   }
 }
 

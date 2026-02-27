@@ -115,7 +115,9 @@ const BusList = ({
                                                         {drivers.length === 0 ? (
                                                             <div className="p-3 text-center text-xs text-gray-400 italic">No drivers available</div>
                                                         ) : (
-                                                            drivers.map(driver => (
+                                                            drivers
+                                                                .filter(driver => (driver.status || '').toUpperCase() === 'ACTIVE' || driver.driver_id === params.data.driver_id)
+                                                                .map(driver => (
                                                                 <button
                                                                     key={driver.driver_id}
                                                                     onClick={(e) => {
@@ -207,7 +209,9 @@ const BusList = ({
                                                         {routes.length === 0 ? (
                                                             <div className="p-3 text-center text-xs text-gray-400 italic">No routes available</div>
                                                         ) : (
-                                                            routes.map(route => (
+                                                            routes
+                                                                .filter(route => (route.routes_active_status || '').toUpperCase() === 'ACTIVE' || route.route_id === params.data.route_id)
+                                                                .map(route => (
                                                                 <button
                                                                     key={route.route_id}
                                                                     onClick={(e) => {

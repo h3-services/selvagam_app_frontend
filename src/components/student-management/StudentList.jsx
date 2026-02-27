@@ -36,6 +36,17 @@ const StudentList = ({
                     className="flex items-center gap-3 w-full cursor-pointer group"
                     onClick={() => { setSelectedStudent(params.data); setShowForm(false); }}
                 >
+                    <div className="w-10 h-10 rounded-xl bg-slate-900 flex-shrink-0 flex items-center justify-center text-white text-[13px] font-black shadow-sm overflow-hidden border border-slate-100 transition-transform group-hover:scale-105">
+                        {params.data.originalData?.student_photo_url ? (
+                            <img 
+                                src={params.data.originalData.student_photo_url} 
+                                alt={params.data.name} 
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            (params.value || 'U').charAt(0)
+                        )}
+                    </div>
                     <div className="flex flex-col overflow-hidden">
                         <p className="font-light text-gray-950 leading-none group-hover:text-blue-700 transition-colors truncate">{params.value || 'Unknown'}</p>
                     </div>

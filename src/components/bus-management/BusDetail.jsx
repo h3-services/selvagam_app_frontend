@@ -5,7 +5,7 @@ import {
     faIndustry, faCogs, faCalendarCheck, faIdCard, 
     faShieldAlt, faRoute, faChair, faBuilding,
     faFingerprint, faCircleCheck, faArrowUpRightFromSquare,
-    faMapMarkerAlt, faPhone, faEnvelope
+    faMapMarkerAlt, faPhone, faEnvelope, faFilePdf
 } from '@fortawesome/free-solid-svg-icons';
 
 const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
@@ -145,7 +145,27 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
                                             <DataRow label="Expiry Date" value={selectedBus.rc_expiry_date} />
                                             <div className="group relative rounded-2xl overflow-hidden border-2 border-slate-100 hover:border-indigo-200 transition-all bg-slate-50 h-[200px]">
                                                 {selectedBus.rc_book_url ? (
-                                                    <img src={selectedBus.rc_book_url} alt="RC Book" className="w-full h-full object-cover" />
+                                                    <>
+                                                        {selectedBus.rc_book_url.toLowerCase().endsWith('.pdf') ? (
+                                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50">
+                                                                <FontAwesomeIcon icon={faFilePdf} className="text-4xl mb-2" />
+                                                                <span className="text-[10px] font-black uppercase tracking-widest">PDF Document</span>
+                                                            </div>
+                                                        ) : (
+                                                            <img src={selectedBus.rc_book_url} alt="RC Book" className="w-full h-full object-cover" />
+                                                        )}
+                                                        <div className="absolute inset-0 bg-indigo-600/0 group-hover:bg-indigo-600/10 transition-all flex items-center justify-center">
+                                                            <a 
+                                                                href={selectedBus.rc_book_url} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="opacity-0 group-hover:opacity-100 bg-white/95 backdrop-blur text-indigo-600 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-2"
+                                                            >
+                                                                View Document
+                                                                <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
+                                                            </a>
+                                                        </div>
+                                                    </>
                                                 ) : (
                                                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
                                                         <FontAwesomeIcon icon={faIdCard} className="text-4xl mb-2 opacity-20" />
@@ -166,7 +186,27 @@ const BusDetail = ({ selectedBus, drivers, onBack, onEdit }) => {
                                             <DataRow label="Expiry Date" value={selectedBus.fc_expiry_date} />
                                             <div className="group relative rounded-2xl overflow-hidden border-2 border-slate-100 hover:border-rose-200 transition-all bg-slate-50 h-[200px]">
                                                 {selectedBus.fc_certificate_url ? (
-                                                    <img src={selectedBus.fc_certificate_url} alt="FC Certificate" className="w-full h-full object-cover" />
+                                                    <>
+                                                        {selectedBus.fc_certificate_url.toLowerCase().endsWith('.pdf') ? (
+                                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50">
+                                                                <FontAwesomeIcon icon={faFilePdf} className="text-4xl mb-2" />
+                                                                <span className="text-[10px] font-black uppercase tracking-widest">PDF Document</span>
+                                                            </div>
+                                                        ) : (
+                                                            <img src={selectedBus.fc_certificate_url} alt="FC Certificate" className="w-full h-full object-cover" />
+                                                        )}
+                                                        <div className="absolute inset-0 bg-rose-600/0 group-hover:bg-rose-600/10 transition-all flex items-center justify-center">
+                                                            <a 
+                                                                href={selectedBus.fc_certificate_url} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="opacity-0 group-hover:opacity-100 bg-white/95 backdrop-blur text-rose-600 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-2"
+                                                            >
+                                                                View Document
+                                                                <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
+                                                            </a>
+                                                        </div>
+                                                    </>
                                                 ) : (
                                                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-300">
                                                         <FontAwesomeIcon icon={faCalendarCheck} className="text-4xl mb-2 opacity-20" />

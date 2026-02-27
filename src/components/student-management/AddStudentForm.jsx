@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic, faCircleNotch } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic, faCircleNotch, faFileUpload } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import { routeService } from '../../services/routeService';
 import { parentService } from '../../services/parentService';
@@ -88,6 +88,60 @@ const YearRangePicker = ({ label, start, end, onStartChange, onEndChange }) => {
         </div>
     );
 };
+
+const FileUploadField = ({ label, icon, onFileSelect, fileName, error }) => (
+    <div className="relative group/field">
+        <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
+        <div className={`relative flex items-center justify-between bg-slate-50 rounded-2xl border-2 border-dashed transition-all duration-300 p-4 ${error ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 hover:border-blue-400 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5'}`}>
+            <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${fileName ? 'bg-blue-600 text-white' : 'bg-white text-slate-400 border border-slate-100 shadow-sm'}`}>
+                    <FontAwesomeIcon icon={fileName ? faCheck : icon} className="text-sm" />
+                </div>
+                <div>
+                    <div className="text-[13px] font-black text-slate-700 truncate max-w-[180px]">
+                        {fileName || "Click to upload student photo"}
+                    </div>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                        {fileName ? "Photo selected successfully" : "Suggested size: 800x800px"}
+                    </p>
+                </div>
+            </div>
+            <label className="cursor-pointer">
+                <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        // Check file size (2MB limit)
+                        const maxSize = 2 * 1024 * 1024; // 2MB
+                        if (file.size > maxSize) {
+                            alert("File is too large. Please select a photo smaller than 2MB.");
+                            e.target.value = ''; // Reset input
+                            return;
+                        }
+
+                        // Check if it's an image
+                        if (!file.type.startsWith('image/')) {
+                            alert("Invalid file type. Please select an image (JPG/PNG).");
+                            e.target.value = ''; // Reset input
+                            return;
+                        }
+
+                        onFileSelect(file);
+                    }} 
+                />
+                <div className="flex flex-col items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 rounded-xl text-blue-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all active:scale-95 shadow-sm group-hover/field:shadow-md">
+                    <FontAwesomeIcon icon={faFileUpload} className="text-xs" />
+                    <span className="text-[9px] font-black uppercase tracking-widest">Select</span>
+                </div>
+            </label>
+        </div>
+        {error && <p className="mt-1.5 ml-1 text-[9px] font-bold text-rose-500 uppercase tracking-wider">{error}</p>}
+    </div>
+);
 
 const ClassSelector = ({ label, value, options, onChange, placeholder, error }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -194,13 +248,12 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
         name: '',
         phone: '',
         email: '',
-        parent_role: 'GUARDIAN', // Default per schema
+        parent_role: 'Mother', // Default per schema
         door_no: '',
         street: '',
         city: '',
         district: '',
-        pincode: '',
-        password: ''
+        pincode: ''
     };
 
     const [formData, setFormData] = useState(defaultStudentState);
@@ -222,6 +275,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
     const [loadingData, setLoadingData] = useState(false);
     const [loadingParent, setLoadingParent] = useState(false);
     const [loadingSave, setLoadingSave] = useState(false);
+    const [photoFile, setPhotoFile] = useState(null);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
@@ -242,7 +296,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
             if (d.study_year && d.study_year.includes('-')) {
                 const parts = d.study_year.split('-');
                 yStart = parts[0];
-                yEnd = parts[1];
+                yEnd = parts[1]; 
             }
 
             setFormData({
@@ -343,7 +397,6 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
             newErrors.parentPhone = "Must be 10 digits";
         }
         if (!newParent.parent_role) newErrors.parentRole = "Role Required";
-        if (!newParent.password) newErrors.parentPassword = "Password Required";
         
         setErrors(prev => ({ ...prev, ...newErrors }));
         return Object.keys(newErrors).length === 0;
@@ -356,10 +409,15 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
         try {
             // API expects phone as a Number based on Swagger example
             const payload = {
-                ...newParent,
+                name: newParent.name,
                 phone: Number(newParent.phone) || 0,
-                door_no: String(newParent.door_no || ''), // Ensure string
-                pincode: String(newParent.pincode || ''), // Ensure string
+                email: newParent.email || '',
+                parent_role: newParent.parent_role,
+                door_no: String(newParent.door_no || ''),
+                street: newParent.street || '',
+                city: newParent.city || '',
+                district: newParent.district || '',
+                pincode: String(newParent.pincode || ''),
             };
             
             console.log("Parent Payload:", JSON.stringify(payload, null, 2));
@@ -462,9 +520,9 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
             console.log("Saving Student Payload:", JSON.stringify(payload, null, 2));
             
             if (initialData) {
-                await onUpdate(initialData.student_id, payload);
+                await onUpdate(initialData.student_id, payload, { photoFile });
             } else {
-                await onAdd(payload);
+                await onAdd(payload, { photoFile });
             }
             
             setFormData(defaultStudentState);
@@ -531,6 +589,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
     const handleClose = () => {
         setFormData(defaultStudentState);
         setNewParent(defaultParentState);
+        setPhotoFile(null);
         setIsAddingNewParent(false);
         setIsSearchingParent(false);
         setParentSearchQuery('');
@@ -541,9 +600,9 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
 
     return (
         <>
-            <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[1999] transition-opacity duration-300" onClick={handleClose} />
+            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-opacity duration-300" onClick={handleClose} />
             
-            <div className={`fixed right-0 top-0 h-full bg-slate-50 shadow-2xl z-[2000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
+            <div className={`fixed right-0 top-0 h-full bg-slate-50 shadow-2xl z-[100000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
                 (isAddingNewParent || isSearchingParent) ? 'w-full lg:w-[1300px]' : 'w-full md:w-[600px]'
             }`}>
                 
@@ -688,6 +747,13 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                             placeholder="10-digit phone number"
                                             error={errors.emergency_contact}
                                             maxLength={10}
+                                        />
+
+                                        <FileUploadField 
+                                            label="Student Photo" 
+                                            icon={faImage} 
+                                            onFileSelect={setPhotoFile} 
+                                            fileName={photoFile?.name || (formData.student_photo_url ? "Current Photo Saved" : "")} 
                                         />
                                     </div>
                                 </div>
@@ -1024,7 +1090,6 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                     />
                                                 </div>
                                                 <InputField label="Email" icon={faEnvelope} type="email" value={newParent.email} onChange={(e) => handleParentChange('email', e.target.value)} placeholder="email@example.com" />
-                                                <InputField label="Password" icon={faLock} type="password" value={newParent.password} onChange={(e) => { handleParentChange('password', e.target.value); if(errors.parentPassword) setErrors(prev => ({...prev, parentPassword: null})); }} placeholder="Set Password" error={errors.parentPassword} />
                                             </div>
 
                                             <div className="space-y-4">
@@ -1079,11 +1144,17 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
 
                                             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2 min-h-0">
                                                 <div className="space-y-4 pb-4">
-                                                    {localParents.filter(p => 
-                                                        p.name.toLowerCase().includes(parentSearchQuery.toLowerCase()) || 
-                                                        p.phone.toString().includes(parentSearchQuery) ||
-                                                        (p.email && p.email.toLowerCase().includes(parentSearchQuery.toLowerCase()))
-                                                    ).map(p => {
+                                                    {localParents.filter(p => {
+                                                        const matchesSearch = p.name.toLowerCase().includes(parentSearchQuery.toLowerCase()) || 
+                                                                            p.phone.toString().includes(parentSearchQuery) ||
+                                                                            (p.email && p.email.toLowerCase().includes(parentSearchQuery.toLowerCase()));
+                                                        
+                                                        // STRICTLY ACTIVE ONLY
+                                                        const isSelected = formData[targetParentField] == p.parent_id;
+                                                        const isActive = p.parents_active_status === 'ACTIVE';
+                                                        
+                                                        return matchesSearch && (isActive || isSelected);
+                                                    }).map(p => {
                                                         const isSelected = formData[targetParentField] == p.parent_id;
                                                         return (
                                                             <div 
@@ -1129,11 +1200,16 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                         );
                                                     })}
                                                     
-                                                    {localParents.filter(p => 
-                                                        p.name.toLowerCase().includes(parentSearchQuery.toLowerCase()) || 
-                                                        p.phone.toString().includes(parentSearchQuery) ||
-                                                        (p.email && p.email.toLowerCase().includes(parentSearchQuery.toLowerCase()))
-                                                    ).length === 0 && (
+                                                    {localParents.filter(p => {
+                                                        const matchesSearch = p.name.toLowerCase().includes(parentSearchQuery.toLowerCase()) || 
+                                                                             p.phone.toString().includes(parentSearchQuery) ||
+                                                                             (p.email && p.email.toLowerCase().includes(parentSearchQuery.toLowerCase()));
+                                                        
+                                                        const isSelected = formData[targetParentField] == p.parent_id;
+                                                        const isActive = p.parents_active_status === 'ACTIVE';
+                                                        
+                                                        return matchesSearch && (isActive || isSelected);
+                                                    }).length === 0 && (
                                                         <div className="text-center py-16 px-6">
                                                             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
                                                                 <FontAwesomeIcon icon={faSearch} className="text-2xl" />

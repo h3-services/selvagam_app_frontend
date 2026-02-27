@@ -87,5 +87,31 @@ export const busService = {
             console.error(`Error assigning route to bus ${busId}:`, error);
             throw error;
         }
+    },
+
+    // Upload Bus RC Book
+    uploadRCBook: async (busId, file) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await api.post(`/uploads/bus/${busId}/rc-book`, formData);
+            return response.data;
+        } catch (error) {
+            console.error(`Error uploading RC Book for bus ${busId}:`, error);
+            throw error;
+        }
+    },
+
+    // Upload Bus FC Certificate
+    uploadFCCertificate: async (busId, file) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const response = await api.post(`/uploads/bus/${busId}/fc-certificate`, formData);
+            return response.data;
+        } catch (error) {
+            console.error(`Error uploading FC Certificate for bus ${busId}:`, error);
+            throw error;
+        }
     }
 };

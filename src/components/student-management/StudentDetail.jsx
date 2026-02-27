@@ -88,7 +88,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
     const fetchAllParents = async (roleType) => {
         setLoadingAllParents(true);
         try {
-            const data = await parentService.getAllParents();
+            const data = await parentService.getAllParents({ active_filter: 'ACTIVE_ONLY' });
             // Filter logic:
             // 1. If replacing Primary: Filter out current Secondary
             // 2. If replacing Secondary: Filter out current Primary
@@ -97,7 +97,7 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                 ? selectedStudent.originalData?.s_parent_id 
                 : selectedStudent.originalData?.parent_id;
             
-            const filtered = data.filter(p => p.parent_id !== otherParentId);
+            const filtered = data.filter(p => p.parent_id !== otherParentId && p.parents_active_status === 'ACTIVE');
             setAllParents(filtered);
         } catch (error) {
             console.error("Error fetching all parents:", error);
@@ -184,8 +184,21 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                         <FontAwesomeIcon icon={faArrowLeft} />
                     </button>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 flex-shrink-0 flex items-center justify-center text-white text-lg sm:text-xl font-black shadow-xl shadow-slate-200">
-                            {selectedStudent.name.charAt(0)}
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 flex-shrink-0 flex items-center justify-center text-white text-lg sm:text-xl font-black shadow-xl shadow-slate-200 overflow-hidden relative group/photo">
+                            {selectedStudent.originalData?.student_photo_url ? (
+                                <>
+                                    <img 
+                                        src={selectedStudent.originalData.student_photo_url} 
+                                        alt={selectedStudent.name} 
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/photo:opacity-100 transition-opacity flex items-center justify-center">
+                                        <FontAwesomeIcon icon={faEye} className="text-white text-xs" />
+                                    </div>
+                                </>
+                            ) : (
+                                selectedStudent.name.charAt(0)
+                            )}
                         </div>
                         <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -468,12 +481,12 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
 
             {/* Parent Selection Modal */}
             {selectingParentRole && (
-                <div className="fixed inset-0 z-[3100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
                     <div 
-                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-500"
+                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-500"
                         onClick={() => setSelectingParentRole(null)}
                     />
-                    <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-white w-full max-w-xl animate-in zoom-in slide-in-from-bottom-8 duration-500 overflow-hidden flex flex-col max-h-[80vh]">
+                    <div className="relative bg-white rounded-[2.5rem] shadow-2xl border border-white w-full max-w-xl animate-in zoom-in slide-in-from-bottom-8 duration-500 overflow-hidden flex flex-col max-h-[80vh] z-[100000]">
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div>
                                 <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Assign {selectingParentRole.charAt(0) + selectingParentRole.slice(1).toLowerCase()} Parent</h3>
