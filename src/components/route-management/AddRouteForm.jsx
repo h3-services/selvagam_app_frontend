@@ -59,9 +59,15 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
 
     const handleAddStop = () => {
         if (currentStopName.trim() && selectedPosition) {
+            const nextOrder = newRoute.stopPoints.length + 1;
             setNewRoute(prev => ({
                 ...prev,
-                stopPoints: [...prev.stopPoints, { name: currentStopName.trim(), position: [selectedPosition.lat, selectedPosition.lng] }],
+                stopPoints: [...prev.stopPoints, { 
+                    name: currentStopName.trim(), 
+                    position: [selectedPosition.lat, selectedPosition.lng],
+                    pickupOrder: nextOrder,
+                    dropOrder: nextOrder 
+                }],
                 stops: prev.stops + 1
             }));
             setCurrentStopName('');
@@ -76,6 +82,13 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
             stopPoints: prev.stopPoints.filter((_, i) => i !== index),
             stops: prev.stops - 1
         }));
+    };
+
+    const handleUpdateOrder = (index, field, value) => {
+        const parsed = parseInt(value, 10);
+        const newStops = [...newRoute.stopPoints];
+        newStops[index] = { ...newStops[index], [field]: isNaN(parsed) ? '' : parsed };
+        setNewRoute(prev => ({ ...prev, stopPoints: newStops }));
     };
 
     const handleAddRoute = () => {
@@ -329,32 +342,74 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                 </div>
 
                                 {/* List of added stops */}
-                                <div className="flex-1 overflow-y-auto bg-blue-50/50 rounded-xl p-3 border border-blue-100 min-h-[150px]">
-                                    {newRoute.stopPoints && newRoute.stopPoints.length > 0 ? (
-                                        <div className="space-y-2">
-                                            {newRoute.stopPoints.map((stop, index) => (
-                                                <div key={index} className="flex items-center justify-between bg-white px-3 py-3 rounded-lg border border-blue-100 shadow-sm cursor-pointer hover:border-purple-300 transition-all select-none">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">
-                                                            {index + 1}
+                                <div className="flex-1 overflow-y-auto min-h-[150px] flex flex-col gap-4">
+                                    {/* Pickup Order Card */}
+                                    <div className="bg-blue-50/50 rounded-xl p-3 border border-blue-100 flex flex-col shadow-sm">
+                                        <h5 className="text-[11px] font-bold text-blue-600 uppercase tracking-widest mb-3">Pickup Sequence</h5>
+                                        {newRoute.stopPoints && newRoute.stopPoints.length > 0 ? (
+                                            <div className="space-y-2">
+                                                {newRoute.stopPoints.map((stop, index) => (
+                                                    <div key={`pickup-${index}`} className="flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border border-blue-50 shadow-sm transition-all select-none">
+                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                            <div className="flex flex-col items-center justify-center shrink-0">
+                                                                <label className="text-[8px] font-bold text-blue-500 uppercase tracking-widest mb-0.5">Order</label>
+                                                                <input 
+                                                                    type="number"
+                                                                    value={stop.pickupOrder !== undefined ? stop.pickupOrder : index + 1}
+                                                                    onChange={(e) => handleUpdateOrder(index, 'pickupOrder', e.target.value)}
+                                                                    className="w-10 bg-white border border-blue-200 text-center focus:border-blue-500 focus:outline-none rounded-md py-1 font-bold text-blue-700 text-xs shadow-inner"
+                                                                    min="0"
+                                                                />
+                                                            </div>
+                                                            <div className="w-px h-8 bg-blue-100 mx-1"></div>
+                                                            <span className="text-sm font-bold text-gray-700 truncate">{stop.name}</span>
                                                         </div>
-                                                        <span className="text-sm font-bold text-gray-700">{stop.name}</span>
+                                                        <button
+                                                            onClick={() => handleRemoveStop(index)}
+                                                            className="text-gray-300 hover:text-red-500 transition-colors px-2 ml-2 shrink-0"
+                                                        >
+                                                            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+                                                        </button>
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleRemoveStop(index)}
-                                                        className="text-gray-400 hover:text-red-500 transition-colors px-2"
-                                                    >
-                                                        <FontAwesomeIcon icon={faTimes} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-60">
-                                            <FontAwesomeIcon icon={faMapLocationDot} className="text-3xl mb-2" />
-                                            <span className="text-xs font-bold">No stops added yet</span>
-                                        </div>
-                                    )}
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="h-20 flex flex-col items-center justify-center text-blue-300 opacity-80">
+                                                <span className="text-[10px] font-bold">No stops added</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Drop Order Card */}
+                                    <div className="bg-purple-50/50 rounded-xl p-3 border border-purple-100 flex flex-col shadow-sm mb-4">
+                                        <h5 className="text-[11px] font-bold text-purple-600 uppercase tracking-widest mb-3">Drop Sequence</h5>
+                                        {newRoute.stopPoints && newRoute.stopPoints.length > 0 ? (
+                                            <div className="space-y-2">
+                                                {newRoute.stopPoints.map((stop, index) => (
+                                                    <div key={`drop-${index}`} className="flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border border-purple-50 shadow-sm transition-all select-none">
+                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                            <div className="flex flex-col items-center justify-center shrink-0">
+                                                                <label className="text-[8px] font-bold text-purple-500 uppercase tracking-widest mb-0.5">Order</label>
+                                                                <input 
+                                                                    type="number"
+                                                                    value={stop.dropOrder !== undefined ? stop.dropOrder : index + 1}
+                                                                    onChange={(e) => handleUpdateOrder(index, 'dropOrder', e.target.value)}
+                                                                    className="w-10 bg-white border border-purple-200 text-center focus:border-purple-500 focus:outline-none rounded-md py-1 font-bold text-purple-700 text-xs shadow-inner"
+                                                                    min="0"
+                                                                />
+                                                            </div>
+                                                            <div className="w-px h-8 bg-purple-100 mx-1"></div>
+                                                            <span className="text-sm font-bold text-gray-700 truncate">{stop.name}</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="h-20 flex flex-col items-center justify-center text-purple-300 opacity-80">
+                                                <span className="text-[10px] font-bold">No stops added</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

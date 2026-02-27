@@ -22,6 +22,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
     const [routeStudents, setRouteStudents] = useState([]);
     const [loadingStudents, setLoadingStudents] = useState(false);
     const [classMap, setClassMap] = useState({});
+    const [errorMessage, setErrorMessage] = useState(null);
 
     const handleViewStudents = async () => {
         setShowStudentsModal(true);
@@ -98,11 +99,17 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
     const handleSaveEdit = async () => {
         if (localLoading || isSaving) return;
         setLocalLoading(true);
+        setErrorMessage(null);
         try {
             await onUpdate(editData);
             setIsEditing(false);
         } catch (error) {
             console.error("Failed to save route:", error);
+            if (error.response?.status === 500 && error.response?.data?.detail?.includes('Duplicate entry')) {
+                setErrorMessage('Order conflict detected. Two stops cannot have the same pickup or drop order sequence. Please check the order fields and try again.');
+            } else {
+                setErrorMessage(error.message || "Failed to update Route. Please try again.");
+            }
         } finally {
             setLocalLoading(false);
         }
@@ -120,6 +127,8 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
                 stopPoints: [...(prev.stopPoints || []), { 
                     name: currentStopName.trim(), 
                     position: [selectedPosition.lat, selectedPosition.lng],
+                    pickupOrder: order,
+                    dropOrder: order,
                     id: null // Explicitly null so handleUpdate knows it's a new stop
                 }],
                 stops: (prev.stops || 0) + 1
@@ -144,6 +153,17 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
         setSelectedPosition(null);
         setLocationSearchQuery('');
         setCurrentStopName('');
+        // Initialize editing state with numeric pickup/drop order
+        if(selectedRoute && selectedRoute.stopPoints){
+            setEditData({
+                ...selectedRoute,
+                stopPoints: selectedRoute.stopPoints.map((s, i) => ({
+                    ...s,
+                    pickupOrder: s.pickupOrder !== undefined ? s.pickupOrder : (i+1),
+                    dropOrder: s.dropOrder !== undefined ? s.dropOrder : (i+1)
+                }))
+            });
+        }
     }
 
     if (!selectedRoute) return null;
@@ -225,92 +245,168 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, isSaving }) => {
             </div>
 
             <div className="flex-1 p-3 sm:p-5 relative min-h-0 flex flex-col">
+                {errorMessage && (
+                    <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center justify-between shadow-sm animate-fade-in shrink-0">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                            <FontAwesomeIcon icon={faTimes} className="text-red-500 bg-red-100 rounded-full w-4 h-4 p-1" />
+                            {errorMessage}
+                        </div>
+                        <button onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-600 transition-colors">
+                            <FontAwesomeIcon icon={faTimes} />
+                        </button>
+                    </div>
+                )}
                 <div className="flex flex-col-reverse lg:flex-row h-full gap-3 sm:gap-4 overflow-y-auto lg:overflow-hidden">
                     {/* Stops List */}
-                    <div className="w-full lg:w-1/3 bg-gray-50 rounded-2xl p-3 sm:p-4 flex flex-col shrink-0 lg:h-full lg:overflow-hidden">
-                        <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-gray-500 shrink-0">Route Stops</h3>
+                    {/* Stops List */}
+                    <div className="w-full lg:w-1/3 flex flex-col gap-4 shrink-0 lg:h-full lg:overflow-y-auto custom-scrollbar pr-2">
+                        
+                        {/* Pickup Order Card */}
+                        <div className="bg-blue-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-blue-100 shadow-sm shrink-0">
+                            <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-blue-600 shrink-0">Pickup Order</h3>
 
-                        {isEditing && (
-                            <div className="mb-4 space-y-2 border-b border-gray-200 pb-4 shrink-0">
-                                <div className="flex flex-col sm:flex-row gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder={selectedPosition ? "Stop name..." : "Select on map"}
-                                        value={currentStopName}
-                                        onChange={(e) => setCurrentStopName(e.target.value)}
-                                        className="flex-1 bg-white border border-purple-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-                                        disabled={!selectedPosition}
-                                    />
-                                    <button
-                                        onClick={handleEditAddStop}
-                                        disabled={!currentStopName.trim() || !selectedPosition}
-                                        className={`w-full sm:w-auto px-4 py-2 sm:px-3 text-white rounded-lg shadow-sm transition-all flex justify-center items-center ${(!currentStopName.trim() || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md'}`}
-                                    >
-                                        <FontAwesomeIcon icon={faPlus} className="sm:mr-0 mr-2" /><span className="sm:hidden font-medium">Add Stop</span>
-                                    </button>
+                            {isEditing && (
+                                <div className="mb-4 space-y-2 border-b border-blue-200 pb-4 shrink-0">
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder={selectedPosition ? "Stop name..." : "Select on map"}
+                                            value={currentStopName}
+                                            onChange={(e) => setCurrentStopName(e.target.value)}
+                                            className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 shadow-sm"
+                                            disabled={!selectedPosition}
+                                        />
+                                        <button
+                                            onClick={handleEditAddStop}
+                                            disabled={!currentStopName.trim() || !selectedPosition}
+                                            className={`w-full sm:w-auto px-4 py-2 sm:px-3 text-white rounded-lg shadow-sm transition-all flex justify-center items-center ${(!currentStopName.trim() || !selectedPosition) ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md hover:bg-blue-700'}`}
+                                        >
+                                            <FontAwesomeIcon icon={faPlus} className="sm:mr-0 mr-2" /><span className="sm:hidden font-medium">Add Stop</span>
+                                        </button>
+                                    </div>
+                                    <p className="text-[10px] text-blue-500 font-medium ml-1">
+                                        {!selectedPosition 
+                                            ? "1. Search & Select location on map" 
+                                            : `2. Name the stop and click + (${selectedPosition.lat.toFixed(5)}, ${selectedPosition.lng.toFixed(5)})`}
+                                    </p>
                                 </div>
-                                <p className="text-[10px] text-gray-500 font-medium ml-1">
-                                    {!selectedPosition 
-                                        ? "1. Search & Select location on map" 
-                                        : `2. Name the stop and click + (${selectedPosition.lat.toFixed(5)}, ${selectedPosition.lng.toFixed(5)})`}
-                                </p>
-                            </div>
-                        )}
+                            )}
 
-                        <div className="space-y-3 flex-1 lg:overflow-y-auto custom-scrollbar pr-1">
-                            {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
-                                (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
-                                    <div key={index} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                                        <div className="flex items-center gap-3 flex-1">
-                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
-                                                {index + 1}
-                                            </div>
-                                            {editingStopIndex === index ? (
-                                                <div className="flex flex-col gap-1 flex-1">
-                                                    <div className="flex items-center gap-2">
+                            <div className="space-y-3 flex-col">
+                                {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
+                                    (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
+                                        <div key={`pickup-${index}`} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-blue-50">
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                {isEditing ? (
+                                                    <div className="flex flex-col items-center justify-center shrink-0">
+                                                        <label className="text-[8px] font-bold text-blue-500 uppercase tracking-widest mb-0.5">Order</label>
                                                         <input 
-                                                            type="text" 
-                                                            value={editingStopName}
-                                                            onChange={(e) => setEditingStopName(e.target.value)}
-                                                            className="flex-1 bg-gray-50 border border-purple-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500 min-w-0"
-                                                            autoFocus
+                                                            type="number"
+                                                            value={stop.pickupOrder !== undefined ? stop.pickupOrder : index + 1}
+                                                            onChange={(e) => {
+                                                                const newStops = [...editData.stopPoints];
+                                                                newStops[index] = { ...newStops[index], pickupOrder: parseInt(e.target.value) || 0 };
+                                                                setEditData({ ...editData, stopPoints: newStops });
+                                                            }}
+                                                            className="w-10 bg-white border border-blue-200 text-center focus:border-blue-500 focus:outline-none rounded-md py-1 font-bold text-blue-700 text-xs shadow-inner"
+                                                            min="0"
                                                         />
-                                                        <button onClick={() => handleSaveStopEdit(index)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors shrink-0">
-                                                            <FontAwesomeIcon icon={faCheck} />
-                                                        </button>
                                                     </div>
-                                                    <span className="text-[10px] text-blue-600 font-medium ml-1 animate-pulse">
-                                                        * Click map to update location
-                                                    </span>
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
+                                                        {stop.pickupOrder !== undefined ? stop.pickupOrder : index + 1}
+                                                    </div>
+                                                )}
+                                                
+                                                {isEditing && <div className="w-px h-8 bg-blue-100 mx-1"></div>}
+                                                {editingStopIndex === index ? (
+                                                    <div className="flex flex-col gap-1 flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <input 
+                                                                type="text" 
+                                                                value={editingStopName}
+                                                                onChange={(e) => setEditingStopName(e.target.value)}
+                                                                className="flex-1 bg-gray-50 border border-blue-200 rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500 min-w-0"
+                                                                autoFocus
+                                                            />
+                                                            <button onClick={() => handleSaveStopEdit(index)} className="text-green-600 hover:bg-green-50 p-1 rounded transition-colors shrink-0">
+                                                                <FontAwesomeIcon icon={faCheck} />
+                                                            </button>
+                                                        </div>
+                                                        <span className="text-[10px] text-blue-600 font-medium ml-1 animate-pulse">
+                                                            * Click map to update location
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm font-bold text-gray-800">{stop.name}</p>
+                                                )}
+                                            </div>
+                                            {isEditing && (
+                                                <div className="flex gap-2 pl-2">
+                                                    {editingStopIndex !== index && (
+                                                        <button
+                                                            onClick={() => handleStartStopEdit(index, stop.name)}
+                                                            className="text-gray-400 hover:text-blue-600 transition-colors"
+                                                        >
+                                                            <FontAwesomeIcon icon={faEdit} />
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleEditRemoveStop(index)}
+                                                        className="text-gray-400 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <FontAwesomeIcon icon={faTimes} />
+                                                    </button>
                                                 </div>
-                                            ) : (
-                                                <p className="text-sm font-bold text-gray-800">{stop.name}</p>
                                             )}
                                         </div>
-                                        {isEditing && (
-                                            <div className="flex gap-2 pl-2">
-                                                {editingStopIndex !== index && (
-                                                    <button
-                                                        onClick={() => handleStartStopEdit(index, stop.name)}
-                                                        className="text-gray-400 hover:text-blue-600 transition-colors"
-                                                    >
-                                                        <FontAwesomeIcon icon={faEdit} />
-                                                    </button>
-                                                )}
-                                                <button
-                                                    onClick={() => handleEditRemoveStop(index)}
-                                                    className="text-gray-400 hover:text-red-500 transition-colors"
-                                                >
-                                                    <FontAwesomeIcon icon={faTimes} />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="text-center py-8 text-gray-400 text-sm">No stops added</div>
-                            )}
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8 text-blue-400 text-sm">No stops added</div>
+                                )}
+                            </div>
                         </div>
+
+                        {/* Drop Order Card */}
+                        <div className="bg-purple-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-purple-100 shadow-sm shrink-0 mb-4">
+                            <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-purple-600 shrink-0">Drop Order</h3>
+                            <div className="space-y-3 flex-col">
+                                {(isEditing ? editData.stopPoints : selectedRoute.stopPoints) && (isEditing ? editData.stopPoints : selectedRoute.stopPoints).length > 0 ? (
+                                    (isEditing ? editData.stopPoints : selectedRoute.stopPoints).map((stop, index) => (
+                                        <div key={`drop-${index}`} className="flex items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-purple-50">
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                {isEditing ? (
+                                                    <div className="flex flex-col items-center justify-center shrink-0">
+                                                        <label className="text-[8px] font-bold text-purple-500 uppercase tracking-widest mb-0.5">Order</label>
+                                                        <input 
+                                                            type="number"
+                                                            value={stop.dropOrder !== undefined ? stop.dropOrder : index + 1}
+                                                            onChange={(e) => {
+                                                                const newStops = [...editData.stopPoints];
+                                                                newStops[index] = { ...newStops[index], dropOrder: parseInt(e.target.value) || 0 };
+                                                                setEditData({ ...editData, stopPoints: newStops });
+                                                            }}
+                                                            className="w-10 bg-white border border-purple-200 text-center focus:border-purple-500 focus:outline-none rounded-md py-1 font-bold text-purple-700 text-xs shadow-inner"
+                                                            min="0"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
+                                                        {stop.dropOrder !== undefined ? stop.dropOrder : index + 1}
+                                                    </div>
+                                                )}
+                                                
+                                                {isEditing && <div className="w-px h-8 bg-purple-100 mx-1"></div>}
+                                                <p className="text-sm font-bold text-gray-800 truncate">{stop.name}</p>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8 text-purple-400 text-sm">No stops added</div>
+                                )}
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Map Container */}

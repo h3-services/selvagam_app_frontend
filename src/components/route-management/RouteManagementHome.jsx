@@ -92,7 +92,9 @@ const RouteManagementHome = () => {
                     name: stop.stop_name,
                     position: [stop.latitude, stop.longitude],
                     id: stop.stop_id,
-                    order: stop.pickup_stop_order
+                    pickupOrder: stop.pickup_stop_order,
+                    dropOrder: stop.drop_stop_order,
+                    order: stop.pickup_stop_order // Retained for backwards compatibility inside UI components
                 }));
 
                 const startCoord = stopPoints.length > 0 ? stopPoints[0].position : [12.6083, 80.0528]; // Default fallback
@@ -242,8 +244,8 @@ const RouteManagementHome = () => {
                         stop_name: stopName,
                         latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                         longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
-                        pickup_stop_order: index + 1,
-                        drop_stop_order: index + 1
+                        pickup_stop_order: stop.pickupOrder !== undefined ? parseInt(stop.pickupOrder) : (index + 1),
+                        drop_stop_order: stop.dropOrder !== undefined ? parseInt(stop.dropOrder) : (index + 1)
                     };
                     console.log(`📦 [CREATE STOP ${index + 1}] Payload:`, JSON.stringify(stopData, null, 2));
                     const createdStop = await routeService.createRouteStop(stopData);
@@ -323,8 +325,8 @@ const RouteManagementHome = () => {
                     stop_name: (stop.name || '').trim(),
                     latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                     longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
-                    pickup_stop_order: parseInt(order),
-                    drop_stop_order: parseInt(order)
+                    pickup_stop_order: stop.pickupOrder !== undefined ? parseInt(stop.pickupOrder) : parseInt(order),
+                    drop_stop_order: stop.dropOrder !== undefined ? parseInt(stop.dropOrder) : parseInt(order)
                 };
                 console.log(`📦 [CREATE STOP order:${order}] Payload:`, JSON.stringify(newStopPayload, null, 2));
                 try {
@@ -355,20 +357,22 @@ const RouteManagementHome = () => {
                     parseFloat(parseFloat(stop.position[0]).toFixed(6)) !== parseFloat(parseFloat(original.position[0]).toFixed(6)) ||
                     parseFloat(parseFloat(stop.position[1]).toFixed(6)) !== parseFloat(parseFloat(original.position[1]).toFixed(6))
                 );
-                const orderChanged = original && order !== (original.order || 0);
+                
+                const pickupOrderChanged = original && parseInt(stop.pickupOrder !== undefined ? stop.pickupOrder : order) !== parseInt(original.pickupOrder || original.order || 0);
+                const dropOrderChanged = original && parseInt(stop.dropOrder !== undefined ? stop.dropOrder : order) !== parseInt(original.dropOrder || original.order || 0);
 
-                if (!nameChanged && !posChanged && !orderChanged) {
-                    console.log(`⏭️ [SKIP STOP ${stop.id} order:${order}] No changes detected.`);
+
+                if (!nameChanged && !posChanged && !pickupOrderChanged && !dropOrderChanged) {
+                    console.log(`⏭️ [SKIP STOP ${stop.id}] No changes detected.`);
                     continue;
                 }
 
                 const stopPayload = {
-                    route_id: updatedData.id,
                     stop_name: (stop.name || '').trim(),
                     latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                     longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
-                    pickup_stop_order: parseInt(order),
-                    drop_stop_order: parseInt(order)
+                    pickup_stop_order: stop.pickupOrder !== undefined ? parseInt(stop.pickupOrder) : parseInt(order),
+                    drop_stop_order: stop.dropOrder !== undefined ? parseInt(stop.dropOrder) : parseInt(order)
                 };
                 console.log(`📦 [UPDATE STOP ${stop.id} order:${order}] Payload:`, JSON.stringify(stopPayload, null, 2));
 
@@ -378,8 +382,6 @@ const RouteManagementHome = () => {
                 } catch (error) {
                     if (error.response && error.response.status === 404) {
                         console.warn(`⚠️ Stop ${stop.id} missing, skipping (backend issue).`);
-                    } else if (error.response && error.response.status === 500 && error.response.data?.detail?.includes('Duplicate entry')) {
-                        console.warn(`⚠️ Order collision at ${order} for stop ${stop.id}, skipping.`);
                     } else {
                         throw error;
                     }
@@ -402,6 +404,7 @@ const RouteManagementHome = () => {
             setSelectedRoute(null);
         } catch (error) {
             console.error("Error updating route:", error);
+            throw error;
         } finally {
             setIsSaving(false);
         }
