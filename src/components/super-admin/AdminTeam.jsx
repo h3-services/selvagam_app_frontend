@@ -58,7 +58,9 @@ const AdminTeam = ({
     };
 
     const saveEdit = () => {
-        onUpdateAdmin(editingId, editData);
+        // Only send fields the API expects, exclude mapped UI fields like id, status, role
+        const { name, email, phone } = editData;
+        onUpdateAdmin(editingId, { name, email, phone: Number(phone) });
     };
 
     return (

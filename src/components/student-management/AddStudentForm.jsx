@@ -599,11 +599,11 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
     if (!show) return null;
 
     return (
-        <>
-            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-opacity duration-300" onClick={handleClose} />
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300" onClick={handleClose} />
             
-            <div className={`fixed right-0 top-0 h-full bg-slate-50 shadow-2xl z-[100000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
-                (isAddingNewParent || isSearchingParent) ? 'w-full lg:w-[1300px]' : 'w-full md:w-[600px]'
+            <div className={`relative shadow-[0_0_100px_rgba(0,0,0,0.3)] bg-slate-50 rounded-[2.5rem] z-[100000] flex flex-col overflow-hidden max-h-[95vh] animate-in zoom-in-95 duration-300 ${
+                (isAddingNewParent || isSearchingParent) ? 'w-full max-w-[1300px]' : 'w-full max-w-[600px]'
             }`}>
                 
 
@@ -1258,7 +1258,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                     </button>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

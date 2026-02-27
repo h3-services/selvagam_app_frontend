@@ -175,11 +175,11 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                         </div>
                         <div>
                             <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">
-                                {initialData ? 'Update Profile' : 'Enroll Driver'}
+                                {initialData ? 'Edit Driver' : 'Add Driver'}
                             </h3>
                             <div className="flex items-center gap-2">
                                 <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
-                                <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">API Core Compliance</p>
+                                <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em]">Driver Form</p>
                             </div>
                         </div>
                     </div>
@@ -189,7 +189,7 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                             className="h-12 px-6 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center text-blue-600 font-black text-[10px] uppercase tracking-widest gap-2.5 transition-all active:scale-95 shadow-sm"
                         >
                             <FontAwesomeIcon icon={faMagic} className="opacity-70" /> 
-                            <span>Auto Pilot</span>
+                            <span>Auto Fill</span>
                         </button>
                         <button 
                             onClick={onClose} 
@@ -210,7 +210,7 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 <FontAwesomeIcon icon={faFingerprint} className="text-2xl" />
                             </div>
                             <div>
-                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Driver Info</h4>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Driver Information</h4>
                                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Basic Details</p>
                             </div>
                         </div>
@@ -219,12 +219,12 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                             <InputField label="Full Name" icon={faUser} value={newDriver.name} onChange={(e) => updateField('name', e.target.value)} placeholder="Full Name" error={touched.name && errors.name} />
                             
                             <div className="grid grid-cols-2 gap-5">
-                                <InputField label="Contact Terminal" icon={faPhone} value={newDriver.phone} onChange={(e) => updateField('phone', e.target.value)} type="tel" maxLength={10} placeholder="10-Digit Mobile" error={touched.phone && errors.phone} />
-                                <InputField label="Digital Mail" icon={faEnvelope} value={newDriver.email} onChange={(e) => updateField('email', e.target.value)} type="email" placeholder="user@example.com" error={touched.email && errors.email} />
+                                <InputField label="Contact Number" icon={faPhone} value={newDriver.phone} onChange={(e) => updateField('phone', e.target.value)} type="tel" maxLength={10} placeholder="10-Digit Mobile" error={touched.phone && errors.phone} />
+                                <InputField label="Email Address" icon={faEnvelope} value={newDriver.email} onChange={(e) => updateField('email', e.target.value)} type="email" placeholder="user@example.com" error={touched.email && errors.email} />
                             </div>
                             
                             {!initialData && (
-                                <InputField label="Auth Password" icon={faLock} value={newDriver.password} onChange={(e) => updateField('password', e.target.value)} type="password" placeholder="System Access" error={touched.password && errors.password} />
+                                <InputField label="Password" icon={faLock} value={newDriver.password} onChange={(e) => updateField('password', e.target.value)} type="password" placeholder="Password" error={touched.password && errors.password} />
                             )}
                         </div>
                     </div>
@@ -236,14 +236,14 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 <FontAwesomeIcon icon={faBriefcase} className="text-2xl" />
                             </div>
                             <div>
-                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">Operational Clearance</h4>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Compliance & Credentials</p>
+                                <h4 className="font-black text-slate-900 text-2xl tracking-tight leading-none mb-1.5">License Details</h4>
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">License Documents</p>
                             </div>
                         </div>
 
                         <div className="space-y-6">
-                            <InputField label="License ID" icon={faIdCard} value={newDriver.licence_number} onChange={(e) => updateField('licence_number', e.target.value)} placeholder="DL-XXXX-XXXX" error={touched.licence_number && errors.licence_number} />
-                            <InputField label="Clearance Expiry" icon={faCalendarAlt} value={newDriver.licence_expiry} onChange={(e) => updateField('licence_expiry', e.target.value)} type="date" error={touched.licence_expiry && errors.licence_expiry} />
+                            <InputField label="License Number" icon={faIdCard} value={newDriver.licence_number} onChange={(e) => updateField('licence_number', e.target.value)} placeholder="DL-XXXX-XXXX" error={touched.licence_number && errors.licence_number} />
+                            <InputField label="License Expiry" icon={faCalendarAlt} value={newDriver.licence_expiry} onChange={(e) => updateField('licence_expiry', e.target.value)} type="date" error={touched.licence_expiry && errors.licence_expiry} />
                         </div>
                     </div>
                 </div>
@@ -260,7 +260,7 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 : '' 
                         }}
                     >
-                        <span>{isSubmitting ? 'Processing...' : (initialData ? 'Update Profile' : 'Register Driver')}</span>
+                        <span>{isSubmitting ? 'Processing...' : (initialData ? 'Save Changes' : 'Save Driver')}</span>
                         <div className={`w-9 h-9 ${isSubmitting ? '' : 'bg-white/10'} rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform`}>
                             {isSubmitting ? (
                                 <FontAwesomeIcon icon={faCircleNotch} spin className="text-xs" />

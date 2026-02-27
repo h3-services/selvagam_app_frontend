@@ -9,7 +9,6 @@ import {
     faMagic,
     faShapes,
     faSignature,
-    faSatellite,
     faCircleNotch
 } from '@fortawesome/free-solid-svg-icons';
 import { classService } from '../../services/classService';
@@ -121,15 +120,15 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
     if (!show) return null;
 
     return (
-        <>
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
             {/* Ambient Backdrop */}
             <div 
-                className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-opacity duration-500" 
+                className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300" 
                 onClick={onClose} 
             />
             
-            {/* Premium Drawer Container */}
-            <div className="fixed right-0 top-0 h-full w-full md:w-[550px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) animate-in slide-in-from-right-full">
+            {/* Premium Modal Container */}
+            <div className="relative w-full max-w-lg bg-slate-50 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh]">
                 
                 {/* Scrollable Intelligence Core */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
@@ -145,7 +144,7 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                             </div>
                             <div>
                                 <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5 font-['Outfit']">
-                                    {initialData ? 'Modify Architecture' : 'Class Assembly'}
+                                    {initialData ? 'Edit Class' : 'Add Class'}
                                 </h3>
                                 <div className="flex items-center gap-2">
                                     <span className="bg-indigo-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
@@ -178,60 +177,32 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                         <form id="add-class-form" onSubmit={handleSubmit} className="space-y-8">
                             
                             {/* Structural Definition Section */}
-                            <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 group hover:shadow-xl transition-all duration-500">
+                            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100 group hover:shadow-lg transition-all duration-300">
                                 <div className="flex items-center gap-4 mb-8">
                                     <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
                                         <FontAwesomeIcon icon={faSignature} className="text-lg" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Structural Core</h4>
-                                        <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Identity & Section</p>
+                                        <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Class Information</h4>
+                                        <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Basic Details</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-6">
                                     <InputField 
-                                        label="Grade / Class Name" 
+                                        label="Class Name" 
                                         icon={faSchool} 
                                         value={formData.class_name} 
                                         onChange={(e) => handleChange('class_name', e.target.value)} 
-                                        placeholder="e.g. Grade 10 or XII" 
+                                        placeholder="e.g. 10, XII, LKG" 
                                     />
 
                                     <InputField 
-                                        label="Strategic Section" 
+                                        label="Section" 
                                         icon={faLayerGroup} 
                                         value={formData.section} 
                                         onChange={(e) => handleChange('section', e.target.value)} 
-                                        placeholder="e.g. Beta, Alpha, or Section-B" 
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Chronology & Status Section */}
-                            <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 group hover:shadow-xl transition-all duration-500">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                        <FontAwesomeIcon icon={faSatellite} className="text-lg" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-slate-900 text-lg tracking-tight leading-none">Operational Data</h4>
-                                        <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Timeline & State</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-6">
-
-
-                                    <SelectField 
-                                        label="Activation State" 
-                                        icon={faCheck} 
-                                        value={formData.status}
-                                        onChange={(e) => handleChange('status', e.target.value)}
-                                        options={[
-                                            { label: 'ACTIVE (Operational)', value: 'ACTIVE' },
-                                            { label: 'INACTIVE (Archived)', value: 'INACTIVE' }
-                                        ]}
+                                        placeholder="e.g. A, B, Alpha" 
                                     />
                                 </div>
                             </div>
@@ -247,7 +218,7 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                         onClick={onClose}
                         className="flex-1 px-8 py-4 bg-slate-50 border border-slate-200 text-slate-500 font-black uppercase tracking-widest rounded-2xl hover:bg-slate-100 hover:text-slate-700 transition-all active:scale-95 text-[11px]"
                     >
-                        Decline
+                        Cancel
                     </button>
                     <button
                         type="submit"
@@ -263,13 +234,13 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                         ) : (
                             <>
                                 <FontAwesomeIcon icon={faCheck} />
-                                <span>{initialData ? 'Commit Changes' : 'Register Cluster'}</span>
+                                <span>{initialData ? 'Save Changes' : 'Create Class'}</span>
                             </>
                         )}
                     </button>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import AdminTeam from './AdminTeam';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
-import DeactivationReasonModal from './DeactivationReasonModal';
 import { adminService } from '../../services/adminService';
 
 const SuperAdminHome = () => {
@@ -46,8 +45,6 @@ const SuperAdminHome = () => {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const [deleteType, setDeleteType] = useState(null); // 'admin'
-    const [showDeactivateModal, setShowDeactivateModal] = useState(false);
-    const [deactivatingItemId, setDeactivatingItemId] = useState(null);
 
     // --- Admin Handlers ---
     const handleAddAdmin = async (newAdmin) => {
@@ -79,29 +76,14 @@ const SuperAdminHome = () => {
 
     const handleToggleAdminStatus = async (id) => {
         const admin = admins.find(a => a.id === id);
-        if (admin && admin.status === 'Active') {
-            setDeactivatingItemId(id);
-            setShowDeactivateModal(true);
-        } else {
+        if (admin) {
              try {
-                await adminService.updateAdminStatus(id, 'ACTIVE');
+                const newStatus = admin.status.toUpperCase() === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+                await adminService.updateAdminStatus(id, newStatus);
                 fetchAdmins();
             } catch (err) {
-                console.error("Failed to activate admin:", err);
+                console.error("Failed to update admin status:", err);
             }
-        }
-    };
-
-    const confirmDeactivation = async (reason) => {
-        if (deactivatingItemId) {
-             try {
-                await adminService.updateAdminStatus(deactivatingItemId, 'INACTIVE');
-                fetchAdmins();
-            } catch (err) {
-                console.error("Failed to deactivate admin:", err);
-            }
-            setDeactivatingItemId(null);
-            setShowDeactivateModal(false);
         }
     };
 
@@ -156,12 +138,6 @@ const SuperAdminHome = () => {
                 onClose={() => setShowDeleteConfirm(false)}
                 onConfirm={confirmDelete}
                 type={deleteType}
-            />
-
-            <DeactivationReasonModal
-                show={showDeactivateModal}
-                onClose={() => setShowDeactivateModal(false)}
-                onConfirm={confirmDeactivation}
             />
         </div>
     );

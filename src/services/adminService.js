@@ -48,7 +48,7 @@ export const adminService = {
     // Update admin status
     updateAdminStatus: async (adminId, status) => {
         try {
-            const response = await api.patch(`/admins/${adminId}/status`, { status });
+            const response = await api.put(`/admins/${adminId}/status`, { status });
             return response.data;
         } catch (error) {
             console.error(`Error updating admin status ${adminId}:`, error);

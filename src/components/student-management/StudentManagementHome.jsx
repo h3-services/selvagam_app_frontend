@@ -74,9 +74,6 @@ const StudentManagementHome = () => {
 
     // Actions State
     const [activeMenuId, setActiveMenuId] = useState(null);
-    const [showDeactivateModal, setShowDeactivateModal] = useState(false);
-    const [deactivatingItemId, setDeactivatingItemId] = useState(null);
-    const [deactivationReason, setDeactivationReason] = useState("");
     const [showParentStatusModal, setShowParentStatusModal] = useState(false);
     const [pendingStudentStatusUpdate, setPendingStudentStatusUpdate] = useState(null);
     const [selectedRows, setSelectedRows] = useState([]);
@@ -602,22 +599,6 @@ const StudentManagementHome = () => {
         navigate(`/students/${student.id}/edit`);
     };
 
-
-    const handleDeactivate = (id) => {
-        setDeactivatingItemId(id);
-        setDeactivationReason("");
-        setShowDeactivateModal(true);
-    };
-
-    const confirmDeactivation = () => {
-        if (deactivatingItemId) {
-            setStudents(students.map(s => s.id === deactivatingItemId ? { ...s, status: 'Inactive', deactivationReason } : s));
-            setDeactivatingItemId(null);
-            setDeactivationReason("");
-            setShowDeactivateModal(false);
-        }
-    };
-
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
             {/* Header - Hidden when viewing details to save space */}
@@ -876,50 +857,6 @@ const StudentManagementHome = () => {
                 </button>
             )}
 
-
-            {/* Deactivation Reason Modal */}
-            {showDeactivateModal && (
-                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-slate-900/80 backdrop-blur-md animate-in fade-in duration-300"
-                        onClick={() => setShowDeactivateModal(false)}
-                    />
-                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300 text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-6 mx-auto">
-                            <FontAwesomeIcon icon={faClock} className="text-2xl text-amber-600" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Reason for Deactivation</h3>
-                        <p className="text-gray-500 text-sm mb-6 leading-relaxed text-center">
-                            Please provide a reason why this person is being moved to inactive status.
-                        </p>
-                        <textarea
-                            value={deactivationReason}
-                            onChange={(e) => setDeactivationReason(e.target.value)}
-                            placeholder="Enter reason here..."
-                            className="w-full p-4 rounded-2xl border border-gray-200 text-sm focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 resize-none bg-gray-50/50 mb-6 min-h-[100px]"
-                            autoFocus
-                        />
-                        <div className="flex gap-3 w-full">
-                            <button
-                                onClick={() => setShowDeactivateModal(false)}
-                                className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmDeactivation}
-                                disabled={!deactivationReason.trim()}
-                                className={`flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${deactivationReason.trim()
-                                    ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200'
-                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                    }`}
-                            >
-                                Confirm
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
                     {/* Parent Status Update Modal */}
                     {/* Parent Status Update Modal */}
             {showParentStatusModal && pendingStudentStatusUpdate && (
