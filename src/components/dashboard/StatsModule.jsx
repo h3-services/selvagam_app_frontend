@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCar, faUserFriends, faRoute, faGraduationCap, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { studentService } from '../../services/studentService';
@@ -7,6 +8,7 @@ import { parentService } from '../../services/parentService';
 import { routeService } from '../../services/routeService';
 
 const StatsModule = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = useState([
         {
             title: 'Total Students',
@@ -14,6 +16,7 @@ const StatsModule = () => {
             icon: faGraduationCap,
             iconBg: 'bg-indigo-100 text-blue-600',
             variant: 'indigo',
+            link: '/students',
             loading: true
         },
         {
@@ -22,6 +25,7 @@ const StatsModule = () => {
             icon: faCar,
             iconBg: 'bg-blue-100 text-blue-600',
             variant: 'purple',
+            link: '/drivers',
             loading: true
         },
         {
@@ -30,14 +34,16 @@ const StatsModule = () => {
             icon: faUserFriends,
             iconBg: 'bg-pink-100 text-pink-600',
             variant: 'pink',
+            link: '/parents',
             loading: true
         },
         {
-            title: 'Total routes',
+            title: 'Total Routes',
             value: '-',
             icon: faRoute,
             iconBg: 'bg-emerald-100 text-emerald-600',
             variant: 'emerald',
+            link: '/routes',
             loading: true
         }
     ]);
@@ -59,6 +65,7 @@ const StatsModule = () => {
                         icon: faGraduationCap,
                         iconBg: 'bg-indigo-100 text-blue-600',
                         variant: 'indigo',
+                        link: '/students',
                         loading: false
                     },
                     {
@@ -67,6 +74,7 @@ const StatsModule = () => {
                         icon: faCar,
                         iconBg: 'bg-blue-100 text-blue-600',
                         variant: 'purple',
+                        link: '/drivers',
                         loading: false
                     },
                     {
@@ -75,14 +83,16 @@ const StatsModule = () => {
                         icon: faUserFriends,
                         iconBg: 'bg-pink-100 text-pink-600',
                         variant: 'pink',
+                        link: '/parents',
                         loading: false
                     },
                     {
-                        title: 'Total routes',
+                        title: 'Total Routes',
                         value: routes.length,
                         icon: faRoute,
                         iconBg: 'bg-emerald-100 text-emerald-600',
                         variant: 'emerald',
+                        link: '/routes',
                         loading: false
                     }
                 ]);
@@ -98,7 +108,7 @@ const StatsModule = () => {
     return (
         <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {stats.map((stat, index) => (
-                <div key={index} className={`group rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white ${
+                <div key={index} onClick={() => navigate(stat.link)} className={`group rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 border shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white cursor-pointer hover:-translate-y-1 ${
                     stat.variant === 'indigo' ? 'border-indigo-100' :
                     stat.variant === 'purple' ? 'border-blue-100' :
                     stat.variant === 'pink' ? 'border-pink-100' :

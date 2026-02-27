@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPhone, faLock, faArrowRight, faBolt, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faPhone, faLock, faArrowRight, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../../config/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import api from '../../services/api';
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -20,35 +19,29 @@ const LoginForm = () => {
         setError('');
         setLoading(true);
         try {
-            const usersRef = collection(db, 'schools', 'hope3-school', 'users');
-            const q = query(usersRef, where('mobile', '==', mobile));
-            const snapshot = await getDocs(q);
+            const response = await api.post('/auth/admin/login', {
+                phone: Number(mobile),
+                password: password
+            });
 
-            if (snapshot.empty) {
-                setError('No account found with this mobile number.');
-                setLoading(false);
-                return;
-            }
+            const { access_token } = response.data;
 
-            const userData = snapshot.docs[0].data();
-
-            if (userData.password !== password) {
-                setError('Incorrect password.');
-                setLoading(false);
-                return;
-            }
+            // Store token in localStorage
+            localStorage.setItem('access_token', access_token);
 
             navigate('/dashboard');
         } catch (err) {
-            console.error(err);
-            setError('Login failed. Please try again.');
+            console.error('Login failed:', err);
+            if (err.response?.status === 401) {
+                setError('Invalid mobile number or password.');
+            } else if (err.response?.status === 422) {
+                setError('Please enter a valid mobile number.');
+            } else {
+                setError('Login failed. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
-    };
-
-    const handleQuickAccess = () => {
-        navigate('/dashboard');
     };
 
     return (
@@ -168,25 +161,13 @@ const LoginForm = () => {
                     </button>
                 </form>
 
-                {/* Divider */}
-                <div className="relative my-6 sm:my-8">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-slate-100"></div>
-                    </div>
-                    <div className="relative flex justify-center">
-                        <span className="px-4 bg-slate-50 text-[9px] font-black uppercase tracking-[0.3em] text-slate-300">or</span>
-                    </div>
-                </div>
-
-                {/* Quick Access */}
+                {/* Temporary Test Button */}
                 <button
-                    onClick={handleQuickAccess}
-                    className="w-full h-12 sm:h-14 bg-white hover:bg-slate-900 text-slate-600 hover:text-white rounded-xl sm:rounded-2xl font-bold text-sm border-2 border-slate-100 hover:border-slate-900 transition-all duration-500 flex items-center justify-center gap-3 group active:scale-95"
+                    onClick={() => { localStorage.setItem('access_token', 'test-token'); navigate('/dashboard'); }}
+                    className="w-full mt-4 h-12 sm:h-14 bg-white hover:bg-slate-900 text-slate-600 hover:text-white rounded-xl sm:rounded-2xl font-bold text-sm border-2 border-slate-100 hover:border-slate-900 transition-all duration-500 flex items-center justify-center gap-3 active:scale-95"
                 >
-                    <FontAwesomeIcon icon={faBolt} className="text-amber-500 group-hover:text-amber-400 group-hover:scale-125 transition-all duration-500" />
-                    <span className="tracking-wide">Quick Access</span>
+                    Skip Login (Testing)
                 </button>
-
                 <p className="text-center mt-6 sm:mt-8 text-[9px] sm:text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em]">
                     Selvagam Santhanalakshmi Noble School
                 </p>

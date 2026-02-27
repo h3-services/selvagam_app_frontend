@@ -15,7 +15,7 @@ const AdminTeam = ({
     const navigate = useNavigate();
     const { adminId } = useParams();
     const [isAddOpen, setIsAddOpen] = useState(false);
-    const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '', password: '' });
+    const [newAdmin, setNewAdmin] = useState({ name: '', email: '', phone: '' });
     const [editingId, setEditingId] = useState(null);
     const [editData, setEditData] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,14 +34,15 @@ const AdminTeam = ({
     }, [isEditPath, adminId, admins]);
 
     const handleAdd = async () => {
-        if (newAdmin.name && newAdmin.email && newAdmin.password) {
+        if (newAdmin.name && newAdmin.email && newAdmin.phone) {
             setIsSubmitting(true);
             try {
                 await onAddAdmin({
-                    ...newAdmin,
-                    phone: Number(newAdmin.phone) // Ensure phone is sent as Number
+                    name: newAdmin.name,
+                    email: newAdmin.email,
+                    phone: Number(newAdmin.phone)
                 });
-                setNewAdmin({ name: '', email: '', phone: '', password: '' });
+                setNewAdmin({ name: '', email: '', phone: '' });
             } catch (error) {
                 console.error("Failed to add admin:", error);
                 alert("Failed to create admin account.");
@@ -49,7 +50,7 @@ const AdminTeam = ({
                 setIsSubmitting(false);
             }
         } else {
-             alert("Please fill in all required fields (Name, Email, Password)");
+             alert("Please fill in all required fields (Name, Email, Phone)");
         }
     };
 
@@ -104,13 +105,7 @@ const AdminTeam = ({
                                     value={newAdmin.phone}
                                     onChange={(e) => setNewAdmin({ ...newAdmin, phone: e.target.value })}
                                 />
-                                <input
-                                    type="password"
-                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 outline-none"
-                                    placeholder="Password"
-                                    value={newAdmin.password}
-                                    onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
-                                />
+
                                 <button
                                     onClick={handleAdd}
                                     disabled={isSubmitting}

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/login/LoginHome';
 import Dashboard from './components/layout/DashboardLayout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import DashboardOverview from './components/dashboard/DashboardHome';
 import StudentManagement from './components/student-management/StudentManagementHome';
 import ParentManagement from './components/parent-management/ParentManagementHome';
@@ -22,8 +23,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        {/* Dashboard Layout Wrapper - No specific path prefix, so children determine URL */}
-        <Route element={<Dashboard />}>
+        {/* Dashboard Layout Wrapper - Protected */}
+        <Route element={<ProtectedRoute><Dashboard /></ProtectedRoute>}>
           <Route path="/dashboard" element={<DashboardOverview />} />
           <Route path="/students" element={<StudentManagement />} />
           <Route path="/students/view/:status" element={<StudentManagement />} />
@@ -67,7 +68,7 @@ function App() {
           <Route path="*" element={<ComingSoon />} />
         </Route>
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

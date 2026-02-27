@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic, faCircleNotch, faFileUpload } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic, faCircleNotch, faFileUpload, faRoute } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import { routeService } from '../../services/routeService';
 import { parentService } from '../../services/parentService';
 import { classService } from '../../services/classService';
+import AddClassForm from '../class-management/AddClassForm';
 
 const InputField = ({ label, icon, type = "text", value, onChange, placeholder, disabled = false, error, maxLength }) => (
     <div className="relative group/field">
@@ -29,7 +30,7 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
     </div>
 );
 
-const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false, error }) => (
+const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false, error, onAdd, addLabel }) => (
     <div className="relative group/field">
         <div className="flex justify-between items-center mb-1.5 ml-1">
             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
@@ -54,6 +55,15 @@ const SelectField = ({ label, icon, value, onChange, options, placeholder, disab
                 <FontAwesomeIcon icon={faChevronDown} />
             </div>
         </div>
+        {onAdd && (
+            <button
+                type="button"
+                onClick={onAdd}
+                className="w-full mt-2 px-3 py-2 rounded-xl border-2 border-dashed border-slate-200 text-slate-500 text-[11px] font-bold hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50 transition-all flex items-center justify-center gap-2"
+            >
+                <span className="text-lg leading-none">+</span> {addLabel || 'Add New'}
+            </button>
+        )}
     </div>
 );
 
@@ -143,7 +153,7 @@ const FileUploadField = ({ label, icon, onFileSelect, fileName, error }) => (
     </div>
 );
 
-const ClassSelector = ({ label, value, options, onChange, placeholder, error }) => {
+const ClassSelector = ({ label, value, options, onChange, placeholder, error, onAddClass }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef(null);
 
@@ -203,6 +213,166 @@ const ClassSelector = ({ label, value, options, onChange, placeholder, error }) 
                                 </div>
                                 {value == opt.value && (
                                     <FontAwesomeIcon icon={faCheck} className="text-[8px] ml-auto shrink-0" />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                    {/* Add Class Button */}
+                    <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setIsOpen(false); onAddClass && onAddClass(); }}
+                        className="w-full mt-2 px-3 py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-500 text-[11px] font-bold hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50 transition-all flex items-center justify-center gap-2"
+                    >
+                        <span className="text-lg leading-none">+</span> Add New Class
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const RouteSelector = ({ label, value, options, onChange, placeholder, error, onAdd, addLabel, disabled }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(opt => opt.value == value);
+
+    return (
+        <div className={`relative group/field ${isOpen ? 'z-[3000]' : 'z-10'}`} ref={containerRef}>
+            <div className="flex justify-between items-center mb-1.5 ml-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
+                {error && <span className="text-[9px] font-bold text-rose-500 animate-pulse uppercase tracking-wider">{error}</span>}
+            </div>
+            <div 
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+                className={`relative flex items-center justify-between bg-white rounded-2xl border ${disabled ? 'bg-slate-50 cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-indigo-400 hover:shadow-md'} transition-all duration-300 px-4 py-3 ${isOpen ? 'ring-4 ring-indigo-500/10 border-indigo-500 shadow-lg' : error ? 'border-rose-400 ring-4 ring-rose-500/5' : 'border-slate-200'}`}
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedOption ? 'bg-indigo-600 text-white shadow-sm' : error ? 'bg-rose-50 text-rose-400' : 'bg-slate-100 text-slate-400'}`}>
+                        <FontAwesomeIcon icon={faBus} className="text-xs" />
+                    </div>
+                    {selectedOption ? (
+                        <div className="flex items-center gap-2">
+                            <span className="text-[13px] font-bold text-slate-800">{selectedOption.label}</span>
+                        </div>
+                    ) : (
+                        <span className="text-[13px] font-bold text-slate-400">{placeholder}</span>
+                    )}
+                </div>
+                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 text-[10px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </div>
+
+            {isOpen && !disabled && (
+                <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-white rounded-2xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] border border-slate-100 z-[3001] max-h-56 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col gap-1">
+                        {options.map((opt) => (
+                            <div 
+                                key={opt.value}
+                                onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 ${value == opt.value ? 'bg-indigo-600 text-white shadow-sm' : 'hover:bg-slate-50 text-slate-700'}`}
+                            >
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${value == opt.value ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                    <FontAwesomeIcon icon={faRoute} />
+                                </div>
+                                <span className={`text-[12px] font-bold truncate flex-1 ${value == opt.value ? 'text-white' : 'text-slate-800'}`}>{opt.label}</span>
+                                {value == opt.value && (
+                                    <FontAwesomeIcon icon={faCheck} className="text-[10px] shrink-0" />
+                                )}
+                            </div>
+                        ))}
+                        {options.length === 0 && (
+                            <div className="px-3 py-4 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">No routes found</div>
+                        )}
+                    </div>
+                    {onAdd && (
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setIsOpen(false); onAdd(); }}
+                            className="w-full mt-2 px-3 py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-500 text-[11px] font-bold hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-2"
+                        >
+                            <span className="text-lg leading-none">+</span> {addLabel || 'Add New'}
+                        </button>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const StopSelector = ({ label, value, options, onChange, placeholder, error, disabled, icon = faMapMarkerAlt, activeColor = 'teal' }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(opt => opt.value == value);
+    
+    // Determine color classes based on activeColor prop
+    const colorMap = {
+        teal: { bg: 'bg-teal-600', text: 'text-teal-600', lightBg: 'bg-teal-50', hoverBorder: 'hover:border-teal-400', ring: 'ring-teal-500' },
+        orange: { bg: 'bg-orange-600', text: 'text-orange-600', lightBg: 'bg-orange-50', hoverBorder: 'hover:border-orange-400', ring: 'ring-orange-500' },
+    };
+    const colors = colorMap[activeColor] || colorMap.teal;
+
+    return (
+        <div className={`relative group/field ${isOpen ? 'z-[3000]' : 'z-10'}`} ref={containerRef}>
+            <div className="flex justify-between items-center mb-1.5 ml-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
+                {error && <span className="text-[9px] font-bold text-rose-500 animate-pulse uppercase tracking-wider">{error}</span>}
+            </div>
+            <div 
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+                className={`relative flex items-center justify-between bg-white rounded-2xl border ${disabled ? 'bg-slate-50 cursor-not-allowed opacity-60' : `cursor-pointer ${colors.hoverBorder} hover:shadow-md`} transition-all duration-300 px-4 py-3 ${isOpen ? `ring-4 ${colors.ring}/10 border-${colors.ring.split('-')[1]}-500 shadow-lg` : error ? 'border-rose-400 ring-4 ring-rose-500/5' : 'border-slate-200'}`}
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedOption ? `${colors.bg} text-white shadow-sm` : error ? 'bg-rose-50 text-rose-400' : 'bg-slate-100 text-slate-400'}`}>
+                        <FontAwesomeIcon icon={icon} className="text-xs" />
+                    </div>
+                    {selectedOption ? (
+                        <div className="flex items-center gap-2">
+                            <span className="text-[13px] font-bold text-slate-800">{selectedOption.name}</span>
+                            <span className={`text-[9px] font-black ${colors.text} ${colors.lightBg} px-2 py-0.5 rounded-md border border-${colors.text.split('-')[1]}-100 uppercase tracking-wider`}>Stop {selectedOption.order}</span>
+                        </div>
+                    ) : (
+                        <span className="text-[13px] font-bold text-slate-400">{placeholder}</span>
+                    )}
+                </div>
+                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 text-[10px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            </div>
+
+            {isOpen && !disabled && (
+                <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-white rounded-2xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] border border-slate-100 z-[3001] max-h-56 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="grid grid-cols-1 gap-1">
+                        {options.map((opt) => (
+                            <div 
+                                key={opt.value}
+                                onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 ${value == opt.value ? `${colors.bg} text-white shadow-sm` : 'hover:bg-slate-50 text-slate-700'}`}
+                            >
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${value == opt.value ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                    {opt.order}
+                                </div>
+                                <span className={`text-[12px] font-bold truncate flex-1 ${value == opt.value ? 'text-white' : 'text-slate-800'}`}>{opt.name}</span>
+                                {value == opt.value && (
+                                    <FontAwesomeIcon icon={faCheck} className="text-[10px] shrink-0" />
                                 )}
                             </div>
                         ))}
@@ -270,6 +440,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
     const [routes, setRoutes] = useState([]);
     const [stops, setStops] = useState([]);
     const [classes, setClasses] = useState([]);
+    const [showAddClassForm, setShowAddClassForm] = useState(false);
     const [filteredPickupStops, setFilteredPickupStops] = useState([]);
     const [filteredDropStops, setFilteredDropStops] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
@@ -599,11 +770,11 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300" onClick={handleClose} />
+        <>
+            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-opacity duration-300" onClick={handleClose} />
             
-            <div className={`relative shadow-[0_0_100px_rgba(0,0,0,0.3)] bg-slate-50 rounded-[2.5rem] z-[100000] flex flex-col overflow-hidden max-h-[95vh] animate-in zoom-in-95 duration-300 ${
-                (isAddingNewParent || isSearchingParent) ? 'w-full max-w-[1300px]' : 'w-full max-w-[600px]'
+            <div className={`fixed right-0 top-0 h-full bg-slate-50 shadow-2xl z-[100000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${
+                (isAddingNewParent || isSearchingParent) ? 'w-full lg:w-[1300px]' : 'w-full md:w-[600px]'
             }`}>
                 
 
@@ -732,6 +903,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                 section: c.section
                                             }))} 
                                             error={errors.class_id}
+                                            onAddClass={() => setShowAddClassForm(true)}
                                         />
                                         
                                         <InputField 
@@ -971,29 +1143,30 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                     <FontAwesomeIcon icon={faArrowRight} /> Pickup
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <SelectField 
-                                                        label="Route" 
-                                                        icon={faBus} 
+                                                    <RouteSelector 
+                                                        label="Pickup Route" 
                                                         value={formData.pickup_route_id} 
-                                                        onChange={(e) => {
-                                                            handleChange('pickup_route_id', e.target.value);
+                                                        onChange={(val) => {
+                                                            handleChange('pickup_route_id', val);
                                                             if(errors.pickup_route_id) setErrors(prev => ({...prev, pickup_route_id: null}));
                                                         }} 
-                                                        placeholder="Select Route"
-                                                        options={routes.map(r => ({value: r.route_id, label: r.name}))} 
+                                                        placeholder="Select Pickup Route"
+                                                        options={routes.filter(r => (r.routes_active_status || r.status) === 'ACTIVE').map(r => ({value: r.route_id, label: r.name}))} 
                                                         error={errors.pickup_route_id}
+                                                        onAdd={() => window.open('/routes/add', '_blank')}
+                                                        addLabel="Add New Route"
                                                     />
-                                                    <SelectField 
-                                                        label="Stop" 
-                                                        icon={faMapMarkerAlt} 
+                                                    <StopSelector 
+                                                        label="Pickup Stop" 
                                                         value={formData.pickup_stop_id} 
-                                                        onChange={(e) => {
-                                                            handleChange('pickup_stop_id', e.target.value);
+                                                        activeColor="teal"
+                                                        onChange={(val) => {
+                                                            handleChange('pickup_stop_id', val);
                                                             if(errors.pickup_stop_id) setErrors(prev => ({...prev, pickup_stop_id: null}));
                                                         }} 
-                                                        placeholder={formData.pickup_route_id ? "Select Stop" : "Select Route First"}
+                                                        placeholder={formData.pickup_route_id ? "Select Pickup Stop" : "Select Route First"}
                                                         disabled={!formData.pickup_route_id}
-                                                        options={filteredPickupStops.map(s => ({value: s.stop_id, label: `${s.stop_name} (Order: ${s.pickup_stop_order})`}))} 
+                                                        options={filteredPickupStops.map(s => ({value: s.stop_id, name: s.stop_name, order: s.pickup_stop_order}))} 
                                                         error={errors.pickup_stop_id}
                                                     />
                                                 </div>
@@ -1007,29 +1180,30 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                     <FontAwesomeIcon icon={faHome} /> Drop
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <SelectField 
-                                                        label="Route" 
-                                                        icon={faBus} 
+                                                    <RouteSelector 
+                                                        label="Drop Route" 
                                                         value={formData.drop_route_id} 
-                                                        onChange={(e) => {
-                                                            handleChange('drop_route_id', e.target.value);
+                                                        onChange={(val) => {
+                                                            handleChange('drop_route_id', val);
                                                             if(errors.drop_route_id) setErrors(prev => ({...prev, drop_route_id: null}));
                                                         }} 
-                                                        placeholder="Select Route"
-                                                        options={routes.map(r => ({value: r.route_id, label: r.name}))} 
+                                                        placeholder="Select Drop Route"
+                                                        options={routes.filter(r => (r.routes_active_status || r.status) === 'ACTIVE').map(r => ({value: r.route_id, label: r.name}))} 
                                                         error={errors.drop_route_id}
+                                                        onAdd={() => window.open('/routes/add', '_blank')}
+                                                        addLabel="Add New Route"
                                                     />
-                                                    <SelectField 
-                                                        label="Stop" 
-                                                        icon={faMapMarkerAlt} 
+                                                    <StopSelector 
+                                                        label="Drop Stop" 
+                                                        activeColor="orange"
                                                         value={formData.drop_stop_id} 
-                                                        onChange={(e) => {
-                                                            handleChange('drop_stop_id', e.target.value);
+                                                        onChange={(val) => {
+                                                            handleChange('drop_stop_id', val);
                                                             if(errors.drop_stop_id) setErrors(prev => ({...prev, drop_stop_id: null}));
                                                         }} 
-                                                        placeholder={formData.drop_route_id ? "Select Stop" : "Select Route First"}
+                                                        placeholder={formData.drop_route_id ? "Select Drop Stop" : "Select Route First"}
                                                         disabled={!formData.drop_route_id}
-                                                        options={filteredDropStops.map(s => ({value: s.stop_id, label: `${s.stop_name} (Order: ${s.drop_stop_order})`}))} 
+                                                        options={filteredDropStops.map(s => ({value: s.stop_id, name: s.stop_name, order: s.drop_stop_order}))} 
                                                         error={errors.drop_stop_id}
                                                     />
                                                 </div>
@@ -1258,7 +1432,29 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                     </button>
                 </div>
             </div>
-        </div>
+
+            {/* Add Class Form Popup */}
+            {showAddClassForm && (
+                <AddClassForm
+                    show={showAddClassForm}
+                    onClose={() => setShowAddClassForm(false)}
+                    onAdd={async (newClass) => {
+                        try {
+                            // Refresh classes list
+                            const classesData = await classService.getAllClasses();
+                            setClasses(classesData || []);
+                            // Auto-select the newly created class
+                            if (newClass?.class_id) {
+                                handleChange('class_id', newClass.class_id);
+                                if (errors.class_id) setErrors(prev => ({ ...prev, class_id: null }));
+                            }
+                        } catch (err) {
+                            console.error('Failed to refresh classes:', err);
+                        }
+                    }}
+                />
+            )}
+        </>
     );
 };
 

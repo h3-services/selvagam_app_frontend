@@ -101,11 +101,13 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         setIsSubmitting(true);
         try {
             if (initialData?.class_id) {
-                await classService.updateClass(initialData.class_id, formData);
-                onUpdate();
+                const { class_name, section } = formData;
+                await classService.updateClass(initialData.class_id, { class_name, section });
+                if (onUpdate) await onUpdate();
             } else {
-                await classService.createClass(formData);
-                onAdd();
+                const { class_name, section } = formData;
+                const newClass = await classService.createClass({ class_name, section });
+                if (onAdd) await onAdd(newClass);
             }
             setFormData(defaultState);
             onClose();
@@ -120,15 +122,11 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-            {/* Ambient Backdrop */}
-            <div 
-                className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300" 
-                onClick={onClose} 
-            />
+        <div className="fixed inset-0 z-[200000] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
+            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300" onClick={onClose} />
             
-            {/* Premium Modal Container */}
-            <div className="relative w-full max-w-lg bg-slate-50 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh]">
+            {/* Centered Modal */}
+            <div className="relative w-full max-w-lg bg-slate-50 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[200001] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh]">
                 
                 {/* Scrollable Intelligence Core */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">

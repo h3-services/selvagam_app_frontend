@@ -105,14 +105,11 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-            <div 
-                className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity duration-300" 
-                onClick={onClose} 
-            />
+        <>
+            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-opacity duration-300" onClick={onClose} />
             
-            {/* Modal Container */}
-            <div className="relative w-full max-w-2xl bg-slate-50 rounded-[2.5rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh]">
+            {/* Right Side Drawer */}
+            <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] md:w-[600px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1)">
                 
                 {/* Scrollable Content Area */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
@@ -305,7 +302,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

@@ -119,9 +119,14 @@ const StudentList = ({
         {
             headerName: "Contact",
             field: "emergencyContact",
-            flex: 1.2,
-            minWidth: 150,
-            cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'flex-start', fontWeight: '300', fontSize: '13px' }
+            flex: 1.4,
+            minWidth: 170,
+            cellRenderer: (params) => (
+                <div className="flex flex-col justify-center h-full gap-0.5 py-1">
+                    <span className="text-[12px] font-semibold text-slate-700">{params.data.mobile || 'N/A'}</span>
+                    <span className="text-[11px] font-medium text-slate-400">{params.data.emergencyContact || 'N/A'}</span>
+                </div>
+            )
         },
 
         {

@@ -23,11 +23,11 @@ api.interceptors.request.use(
             config.headers['Content-Type'] = 'application/json';
         }
         
-        // You can add auth headers here if needed, e.g. from localStorage
-        // const token = localStorage.getItem('token');
-        // if (token) {
-        //     config.headers.Authorization = `Bearer ${token}`;
-        // }
+        // Attach Bearer token from localStorage if available
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
     },
     (error) => {
@@ -39,6 +39,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        // If token is expired or invalid, redirect to login
+        if (error.response?.status === 401 && !error.config?.url?.includes('/auth/')) {
+            localStorage.removeItem('access_token');
+            window.location.href = '/login';
+        }
         console.error('API Error:', error);
         return Promise.reject(error);
     }
