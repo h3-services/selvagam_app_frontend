@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faMapLocationDot, faBus, faCircle, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, faCircleNotch, faMars, faVenus, faGripVertical } from '@fortawesome/free-solid-svg-icons';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import { routeService } from '../../services/routeService';
+import { faArrowLeft, faMapLocationDot, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, faCircleNotch, faMars, faVenus, faGripVertical } from '@fortawesome/free-solid-svg-icons';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { studentService } from '../../services/studentService';
 import { classService } from '../../services/classService';
 import { LocationMarker, createStopIcon, createSchoolIcon } from './RouteMapUtils';
@@ -100,6 +99,22 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
         setSelectedPosition(newPos);
         setLocationSearchQuery(display_name);
         setSearchSuggestions([]);
+    };
+
+    const handleManualSearch = async () => {
+        if (locationSearchQuery.length < 2 || isSearchingLocation) return;
+        setIsSearchingLocation(true);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=1`);
+            const data = await response.json();
+            if (data && data.length > 0) {
+                handleSelectSuggestion(data[0]);
+            }
+        } catch (error) {
+            console.error("Manual search error:", error);
+        } finally {
+            setIsSearchingLocation(false);
+        }
     };
 
     // Keep "New Stop" orders synchronized while editing: Next sequential for Pickup, always 1 for Drop
@@ -284,7 +299,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
     };
 
     return (
-        <div className="h-full bg-white lg:rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="h-full bg-white lg:rounded-3xl shadow-2xl overflow-y-auto lg:overflow-hidden flex flex-col scrollbar-hide">
             <div className="relative p-3 sm:p-5 shrink-0" style={{ backgroundColor: '#3A7BFF' }}>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
@@ -356,7 +371,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                         </button>
                     </div>
                 )}
-                <div className="flex flex-col lg:flex-row h-full gap-3 sm:gap-4 overflow-y-auto lg:overflow-hidden">
+                <div className="flex flex-col lg:flex-row lg:h-full gap-3 sm:gap-4 scrollbar-hide">
                     {/* Stops List */}
                     {/* Stops List */}
                     <div className="w-full lg:w-1/3 flex flex-col gap-4 shrink-0 lg:h-full lg:overflow-y-auto custom-scrollbar pr-2">
@@ -566,21 +581,25 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
 
                     </div>
 
-                    {/* Map Container - Moved to top on mobile for better visibility */}
-                    <div className="order-first lg:order-none flex-1 relative rounded-2xl overflow-hidden shadow-inner border border-gray-200 min-h-[300px] sm:min-h-[400px] lg:min-h-0 shrink-0 lg:shrink">
+                    {/* Map Container */}
+                    <div className="order-first lg:order-none flex-1 relative flex flex-col gap-3 min-h-[350px] sm:min-h-[450px] lg:min-h-0 shrink-0 lg:shrink">
                         {isEditing && (
-                            <div className="absolute top-4 left-16 right-4 z-[1000] flex flex-col gap-1">
+                            <div className="w-full z-[1000] flex flex-col gap-1">
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
                                         placeholder="Search location..."
                                         value={locationSearchQuery}
                                         onChange={(e) => setLocationSearchQuery(e.target.value)}
-                                        className="flex-1 px-4 py-2 rounded-xl border border-purple-200 shadow-lg focus:outline-none focus:border-blue-500 text-sm bg-white/90 backdrop-blur-sm"
+                                        onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
+                                        className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white"
                                     />
-                                    <div className="w-10 h-10 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center">
-                                        <FontAwesomeIcon icon={isSearchingLocation ? faSpinner : faSearch} className={isSearchingLocation ? "animate-spin" : ""} />
-                                    </div>
+                                    <button 
+                                        onClick={handleManualSearch}
+                                        className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-md flex items-center justify-center transition-colors border-0"
+                                    >
+                                        <FontAwesomeIcon icon={isSearchingLocation ? faSpinner : faSearch} className={isSearchingLocation ? "animate-spin text-lg" : "text-lg"} />
+                                    </button>
                                 </div>
                                 {/* Suggestions Dropdown */}
                                 {searchSuggestions.length > 0 && (
@@ -598,12 +617,13 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                 )}
                             </div>
                         )}
-                        <MapContainer
-                            center={[12.6083, 80.0528]} 
-                            zoom={11}
-                            style={{ height: '100%', width: '100%' }}
-                            scrollWheelZoom={true}
-                        >
+                        <div className="flex-1 w-full relative rounded-2xl overflow-hidden shadow-inner border border-gray-200">
+                            <MapContainer
+                                center={[12.6083, 80.0528]} 
+                                zoom={11}
+                                style={{ height: '100%', width: '100%', zIndex: 1 }}
+                                scrollWheelZoom={true}
+                            >
                             <TileLayer
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -651,13 +671,11 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                 })
                             }
 
-
-                            {/* Optional Route Line if needed, can connect all points */}
-
                         </MapContainer>
                     </div>
                 </div>
             </div>
+        </div>
 
             {/* Students Modal */}
             {showStudentsModal && (
@@ -735,6 +753,5 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
         </div>
     );
 };
-
 
 export default RouteDetail;

@@ -62,6 +62,22 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
         setSearchSuggestions([]);
     };
 
+    const handleManualSearch = async () => {
+        if (locationSearchQuery.length < 2 || isSearchingLocation) return;
+        setIsSearchingLocation(true);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=1`);
+            const data = await response.json();
+            if (data && data.length > 0) {
+                handleSelectSuggestion(data[0]);
+            }
+        } catch (error) {
+            console.error("Manual search error:", error);
+        } finally {
+            setIsSearchingLocation(false);
+        }
+    };
+
     // Keep "New Stop" orders synchronized: Next sequential for Pickup, always 1 for Drop
     useEffect(() => {
         const nextOrder = (newRoute.stopPoints || []).length + 1;
@@ -215,10 +231,10 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-hidden p-6 sm:p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
+                <div className="flex-1 overflow-y-auto md:overflow-hidden p-4 sm:p-8">
+                    <div className="flex flex-col md:grid md:grid-cols-2 gap-6 sm:gap-8 h-full">
                         {/* Left Column: Map */}
-                        <div className="flex flex-col h-full rounded-2xl overflow-hidden shadow-md border-2 border-blue-100 relative">
+                        <div className="flex flex-col h-[350px] md:h-full rounded-2xl overflow-hidden shadow-md border-2 border-blue-100 relative shrink-0">
                             <div className="absolute top-4 left-16 right-4 z-[1000] flex flex-col gap-1">
                                 <div className="flex gap-2">
                                     <input
@@ -226,11 +242,15 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                         placeholder="Search location..."
                                         value={locationSearchQuery}
                                         onChange={(e) => setLocationSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
                                         className="flex-1 px-4 py-2 rounded-xl border border-purple-200 shadow-lg focus:outline-none focus:border-blue-500 text-sm bg-white/90 backdrop-blur-sm"
                                     />
-                                    <div className="w-10 h-10 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center">
+                                    <button 
+                                        onClick={handleManualSearch}
+                                        className="w-10 h-10 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center border-0 cursor-pointer active:scale-95 transition-transform"
+                                    >
                                         <FontAwesomeIcon icon={isSearchingLocation ? faCircleNotch : faSearch} className={isSearchingLocation ? "animate-spin" : ""} />
-                                    </div>
+                                    </button>
                                 </div>
                                 {/* Suggestions Dropdown */}
                                 {searchSuggestions.length > 0 && (
@@ -304,7 +324,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                         </div>
 
                         {/* Right Column: Details & Stops List */}
-                        <div className="flex flex-col h-full overflow-y-auto pr-2">
+                        <div className="flex flex-col md:h-full md:overflow-y-auto pr-2 pb-10 md:pb-0">
                             {/* Route Details */}
                             <div className="space-y-4 mb-6">
                                 <h4 className="font-bold text-lg text-gray-800 border-b border-blue-100 pb-2 flex items-center gap-2">
