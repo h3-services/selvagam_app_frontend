@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { useState, useMemo, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers, faBus, faWalking, faUserCheck, faUserSlash, faUserTie, faBan } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faClock, faUserPlus, faArrowLeft, faCircleNotch, faUser, faFilter, faChevronDown, faGraduationCap, faCheck, faArchive, faUsers, faBus, faWalking, faUserCheck, faUserSlash, faUserTie, faBan, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { useRef } from 'react';
 import { COLORS } from '../../constants/colors';
 import StudentList from './StudentList';
@@ -26,6 +26,7 @@ const StudentManagementHome = () => {
     const [allRoutes, setAllRoutes] = useState([]);
     const [allStops, setAllStops] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [errorModal, setErrorModal] = useState({ show: false, message: '' });
     const searchQuery = searchParams.get('search') || "";
 
     const handleSearchChange = (value) => {
@@ -323,7 +324,7 @@ const StudentManagementHome = () => {
                 }
             }
             
-            alert(errorMessage);
+            setErrorModal({ show: true, message: errorMessage });
             // Don't close the form - let user fix the errors
         }
     };
@@ -395,7 +396,7 @@ const StudentManagementHome = () => {
             await fetchAllData();
         } catch (error) {
             console.error("Bulk status update failed:", error);
-            alert("Some updates failed. Please refresh and try again.");
+            setErrorModal({ show: true, message: "Some updates failed. Please refresh and try again." });
         } finally {
             setLoading(false);
             setShowBulkParentStatusModal(false);
@@ -416,7 +417,7 @@ const StudentManagementHome = () => {
             await fetchAllData();
         } catch (error) {
             console.error("Bulk transport update failed:", error);
-            alert("Some transport updates failed.");
+            setErrorModal({ show: true, message: "Some transport updates failed." });
         } finally {
             setLoading(false);
         }
@@ -487,7 +488,7 @@ const StudentManagementHome = () => {
                    
                 } catch (err) {
                     console.error("Failed to update parent status", err);
-                    alert("Student updated, but failed to update parent status.");
+                    setErrorModal({ show: true, message: "Student updated, but failed to update parent status." });
                 }
             }
         }
@@ -510,7 +511,7 @@ const StudentManagementHome = () => {
             await fetchAllData(); // Then sync with server
         } catch (error) {
             console.error("Failed to update status:", error);
-            alert("Failed to update student status");
+            setErrorModal({ show: true, message: "Failed to update student status" });
         }
     };
 
@@ -537,7 +538,7 @@ const StudentManagementHome = () => {
             await fetchAllData();
         } catch (error) {
             console.error("Failed to update transport status:", error);
-            alert("Failed to update transport status");
+            setErrorModal({ show: true, message: "Failed to update transport status" });
         }
     };
 
@@ -589,7 +590,7 @@ const StudentManagementHome = () => {
             }
         } catch (error) {
             console.error("Error updating student:", error);
-            alert("Failed to update student: " + (error.response?.data?.detail || error.message));
+            setErrorModal({ show: true, message: "Failed to update student: " + (error.response?.data?.detail || error.message) });
         } finally {
             setLoading(false);
         }
@@ -1033,6 +1034,35 @@ const StudentManagementHome = () => {
                                  </>
                              );
                         })()}
+                    </div>
+                </div>
+            )}
+
+            {/* Error Notification Modal */}
+            {errorModal.show && (
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setErrorModal({ show: false, message: '' })}
+                    />
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
+                                <FontAwesomeIcon icon={faExclamationTriangle} className="text-2xl text-red-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Notification</h3>
+                            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+                                {errorModal.message}
+                            </p>
+                            <div className="flex w-full">
+                                <button
+                                    onClick={() => setErrorModal({ show: false, message: '' })}
+                                    className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

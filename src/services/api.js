@@ -2,9 +2,9 @@ import axios from 'axios';
 
 // Create an axios instance with config from environment variables
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || 'https://api.selvagam.com/api/v1',
+    baseURL: import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, ''),
     headers: {
-        'X-Admin-API-Key': import.meta.env.VITE_ADMIN_API_KEY
+        'x-admin-key': import.meta.env.VITE_ADMIN_API_KEY
     },
 });
 
@@ -12,7 +12,7 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         // Ensure the API Key is injected into every request header
-        config.headers['X-Admin-API-Key'] = import.meta.env.VITE_ADMIN_API_KEY;
+        config.headers['x-admin-key'] = import.meta.env.VITE_ADMIN_API_KEY;
         
         // Handle Content-Type intelligently
         if (config.data instanceof FormData) {

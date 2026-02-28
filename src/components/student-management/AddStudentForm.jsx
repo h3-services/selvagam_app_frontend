@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic, faCircleNotch, faFileUpload, faRoute } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faUserPlus, faUser, faPhone, faChild, faCheck, faUserTie, faCalendar, faSchool, faBus, faMapMarkerAlt, faImage, faWarning, faHome, faEnvelope, faLock, faArrowRight, faSearch, faChevronDown, faMagic, faCircleNotch, faFileUpload, faRoute, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import { routeService } from '../../services/routeService';
 import { parentService } from '../../services/parentService';
@@ -99,7 +99,7 @@ const YearRangePicker = ({ label, start, end, onStartChange, onEndChange }) => {
     );
 };
 
-const FileUploadField = ({ label, icon, onFileSelect, fileName, error }) => (
+const FileUploadField = ({ label, icon, onFileSelect, fileName, error, onError }) => (
     <div className="relative group/field">
         <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
         <div className={`relative flex items-center justify-between bg-slate-50 rounded-2xl border-2 border-dashed transition-all duration-300 p-4 ${error ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200 hover:border-blue-400 hover:bg-white hover:shadow-lg hover:shadow-blue-500/5'}`}>
@@ -128,14 +128,14 @@ const FileUploadField = ({ label, icon, onFileSelect, fileName, error }) => (
                         // Check file size (2MB limit)
                         const maxSize = 2 * 1024 * 1024; // 2MB
                         if (file.size > maxSize) {
-                            alert("File is too large. Please select a photo smaller than 2MB.");
+                            if (onError) onError("File is too large. Please select a photo smaller than 2MB.");
                             e.target.value = ''; // Reset input
                             return;
                         }
 
                         // Check if it's an image
                         if (!file.type.startsWith('image/')) {
-                            alert("Invalid file type. Please select an image (JPG/PNG).");
+                            if (onError) onError("Invalid file type. Please select an image (JPG/PNG).");
                             e.target.value = ''; // Reset input
                             return;
                         }
@@ -448,6 +448,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
     const [loadingSave, setLoadingSave] = useState(false);
     const [photoFile, setPhotoFile] = useState(null);
     const [errors, setErrors] = useState({});
+    const [errorModal, setErrorModal] = useState({ show: false, message: '' });
 
     useEffect(() => {
         if (parents) {
@@ -928,6 +929,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                             icon={faImage} 
                                             onFileSelect={setPhotoFile} 
                                             fileName={photoFile?.name || (formData.student_photo_url ? "Current Photo Saved" : "")} 
+                                            onError={(msg) => setErrorModal({ show: true, message: msg })}
                                         />
                                     </div>
                                 </div>
@@ -1455,6 +1457,35 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                         }
                     }}
                 />
+            )}
+
+            {/* Error Notification Modal */}
+            {errorModal.show && (
+                <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setErrorModal({ show: false, message: '' })}
+                    />
+                    <div className="relative bg-white rounded-3xl shadow-2xl border border-white p-8 w-full max-w-sm animate-in zoom-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
+                                <FontAwesomeIcon icon={faExclamationTriangle} className="text-2xl text-red-600" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Notice</h3>
+                            <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+                                {errorModal.message}
+                            </p>
+                            <div className="flex w-full">
+                                <button
+                                    onClick={() => setErrorModal({ show: false, message: '' })}
+                                    className="flex-1 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-all active:scale-95"
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );

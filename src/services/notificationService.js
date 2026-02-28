@@ -1,6 +1,6 @@
 // Remote backend URL for notifications - targeting the production API v1
-const NOTIFICATION_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://api.selvagam.com/api/v1').replace(/\/$/, '');
-const ADMIN_API_KEY = import.meta.env.VITE_ADMIN_API_KEY || 'selvagam-admin-key-2024';
+const NOTIFICATION_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const ADMIN_API_KEY = import.meta.env.VITE_ADMIN_API_KEY;
 
 /**
  * Specifically broadcasts a notification to ALL parents.
