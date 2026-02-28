@@ -569,7 +569,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                     {/* Map Container - Moved to top on mobile for better visibility */}
                     <div className="order-first lg:order-none flex-1 relative rounded-2xl overflow-hidden shadow-inner border border-gray-200 min-h-[300px] sm:min-h-[400px] lg:min-h-0 shrink-0 lg:shrink">
                         {isEditing && (
-                            <div className="absolute top-4 left-16 right-4 z-[9999] flex flex-col gap-1">
+                            <div className="absolute top-4 left-16 right-4 z-[1000] flex flex-col gap-1">
                                 <div className="flex gap-2">
                                     <input
                                         type="text"

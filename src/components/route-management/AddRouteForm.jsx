@@ -195,14 +195,18 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
         <div className="fixed inset-0 z-[99999]">
             <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md" onClick={onClose}></div>
             <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-blue-50 to-white shadow-2xl z-[100000] flex flex-col transition-all">
-                <div className="relative p-6 sm:p-8 border-b border-blue-100 flex-shrink-0">
-                    <button
-                        onClick={onClose}
-                        className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full hover:bg-blue-100 transition"
-                        style={{ color: COLORS.SIDEBAR_BG }}
+                
+                {/* Static Action Buttons */}
+                <div className="absolute top-6 right-8 z-[100010] flex items-center gap-3">
+                    <button 
+                        onClick={onClose} 
+                        className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
                     >
-                        <FontAwesomeIcon icon={faTimes} className="text-xl" />
+                        <FontAwesomeIcon icon={faTimes} className="text-lg" />
                     </button>
+                </div>
+
+                <div className="relative p-6 sm:p-8 border-b border-blue-100 flex-shrink-0">
                     <div className="flex items-center gap-4 ml-1">
                         <div>
                             <h3 className="font-bold text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add New Route</h3>
@@ -215,7 +219,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
                         {/* Left Column: Map */}
                         <div className="flex flex-col h-full rounded-2xl overflow-hidden shadow-md border-2 border-blue-100 relative">
-                            <div className="absolute top-4 left-16 right-4 z-[20] flex flex-col gap-1">
+                            <div className="absolute top-4 left-16 right-4 z-[1000] flex flex-col gap-1">
                                 <div className="flex gap-2">
                                     <input
                                         type="text"

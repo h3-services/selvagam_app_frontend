@@ -111,6 +111,26 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
             {/* Right Side Drawer */}
             <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] md:w-[600px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1)">
                 
+                
+                {/* Static Action Buttons (Close / Auto Fill) */}
+                <div className="absolute top-6 right-6 sm:right-8 z-[100010] flex items-center gap-3">
+                    <button 
+                        type="button" 
+                        onClick={handleAutoFill}
+                        className="w-10 h-10 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-blue-600 hover:text-white hover:border-blue-600 hover:bg-blue-600 transition-all duration-300 shadow-sm active:scale-90"
+                        title="Auto Fill"
+                    >
+                        <FontAwesomeIcon icon={faMagic} className="text-sm" />
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={onClose} 
+                        className="w-10 h-10 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
+                    >
+                        <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                    </button>
+                </div>
+
                 {/* Scrollable Content Area */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
                     {/* Premium Header */}
@@ -126,24 +146,7 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                     <h3 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-none mb-1 sm:mb-1.5">{initialData ? 'Edit Parent' : 'Add Parent'}</h3>
                                 </div>
                             </div>
-                        
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <button 
-                                type="button" 
-                                onClick={handleAutoFill}
-                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition-all active:scale-90"
-                            >
-                                <FontAwesomeIcon icon={faMagic} className="text-xs sm:text-sm" />
-                            </button>
-                            <button 
-                                type="button"
-                                onClick={onClose} 
-                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all active:scale-90"
-                            >
-                                <FontAwesomeIcon icon={faTimes} className="text-base sm:text-lg" />
-                            </button>
                         </div>
-                    </div>
 
                     {/* Form Layout */}
                     <div className="px-8 pb-8 space-y-8">

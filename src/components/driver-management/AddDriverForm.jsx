@@ -48,7 +48,7 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
 const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
     const [newDriver, setNewDriver] = useState({
         name: '', phone: '', email: '', licence_number: '',
-        licence_expiry: '', fcm_token: 'string', password: ''
+        licence_expiry: '', fcm_token: 'string', photo_url: 'string'
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,14 +60,13 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                 setNewDriver({
                     ...initialData,
                     phone: String(initialData.phone || initialData.mobile || ''),
-                    licence_number: initialData.licence_number || initialData.licenseNumber || '',
-                    password: '' // Keep password empty on edit unless changed
+                    licence_number: initialData.licence_number || initialData.licenseNumber || ''
                 });
             } else {
                 // Reset form when opening for "Add"
                 setNewDriver({
                     name: '', phone: '', email: '', licence_number: '',
-                    licence_expiry: '', fcm_token: 'string', password: ''
+                    licence_expiry: '', fcm_token: 'string', photo_url: 'string'
                 });
             }
             setTouched({});
@@ -80,9 +79,6 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         if (values.email?.trim() && !/\S+@\S+\.\S+/.test(values.email)) errors.email = "Invalid";
         if (!values.phone) errors.phone = "Required";
         else if (values.phone.length !== 10) errors.phone = "10 Digits";
-        
-        // Password only required for new enrollment
-        if (!initialData && !values.password) errors.password = "Required";
         
         if (!values.licence_number?.trim()) errors.licence_number = "Required";
         if (!values.licence_expiry) errors.licence_expiry = "Required";
@@ -108,14 +104,19 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                     });
                 } else {
                     await onAdd({
-                        ...newDriver,
-                        phone: Number(newDriver.phone)
+                        name: newDriver.name,
+                        phone: Number(newDriver.phone),
+                        email: newDriver.email,
+                        licence_number: newDriver.licence_number,
+                        licence_expiry: newDriver.licence_expiry,
+                        photo_url: newDriver.photo_url || "string",
+                        fcm_token: newDriver.fcm_token || "string"
                     });
                 }
                 onClose();
                 setNewDriver({
                     name: '', phone: '', email: '', licence_number: '',
-                    licence_expiry: '', fcm_token: 'string', password: ''
+                    licence_expiry: '', fcm_token: 'string', photo_url: 'string'
                 });
                 setTouched({});
             } catch (error) {
@@ -150,7 +151,7 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
             licence_number: `DL-${randomNum}-IND`,
             licence_expiry: futureDate.toISOString().split('T')[0],
             fcm_token: `fcm_token_${randomNum}`,
-            password: 'AuthPassword2024'
+            photo_url: 'string'
         });
         const allTouched = Object.keys(newDriver).reduce((acc, key) => ({ ...acc, [key]: true }), {});
         setTouched(allTouched);
@@ -164,6 +165,23 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
             
             <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-2xl z-[100000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
                 
+                {/* Static Action Buttons (Close / Auto Fill) */}
+                <div className="absolute top-6 right-8 z-[100010] flex items-center gap-3">
+                    <button 
+                        onClick={handleAutoFill}
+                        className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-blue-600 hover:text-white hover:border-blue-600 hover:bg-blue-600 transition-all duration-300 shadow-sm active:scale-90"
+                        title="Auto Fill"
+                    >
+                        <FontAwesomeIcon icon={faMagic} className="text-lg" />
+                    </button>
+                    <button 
+                        onClick={onClose} 
+                        className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
+                    >
+                        <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                    </button>
+                </div>
+
                 {/* Header Substrate */}
                 <div className="relative px-8 py-8 bg-slate-50 flex justify-between items-center z-10">
                     <div className="flex items-center gap-6">
@@ -183,22 +201,7 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <button 
-                            onClick={handleAutoFill}
-                            className="h-12 px-6 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center text-blue-600 font-black text-[10px] uppercase tracking-widest gap-2.5 transition-all active:scale-95 shadow-sm"
-                        >
-                            <FontAwesomeIcon icon={faMagic} className="opacity-70" /> 
-                            <span>Auto Fill</span>
-                        </button>
-                        <button 
-                            onClick={onClose} 
-                            className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
-                        >
-                            <FontAwesomeIcon icon={faTimes} className="text-lg" />
-                        </button>
                     </div>
-                </div>
 
                 {/* Form Environment */}
                 <div className="flex-1 overflow-y-auto px-8 pb-32 space-y-8 custom-scrollbar">
@@ -222,10 +225,6 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                 <InputField label="Contact Number" icon={faPhone} value={newDriver.phone} onChange={(e) => updateField('phone', e.target.value)} type="tel" maxLength={10} placeholder="10-Digit Mobile" error={touched.phone && errors.phone} />
                                 <InputField label="Email Address" icon={faEnvelope} value={newDriver.email} onChange={(e) => updateField('email', e.target.value)} type="email" placeholder="user@example.com" error={touched.email && errors.email} />
                             </div>
-                            
-                            {!initialData && (
-                                <InputField label="Password" icon={faLock} value={newDriver.password} onChange={(e) => updateField('password', e.target.value)} type="password" placeholder="Password" error={touched.password && errors.password} />
-                            )}
                         </div>
                     </div>
 

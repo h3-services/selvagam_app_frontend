@@ -348,6 +348,34 @@ const BusList = ({
                                     );
                                 }
                             },
+                            {
+                                headerName: "Actions",
+                                field: "actions",
+                                flex: 0.8,
+                                minWidth: 100,
+                                cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
+                                cellRenderer: (params) => {
+                                    const { handleDelete } = params.context;
+                                    const isScrap = (params.data.status || '').toUpperCase() === 'SCRAP';
+                                    
+                                    if (isScrap) return null;
+
+                                    return (
+                                        <div className="flex items-center justify-center w-full h-full">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(params.data.id);
+                                                }}
+                                                className="w-10 h-10 rounded-2xl bg-rose-50 border border-transparent hover:border-rose-100 hover:bg-rose-100 hover:shadow-lg hover:shadow-rose-100 flex items-center justify-center text-rose-500 hover:text-rose-600 transition-all duration-300 shadow-sm active:scale-90 group/btn"
+                                                title="Move to Scrap"
+                                            >
+                                                <FontAwesomeIcon icon={faTrash} className="text-[13px] group-hover/btn:scale-110 group-active/btn:scale-95 transition-transform" />
+                                            </button>
+                                        </div>
+                                    );
+                                }
+                            }
                         ]}
                         context={{ activeMenuId, setActiveMenuId, drivers, routes, handleDriverChange, handleStatusChange, handleRouteChange, handleDelete }}
                         rowSelection={{ 

@@ -128,6 +128,25 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
             {/* Centered Modal */}
             <div className="relative w-full max-w-lg bg-slate-50 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[200001] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh]">
                 
+                {/* Static Action Buttons (Close / Auto Fill) */}
+                <div className="absolute top-6 right-6 z-50 flex items-center gap-2">
+                    <button 
+                        type="button" 
+                        onClick={handleAutoFill}
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/80 backdrop-blur border border-slate-200 shadow-sm text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center transition-all active:scale-90"
+                        title="Auto-Pilot Generation"
+                    >
+                        <FontAwesomeIcon icon={faMagic} className="text-sm" />
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={onClose} 
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/80 backdrop-blur border border-slate-200 shadow-sm text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all active:scale-90"
+                    >
+                        <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                    </button>
+                </div>
+
                 {/* Scrollable Intelligence Core */}
                 <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
                     
@@ -149,24 +168,6 @@ const AddClassForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                                     <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Class Details</p>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-3">
-                            <button 
-                                type="button" 
-                                onClick={handleAutoFill}
-                                className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center transition-all active:scale-90"
-                                title="Auto-Pilot Generation"
-                            >
-                                <FontAwesomeIcon icon={faMagic} className="text-sm" />
-                            </button>
-                            <button 
-                                type="button"
-                                onClick={onClose} 
-                                className="w-10 h-10 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-400 hover:text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all active:scale-90"
-                            >
-                                <FontAwesomeIcon icon={faTimes} className="text-lg" />
-                            </button>
                         </div>
                     </div>
 

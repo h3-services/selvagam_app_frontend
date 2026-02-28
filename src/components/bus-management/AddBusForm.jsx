@@ -235,6 +235,23 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
             
             <div className="fixed right-0 top-0 h-full w-full md:w-[600px] bg-slate-50 shadow-2xl z-[100000] flex flex-col transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)">
                 
+                {/* Static Action Buttons (Close / Auto Pilot) */}
+                <div className="absolute top-6 right-8 z-[100010] flex items-center gap-3">
+                    <button 
+                        onClick={handleAutoFill}
+                        className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-blue-600 hover:text-white hover:border-blue-600 hover:bg-blue-600 transition-all duration-300 shadow-sm active:scale-90"
+                        title="Auto Pilot"
+                    >
+                        <FontAwesomeIcon icon={faMagic} className="text-lg" />
+                    </button>
+                    <button 
+                        onClick={handleClose} 
+                        className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
+                    >
+                        <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                    </button>
+                </div>
+
                 {/* Header Substrate - Now Sticky */}
                 <div className="sticky top-0 px-8 py-7 bg-slate-50/80 backdrop-blur-xl flex justify-between items-center z-30 border-b border-slate-100/50">
                     <div className="flex items-center gap-6">
@@ -247,21 +264,6 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                         <div>
                             <h3 className="font-black text-2xl text-slate-900 tracking-tight leading-none mb-1.5">{editingBus ? 'Update Details' : 'Add New Bus'}</h3>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <button 
-                            onClick={handleAutoFill}
-                            className="h-12 px-6 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center text-blue-600 font-black text-[10px] uppercase tracking-widest gap-2.5 transition-all active:scale-95 shadow-sm"
-                        >
-                            <FontAwesomeIcon icon={faMagic} className="opacity-70" /> 
-                            <span>Auto Pilot</span>
-                        </button>
-                        <button 
-                            onClick={handleClose} 
-                            className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
-                        >
-                            <FontAwesomeIcon icon={faTimes} className="text-lg" />
-                        </button>
                     </div>
                 </div>
 

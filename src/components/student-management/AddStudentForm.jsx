@@ -777,6 +777,14 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                 (isAddingNewParent || isSearchingParent) ? 'w-full lg:w-[1300px]' : 'w-full md:w-[600px]'
             }`}>
                 
+                {/* Static Close Button */}
+                <button 
+                    onClick={handleClose} 
+                    className="absolute top-6 right-8 z-[100010] w-12 h-12 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
+                >
+                    <FontAwesomeIcon icon={faTimes} className="text-lg" />
+                </button>
+
 
                 {/* Main Scrollable Content */}
                 <div className="flex-1 overflow-hidden relative">
@@ -813,12 +821,6 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                     >
                                         <FontAwesomeIcon icon={faMagic} className="opacity-70" /> 
                                         <span>Auto Fill</span>
-                                    </button>
-                                    <button 
-                                        onClick={handleClose} 
-                                        className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
-                                    >
-                                        <FontAwesomeIcon icon={faTimes} className="text-lg" />
                                     </button>
                                 </div>
                             </div>
