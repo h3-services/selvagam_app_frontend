@@ -1,0 +1,5 @@
+{
+    "zeroDrop.preferredBranch": "main",
+    "zeroDrop.pullFromBranch": "main",
+    "javascript.autoClosingTags": false
+}
