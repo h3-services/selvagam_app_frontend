@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faMapLocationDot, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, faCircleNotch, faMars, faVenus, faGripVertical } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faMapLocationDot, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, faCircleNotch, faMars, faVenus, faGripVertical, faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { studentService } from '../../services/studentService';
 import { classService } from '../../services/classService';
@@ -28,6 +28,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
     const [dragOverItem, setDragOverItem] = useState(null);
     const [dragType, setDragType] = useState(null); // 'pickup' or 'drop'
     const [activeOrderTab, setActiveOrderTab] = useState('pickup'); // 'pickup' | 'drop'
+    const [isLocating, setIsLocating] = useState(false);
 
     const handleViewStudents = async () => {
         setShowStudentsModal(true);
@@ -115,6 +116,44 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
         } finally {
             setIsSearchingLocation(false);
         }
+    };
+
+    const handleDetectLocation = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                const newPos = { lat: latitude, lng: longitude };
+                setSelectedPosition(newPos);
+                
+                // Try to get address for the coordinates
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const data = await response.json();
+                    if (data && data.display_name) {
+                        setLocationSearchQuery(data.display_name);
+                    } else {
+                        setLocationSearchQuery(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                    }
+                } catch (error) {
+                    console.error("Error fetching address:", error);
+                    setLocationSearchQuery(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+                } finally {
+                    setIsLocating(false);
+                }
+            },
+            (error) => {
+                console.error("Error detecting location:", error);
+                setIsLocating(false);
+                alert("Could not detect your location. Please check your browser permissions.");
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        );
     };
 
     // Keep "New Stop" orders synchronized while editing: Next sequential for Pickup, always 1 for Drop
@@ -597,8 +636,17 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                     <button 
                                         onClick={handleManualSearch}
                                         className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-md flex items-center justify-center transition-colors border-0"
+                                        title="Search Location"
                                     >
                                         <FontAwesomeIcon icon={isSearchingLocation ? faSpinner : faSearch} className={isSearchingLocation ? "animate-spin text-lg" : "text-lg"} />
+                                    </button>
+                                    <button 
+                                        onClick={handleDetectLocation}
+                                        className="w-12 h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-md flex items-center justify-center transition-colors border-0"
+                                        title="Detect My Location"
+                                        type="button"
+                                    >
+                                        <FontAwesomeIcon icon={isLocating ? faCircleNotch : faLocationCrosshairs} className={isLocating ? "animate-spin text-lg" : "text-lg"} />
                                     </button>
                                 </div>
                                 {/* Suggestions Dropdown */}
