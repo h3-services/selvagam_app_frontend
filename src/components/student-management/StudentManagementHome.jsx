@@ -687,8 +687,8 @@ const StudentManagementHome = () => {
             )}
 
             {/* Grid Content */}
-            <div className="flex-1 px-2 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col w-full">
-                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
+            <div className="flex-1 px-2 lg:px-8 pt-2 pb-2 lg:pt-4 lg:pb-4 overflow-hidden flex flex-col w-full h-full">
+                <div className="flex-1 flex flex-col min-h-0 h-full lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
@@ -851,7 +851,7 @@ const StudentManagementHome = () => {
             {!showForm && !selectedStudent && (
                 <button
                     onClick={() => navigate('/students/add')}
-                    className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center z-40"
+                    className="fixed bottom-24 right-6 sm:bottom-32 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
                     <FontAwesomeIcon icon={faUserPlus} className="text-xl sm:text-2xl" />

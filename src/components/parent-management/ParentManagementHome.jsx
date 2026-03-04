@@ -449,7 +449,7 @@ const ParentManagementHome = () => {
             {!showForm && !showBulkMenu && (
                 <button
                     onClick={() => navigate('/parents/add')}
-                    className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-[24px] shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-40"
+                    className="fixed bottom-24 right-6 sm:bottom-32 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-[24px] shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-40"
                     style={{ backgroundColor: COLORS.SIDEBAR_BG }}
                 >
                     <FontAwesomeIcon icon={faUserPlus} className="text-xl sm:text-2xl" />

@@ -174,7 +174,7 @@ const ClassManagementHome = () => {
             {/* Floating Action Button */}
             <button
                 onClick={() => navigate('/classes/add')}
-                className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
+                className="fixed bottom-24 right-6 sm:bottom-32 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"
                 style={{ backgroundColor: COLORS.SIDEBAR_BG }}
             >
                 <FontAwesomeIcon icon={faPlus} className="text-xl sm:text-2xl" />

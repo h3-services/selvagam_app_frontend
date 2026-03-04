@@ -36,7 +36,7 @@ const DriverList = ({
             {/* Unified Table View for All Screen Sizes */}
             <div className="flex flex-col flex-1 overflow-hidden p-0 w-full">
                 <div className="ag-theme-quartz w-full custom-ag-grid flex-1 overflow-hidden" style={{
-                    height: 'calc(100vh - 165px)',
+                    height: '100%',
                     '--ag-header-background-color': '#f0f4ff',
                     '--ag-header-foreground-color': '#3b82f6',
                     '--ag-font-family': 'inherit',

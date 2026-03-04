@@ -166,7 +166,7 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
     return (
         <div className="flex flex-col flex-1 bg-white rounded-none shadow-none overflow-hidden p-0 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 mobile-full-width-table">
             <div className="ag-theme-quartz w-full custom-ag-grid overflow-hidden" style={{
-                height: 'calc(100vh - 165px)',
+                height: '100%',
                 '--ag-header-background-color': '#f0f4ff',
                 '--ag-header-foreground-color': '#3b82f6',
                 '--ag-font-family': 'inherit',
