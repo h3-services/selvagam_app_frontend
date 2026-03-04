@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faArrowLeft, faTrash, faMapLocationDot, faCircleNotch, faArchive, faRoute, faUndo, faCheck, faChevronDown, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faArrowLeft, faTrash, faMapLocationDot, faCircleNotch, faArchive, faRoute, faUndo, faCheck, faChevronDown, faUsers, faClone, faCopy } from '@fortawesome/free-solid-svg-icons';
 import { COLORS } from '../../constants/colors';
 import RouteList from './RouteList';
 import RouteDetail from './RouteDetail';
@@ -170,6 +170,27 @@ const RouteManagementHome = () => {
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
+    const [duplicateData, setDuplicateData] = useState(null);
+
+    const handleDuplicateRoute = (route) => {
+        const baseRoute = {
+            routeName: `${route.routeName} (Copy)`,
+            distance: route.distance,
+            assignedBus: route.assignedBus,
+            stopPoints: [...(route.stopPoints || [])]
+                .sort((a, b) => (a.pickupOrder || 0) - (b.pickupOrder || 0))
+                .map((s, i) => ({
+                    ...s,
+                    id: null,
+                    pickupOrder: i + 1,
+                    dropOrder: i + 1
+                })),
+            stops: route.stops,
+            coordinates: route.coordinates
+        };
+        setDuplicateData(baseRoute);
+        navigate('/routes/add');
+    };
 
     const handleViewDetail = (route) => {
         navigate(`/routes/${route.id}/detail`);
@@ -303,8 +324,8 @@ const RouteManagementHome = () => {
                         stop_name: stopName,
                         latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                         longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
-                        pickup_stop_order: stop.pickupOrder !== undefined ? parseInt(stop.pickupOrder) : (index + 1),
-                        drop_stop_order: stop.dropOrder !== undefined ? parseInt(stop.dropOrder) : (index + 1)
+                        pickup_stop_order: index + 1,
+                        drop_stop_order: index + 1
                     };
                     console.log(`📦 [CREATE STOP ${index + 1}] Payload:`, JSON.stringify(stopData, null, 2));
                     const createdStop = await routeService.createRouteStop(stopData);
@@ -469,14 +490,31 @@ const RouteManagementHome = () => {
         }
     };
 
-    const handleReorderStop = async (stopId, newOrderData) => {
+    const handleReorderStop = async (updatedStops) => {
         try {
-            console.log(`🔄 [REORDER STOP] Live update for stop ${stopId}:`, JSON.stringify(newOrderData, null, 2));
-            await routeService.updateRouteStop(stopId, newOrderData);
+            setIsSaving(true);
+            console.log(`🔄 [REORDER STOPS] Updating entire sequence:`, updatedStops.length, "stops");
+            
+            // Loop through all stops and update their orders sequentially
+            for (const stop of updatedStops) {
+                const stopPayload = {
+                    stop_name: (stop.name || '').trim(),
+                    latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
+                    longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
+                    pickup_stop_order: stop.pickupOrder || 1,
+                    drop_stop_order: stop.dropOrder || 1
+                };
+                
+                await routeService.updateRouteStop(stop.id, stopPayload);
+            }
+            
             // Refresh all data to get the new shifted order from backend
             await fetchAllData();
+            console.log("✅ [REORDER STOPS] Done");
         } catch (error) {
-            console.error("Failed to live reorder stop:", error);
+            console.error("Failed to live reorder stops:", error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -552,6 +590,7 @@ const RouteManagementHome = () => {
                             onUpdate={handleUpdate}
                             onReorderStop={handleReorderStop}
                             onDelete={handleDelete}
+                            onDuplicate={handleDuplicateRoute}
                             isSaving={isSaving}
                         />
                     ) : (
@@ -582,11 +621,12 @@ const RouteManagementHome = () => {
 
             <AddRouteForm
                 show={isAddPath}
-                onClose={() => navigate('/routes')}
+                onClose={() => { navigate('/routes'); setDuplicateData(null); }}
                 onAdd={handleAdd}
                 schoolLocations={schoolLocations}
                 availableBuses={activeBuses}
                 isSaving={isSaving}
+                initialData={duplicateData}
             />
 
             <BusReassignModal

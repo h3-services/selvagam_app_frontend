@@ -1,16 +1,27 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faMapLocationDot, faSearch, faCircleNotch, faChevronDown, faRoute, faLocationDot, faPlus, faBus, faGripVertical, faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { faTimes, faMapLocationDot, faSearch, faCircleNotch, faChevronDown, faRoute, faLocationDot, faPlus, faBus, faGripVertical, faLocationCrosshairs, faExchangeAlt } from '@fortawesome/free-solid-svg-icons';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, ZoomControl } from 'react-leaflet';
 import { COLORS } from '../../constants/colors';
 import { LocationMarker, createSchoolIcon, createStopIcon } from './RouteMapUtils';
 
-const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBuses = [], isSaving }) => {
+const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBuses = [], isSaving, initialData }) => {
     // Default fallback campus if array is empty
     const defaultCampus = { id: 0, name: 'Default Campus', lat: 12.6083, lng: 80.0528 };
     const initialCampusId = schoolLocations.length > 0 ? schoolLocations[0].id : defaultCampus.id;
 
     const [newRoute, setNewRoute] = useState({ routeName: '', distance: '', assignedBus: '', stops: 0, stopPoints: [] });
+
+    // Pre-fill form if initialData is provided (e.g., Duplication)
+    useEffect(() => {
+        if (show) {
+            if (initialData) {
+                setNewRoute(initialData);
+            } else {
+                setNewRoute({ routeName: '', distance: '', assignedBus: '', stops: 0, stopPoints: [] });
+            }
+        }
+    }, [show, initialData]);
     const [currentStopName, setCurrentStopName] = useState('');
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [locationSearchQuery, setLocationSearchQuery] = useState('');
@@ -40,7 +51,11 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
             if (locationSearchQuery.length > 2) {
                 setIsSearchingLocation(true);
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=5`);
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=5&accept-language=en`, {
+                        headers: {
+                            'Accept-Language': 'en-US,en;q=0.9',
+                        }
+                    });
                     const data = await response.json();
                     setSearchSuggestions(data);
                 } catch (error) {
@@ -68,7 +83,11 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
         if (locationSearchQuery.length < 2 || isSearchingLocation) return;
         setIsSearchingLocation(true);
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=1`);
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=1&accept-language=en`, {
+                headers: {
+                    'Accept-Language': 'en-US,en;q=0.9',
+                }
+            });
             const data = await response.json();
             if (data && data.length > 0) {
                 handleSelectSuggestion(data[0]);
@@ -95,7 +114,11 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                 
                 // Try to get address for the coordinates
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`, {
+                        headers: {
+                            'Accept-Language': 'en-US,en;q=0.9',
+                        }
+                    });
                     const data = await response.json();
                     if (data && data.display_name) {
                         setLocationSearchQuery(data.display_name);
@@ -215,6 +238,28 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
         setDragType(null);
     };
 
+    const handleReverseNewRouteOrder = (type) => { // 'pickup' or 'drop'
+        const currentData = [...(newRoute.stopPoints || [])];
+        if (currentData.length < 2) return;
+
+        // Sort by current order first, then reverse
+        const sorted = currentData.sort((a, b) => {
+            const valA = type === 'pickup' ? (a.pickupOrder || 0) : (a.dropOrder || 0);
+            const valB = type === 'pickup' ? (b.pickupOrder || 0) : (b.dropOrder || 0);
+            return valA - valB;
+        });
+
+        const reversed = sorted.reverse();
+        
+        // Map new sequential orders
+        const finalStops = reversed.map((stop, index) => ({
+            ...stop,
+            [type === 'pickup' ? 'pickupOrder' : 'dropOrder']: index + 1
+        }));
+
+        setNewRoute(prev => ({ ...prev, stopPoints: finalStops }));
+    };
+
     const handleAddRoute = () => {
         if (localSaving || isSaving) return;
         const defaultCampus = { id: 0, name: 'Default Campus', lat: 12.6083, lng: 80.0528 };
@@ -274,43 +319,46 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                 <div className="flex-1 overflow-y-auto md:overflow-hidden p-4 sm:p-8">
                     <div className="flex flex-col md:grid md:grid-cols-2 gap-6 sm:gap-8 h-full">
                         {/* Left Column: Map */}
-                        <div className="flex flex-col h-[350px] md:h-full rounded-2xl overflow-hidden shadow-md border-2 border-blue-100 relative shrink-0">
-                            <div className="absolute top-4 left-16 right-4 z-[1000] flex flex-col gap-1">
+                        <div className="flex flex-col h-[550px] md:h-full rounded-2xl overflow-hidden shadow-md border-2 border-blue-100 relative shrink-0">
+                            <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col gap-1">
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
-                                        placeholder="Search location..."
+                                        placeholder="Search for a location..."
                                         value={locationSearchQuery}
                                         onChange={(e) => setLocationSearchQuery(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
-                                        className="flex-1 px-4 py-2 rounded-xl border border-purple-200 shadow-lg focus:outline-none focus:border-blue-500 text-sm bg-white/90 backdrop-blur-sm"
+                                        className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white/95 backdrop-blur-sm min-w-0"
+                                        title={locationSearchQuery}
                                     />
                                     <button 
                                         onClick={handleManualSearch}
-                                        className="w-10 h-10 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center border-0 cursor-pointer active:scale-95 transition-transform"
+                                        className="w-11 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg flex items-center justify-center transition-all hover:scale-105 border-0 shrink-0"
                                         title="Search Location"
                                     >
-                                        <FontAwesomeIcon icon={isSearchingLocation ? faCircleNotch : faSearch} className={isSearchingLocation ? "animate-spin" : ""} />
+                                        <FontAwesomeIcon icon={isSearchingLocation ? faCircleNotch : faSearch} className={isSearchingLocation ? "animate-spin text-[16px]" : "text-[16px]"} />
                                     </button>
                                     <button 
                                         onClick={handleDetectLocation}
-                                        className="w-10 h-10 bg-emerald-600 text-white rounded-xl shadow-lg flex items-center justify-center border-0 cursor-pointer active:scale-95 transition-transform"
+                                        className="w-11 h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-lg flex items-center justify-center transition-all hover:scale-105 border-0 shrink-0"
                                         title="Detect My Location"
                                         type="button"
                                     >
-                                        <FontAwesomeIcon icon={isLocating ? faCircleNotch : faLocationCrosshairs} className={isLocating ? "animate-spin" : ""} />
+                                        <FontAwesomeIcon icon={isLocating ? faCircleNotch : faLocationCrosshairs} className={isLocating ? "animate-spin text-[16px]" : "text-[16px]"} />
                                     </button>
                                 </div>
                                 {/* Suggestions Dropdown */}
                                 {searchSuggestions.length > 0 && (
-                                    <div className="bg-white rounded-xl shadow-xl border border-blue-100 overflow-hidden max-h-48 overflow-y-auto">
+                                    <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-blue-50 overflow-hidden max-h-60 mt-1 overflow-y-auto">
                                         {searchSuggestions.map((suggestion, idx) => (
                                             <div
                                                 key={idx}
                                                 onClick={() => handleSelectSuggestion(suggestion)}
-                                                className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 truncate"
+                                                className="px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors flex flex-col gap-0.5"
+                                                title={suggestion.display_name}
                                             >
-                                                {suggestion.display_name}
+                                                <span className="font-medium truncate">{suggestion.display_name.split(',')[0]}</span>
+                                                <span className="text-[10px] text-gray-400 truncate uppercase tracking-tight">{suggestion.display_name.split(',').slice(1).join(',')}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -325,7 +373,9 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                 key={selectedCampus}
                                 style={{ height: '100%', width: '100%' }}
                                 scrollWheelZoom={true}
+                                zoomControl={false}
                             >
+                                <ZoomControl position="bottomright" />
                                 <TileLayer
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -490,9 +540,10 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                             placeholder={selectedPosition ? "Enter stop name..." : "Select location on map ->"}
                                             value={currentStopName}
                                             onChange={(e) => setCurrentStopName(e.target.value)}
-                                            className="flex-1 bg-white border border-blue-100 rounded-xl px-4 py-3 text-sm font-medium focus:border-blue-400 focus:outline-none transition shadow-sm"
+                                            className="flex-1 bg-white border border-blue-100 rounded-xl px-4 py-3 text-sm font-medium focus:border-blue-400 focus:outline-none transition shadow-sm min-w-0"
                                             onKeyDown={(e) => e.key === 'Enter' && handleAddStop()}
                                             disabled={!selectedPosition}
+                                            title={currentStopName}
                                         />
                                         <button
                                             onClick={handleAddStop}
@@ -510,7 +561,17 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                 <div className="flex-1 overflow-y-auto min-h-[150px] flex flex-col gap-4">
                                     {/* Pickup Order Card */}
                                     <div className="bg-blue-50/50 rounded-xl p-3 border border-blue-100 flex flex-col shadow-sm">
-                                        <h5 className="text-[11px] font-bold text-blue-600 uppercase tracking-widest mb-3">Pickup Sequence</h5>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h5 className="text-[11px] font-bold text-blue-600 uppercase tracking-widest">Pickup Sequence</h5>
+                                            <button 
+                                                onClick={() => handleReverseNewRouteOrder('pickup')}
+                                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-white text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white transition-all active:scale-95"
+                                                title="Reverse Pickup Sequence"
+                                            >
+                                                <FontAwesomeIcon icon={faExchangeAlt} className="rotate-90" />
+                                                Reverse
+                                            </button>
+                                        </div>
                                         {newRoute.stopPoints && newRoute.stopPoints.length > 0 ? (
                                             <div className="space-y-2">
                                                 {newRoute.stopPoints
@@ -556,7 +617,17 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
 
                                     {/* Drop Order Card */}
                                     <div className="bg-purple-50/50 rounded-xl p-3 border border-purple-100 flex flex-col shadow-sm mb-4">
-                                        <h5 className="text-[11px] font-bold text-purple-600 uppercase tracking-widest mb-3">Drop Sequence</h5>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h5 className="text-[11px] font-bold text-purple-600 uppercase tracking-widest">Drop Sequence</h5>
+                                            <button 
+                                                onClick={() => handleReverseNewRouteOrder('drop')}
+                                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-white text-purple-600 border border-purple-100 hover:bg-purple-600 hover:text-white transition-all active:scale-95"
+                                                title="Reverse Drop Sequence"
+                                            >
+                                                <FontAwesomeIcon icon={faExchangeAlt} className="rotate-90" />
+                                                Reverse
+                                            </button>
+                                        </div>
                                         {newRoute.stopPoints && newRoute.stopPoints.length > 0 ? (
                                             <div className="space-y-2">
                                                 {newRoute.stopPoints

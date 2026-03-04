@@ -219,12 +219,20 @@ const ParentList = ({
                         overlayNoRowsTemplate='<span class="p-4 font-light uppercase text-xs tracking-widest text-gray-300">No parents found</span>'
                         onGridReady={(params) => {
                             if (window.innerWidth >= 1024) {
-                                params.api.sizeColumnsToFit();
+                                setTimeout(() => {
+                                    if (params.api && params.api.getHorizontalPixelRange().right > 0) {
+                                        params.api.sizeColumnsToFit();
+                                    }
+                                }, 0);
                             }
                         }}
                         onGridSizeChanged={(params) => {
                             if (window.innerWidth >= 1024) {
-                                params.api.sizeColumnsToFit();
+                                setTimeout(() => {
+                                    if (params.api && params.api.getHorizontalPixelRange().right > 0) {
+                                        params.api.sizeColumnsToFit();
+                                    }
+                                }, 0);
                             }
                         }}
                     />

@@ -262,12 +262,20 @@ const StudentList = ({
                             }}
                             onGridReady={(params) => {
                                 if (window.innerWidth >= 1024) {
-                                    params.api.sizeColumnsToFit();
+                                    setTimeout(() => {
+                                        if (params.api && params.api.getHorizontalPixelRange().right > 0) {
+                                            params.api.sizeColumnsToFit();
+                                        }
+                                    }, 0);
                                 }
                             }}
                             onGridSizeChanged={(params) => {
                                 if (window.innerWidth >= 1024) {
-                                    params.api.sizeColumnsToFit();
+                                    setTimeout(() => {
+                                        if (params.api && params.api.getHorizontalPixelRange().right > 0) {
+                                            params.api.sizeColumnsToFit();
+                                        }
+                                    }, 0);
                                 }
                             }}
                             defaultColDef={{

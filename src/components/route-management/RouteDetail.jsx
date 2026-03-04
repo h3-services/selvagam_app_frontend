@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faMapLocationDot, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, faCircleNotch, faMars, faVenus, faGripVertical, faLocationCrosshairs } from '@fortawesome/free-solid-svg-icons';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { faArrowLeft, faMapLocationDot, faTimes, faCheck, faEdit, faPlus, faSpinner, faSearch, faUserGraduate, 
+     faCircleNotch, faMars, faVenus, faGripVertical, faLocationCrosshairs, faClone, faExchangeAlt, faSortAmountDown, faFileExcel, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
+import * as XLSX from 'xlsx';
 import { studentService } from '../../services/studentService';
 import { classService } from '../../services/classService';
 import { LocationMarker, createStopIcon, createSchoolIcon } from './RouteMapUtils';
 
-const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving }) => {
+const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplicate, isSaving }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editData, setEditData] = useState(null);
     const [currentStopName, setCurrentStopName] = useState('');
@@ -29,6 +31,49 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
     const [dragType, setDragType] = useState(null); // 'pickup' or 'drop'
     const [activeOrderTab, setActiveOrderTab] = useState('pickup'); // 'pickup' | 'drop'
     const [isLocating, setIsLocating] = useState(false);
+
+    const handleExportExcel = () => {
+        if (!selectedRoute) return;
+
+        // Prepare Data for Excel
+        const metadata = [
+            ["Route Details"],
+            ["Route Name", selectedRoute.routeName],
+            ["Assigned Bus", selectedRoute.assignedBus || 'Not Assigned'],
+            ["Total Stops", selectedRoute.stops || 0],
+            [], // Spacer
+            ["Stop Name", "Latitude", "Longitude", "Pickup Order", "Drop Order"]
+        ];
+        
+        const stopRows = (selectedRoute.stopPoints || [])
+            .sort((a,b) => (a.pickupOrder || 0) - (b.pickupOrder || 0))
+            .map(stop => [
+                stop.name,
+                stop.position[0],
+                stop.position[1],
+                stop.pickupOrder || '',
+                stop.dropOrder || ''
+            ]);
+
+        const fullData = [...metadata, ...stopRows];
+
+        // Create workbook and worksheet
+        const ws = XLSX.utils.aoa_to_sheet(fullData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Stops");
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 30 }, // Stop Name
+            { wch: 15 }, // Lat
+            { wch: 15 }, // Lng
+            { wch: 12 }, // Pickup Order
+            { wch: 12 }  // Drop Order
+        ];
+
+        // Trigger Download
+        XLSX.writeFile(wb, `${selectedRoute.routeName.replace(/\s+/g, '_')}_Stops.xlsx`);
+    };
 
     const handleViewStudents = async () => {
         setShowStudentsModal(true);
@@ -78,7 +123,11 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
             if (locationSearchQuery.length > 2) {
                 setIsSearchingLocation(true);
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=5`);
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=5&accept-language=en`, {
+                        headers: {
+                            'Accept-Language': 'en-US,en;q=0.9',
+                        }
+                    });
                     const data = await response.json();
                     setSearchSuggestions(data);
                 } catch (error) {
@@ -106,7 +155,11 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
         if (locationSearchQuery.length < 2 || isSearchingLocation) return;
         setIsSearchingLocation(true);
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=1`);
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearchQuery)}&limit=1&accept-language=en`, {
+                headers: {
+                    'Accept-Language': 'en-US,en;q=0.9',
+                }
+            });
             const data = await response.json();
             if (data && data.length > 0) {
                 handleSelectSuggestion(data[0]);
@@ -133,7 +186,11 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                 
                 // Try to get address for the coordinates
                 try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`, {
+                        headers: {
+                            'Accept-Language': 'en-US,en;q=0.9',
+                        }
+                    });
                     const data = await response.json();
                     if (data && data.display_name) {
                         setLocationSearchQuery(data.display_name);
@@ -231,6 +288,61 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
         });
     };
 
+    const handleEditDuplicateStop = (index) => {
+        setEditData(prev => {
+            const sourceStop = prev.stopPoints[index];
+            if (!sourceStop) return prev;
+            
+            const newStop = {
+                ...sourceStop,
+                name: `${sourceStop.name} (Copy)`,
+                id: null,
+            };
+            
+            const updatedStops = [...prev.stopPoints];
+            updatedStops.splice(index + 1, 0, newStop);
+            
+            // Re-calculate orders based on new sequence
+            const finalStops = updatedStops.map((s, i) => ({
+                ...s,
+                pickupOrder: i + 1,
+                dropOrder: i + 1
+            }));
+
+            return {
+                ...prev,
+                stopPoints: finalStops,
+                stops: finalStops.length
+            };
+        });
+    };
+
+    const handleReverseOrder = (type) => { // 'pickup' or 'drop'
+        const currentData = isEditing ? editData.stopPoints : (selectedRoute?.stopPoints || []);
+        if (!currentData || currentData.length < 2) return;
+
+        // Sort by current order first, then reverse
+        const sorted = [...currentData].sort((a, b) => {
+            const valA = type === 'pickup' ? (a.pickupOrder || 0) : (a.dropOrder || 0);
+            const valB = type === 'pickup' ? (b.pickupOrder || 0) : (b.dropOrder || 0);
+            return valA - valB;
+        });
+
+        const reversed = sorted.reverse();
+        
+        // Map new sequential orders
+        const finalStops = reversed.map((stop, index) => ({
+            ...stop,
+            [type === 'pickup' ? 'pickupOrder' : 'dropOrder']: index + 1
+        }));
+
+        if (isEditing) {
+            setEditData({ ...editData, stopPoints: finalStops });
+        } else if (onReorderStop) {
+            onReorderStop(finalStops);
+        }
+    };
+
     const handleStartEditing = () => {
         setIsEditing(true);
         setSelectedPosition(null);
@@ -307,14 +419,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
         if (isEditing) {
             setEditData({ ...editData, stopPoints: finalStops });
         } else if (onReorderStop) {
-            const stopToUpdate = finalStops[movedItem.originalIndex];
-            onReorderStop(stopToUpdate.id, {
-                stop_name: stopToUpdate.name,
-                latitude: parseFloat(parseFloat(stopToUpdate.position[0]).toFixed(6)),
-                longitude: parseFloat(parseFloat(stopToUpdate.position[1]).toFixed(6)),
-                pickup_stop_order: stopToUpdate.pickupOrder,
-                drop_stop_order: stopToUpdate.dropOrder
-            });
+            onReorderStop(finalStops);
         }
 
         setDraggedItem(null);
@@ -341,7 +446,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
         <div className="h-full bg-white lg:rounded-3xl shadow-2xl overflow-y-auto lg:overflow-hidden flex flex-col scrollbar-hide">
             <div className="relative p-3 sm:p-5 shrink-0" style={{ backgroundColor: '#3A7BFF' }}>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 ml-10 lg:ml-0">
                         <button
                             onClick={() => { onBack(); setIsEditing(false); }}
                             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex-shrink-0 flex items-center justify-center text-white hover:bg-white/30 transition-all"
@@ -367,7 +472,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                         </div>
                     </div>
                     {isEditing ? (
-                        <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end shrink-0">
+                        <div className="flex flex-row gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end shrink-0">
                             <button 
                                 onClick={() => setIsEditing(false)} 
                                 disabled={isSaving}
@@ -385,10 +490,26 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                             </button>
                         </div>
                     ) : (
-                        <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end shrink-0">
+                        <div className="flex flex-row gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end shrink-0">
+                            <button 
+                                onClick={() => onDuplicate(selectedRoute)}
+                                className="flex-1 sm:flex-none px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium flex items-center justify-center gap-2"
+                                title="Duplicate this route with all its stops"
+                            >
+                                <FontAwesomeIcon icon={faClone} />
+                                Duplicate
+                            </button>
                             <button onClick={handleViewStudents} className="flex-1 sm:flex-none px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium flex items-center justify-center gap-2">
                                 <FontAwesomeIcon icon={faUserGraduate} />
                                 Students
+                            </button>
+                            <button 
+                                onClick={handleExportExcel} 
+                                className="flex-1 sm:flex-none px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
+                                title="Download stops as Excel"
+                            >
+                                <FontAwesomeIcon icon={faFileExcel} />
+                                Export Excel
                             </button>
                             <button onClick={handleStartEditing} className="flex-1 sm:flex-none px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium flex items-center justify-center">
                                 <FontAwesomeIcon icon={faEdit} className="mr-1" />Edit
@@ -419,22 +540,34 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                         <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
                             <button
                                 onClick={() => setActiveOrderTab('pickup')}
-                                className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeOrderTab === 'pickup' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                                className={`flex-1 py-1.5 sm:py-2 text-[10px] sm:text-sm font-bold rounded-lg transition-all ${activeOrderTab === 'pickup' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
                             >
-                                Pickup Sequence
+                                <span className="sm:hidden">Pickup</span>
+                                <span className="hidden sm:inline">Pickup Sequence</span>
                             </button>
                             <button
                                 onClick={() => setActiveOrderTab('drop')}
-                                className={`flex-1 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeOrderTab === 'drop' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                                className={`flex-1 py-1.5 sm:py-2 text-[10px] sm:text-sm font-bold rounded-lg transition-all ${activeOrderTab === 'drop' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
                             >
-                                Drop Sequence
+                                <span className="sm:hidden">Drop</span>
+                                <span className="hidden sm:inline">Drop Sequence</span>
                             </button>
                         </div>
 
                         {/* Pickup Order Card */}
                         {activeOrderTab === 'pickup' && (
                         <div className="bg-blue-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-blue-100 shadow-sm shrink-0 mb-4 lg:mb-0">
-                            <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-blue-600 shrink-0">Pickup Order</h3>
+                            <div className="flex items-center justify-between mb-4 shrink-0">
+                                <h3 className="text-sm font-bold uppercase tracking-wide text-blue-600">Pickup Order</h3>
+                                <button 
+                                    onClick={() => handleReverseOrder('pickup')}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"
+                                    title="Reverse Pickup Sequence"
+                                >
+                                    <FontAwesomeIcon icon={faExchangeAlt} className="rotate-90" />
+                                    Reverse
+                                </button>
+                            </div>
                             
 
 
@@ -476,15 +609,17 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                                     setNewStopDropOrder(nextOrder);
                                                 }
                                             }}
-                                            className="flex-1 bg-slate-50 border border-blue-100 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm"
+                                            className="flex-1 bg-slate-50 border border-blue-100 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all shadow-sm min-w-0"
                                             disabled={!selectedPosition}
+                                            title={currentStopName}
                                         />
                                         <button
                                             onClick={handleEditAddStop}
                                             disabled={!currentStopName.trim() || !selectedPosition}
-                                            className={`w-full sm:w-auto px-4 py-2 sm:px-3 text-white rounded-lg shadow-sm transition-all flex justify-center items-center ${(!currentStopName.trim() || !selectedPosition) ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md hover:bg-blue-700'}`}
+                                            className={`w-12 h-10 px-4 py-2 sm:px-3 text-white rounded-lg shadow-sm transition-all flex justify-center items-center shrink-0 ${(!currentStopName.trim() || !selectedPosition) ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:shadow-md hover:bg-blue-700'}`}
+                                            title="Add Stop"
                                         >
-                                            <FontAwesomeIcon icon={faPlus} className="sm:mr-0 mr-2" /><span className="sm:hidden font-medium">Add Stop</span>
+                                            <FontAwesomeIcon icon={faPlus} />
                                         </button>
                                     </div>
                                     <p className="text-[10px] text-blue-400 font-bold ml-1 flex items-center gap-1.5 capitalize">
@@ -545,22 +680,33 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                                             </span>
                                                         </div>
                                                     ) : (
-                                                        <p className="text-sm font-bold text-gray-800">{stop.name}</p>
+                                                        <p className="text-sm font-bold text-gray-800 truncate" title={stop.name}>{stop.name}</p>
                                                     )}
                                                 </div>
-                                                {isEditing && (
+                                                 {isEditing && (
                                                     <div className="flex gap-2 pl-2">
                                                         {editingStopIndex !== stop.originalIndex && (
-                                                            <button
-                                                                onClick={() => handleStartStopEdit(stop.originalIndex, stop.name)}
-                                                                className="text-gray-400 hover:text-blue-600 transition-colors"
-                                                            >
-                                                                <FontAwesomeIcon icon={faEdit} />
-                                                            </button>
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleEditDuplicateStop(stop.originalIndex)}
+                                                                    className="text-gray-400 hover:text-emerald-500 transition-colors"
+                                                                    title="Duplicate Stop"
+                                                                >
+                                                                    <FontAwesomeIcon icon={faClone} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleStartStopEdit(stop.originalIndex, stop.name)}
+                                                                    className="text-gray-400 hover:text-blue-600 transition-colors"
+                                                                    title="Edit Name"
+                                                                >
+                                                                    <FontAwesomeIcon icon={faEdit} />
+                                                                </button>
+                                                            </>
                                                         )}
                                                         <button
                                                             onClick={() => handleEditRemoveStop(stop.originalIndex)}
                                                             className="text-gray-400 hover:text-red-500 transition-colors"
+                                                            title="Remove Stop"
                                                         >
                                                             <FontAwesomeIcon icon={faTimes} />
                                                         </button>
@@ -578,7 +724,17 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                         {/* Drop Order Card */}
                         {activeOrderTab === 'drop' && (
                         <div className="bg-purple-50/50 rounded-2xl p-3 sm:p-4 flex flex-col border border-purple-100 shadow-sm shrink-0 mb-4 lg:mb-0">
-                            <h3 className="text-sm font-bold uppercase tracking-wide mb-4 text-purple-600 shrink-0">Drop Order</h3>
+                            <div className="flex items-center justify-between mb-4 shrink-0">
+                                <h3 className="text-sm font-bold uppercase tracking-wide text-purple-600">Drop Order</h3>
+                                <button 
+                                    onClick={() => handleReverseOrder('drop')}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white transition-all shadow-sm active:scale-95"
+                                    title="Reverse Drop Sequence"
+                                >
+                                    <FontAwesomeIcon icon={faExchangeAlt} className="rotate-90" />
+                                    Reverse
+                                </button>
+                            </div>
                             
 
                             <div className="space-y-3 flex-col">
@@ -607,7 +763,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                                                     </div>
                                                     
                                                     {isEditing && <div className="w-px h-8 bg-purple-100 mx-1"></div>}
-                                                    <p className="text-sm font-bold text-gray-800 truncate">{stop.name}</p>
+                                                    <p className="text-sm font-bold text-gray-800 truncate" title={stop.name}>{stop.name}</p>
                                                 </div>
                                             </div>
                                         ))
@@ -621,57 +777,62 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, isSaving 
                     </div>
 
                     {/* Map Container */}
-                    <div className="order-first lg:order-none flex-1 relative flex flex-col gap-3 min-h-[350px] sm:min-h-[450px] lg:min-h-0 shrink-0 lg:shrink">
-                        {isEditing && (
-                            <div className="w-full z-[1000] flex flex-col gap-1">
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Search location..."
-                                        value={locationSearchQuery}
-                                        onChange={(e) => setLocationSearchQuery(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
-                                        className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white"
-                                    />
-                                    <button 
-                                        onClick={handleManualSearch}
-                                        className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-md flex items-center justify-center transition-colors border-0"
-                                        title="Search Location"
-                                    >
-                                        <FontAwesomeIcon icon={isSearchingLocation ? faSpinner : faSearch} className={isSearchingLocation ? "animate-spin text-lg" : "text-lg"} />
-                                    </button>
-                                    <button 
-                                        onClick={handleDetectLocation}
-                                        className="w-12 h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-md flex items-center justify-center transition-colors border-0"
-                                        title="Detect My Location"
-                                        type="button"
-                                    >
-                                        <FontAwesomeIcon icon={isLocating ? faCircleNotch : faLocationCrosshairs} className={isLocating ? "animate-spin text-lg" : "text-lg"} />
-                                    </button>
-                                </div>
-                                {/* Suggestions Dropdown */}
-                                {searchSuggestions.length > 0 && (
-                                    <div className="bg-white rounded-xl shadow-xl border border-blue-100 overflow-hidden max-h-48 overflow-y-auto">
-                                        {searchSuggestions.map((suggestion, idx) => (
-                                            <div
-                                                key={idx}
-                                                onClick={() => handleSelectSuggestion(suggestion)}
-                                                className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-0 truncate"
-                                            >
-                                                {suggestion.display_name}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                    <div className="order-first lg:order-none flex-1 relative flex flex-col min-h-[450px] sm:min-h-[550px] lg:min-h-0 shrink-0 lg:shrink">
                         <div className="flex-1 w-full relative rounded-2xl overflow-hidden shadow-inner border border-gray-200">
+                            {isEditing && (
+                                <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col gap-1">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Search for a location..."
+                                            value={locationSearchQuery}
+                                            onChange={(e) => setLocationSearchQuery(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleManualSearch()}
+                                            className="flex-1 px-4 py-3 rounded-2xl border border-gray-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white/95 backdrop-blur-sm min-w-0"
+                                            title={locationSearchQuery}
+                                        />
+                                        <button 
+                                            onClick={handleManualSearch}
+                                            className="w-11 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg flex items-center justify-center transition-all hover:scale-105 border-0 shrink-0"
+                                            title="Search Location"
+                                        >
+                                            <FontAwesomeIcon icon={isSearchingLocation ? faSpinner : faSearch} className={isSearchingLocation ? "animate-spin text-[16px]" : "text-[16px]"} />
+                                        </button>
+                                        <button 
+                                            onClick={handleDetectLocation}
+                                            className="w-11 h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl shadow-lg flex items-center justify-center transition-all hover:scale-105 border-0 shrink-0"
+                                            title="Detect My Location"
+                                            type="button"
+                                        >
+                                            <FontAwesomeIcon icon={isLocating ? faCircleNotch : faLocationCrosshairs} className={isLocating ? "animate-spin text-[16px]" : "text-[16px]"} />
+                                        </button>
+                                    </div>
+                                    {/* Suggestions Dropdown */}
+                                    {searchSuggestions.length > 0 && (
+                                        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-blue-50 overflow-hidden max-h-60 mt-1 overflow-y-auto">
+                                            {searchSuggestions.map((suggestion, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    onClick={() => handleSelectSuggestion(suggestion)}
+                                                    className="px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors flex flex-col gap-0.5"
+                                                    title={suggestion.display_name}
+                                                >
+                                                    <span className="font-medium truncate">{suggestion.display_name.split(',')[0]}</span>
+                                                    <span className="text-[10px] text-gray-400 truncate uppercase tracking-tight">{suggestion.display_name.split(',').slice(1).join(',')}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <MapContainer
                                 center={[12.6083, 80.0528]} 
                                 zoom={11}
                                 style={{ height: '100%', width: '100%', zIndex: 1 }}
                                 scrollWheelZoom={true}
+                                zoomControl={false}
                             >
+                            <ZoomControl position="bottomright" />
                             <TileLayer
                                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
