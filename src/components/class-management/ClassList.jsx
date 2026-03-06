@@ -27,7 +27,6 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             field: "class_name",
             flex: 1.2,
             minWidth: 200,
-            minWidth: 200,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
             cellRenderer: (params) => (
                 <div className="flex flex-col items-center overflow-hidden">
@@ -41,7 +40,6 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
             headerName: "Section",
             field: "section",
             width: 120,
-            minWidth: 120,
             minWidth: 120,
             cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' },
             cellRenderer: (params) => (
@@ -67,8 +65,8 @@ const ClassList = ({ classes, activeMenuId, setActiveMenuId, onUpdateStatus, onE
         {
             headerName: "ACTIONS",
             field: "class_id",
-            width: 130,
-
+            width: 100,
+            minWidth: 100,
             sortable: false,
             filter: false,
             filter: false,

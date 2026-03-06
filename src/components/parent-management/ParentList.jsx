@@ -133,8 +133,8 @@ const ParentList = ({
         {
             headerName: 'ACTIONS',
             field: 'parent_id',
-            width: 80,
-            minWidth: 80,
+            width: 100,
+            minWidth: 100,
             sortable: false,
             filter: false,
             suppressMovable: true,

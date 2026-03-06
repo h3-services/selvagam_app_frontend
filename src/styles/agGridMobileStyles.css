@@ -169,6 +169,12 @@
   .custom-ag-grid .action-menu-trigger {
     width: 32px;
     height: 32px;
+  }  /* Fix last column cutting off on mobile */
+  .custom-ag-grid .ag-header-cell:last-child {
+      padding-right: 16px !important;
+  }
+  .custom-ag-grid .ag-cell:last-child {
+      padding-right: 16px !important;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faTimes, 
@@ -44,30 +44,77 @@ const InputField = ({ label, icon, type = "text", value, onChange, placeholder, 
     </div>
 );
 
-const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false }) => (
-    <div className="relative group/field">
-        <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">{label}</label>
-        <div className={`relative flex items-center bg-white rounded-2xl border transition-all duration-500 ${disabled ? 'bg-slate-50 border-slate-100' : 'border-slate-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/5 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500'}`}>
-            <div className="w-12 h-12 flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-all group-focus-within/field:text-blue-600 group-focus-within/field:scale-110">
-                <FontAwesomeIcon icon={icon} className="text-sm" />
+const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false, error, activeColor = 'blue' }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedOption = options.find(opt => opt.value == value);
+
+    const colorConfig = {
+        blue: { primary: 'blue-600', light: 'bg-blue-50', border: 'hover:border-blue-400', ring: 'ring-blue-500' },
+        indigo: { primary: 'indigo-600', light: 'bg-indigo-50', border: 'hover:border-indigo-400', ring: 'ring-indigo-500' },
+        emerald: { primary: 'emerald-600', light: 'bg-emerald-50', border: 'hover:border-emerald-400', ring: 'ring-emerald-500' },
+        amber: { primary: 'amber-600', light: 'bg-amber-50', border: 'hover:border-amber-400', ring: 'ring-amber-500' }
+    };
+    const theme = colorConfig[activeColor] || colorConfig.blue;
+
+    return (
+        <div className={`relative group/field ${isOpen ? 'z-[3000]' : 'z-10'}`} ref={containerRef}>
+            <div className="flex justify-between items-center mb-1.5 ml-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
+                {error && <span className="text-[9px] font-bold text-rose-500 animate-pulse uppercase tracking-wider">{error}</span>}
             </div>
-            <select
-                value={value}
-                onChange={onChange}
-                disabled={disabled}
-                className="w-full pl-12 pr-10 py-4 bg-transparent rounded-2xl text-[13px] font-bold text-slate-700 focus:outline-none appearance-none disabled:text-slate-400 cursor-pointer"
+            <div 
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+                className={`relative flex items-center justify-between bg-white rounded-2xl border ${disabled ? 'bg-slate-50 cursor-not-allowed opacity-60' : `cursor-pointer ${theme.border} hover:shadow-md`} transition-all duration-300 px-4 py-3 ${isOpen ? `ring-4 ${theme.ring}/10 border-${theme.primary.split('-')[0]}-500 shadow-lg` : error ? 'border-rose-400 ring-4 ring-rose-500/5' : 'border-slate-200'}`}
             >
-                <option value="">{placeholder}</option>
-                {options.map((opt, idx) => (
-                    <option key={idx} value={opt.value}>{opt.label}</option>
-                ))}
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 text-xs">
-                <FontAwesomeIcon icon={faChevronDown} />
+                <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedOption ? `bg-${theme.primary} text-white shadow-sm` : error ? 'bg-rose-50 text-rose-400' : 'bg-slate-100 text-slate-400'}`}>
+                        <FontAwesomeIcon icon={icon} className="text-xs" />
+                    </div>
+                    {selectedOption ? (
+                        <span className="text-[13px] font-bold text-slate-800">{selectedOption.label}</span>
+                    ) : (
+                        <span className="text-[13px] font-bold text-slate-400">{placeholder}</span>
+                    )}
+                </div>
+                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 text-[10px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </div>
+
+            {isOpen && !disabled && (
+                <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-white rounded-2xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] border border-slate-100 z-[3001] max-h-56 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col gap-1">
+                        {options.map((opt, idx) => (
+                            <div 
+                                key={idx}
+                                onClick={() => { onChange({ target: { value: opt.value } }); setIsOpen(false); }}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 ${value == opt.value ? `bg-${theme.primary} text-white shadow-sm` : 'hover:bg-slate-50 text-slate-700'}`}
+                            >
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${value == opt.value ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                    <FontAwesomeIcon icon={icon} />
+                                </div>
+                                <span className={`text-[12px] font-bold truncate flex-1 ${value == opt.value ? 'text-white' : 'text-slate-800'}`}>{opt.label}</span>
+                                {value == opt.value && (
+                                    <FontAwesomeIcon icon={faCheck} className="text-[10px] shrink-0" />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 const FileUploadField = ({ label, icon, onFileSelect, fileName, disabled = false, error }) => (
     <div className="relative group/field">
@@ -268,10 +315,10 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                 </div>
 
                 {/* Form Environment */}
-                <div className="flex-1 overflow-y-auto px-8 pb-32 space-y-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto px-3 lg:px-8 pb-48 lg:pb-32 space-y-6 lg:space-y-8 custom-scrollbar">
                     
                     {/* Vehicle Specifications Bento */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                    <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] p-4 lg:p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                         <div className="flex items-center gap-5 mb-10">
                             <div className="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                 <FontAwesomeIcon icon={faClipboardList} className="text-2xl" />
@@ -322,7 +369,7 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                     </div>
 
                     {/* Fleet Layout Bento */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                    <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] p-4 lg:p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                         <div className="flex items-center gap-5 mb-10">
                             <div className="w-14 h-14 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                 <FontAwesomeIcon icon={faCogs} className="text-2xl" />
@@ -349,7 +396,7 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                     </div>
 
                     {/* Operational Assignment Bento */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                    <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] p-4 lg:p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                         <div className="flex items-center gap-5 mb-10">
                             <div className="w-14 h-14 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                 <FontAwesomeIcon icon={faRoute} className="text-2xl" />
@@ -366,6 +413,7 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                                 value={busData.driver_id} 
                                 onChange={(e) => setBusData({...busData, driver_id: e.target.value})} 
                                 placeholder="Select Driver"
+                                activeColor="amber"
                                 options={drivers
                                     .filter(d => {
                                         const status = (d.status || d.active_status || '').toUpperCase();
@@ -379,6 +427,7 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                                 value={busData.route_id} 
                                 onChange={(e) => setBusData({...busData, route_id: e.target.value})} 
                                 placeholder="Select Route"
+                                activeColor="indigo"
                                 options={routes
                                     .filter(r => {
                                         const status = (r.status || r.active_status || r.routes_active_status || '').toUpperCase();
@@ -390,7 +439,7 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                     </div>
 
                     {/* Compliance Assets Bento */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                    <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] p-4 lg:p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                         <div className="flex items-center gap-5 mb-10">
                             <div className="w-14 h-14 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                 <FontAwesomeIcon icon={faShieldAlt} className="text-2xl" />
@@ -424,11 +473,11 @@ const AddBusForm = ({ show, onClose, onAdd, onUpdate, editingBus, drivers = [], 
                 </div>
 
                 {/* Execution Footer */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-20">
+                <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
                     <button
                         onClick={handleSubmit}
                         disabled={(!isValid && Object.keys(touched).length > 0) || isSubmitting}
-                        className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${(!isValid && Object.keys(touched).length > 0) || isSubmitting ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
+                        className={`group w-full h-12 lg:h-14 rounded-xl lg:rounded-2xl font-black text-white text-[8px] lg:text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 lg:gap-4 transition-all shadow-2xl active:scale-95 ${(!isValid && Object.keys(touched).length > 0) || isSubmitting ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
                         style={{ 
                             background: (isValid || Object.keys(touched).length === 0) && !isSubmitting
                                 ? 'linear-gradient(135deg, #3A7BFF 0%, #1e3a8a 100%)' 

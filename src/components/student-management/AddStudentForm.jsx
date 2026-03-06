@@ -826,10 +826,10 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                 </div>
                             </div>
 
-                            <div className="px-8 pb-8 space-y-8 bg-slate-50 min-h-full">
+                            <div className="px-3 lg:px-8 pb-48 lg:pb-8 space-y-6 lg:space-y-8 bg-slate-50 min-h-full">
                                 
                                 {/* Section: Personal Details */}
-                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                                <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] p-4 lg:p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                                     <div className="flex items-center gap-5 mb-10">
                                         <div className="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                             <FontAwesomeIcon icon={faChild} className="text-2xl" />
@@ -935,7 +935,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                 </div>
 
                                 {/* Section: Parent/Guardian Link */}
-                                <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                                <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] p-4 lg:p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                                     <div className="flex items-center gap-5 mb-10">
                                         <div className="w-14 h-14 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                             <FontAwesomeIcon icon={faUserTie} className="text-2xl" />
@@ -958,7 +958,7 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                         {formData.parent_id ? (() => {
                                             const selectedParent = localParents.find(p => p.parent_id == formData.parent_id);
                                             return selectedParent ? (
-                                                <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 relative group/card transition-all duration-500 hover:shadow-xl shadow-sm">
+                                                <div className="bg-white border border-slate-100 rounded-[1.5rem] lg:rounded-[2.5rem] p-4 lg:p-8 relative group/card transition-all duration-500 hover:shadow-xl shadow-sm">
                                                     <div className="flex items-start justify-between mb-8">
                                                         <div className="flex items-center gap-5">
                                                             <div className="relative">
@@ -1152,7 +1152,10 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                         value={formData.pickup_route_id} 
                                                         onChange={(val) => {
                                                             handleChange('pickup_route_id', val);
+                                                            // Automatically set Drop Route to match Pickup Route
+                                                            handleChange('drop_route_id', val);
                                                             if(errors.pickup_route_id) setErrors(prev => ({...prev, pickup_route_id: null}));
+                                                            if(errors.drop_route_id) setErrors(prev => ({...prev, drop_route_id: null}));
                                                         }} 
                                                         placeholder="Select Pickup Route"
                                                         options={routes.filter(r => (r.routes_active_status || r.status) === 'ACTIVE').map(r => ({value: r.route_id, label: r.name}))} 
@@ -1166,7 +1169,10 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                                                         activeColor="teal"
                                                         onChange={(val) => {
                                                             handleChange('pickup_stop_id', val);
+                                                            // Automatically set Drop Stop to match Pickup Stop
+                                                            handleChange('drop_stop_id', val);
                                                             if(errors.pickup_stop_id) setErrors(prev => ({...prev, pickup_stop_id: null}));
+                                                            if(errors.drop_stop_id) setErrors(prev => ({...prev, drop_stop_id: null}));
                                                         }} 
                                                         placeholder={formData.pickup_route_id ? "Select Pickup Stop" : "Select Route First"}
                                                         disabled={!formData.pickup_route_id}
@@ -1413,11 +1419,11 @@ const AddStudentForm = ({ show, onClose, onAdd, onUpdate, parents, initialData, 
                 </div>
 
                 {/* Footer */}
-                <div className="px-10 py-6 border-t border-slate-100 bg-white/80 backdrop-blur-2xl flex-shrink-0 z-20 flex justify-center">
+                <div className="px-4 lg:px-10 py-3 lg:py-6 border-t border-slate-100 bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.05)] flex-shrink-0 z-50 flex justify-center">
                     <button
                         onClick={handleSaveStudent}
                         disabled={loadingSave}
-                        className={`px-8 py-3.5 rounded-full font-black uppercase tracking-[0.2em] text-[10px] text-white shadow-[0_15px_30px_rgba(58,123,255,0.2)] hover:shadow-[0_20px_40px_rgba(58,123,255,0.3)] hover:-translate-y-0.5 active:scale-95 transition-all duration-500 flex items-center gap-3 group relative overflow-hidden ${loadingSave ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`px-5 py-2 lg:px-8 lg:py-3.5 rounded-full font-black uppercase tracking-[0.2em] text-[8px] lg:text-[10px] text-white shadow-[0_15px_30px_rgba(58,123,255,0.15)] hover:shadow-[0_20px_40px_rgba(58,123,255,0.3)] hover:-translate-y-0.5 active:scale-95 transition-all duration-500 flex items-center gap-2 lg:gap-3 group relative overflow-hidden ${loadingSave ? 'opacity-70 cursor-not-allowed' : ''}`}
                         style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}
                     >
                         {/* Shimmer Effect */}

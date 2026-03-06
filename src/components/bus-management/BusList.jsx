@@ -349,9 +349,9 @@ const BusList = ({
                                 }
                             },
                             {
-                                headerName: "Actions",
+                                headerName: "ACTIONS",
                                 field: "actions",
-                                flex: 0.8,
+                                width: 100,
                                 minWidth: 100,
                                 cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' },
                                 cellRenderer: (params) => {

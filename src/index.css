@@ -239,47 +239,52 @@ body,
 /* MOBILE PAGINATION COMPACTNESS */
 @media (max-width: 768px) {
   .ag-paging-panel {
-    gap: 0.35rem !important;
-    padding: 0.25rem 0.6rem !important;
-    min-height: 48px !important;
-    margin: 6px 6px !important;
-    border-radius: 12px !important;
-    padding-left: 0.8rem !important;
+    gap: 0.25rem !important;
+    padding: 0.15rem 0.4rem !important;
+    min-height: 40px !important;
+    margin: 4px 4px !important;
+    border-radius: 10px !important;
+    padding-left: 0.5rem !important;
   }
   
   .ag-paging-button {
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 8px !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+  }
+
+  .ag-paging-button .ag-icon {
+    font-size: 14px !important;
   }
   
   .ag-paging-size-panel {
-    font-size: 11px !important;
-    gap: 0.3rem !important;
+    font-size: 10px !important;
+    gap: 0.2rem !important;
   }
 
   .ag-paging-size-panel select {
-    padding: 1px 4px !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
+    padding: 0px 2px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    height: 22px !important;
   }
 
   .ag-paging-row-summary-panel {
-    font-size: 10px !important;
+    font-size: 9px !important;
     gap: 2px !important;
-    margin-right: 4px !important;
+    margin-right: 2px !important;
   }
 
   .ag-paging-page-summary-panel {
-    gap: 0.4rem !important;
-    font-size: 11px !important;
+    gap: 0.25rem !important;
+    font-size: 10px !important;
   }
   
   .ag-paging-description span[ref="lbCurrent"] {
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 8px !important;
-    font-size: 10px !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+    font-size: 9px !important;
   }
 }
 

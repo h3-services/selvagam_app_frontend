@@ -35,8 +35,8 @@ const CommunicationHome = () => {
 
     const [classes, setClasses] = useState([]);
     const [routes, setRoutes] = useState([]);
-    const [selectedClass, setSelectedClass] = useState(null);
-    const [selectedRoute, setSelectedRoute] = useState(null);
+    const [selectedClasses, setSelectedClasses] = useState([]);
+    const [selectedRoutes, setSelectedRoutes] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
@@ -65,9 +65,9 @@ const CommunicationHome = () => {
                 handleCategoryChange(id);
                 setShowDropdown(false);
             }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-[9px] sm:text-[11px] uppercase tracking-[0.2em] relative overflow-hidden group
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-3 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl border transition-all font-black text-[8px] sm:text-[11px] uppercase tracking-wider sm:tracking-[0.2em] relative overflow-hidden group
                 ${current === id 
-                    ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-200' 
+                    ? 'bg-slate-900 border-slate-900 text-white shadow-lg sm:shadow-xl shadow-slate-200' 
                     : 'bg-white border-slate-100 text-slate-400 hover:border-blue-400 hover:text-blue-600 shadow-sm'}`}
         >
             <FontAwesomeIcon icon={icon} className={`${current === id ? 'text-blue-400' : 'text-slate-300 group-hover:text-blue-400'}`} />
@@ -88,10 +88,10 @@ const CommunicationHome = () => {
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Announcement Control</p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 flex-1 max-w-2xl">
-                        <CategoryButton id="ALL" label="All Parents" icon={faUsers} current={category} />
-                        <CategoryButton id="CLASS" label="Class Wise" icon={faGraduationCap} current={category} />
-                        <CategoryButton id="ROUTE" label="Route Wise" icon={faRoute} current={category} />
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 flex-1 w-full sm:max-w-2xl">
+                        <CategoryButton id="ALL" label="Parents" icon={faUsers} current={category} />
+                        <CategoryButton id="CLASS" label="Class" icon={faGraduationCap} current={category} />
+                        <CategoryButton id="ROUTE" label="Route" icon={faRoute} current={category} />
                     </div>
                 </div>
             </div>
@@ -109,47 +109,85 @@ const CommunicationHome = () => {
                                     <FontAwesomeIcon icon={category === 'CLASS' ? faGraduationCap : faRoute} />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Select {category === 'CLASS' ? 'Standard' : 'Travel Route'}</p>
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Select {category === 'CLASS' ? 'Standards' : 'Travel Routes'}</p>
                                     <p className="truncate max-w-[200px] sm:max-w-none">
                                         {category === 'CLASS' 
-                                            ? (selectedClass ? `${selectedClass.class_name} - ${selectedClass.section}` : 'Choose a Class...') 
-                                            : (selectedRoute ? selectedRoute.name : 'Choose a Route...')}
+                                            ? (selectedClasses.length > 0 ? `${selectedClasses.length} Classes Selected` : 'Choose Classes...') 
+                                            : (selectedRoutes.length > 0 ? `${selectedRoutes.length} Routes Selected` : 'Choose Routes...')}
                                     </p>
                                 </div>
                             </div>
-                            <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 transition-transform duration-300 ${showDropdown ? 'rotate-180 text-blue-500' : ''}`} />
+                            <div className="flex items-center gap-3">
+                                {((category === 'CLASS' && selectedClasses.length > 0) || (category === 'ROUTE' && selectedRoutes.length > 0)) && (
+                                    <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full animate-bounce">
+                                        {category === 'CLASS' ? selectedClasses.length : selectedRoutes.length}
+                                    </span>
+                                )}
+                                <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 transition-transform duration-300 ${showDropdown ? 'rotate-180 text-blue-500' : ''}`} />
+                            </div>
                         </button>
 
                         {showDropdown && (
                             <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-3xl shadow-2xl border border-slate-100 z-[100] overflow-hidden animate-in zoom-in-95 duration-200 p-2">
+                                <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100 mb-2">
+                                    <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Multi-Select Enabled</span>
+                                    <button 
+                                        onClick={() => category === 'CLASS' ? setSelectedClasses([]) : setSelectedRoutes([])}
+                                        className="text-[10px] font-black text-rose-500 tracking-tight hover:underline"
+                                    >
+                                        Clear All
+                                    </button>
+                                </div>
                                 <div className="max-h-[300px] overflow-y-auto custom-scrollbar grid grid-cols-1 sm:grid-cols-2 gap-1 p-1">
                                     {category === 'CLASS' ? (
-                                        classes.map((cls) => (
-                                            <button
-                                                key={cls.class_id}
-                                                onClick={() => {
-                                                    setSelectedClass(cls);
-                                                    setShowDropdown(false);
-                                                }}
-                                                className={`px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${selectedClass?.class_id === cls.class_id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
-                                            >
-                                                {cls.class_name} - {cls.section}
-                                            </button>
-                                        ))
+                                        classes.map((cls) => {
+                                            const isSelected = selectedClasses.some(c => c.class_id === cls.class_id);
+                                            return (
+                                                <button
+                                                    key={cls.class_id}
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setSelectedClasses(prev => prev.filter(c => c.class_id !== cls.class_id));
+                                                        } else {
+                                                            setSelectedClasses(prev => [...prev, cls]);
+                                                        }
+                                                    }}
+                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
+                                                >
+                                                    <span>{cls.class_name} - {cls.section}</span>
+                                                    {isSelected && <FontAwesomeIcon icon={faCheck} className="text-blue-400" />}
+                                                </button>
+                                            );
+                                        })
                                     ) : (
-                                        routes.map((route) => (
-                                            <button
-                                                key={route.route_id}
-                                                onClick={() => {
-                                                    setSelectedRoute(route);
-                                                    setShowDropdown(false);
-                                                }}
-                                                className={`px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${selectedRoute?.route_id === route.route_id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
-                                            >
-                                                {route.name}
-                                            </button>
-                                        ))
+                                        routes.map((route) => {
+                                            const isSelected = selectedRoutes.some(r => r.route_id === route.route_id);
+                                            return (
+                                                <button
+                                                    key={route.route_id}
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setSelectedRoutes(prev => prev.filter(r => r.route_id !== route.route_id));
+                                                        } else {
+                                                            setSelectedRoutes(prev => [...prev, route]);
+                                                        }
+                                                    }}
+                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
+                                                >
+                                                    <span>{route.name}</span>
+                                                    {isSelected && <FontAwesomeIcon icon={faCheck} className="text-blue-400" />}
+                                                </button>
+                                            );
+                                        })
                                     )}
+                                </div>
+                                <div className="p-2 mt-2 border-t border-slate-100">
+                                    <button 
+                                        onClick={() => setShowDropdown(false)}
+                                        className="w-full bg-blue-600 text-white py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-slate-900 transition-all"
+                                    >
+                                        Apply Selection
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -162,8 +200,8 @@ const CommunicationHome = () => {
                 <div className="max-w-4xl mx-auto pb-20">
                     <ComposeMessage 
                         targetCategory={category}
-                        targetId={category === 'CLASS' ? selectedClass?.class_id : (category === 'ROUTE' ? selectedRoute?.route_id : null)}
-                        targetLabel={category === 'ALL' ? 'All Registered Parents' : (category === 'CLASS' ? `${selectedClass?.class_name || '...'} - ${selectedClass?.section || '...'}` : (selectedRoute?.name || '...'))}
+                        targetIds={category === 'CLASS' ? selectedClasses.map(c => c.class_id) : (category === 'ROUTE' ? selectedRoutes.map(r => r.route_id) : [])}
+                        targetLabel={category === 'ALL' ? 'All Registered Parents' : (category === 'CLASS' ? (selectedClasses.length > 0 ? `${selectedClasses.length} Classes` : 'None') : (selectedRoutes.length > 0 ? `${selectedRoutes.length} Routes` : 'None'))}
                     />
                 </div>
             </div>

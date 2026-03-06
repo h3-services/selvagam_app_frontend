@@ -204,10 +204,10 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                     </div>
 
                 {/* Form Environment */}
-                <div className="flex-1 overflow-y-auto px-8 pb-32 space-y-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto px-3 lg:px-8 pb-48 lg:pb-32 space-y-6 lg:space-y-8 custom-scrollbar">
                     
                     {/* Driver Info Section */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                    <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] p-4 lg:p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                         <div className="flex items-center gap-5 mb-10">
                             <div className="w-14 h-14 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                 <FontAwesomeIcon icon={faFingerprint} className="text-2xl" />
@@ -229,7 +229,7 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                     </div>
 
                     {/* Operational Clearance Bento */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
+                    <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] p-4 lg:p-8 shadow-sm border border-slate-100 relative group hover:shadow-xl transition-all duration-500">
                         <div className="flex items-center gap-5 mb-10">
                             <div className="w-14 h-14 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner group-hover:rotate-6 transition-all duration-500">
                                 <FontAwesomeIcon icon={faBriefcase} className="text-2xl" />
@@ -248,11 +248,11 @@ const AddDriverForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
                 </div>
 
                 {/* Execution Footer */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-20">
+                <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6 bg-white/80 backdrop-blur-xl border-t border-slate-100 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
                     <button
                         onClick={handleAction}
                         disabled={!isValid && Object.keys(touched).length > 0 || isSubmitting}
-                        className={`group w-full h-14 rounded-2xl font-black text-white text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-4 transition-all shadow-2xl active:scale-95 ${(!isValid && Object.keys(touched).length > 0) || isSubmitting ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
+                        className={`group w-full h-12 lg:h-14 rounded-xl lg:rounded-2xl font-black text-white text-[8px] lg:text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 lg:gap-4 transition-all shadow-2xl active:scale-95 ${(!isValid && Object.keys(touched).length > 0) || isSubmitting ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
                         style={{ 
                             background: (isValid || Object.keys(touched).length === 0) && !isSubmitting
                                 ? 'linear-gradient(135deg, #3A7BFF 0%, #1e3a8a 100%)' 

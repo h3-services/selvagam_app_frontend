@@ -102,10 +102,10 @@ const RouteList = ({
                                 )
                             },
                             {
-                                headerName: activeTab === 'Archived' ? "Restore" : "Delete",
+                                headerName: "ACTIONS",
                                 field: "id",
-                                width: 90,
-                                minWidth: 90,
+                                width: 100,
+                                minWidth: 100,
                                 sortable: false,
                                 filter: false,
                                 cellRenderer: (params) => (

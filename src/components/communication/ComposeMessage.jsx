@@ -17,7 +17,7 @@ import { sendNotification, sendBroadcastNotification, broadcastToParents, sendRo
 import { parentService } from '../../services/parentService';
 import { routeService } from '../../services/routeService';
 
-const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
+const ComposeMessage = ({ targetCategory, targetIds = [], targetLabel }) => {
     const [parents, setParents] = useState([]);
     const [messageType, setMessageType] = useState('text'); // 'text' | 'audio'
     const [messageText, setMessageText] = useState('');
@@ -52,8 +52,8 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
         if (!title.trim() || !messageText.trim()) return;
         
         // Validation for selection
-        if (targetCategory !== 'ALL' && !targetId) {
-            alert(`⚠️ Selection Required: Please choose a ${targetCategory.toLowerCase()} from the selector above.`);
+        if (targetCategory !== 'ALL' && targetIds.length === 0) {
+            alert(`⚠️ Selection Required: Please choose at least one ${targetCategory.toLowerCase()} from the selector above.`);
             return;
         }
 
@@ -68,21 +68,25 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
                     messageType
                 );
             } else if (targetCategory === 'ROUTE') {
-                // Use specific route notification API
-                await sendRouteNotification(
-                    targetId,
-                    title.trim(), 
-                    messageText.trim(), 
-                    messageType
-                );
+                // Loop through all selected routes
+                const results = await Promise.all(targetIds.map(id => 
+                    sendRouteNotification(
+                        id,
+                        title.trim(), 
+                        messageText.trim(), 
+                        messageType
+                    )
+                ));
             } else if (targetCategory === 'CLASS') {
-                // Use specific class notification API
-                await sendClassNotification(
-                    targetId,
-                    title.trim(), 
-                    messageText.trim(), 
-                    messageType
-                );
+                // Loop through all selected classes
+                const results = await Promise.all(targetIds.map(id => 
+                    sendClassNotification(
+                        id,
+                        title.trim(), 
+                        messageText.trim(), 
+                        messageType
+                    )
+                ));
             }
             
             // Notification dispatched successfully

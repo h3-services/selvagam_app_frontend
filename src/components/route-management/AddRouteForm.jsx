@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faMapLocationDot, faSearch, faCircleNotch, faChevronDown, faRoute, faLocationDot, faPlus, faBus, faGripVertical, faLocationCrosshairs, faExchangeAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faMapLocationDot, faSearch, faCircleNotch, faChevronDown, faRoute, faLocationDot, faPlus, faBus, faGripVertical, faLocationCrosshairs, faExchangeAlt, faMagic, faCheck, faInfoCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, ZoomControl } from 'react-leaflet';
 import { COLORS } from '../../constants/colors';
 import { LocationMarker, createSchoolIcon, createStopIcon } from './RouteMapUtils';
@@ -44,6 +44,78 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
         window.addEventListener('click', handleClickOutside);
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);
+
+    const SelectField = ({ label, icon, value, onChange, options, placeholder, disabled = false, error, activeColor = 'blue' }) => {
+        const [isOpen, setIsOpen] = useState(false);
+        const containerRef = useRef(null);
+
+        useEffect(() => {
+            const handleClickOutside = (event) => {
+                if (containerRef.current && !containerRef.current.contains(event.target)) {
+                    setIsOpen(false);
+                }
+            };
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }, []);
+
+        const selectedOption = options.find(opt => opt.value == value);
+
+        const colorConfig = {
+            blue: { primary: 'blue-600', light: 'bg-blue-50', border: 'hover:border-blue-400', ring: 'ring-blue-500' },
+            indigo: { primary: 'indigo-600', light: 'bg-indigo-50', border: 'hover:border-indigo-400', ring: 'ring-indigo-500' },
+            emerald: { primary: 'emerald-600', light: 'bg-emerald-50', border: 'hover:border-emerald-400', ring: 'ring-emerald-500' },
+            amber: { primary: 'amber-600', light: 'bg-amber-50', border: 'hover:border-amber-400', ring: 'ring-amber-500' }
+        };
+        const theme = colorConfig[activeColor] || colorConfig.blue;
+
+        return (
+            <div className={`relative group/field ${isOpen ? 'z-[3000]' : 'z-10'}`} ref={containerRef}>
+                <div className="flex justify-between items-center mb-1.5 ml-1">
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">{label}</label>
+                    {error && <span className="text-[9px] font-bold text-rose-500 animate-pulse uppercase tracking-wider">{error}</span>}
+                </div>
+                <div 
+                    onClick={() => !disabled && setIsOpen(!isOpen)}
+                    className={`relative flex items-center justify-between bg-white rounded-2xl border ${disabled ? 'bg-slate-50 cursor-not-allowed opacity-60' : `cursor-pointer ${theme.border} hover:shadow-md`} transition-all duration-300 px-4 py-3 ${isOpen ? `ring-4 ${theme.ring}/10 border-${theme.primary.split('-')[0]}-500 shadow-lg` : error ? 'border-rose-400 ring-4 ring-rose-500/5' : 'border-slate-200'}`}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 ${selectedOption ? `bg-${theme.primary} text-white shadow-sm` : error ? 'bg-rose-50 text-rose-400' : 'bg-slate-100 text-slate-400'}`}>
+                            <FontAwesomeIcon icon={icon} className="text-xs" />
+                        </div>
+                        {selectedOption ? (
+                            <span className="text-[13px] font-bold text-slate-800">{selectedOption.label}</span>
+                        ) : (
+                            <span className="text-[13px] font-bold text-slate-400">{placeholder}</span>
+                        )}
+                    </div>
+                    <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 text-[10px] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                </div>
+
+                {isOpen && !disabled && (
+                    <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-white rounded-2xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] border border-slate-100 z-[3001] max-h-56 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="flex flex-col gap-1">
+                            {options.map((opt, idx) => (
+                                <div 
+                                    key={idx}
+                                    onClick={() => { onChange({ target: { value: opt.value } }); setIsOpen(false); }}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 ${value == opt.value ? `bg-${theme.primary} text-white shadow-sm` : 'hover:bg-slate-50 text-slate-700'}`}
+                                >
+                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 ${value == opt.value ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                                        <FontAwesomeIcon icon={icon} />
+                                    </div>
+                                    <span className={`text-[12px] font-bold truncate flex-1 ${value == opt.value ? 'text-white' : 'text-slate-800'}`}>{opt.label}</span>
+                                    {value == opt.value && (
+                                        <FontAwesomeIcon icon={faCheck} className="text-[10px] shrink-0" />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     // Debounce search for suggestions
     useEffect(() => {
@@ -295,31 +367,47 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
     return (
         <div className="fixed inset-0 z-[99999]">
             <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md" onClick={onClose}></div>
-            <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-gradient-to-br from-blue-50 to-white shadow-2xl z-[100000] flex flex-col transition-all">
+            <div className="fixed right-0 top-0 h-full w-full lg:w-[1100px] bg-slate-50 shadow-2xl z-[100000] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1)">
                 
-                {/* Static Action Buttons */}
-                <div className="absolute top-6 right-8 z-[100010] flex items-center gap-3">
+                {/* Static Action Buttons (Close / Auto Fill) */}
+                <div className="absolute top-6 right-6 sm:right-8 z-[100030] flex items-center gap-3 hidden lg:flex">
                     <button 
                         onClick={onClose} 
-                        className="w-12 h-12 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
+                        className="w-10 h-10 rounded-2xl bg-white/80 backdrop-blur border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all duration-300 shadow-sm active:scale-90"
                     >
                         <FontAwesomeIcon icon={faTimes} className="text-lg" />
                     </button>
                 </div>
 
-                <div className="relative p-6 sm:p-8 border-b border-blue-100 flex-shrink-0">
-                    <div className="flex items-center gap-4 ml-1">
+                {/* Premium Header */}
+                <div className="relative px-4 sm:px-8 py-5 sm:py-8 flex justify-between items-center z-[100020] bg-white border-b border-slate-100 shadow-sm">
+                    <div className="flex items-center gap-3 sm:gap-6">
+                        <button 
+                            onClick={onClose}
+                            className="lg:hidden w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 active:scale-95 transition-all"
+                        >
+                            <FontAwesomeIcon icon={faArrowLeft} />
+                        </button>
+                        <div className="relative group">
+                            <div className="absolute -inset-2 bg-blue-600 blur-xl opacity-0 group-hover:opacity-20 rounded-full transition-opacity duration-700"></div>
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-[20px] sm:rounded-[22px] flex items-center justify-center shadow-[0_15px_30px_rgba(58,123,255,0.3)] relative z-10 text-white transform group-hover:rotate-6 transition-transform duration-500" style={{ background: `linear-gradient(135deg, ${COLORS.SIDEBAR_BG}, #1e3a8a)` }}>
+                                <FontAwesomeIcon icon={initialData ? faMapLocationDot : faRoute} className="text-lg sm:text-xl" />
+                            </div>
+                        </div>
                         <div>
-                            <h3 className="font-bold text-2xl" style={{ color: COLORS.SIDEBAR_BG }}>Add New Route</h3>
-                            <p className="text-gray-500 text-sm">Create a new travel route with stops</p>
+                            <h3 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight leading-none mb-1 sm:mb-1.5">{initialData ? 'Update Route' : 'Add Route'}</h3>
+                            <div className="flex items-center gap-2">
+                                <span className="bg-blue-600 w-1.5 h-1.5 rounded-full animate-pulse"></span>
+                                <p className="text-slate-500 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em]">Route Protocol</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto md:overflow-hidden p-4 sm:p-8">
+                <div className="flex-1 overflow-y-auto md:overflow-hidden px-3 lg:px-8 pb-48 lg:pb-8">
                     <div className="flex flex-col md:grid md:grid-cols-2 gap-6 sm:gap-8 h-full">
                         {/* Left Column: Map */}
-                        <div className="flex flex-col h-[550px] md:h-full rounded-2xl overflow-hidden shadow-md border-2 border-blue-100 relative shrink-0">
+                        <div className="flex flex-col h-[400px] lg:h-full rounded-[2rem] overflow-hidden shadow-xl border-4 border-white relative shrink-0">
                             <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col gap-1">
                                 <div className="flex gap-2">
                                     <input
@@ -416,100 +504,73 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                             </MapContainer>
 
                             {!selectedPosition && (
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-purple-900 text-xs font-bold px-4 py-2 rounded-full pointer-events-none z-[1000] shadow-lg border border-purple-200">
+                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-blue-900 text-xs font-bold px-4 py-2 rounded-full pointer-events-none z-[1000] shadow-lg border border-blue-200 animate-bounce">
                                     Click map to set stop location
                                 </div>
                             )}
                         </div>
 
                         {/* Right Column: Details & Stops List */}
-                        <div className="flex flex-col md:h-full md:overflow-y-auto pr-2 pb-10 md:pb-0">
+                        <div className="flex flex-col md:h-full md:overflow-y-auto pr-0 lg:pr-2 space-y-6">
                             {/* Route Details */}
-                            <div className="space-y-4 mb-6">
-                                <h4 className="font-bold text-lg text-gray-800 border-b border-blue-100 pb-2 flex items-center gap-2">
-                                    Route Details
-                                </h4>
-
-
-
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Route Name</label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Route A - Downtown"
-                                        value={newRoute.routeName}
-                                        onChange={(e) => setNewRoute({ ...newRoute, routeName: e.target.value })}
-                                        className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm"
-                                    />
+                            <div className="bg-white rounded-[1.5rem] p-4 lg:p-6 shadow-sm border border-slate-100 space-y-6">
+                                <div className="flex items-center gap-4 mb-2">
+                                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                        <FontAwesomeIcon icon={faInfoCircle} />
+                                    </div>
+                                    <h4 className="font-black text-slate-900 tracking-tight">General Info</h4>
                                 </div>
 
-                                <div>
-                                    <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: COLORS.SIDEBAR_BG }}>Assigned Bus</label>
-                                    <div className="relative">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setShowBusDropdown(!showBusDropdown);
-                                            }}
-                                            className="w-full bg-white border-2 border-blue-100 rounded-xl px-4 py-3 text-sm focus:border-blue-400 focus:outline-none transition shadow-sm text-left flex items-center justify-between"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <FontAwesomeIcon icon={faBus} className="text-blue-500" />
-                                                <span className="font-bold text-gray-700">
-                                                    {newRoute.assignedBus ? `${newRoute.assignedBus}` : 'Select a Bus'}
-                                                </span>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-[0.15em] ml-1">Route Name</label>
+                                        <div className="relative flex items-center bg-white rounded-2xl border border-slate-200 hover:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/10 focus-within:border-blue-500 transition-all duration-300 group/input">
+                                            <div className="w-11 h-11 flex items-center justify-center text-slate-400 absolute left-0 top-0 pointer-events-none transition-all group-focus-within/input:text-blue-600">
+                                                <FontAwesomeIcon icon={faRoute} className="text-sm" />
                                             </div>
-                                            <FontAwesomeIcon icon={faChevronDown} className={`text-blue-400 transition-transform ${showBusDropdown ? 'rotate-180' : ''}`} />
-                                        </button>
-
-                                        {showBusDropdown && (
-                                            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-blue-100 rounded-2xl shadow-xl z-[2000] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                                                <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                                                    <div 
-                                                        onClick={() => {
-                                                            setNewRoute({ ...newRoute, busId: '', assignedBus: '' });
-                                                            setShowBusDropdown(false);
-                                                        }}
-                                                        className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm font-bold text-slate-400 border-b border-slate-50"
-                                                    >
-                                                        None / Unassigned
-                                                    </div>
-                                                    {(availableBuses || []).map(bus => (
-                                                        <div 
-                                                            key={bus.id}
-                                                            onClick={() => {
-                                                                setNewRoute({ 
-                                                                    ...newRoute, 
-                                                                    busId: bus.id, 
-                                                                    assignedBus: bus.busNumber 
-                                                                });
-                                                                setShowBusDropdown(false);
-                                                            }}
-                                                            className="px-4 py-3 hover:bg-blue-50 cursor-pointer group transition-colors border-b border-slate-50 last:border-0"
-                                                        >
-                                                            <div className="flex flex-col">
-                                                                <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">
-                                                                    {bus.busNumber}
-                                                                </span>
-                                                                <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                                                                    Driver: {bus.driverName || 'No Driver'}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                            <input
+                                                type="text"
+                                                placeholder="e.g. Route A - Downtown"
+                                                value={newRoute.routeName}
+                                                onChange={(e) => setNewRoute({ ...newRoute, routeName: e.target.value })}
+                                                className="w-full pl-11 pr-4 py-3 bg-transparent rounded-2xl text-[13px] font-bold text-slate-700 placeholder-slate-300 focus:outline-none"
+                                            />
+                                        </div>
                                     </div>
+
+                                    <SelectField 
+                                        label="Assigned Bus" 
+                                        icon={faBus} 
+                                        value={newRoute.busId} 
+                                        onChange={(e) => {
+                                            const bus = availableBuses.find(b => b.id == e.target.value);
+                                            setNewRoute({ 
+                                                ...newRoute, 
+                                                busId: e.target.value, 
+                                                assignedBus: bus ? bus.busNumber : '' 
+                                            });
+                                        }} 
+                                        activeColor="blue"
+                                        placeholder="Select a Bus"
+                                        options={[
+                                            { value: '', label: 'None / Unassigned' },
+                                            ...(availableBuses || []).map(bus => ({
+                                                value: bus.id,
+                                                label: `${bus.busNumber} (${bus.driverName || 'No Driver'})`
+                                            }))
+                                        ]}
+                                    />
                                 </div>
                             </div>
 
                             {/* Stop Points Management */}
-                            <div className="flex flex-col flex-1">
-                                <h4 className="font-bold text-lg text-gray-800 border-b border-blue-100 pb-2 mb-4 flex items-center gap-2">
-                                    Stops
-                                </h4>
+                            <div className="bg-white rounded-[1.5rem] p-4 lg:p-6 shadow-sm border border-slate-100 flex flex-col h-fit">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                        <FontAwesomeIcon icon={faLocationDot} />
+                                    </div>
+                                    <h4 className="font-black text-slate-900 tracking-tight">Stop Registry</h4>
+                                </div>
 
                                 <div className="space-y-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-blue-100 shadow-inner">
                                     <div className="grid grid-cols-2 gap-3">
@@ -670,15 +731,25 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                     </div>
                 </div>
 
-                <div className="p-6 sm:p-8 border-t border-blue-100 bg-white flex-shrink-0">
+                <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6 bg-white/90 backdrop-blur-xl border-t border-slate-200 z-[100030] shadow-[0_-15px_40px_rgba(0,0,0,0.1)]">
                     <button
                         onClick={handleAddRoute}
                         disabled={isSaving}
-                        className="w-full py-4 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] transition-all text-base disabled:bg-gray-400 disabled:shadow-none flex items-center justify-center gap-2"
-                        style={{ backgroundColor: isSaving ? undefined : COLORS.SIDEBAR_BG }}
+                        className={`group w-full h-12 lg:h-14 rounded-xl lg:rounded-2xl font-black text-white text-[8px] lg:text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 lg:gap-4 transition-all shadow-2xl active:scale-95 ${isSaving ? 'bg-slate-400 opacity-60 cursor-not-allowed' : 'hover:scale-[1.01] hover:shadow-blue-500/25 active:scale-95'}`}
+                        style={{ 
+                            background: !isSaving
+                                ? 'linear-gradient(135deg, #3A7BFF 0%, #1e3a8a 100%)' 
+                                : '' 
+                        }}
                     >
-                        {isSaving ? <FontAwesomeIcon icon={faCircleNotch} spin /> : null}
-                        {isSaving ? 'Creating Route...' : 'Add Route'}
+                        <span>{isSaving ? 'Processing Protocol...' : (initialData ? 'Save Route Changes' : 'Initialize Route')}</span>
+                        <div className={`w-9 h-9 ${isSaving ? '' : 'bg-white/10'} rounded-xl flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform`}>
+                            {isSaving ? (
+                                <FontAwesomeIcon icon={faCircleNotch} spin className="text-xs" />
+                            ) : (
+                                <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                            )}
+                        </div>
                     </button>
                 </div>
             </div>
