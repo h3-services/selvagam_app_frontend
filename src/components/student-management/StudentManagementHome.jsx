@@ -358,6 +358,7 @@ const StudentManagementHome = () => {
         setPendingBulkUpdate({ newStatus, selectedRows, uniqueParents });
         setBulkParentSelection(smartSelection);
         setShowBulkParentStatusModal(true);
+        setShowBulkMenu(false);
     };
 
     const confirmBulkUpdate = async (shouldUpdateParents) => {
@@ -606,13 +607,13 @@ const StudentManagementHome = () => {
             {!selectedStudent && (
                 <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className='ml-14 lg:ml-0'>
+                        <div>
                             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                                 Student Management
                             </h1>
                         </div>
 
-                        <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 lg:gap-6">
                             {/* View Mode Toggle (Segmented Control) */}
                             <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-inner">
                                 <button
@@ -687,8 +688,8 @@ const StudentManagementHome = () => {
             )}
 
             {/* Grid Content */}
-            <div className="flex-1 px-2 lg:px-8 pt-2 pb-2 lg:pt-4 lg:pb-4 overflow-hidden flex flex-col w-full h-full">
-                <div className="flex-1 flex flex-col min-h-0 h-full lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
+            <div className="flex-1 px-2 lg:px-8 pt-2 pb-1 lg:pt-4 lg:pb-2 overflow-hidden flex flex-col w-full h-full">
+                <div className="flex-1 flex flex-col min-h-0 h-full lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-1 overflow-hidden">
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
@@ -721,7 +722,7 @@ const StudentManagementHome = () => {
             </div>
 
             {/* Bulk Actions Floating Pill */}
-            {selectedRows.length > 0 && !selectedStudent && (
+            {selectedRows.length > 0 && !selectedStudent && !showBulkParentStatusModal && !showParentStatusModal && (
                 <>
                     {/* Full Screen Backdrop Blur when menu is open */}
                     {showBulkMenu && (
@@ -848,7 +849,7 @@ const StudentManagementHome = () => {
             />
 
             {/* Floating Add Button */}
-            {!showForm && !selectedStudent && (
+            {!showForm && !selectedStudent && !showBulkParentStatusModal && !showParentStatusModal && (
                 <button
                     onClick={() => navigate('/students/add')}
                     className="fixed bottom-24 right-6 sm:bottom-32 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 text-white rounded-full shadow-2xl hover:shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center z-40 transform hover:-translate-y-1"

@@ -48,24 +48,79 @@ body,
   background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  margin: 12px 1.5rem 24px 1.5rem !important;
+  margin: 12px 1.5rem 4px 1.5rem !important;
   border-radius: 20px !important;
   padding: 0.5rem 1rem !important;
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  justify-content: center !important;
-  gap: 1rem !important;
+  justify-content: flex-start !important;
+  padding-left: 2rem !important;
+  gap: 1.5rem !important;
   min-height: 60px !important;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.8) !important;
-  z-index: 10 !important;
+  z-index: 1000 !important;
   white-space: nowrap !important;
+  overflow: visible !important;
 }
 
-/* Hide the Page Size selector to keep it clean */
-.ag-paging-size-panel {
+/* Remove default spacer to allow left alignment */
+.ag-paging-panel > .ag-fill {
   display: none !important;
+}
+
+/* Ensure AG Grid popups (like the Page Size dropdown) are never clipped */
+.ag-popup, .ag-select-list {
+  z-index: 999999 !important;
+  overflow: visible !important;
+}
+
+.ag-select-list {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+  padding: 4px !important;
+  min-width: 80px !important;
+}
+
+.ag-select-list-item {
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+}
+
+.ag-select-list-item:hover {
+  background: #f8fafc !important;
+  color: #3b82f6 !important;
+}
+
+.ag-select-list-item span {
+  width: 100% !important;
+  text-align: center !important;
+  display: block !important;
+}
+
+/* Updated Page Size selector to be premium and compact */
+.ag-paging-size-panel {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+}
+
+.ag-paging-size-panel select {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  padding: 2px 8px !important;
+  outline: none !important;
+  cursor: pointer !important;
 }
 
 /* Fix the Row Summary (1 to 5 of 5) */
@@ -184,24 +239,47 @@ body,
 /* MOBILE PAGINATION COMPACTNESS */
 @media (max-width: 768px) {
   .ag-paging-panel {
-    gap: 0.5rem !important;
-    padding: 0.5rem !important;
-    min-height: 54px !important;
-    margin: 8px 8px !important;
+    gap: 0.35rem !important;
+    padding: 0.25rem 0.6rem !important;
+    min-height: 48px !important;
+    margin: 6px 6px !important;
     border-radius: 12px !important;
+    padding-left: 0.8rem !important;
   }
   
   .ag-paging-button {
-    width: 32px !important;
-    height: 32px !important;
+    width: 28px !important;
+    height: 28px !important;
     border-radius: 8px !important;
   }
   
-  .ag-paging-description span[ref="lbCurrent"] {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 8px !important;
+  .ag-paging-size-panel {
     font-size: 11px !important;
+    gap: 0.3rem !important;
+  }
+
+  .ag-paging-size-panel select {
+    padding: 1px 4px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+  }
+
+  .ag-paging-row-summary-panel {
+    font-size: 10px !important;
+    gap: 2px !important;
+    margin-right: 4px !important;
+  }
+
+  .ag-paging-page-summary-panel {
+    gap: 0.4rem !important;
+    font-size: 11px !important;
+  }
+  
+  .ag-paging-description span[ref="lbCurrent"] {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    font-size: 10px !important;
   }
 }
 
@@ -221,5 +299,16 @@ body,
     .ag-paging-panel {
       padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem) !important;
     }
+  }
+}
+
+/* Hide overlapping bottom elements when Sidebar is open on mobile */
+@media (max-width: 1023px) {
+  body.sidebar-open .ag-paging-panel,
+  body.sidebar-open button.fixed.bottom-24,
+  body.sidebar-open button.fixed.sm\:bottom-32,
+  body.sidebar-open div.fixed.bottom-20,
+  body.sidebar-open div.fixed.sm\:bottom-28 {
+    display: none !important;
   }
 }

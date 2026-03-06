@@ -112,7 +112,7 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
 
     return (
         <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col animate-fade-in">
-            <form onSubmit={handleSendMessage} className="p-5 sm:p-8 lg:p-12 flex flex-col gap-6 sm:gap-10">
+            <form onSubmit={handleSendMessage} className="p-4 sm:p-8 lg:p-12 flex flex-col gap-6 sm:gap-10">
                 {/* Mechanism Section */}
                 <div className="flex flex-col gap-3 max-w-md">
                     <label className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1 flex items-center gap-2">
@@ -123,14 +123,14 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
                         <button
                             type="button"
                             onClick={() => setMessageType('text')}
-                            className={`flex-1 px-8 py-3 rounded-[0.9rem] text-xs font-black transition-all flex items-center justify-center gap-2.5 tracking-wider ${messageType === 'text' ? 'bg-white text-blue-600 shadow-md border border-slate-100 ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-[0.9rem] text-[10px] sm:text-xs font-black transition-all flex items-center justify-center gap-2 tracking-wider ${messageType === 'text' ? 'bg-white text-blue-600 shadow-md border border-slate-100 ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             <FontAwesomeIcon icon={faCommentDots} /> TEXT ALERT
                         </button>
                         <button
                             type="button"
                             onClick={() => setMessageType('audio')}
-                            className={`flex-1 px-8 py-3 rounded-[0.9rem] text-xs font-black transition-all flex items-center justify-center gap-2.5 tracking-wider ${messageType === 'audio' ? 'bg-white text-blue-600 shadow-md border border-slate-100 ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-[0.9rem] text-[10px] sm:text-xs font-black transition-all flex items-center justify-center gap-2 tracking-wider ${messageType === 'audio' ? 'bg-white text-blue-600 shadow-md border border-slate-100 ring-1 ring-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             <FontAwesomeIcon icon={faMicrophone} /> VOICE NOTE
                         </button>
@@ -146,7 +146,7 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="e.g. Weather Alert - Route Delay"
-                            className="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50/50 text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-400 focus:bg-white transition-all shadow-sm"
+                            className="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50/50 text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-400 focus:bg-white transition-all shadow-sm"
                             required
                         />
                     </div>
@@ -158,7 +158,7 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
                                 value={messageText}
                                 onChange={(e) => setMessageText(e.target.value)}
                                 placeholder={messageType === 'text' ? "Compose your critical announcement..." : "Describe the voice message contents..."}
-                                className="w-full min-h-[160px] p-8 rounded-3xl border border-slate-200 bg-slate-50/50 text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-400 focus:bg-white transition-all resize-none shadow-sm custom-scrollbar leading-relaxed"
+                                className="w-full min-h-[140px] sm:min-h-[160px] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-200 bg-slate-50/50 text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-indigo-400 focus:bg-white transition-all resize-none shadow-sm custom-scrollbar leading-relaxed"
                                 required
                             ></textarea>
                             <div className="absolute bottom-6 right-6 flex items-center gap-2">
@@ -175,7 +175,7 @@ const ComposeMessage = ({ targetCategory, targetId, targetLabel }) => {
                     <button
                         type="submit"
                         disabled={isSending || !title.trim() || !messageText.trim() || loadingData}
-                        className={`group relative overflow-hidden px-12 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center gap-4 active:scale-95 shadow-2xl ${
+                        className={`group relative overflow-hidden w-full sm:w-auto px-10 sm:px-12 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-4 active:scale-95 shadow-2xl ${
                             isSending || !title.trim() || !messageText.trim() || loadingData
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none'
                             : 'bg-blue-600 text-white hover:bg-slate-900 hover:shadow-indigo-200 hover:-translate-y-1'

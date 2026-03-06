@@ -65,7 +65,7 @@ const CommunicationHome = () => {
                 handleCategoryChange(id);
                 setShowDropdown(false);
             }}
-            className={`flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl border-2 transition-all font-black text-[11px] uppercase tracking-[0.2em] relative overflow-hidden group
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-[9px] sm:text-[11px] uppercase tracking-[0.2em] relative overflow-hidden group
                 ${current === id 
                     ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-200' 
                     : 'bg-white border-slate-100 text-slate-400 hover:border-blue-400 hover:text-blue-600 shadow-sm'}`}
@@ -81,14 +81,14 @@ const CommunicationHome = () => {
             {/* Header */}
             <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-4 sticky top-0 z-30">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 max-w-7xl mx-auto w-full">
-                    <div className='ml-14 lg:ml-0'>
+                    <div>
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">
                             Communication Hub
                         </h1>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Announcement Control</p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-3 flex-1 max-w-2xl">
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 flex-1 max-w-2xl">
                         <CategoryButton id="ALL" label="All Parents" icon={faUsers} current={category} />
                         <CategoryButton id="CLASS" label="Class Wise" icon={faGraduationCap} current={category} />
                         <CategoryButton id="ROUTE" label="Route Wise" icon={faRoute} current={category} />
@@ -102,7 +102,7 @@ const CommunicationHome = () => {
                     <div className="max-w-xl mx-auto relative px-4 sm:px-0">
                         <button
                             onClick={() => setShowDropdown(!showDropdown)}
-                            className="w-full bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 flex items-center justify-between text-slate-900 font-black text-sm hover:border-blue-400 hover:shadow-lg transition-all"
+                            className="w-full bg-white border-2 border-slate-200 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between text-slate-900 font-black text-xs sm:text-sm hover:border-blue-400 hover:shadow-lg transition-all"
                         >
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">

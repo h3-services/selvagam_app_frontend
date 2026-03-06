@@ -38,6 +38,14 @@ const Sidebar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+    }
+  }, [isOpen, isMobile]);
+
   // Helper to check if a path is active
   const isActive = (path) => {
     if (path === '/dashboard' && location.pathname === '/dashboard') return true;
@@ -140,7 +148,7 @@ const Sidebar = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="lg:hidden fixed top-4 right-4 z-[9999] p-2.5 bg-white/10 backdrop-blur-md rounded-xl text-black shadow-lg hover:bg-white/20 transition-all active:scale-95 border border-white/10"
+          className="lg:hidden fixed top-3.5 right-4 z-[9999] p-2 bg-white rounded-xl text-slate-800 shadow-md hover:bg-slate-50 transition-all active:scale-95 border border-slate-200"
         >
           <RiMenu4Fill size={24} />
         </button>
