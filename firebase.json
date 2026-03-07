@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "selvagam-testing-site",
     "public": "dist",
     "ignore": [
       "firebase.json",
