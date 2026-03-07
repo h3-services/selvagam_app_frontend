@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faCalendarAlt, faRoute, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import TripList from './TripList';
+import TripDetail from './TripDetail';
 import { tripService } from '../../services/tripService';
 import { driverService } from '../../services/driverService';
 import { busService } from '../../services/busService';
@@ -10,6 +11,7 @@ import { routeService } from '../../services/routeService';
 
 const TripManagementHome = () => {
     const navigate = useNavigate();
+    const { tripId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
 
     // Derived States
@@ -63,6 +65,7 @@ const TripManagementHome = () => {
             setLoading(false);
         }
     };
+
     const handleSearchChange = (value) => {
         const newParams = new URLSearchParams(searchParams);
         if (value) newParams.set('search', value);
@@ -78,15 +81,17 @@ const TripManagementHome = () => {
     };
 
 
-    const filteredTrips = trips.filter(trip => {
-        const matchesSearch = trip.route.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            trip.bus.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            trip.driver.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        const matchesDate = !selectedDate || trip.date === selectedDate;
-        
-        return matchesSearch && matchesDate;
-    });
+    const filteredTrips = useMemo(() => {
+        return trips.filter(trip => {
+            const matchesSearch = trip.route.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                trip.bus.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                trip.driver.toLowerCase().includes(searchQuery.toLowerCase());
+            
+            const matchesDate = !selectedDate || trip.date === selectedDate;
+            
+            return matchesSearch && matchesDate;
+        });
+    }, [trips, searchQuery, selectedDate]);
 
     const handleStatusChange = async (id, newStatus) => {
         try {
@@ -102,52 +107,60 @@ const TripManagementHome = () => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className='ml-14 lg:ml-0'>
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Trip Management</h1>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row items-center gap-6">
-                        <div className="relative group">
-                            <input
-                                type="date"
-                                value={selectedDate}
-                                onChange={(e) => handleDateChange(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-full sm:w-44 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none"
-                            />
-                            <FontAwesomeIcon icon={faCalendarAlt} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
+        <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in overflow-hidden">
+            {/* Header - Only show when NOT in detail view */}
+            {!tripId && (
+                <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-3 sticky top-0 z-30">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className='ml-14 lg:ml-0'>
+                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Trip Management</h1>
                         </div>
-                        <div className="relative group">
-                            <input
-                                type="text"
-                                placeholder="Search trips..."
-                                value={searchQuery}
-                                onChange={(e) => handleSearchChange(e.target.value)}
-                                className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
-                            />
-                            <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
+
+                        <div className="flex flex-col md:flex-row items-center gap-6">
+                            <div className="relative group">
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) => handleDateChange(e.target.value)}
+                                    className="pl-10 pr-4 py-2.5 w-full sm:w-44 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none"
+                                />
+                                <FontAwesomeIcon icon={faCalendarAlt} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
+                            </div>
+                            <div className="relative group">
+                                <input
+                                    type="text"
+                                    placeholder="Search trips..."
+                                    value={searchQuery}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
+                                    className="pl-10 pr-4 py-2.5 w-full md:w-80 bg-blue-50/50 border border-indigo-100/50 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:bg-white focus:border-indigo-300 transition-all outline-none placeholder:text-indigo-300"
+                                />
+                                <FontAwesomeIcon icon={faSearch} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-blue-600 transition-colors" />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Grid Content */}
-            <div className="flex-1 px-2 lg:px-8 pt-4 pb-4 overflow-hidden flex flex-col w-full">
-                <div className="flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3 overflow-hidden">
+            {/* Content Area */}
+            <div className={`flex-1 overflow-hidden flex flex-col w-full ${!tripId ? 'px-2 lg:px-8 pt-4 pb-4' : 'px-4 lg:px-8 pt-6'}`}>
+                <div className={`${!tripId ? 'flex-1 flex flex-col min-h-0 lg:bg-white lg:rounded-[2.5rem] lg:shadow-[0_20px_70px_-10px_rgba(0,0,0,0.1)] lg:border lg:border-white lg:px-6 lg:pt-2 lg:pb-3' : 'h-full'} overflow-hidden`}>
                     {loading ? (
                         <div className="h-full flex flex-col items-center justify-center min-h-[400px]">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
-                                <FontAwesomeIcon icon={faCalendarAlt} spin className="text-2xl text-blue-600" />
+                                <FontAwesomeIcon icon={faRoute} spin className="text-2xl text-blue-600" />
                             </div>
-                            <p className="text-gray-500 font-medium tracking-wide">Loading...</p>
+                            <p className="text-gray-500 font-medium tracking-wide">Loading trips...</p>
                         </div>
+                    ) : tripId ? (
+                        <TripDetail 
+                            tripId={tripId} 
+                            onBack={() => navigate('/trips')} 
+                        />
                     ) : (
                         <TripList
                             filteredTrips={filteredTrips}
                             handleStatusChange={handleStatusChange}
+                            onSelectTrip={(id) => navigate(`/trips/${id}/detail`)}
                         />
                     )}
                 </div>
@@ -157,3 +170,4 @@ const TripManagementHome = () => {
 };
 
 export default TripManagementHome;
+

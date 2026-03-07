@@ -5,7 +5,7 @@ import { faRoute, faUser, faSpinner, faCheckCircle } from '@fortawesome/free-sol
 import TripStatusBadge from './TripStatusBadge';
 import '../../styles/agGridMobileStyles.css';
 
-const TripList = ({ filteredTrips, handleStatusChange }) => {
+const TripList = ({ filteredTrips, handleStatusChange, onSelectTrip }) => {
     const [activeStatusId, setActiveStatusId] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
@@ -23,11 +23,11 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
             minWidth: 180,
             cellStyle: { display: 'flex', alignItems: 'center' },
             cellRenderer: params => (
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                <div className="flex items-center gap-2 group/name cursor-pointer">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 group-hover/name:bg-blue-600 group-hover/name:text-white transition-all duration-300">
                         <FontAwesomeIcon icon={faRoute} />
                     </div>
-                    <span className="font-light text-gray-950">{params.value}</span>
+                    <span className="font-light text-gray-950 group-hover/name:text-blue-600 transition-colors duration-300">{params.value}</span>
                 </div>
             )
         },
@@ -126,6 +126,7 @@ const TripList = ({ filteredTrips, handleStatusChange }) => {
                             resizable: true,
                             headerClass: "font-black uppercase text-[12px] tracking-wider",
                         }}
+                        onRowClicked={(params) => onSelectTrip(params.data.id)}
                         rowHeight={isMobile ? 60 : 80}
                         headerHeight={isMobile ? 40 : 50}
                         pagination={true}

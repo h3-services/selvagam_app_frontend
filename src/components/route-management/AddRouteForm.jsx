@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faMapLocationDot, faSearch, faCircleNotch, faChevronDown, faRoute, faLocationDot, faPlus, faBus, faGripVertical, faLocationCrosshairs, faExchangeAlt, faMagic, faCheck, faInfoCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faMapLocationDot, faSearch, faCircleNotch, faChevronDown, faRoute, faLocationDot, faPlus, faBus, faGripVertical, faLocationCrosshairs, faExchangeAlt, faMagic, faCheck, faInfoCircle, faArrowLeft, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, ZoomControl } from 'react-leaflet';
 import { COLORS } from '../../constants/colors';
 import { LocationMarker, createSchoolIcon, createStopIcon } from './RouteMapUtils';
@@ -23,6 +23,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
         }
     }, [show, initialData]);
     const [currentStopName, setCurrentStopName] = useState('');
+    const [currentStopLocation, setCurrentStopLocation] = useState('');
     const [selectedPosition, setSelectedPosition] = useState(null);
     const [locationSearchQuery, setLocationSearchQuery] = useState('');
     const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -37,6 +38,8 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
     const [draggedItem, setDraggedItem] = useState(null);
     const [dragOverItem, setDragOverItem] = useState(null);
     const [dragType, setDragType] = useState(null); // 'pickup' or 'drop'
+    const [editingGroupHeader, setEditingGroupHeader] = useState(null);
+    const [tempGroupHeaderName, setTempGroupHeaderName] = useState('');
 
     // Close dropdown on click outside
     useEffect(() => {
@@ -225,6 +228,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
             setNewRoute(prev => {
                 const updatedStops = [...prev.stopPoints, { 
                     name: currentStopName.trim(), 
+                    location: currentStopLocation.trim(),
                     position: [selectedPosition.lat, selectedPosition.lng],
                     pickupOrder: parseInt(newStopPickupOrder) || (prev.stopPoints.length + 1),
                     dropOrder: parseInt(newStopDropOrder) || (prev.stopPoints.length + 1)
@@ -236,6 +240,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                 };
             });
             setCurrentStopName('');
+            setCurrentStopLocation('');
             setSelectedPosition(null);
             setLocationSearchQuery('');
         }
@@ -259,8 +264,24 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
         setNewRoute(prev => ({ ...prev, stopPoints: newStops }));
     };
 
-    const handleDragStart = (e, index, type) => {
-        setDraggedItem(index);
+    const handleRenameGroup = (oldName, newName) => {
+        if (!newName.trim()) {
+            setEditingGroupHeader(null);
+            return;
+        }
+        
+        setNewRoute(prev => ({
+            ...prev,
+            stopPoints: (prev.stopPoints || []).map(stop => {
+                const isMatch = (stop.location === oldName) || (!stop.location && oldName === 'Unassigned Area');
+                return isMatch ? { ...stop, location: newName.trim() } : stop;
+            })
+        }));
+        setEditingGroupHeader(null);
+    };
+
+    const handleDragStart = (e, originalIndex, type) => {
+        setDraggedItem(originalIndex);
         setDragType(type);
         e.dataTransfer.effectAllowed = "move";
     };
@@ -271,35 +292,63 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
         setDragOverItem(index);
     };
 
-    const handleDrop = (e, targetIndex) => {
+    const handleDrop = (e, targetOriginalIndex, targetLocation) => {
         e.preventDefault();
-        if (draggedItem === null || draggedItem === targetIndex) {
+        if (draggedItem === null) {
             setDraggedItem(null);
             setDragOverItem(null);
             return;
         }
 
         const currentStops = [...newRoute.stopPoints];
+        const orderKey = dragType === 'pickup' ? 'pickupOrder' : 'dropOrder';
         
-        // Find the items being sorted by current dragType
+        // 1. Get current sorted order
         const sortedItems = currentStops
             .map((s, i) => ({ ...s, originalIndex: i }))
-            .sort((a, b) => {
-                const orderKey = dragType === 'pickup' ? 'pickupOrder' : 'dropOrder';
-                return (a[orderKey] || 0) - (b[orderKey] || 0);
-            });
+            .sort((a, b) => (a[orderKey] || 0) - (b[orderKey] || 0));
 
-        const movedItem = sortedItems[draggedItem];
-        const remainingItems = sortedItems.filter((_, i) => i !== draggedItem);
+        // 2. Find indices in the sorted array
+        const draggedIdx = sortedItems.findIndex(item => item.originalIndex === draggedItem);
+        let targetIdx = targetOriginalIndex !== null ? sortedItems.findIndex(item => item.originalIndex === targetOriginalIndex) : -1;
+
+        if (draggedIdx === -1) {
+            setDraggedItem(null);
+            setDragOverItem(null);
+            return;
+        }
+
+        const movedItem = { ...sortedItems[draggedIdx] };
         
-        // Insert at new position
-        remainingItems.splice(targetIndex, 0, movedItem);
+        // 3. Update location if dropped into a different group
+        if (targetLocation && movedItem.location !== targetLocation) {
+            movedItem.location = (targetLocation === 'Unassigned Area' ? '' : targetLocation);
+        }
 
-        // Update orders for all items based on new positions
+        const remainingItems = sortedItems.filter((_, i) => i !== draggedIdx);
+        
+        // 4. Handle dropping on a group header (targetIdx === -1)
+        if (targetIdx === -1 && targetLocation) {
+            const lastInLocIdx = [...remainingItems].reverse().findIndex(item => {
+                const itemLoc = item.location || 'Unassigned Area';
+                return itemLoc === targetLocation;
+            });
+            
+            if (lastInLocIdx !== -1) {
+                targetIdx = remainingItems.length - lastInLocIdx;
+            } else {
+                targetIdx = remainingItems.length;
+            }
+        } else if (targetIdx === -1) {
+            targetIdx = draggedIdx;
+        }
+
+        remainingItems.splice(targetIdx, 0, movedItem);
+
+        // 5. Update orders for all items based on new positions
         remainingItems.forEach((item, idx) => {
-            const orderKey = dragType === 'pickup' ? 'pickupOrder' : 'dropOrder';
             currentStops[item.originalIndex] = {
-                ...currentStops[item.originalIndex],
+                ...item,
                 [orderKey]: idx + 1
             };
         });
@@ -595,26 +644,40 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                             />
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col gap-2">
                                         <input
                                             type="text"
-                                            placeholder={selectedPosition ? "Enter stop name..." : "Select location on map ->"}
-                                            value={currentStopName}
-                                            onChange={(e) => setCurrentStopName(e.target.value)}
-                                            className="flex-1 bg-white border border-blue-100 rounded-xl px-4 py-3 text-sm font-medium focus:border-blue-400 focus:outline-none transition shadow-sm min-w-0"
-                                            onKeyDown={(e) => e.key === 'Enter' && handleAddStop()}
-                                            disabled={!selectedPosition}
-                                            title={currentStopName}
+                                            placeholder="Area/Location (e.g. Main Street)"
+                                            value={currentStopLocation}
+                                            onChange={(e) => setCurrentStopLocation(e.target.value)}
+                                            className="w-full bg-white border border-blue-100 rounded-xl px-4 py-2.5 text-xs font-bold text-blue-600 focus:border-blue-400 focus:outline-none transition shadow-sm placeholder:text-blue-200"
+                                            title="Grouping Location"
+                                            list="add-route-locations"
                                         />
-                                        <button
-                                            onClick={handleAddStop}
-                                            disabled={currentStopName.trim().length < 3 || !selectedPosition}
-                                            className={`w-12 rounded-xl flex items-center justify-center text-white shadow-md transition-all ${(currentStopName.trim().length < 3 || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'hover:shadow-lg'}`}
-                                            style={{ backgroundColor: (currentStopName.trim().length < 3 || !selectedPosition) ? undefined : COLORS.SIDEBAR_BG }}
-                                            title={selectedPosition && currentStopName.trim().length < 3 ? "Stop name must be at least 3 characters" : ""}
-                                        >
-                                            <FontAwesomeIcon icon={faPlus} />
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder={selectedPosition ? "Enter stop name..." : "Select location on map ->"}
+                                                value={currentStopName}
+                                                onChange={(e) => setCurrentStopName(e.target.value)}
+                                                className="flex-1 bg-white border border-blue-100 rounded-xl px-4 py-3 text-sm font-medium focus:border-blue-400 focus:outline-none transition shadow-sm min-w-0"
+                                                onKeyDown={(e) => e.key === 'Enter' && handleAddStop()}
+                                                disabled={!selectedPosition}
+                                                title={currentStopName}
+                                            />
+                                            <button
+                                                onClick={handleAddStop}
+                                                disabled={currentStopName.trim().length < 3 || !selectedPosition}
+                                                className={`w-12 rounded-xl flex items-center justify-center text-white shadow-md transition-all ${(currentStopName.trim().length < 3 || !selectedPosition) ? 'bg-gray-300 cursor-not-allowed' : 'hover:shadow-lg'}`}
+                                                style={{ backgroundColor: (currentStopName.trim().length < 3 || !selectedPosition) ? undefined : COLORS.SIDEBAR_BG }}
+                                                title={selectedPosition && currentStopName.trim().length < 3 ? "Stop name must be at least 3 characters" : ""}
+                                            >
+                                                <FontAwesomeIcon icon={faPlus} />
+                                            </button>
+                                        </div>
+                                        <span className="text-[10px] text-blue-500 font-medium ml-1">
+                                            * Click map to set stop location
+                                        </span>
                                     </div>
                                 </div>
 
@@ -634,40 +697,93 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                             </button>
                                         </div>
                                         {newRoute.stopPoints && newRoute.stopPoints.length > 0 ? (
-                                            <div className="space-y-2">
-                                                {newRoute.stopPoints
+                                            <div className="space-y-4">
+                                                {Object.entries(
+                                                    newRoute.stopPoints
                                                     .map((stop, originalIndex) => ({ ...stop, originalIndex }))
-                                                    .sort((a, b) => (a.pickupOrder || 0) - (b.pickupOrder || 0))
-                                                    .map((stop, displayIndex) => (
-                                                        <div 
-                                                            key={`pickup-${stop.originalIndex}`} 
-                                                            className={`flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border transition-all duration-200 ${draggedItem === displayIndex && dragType === 'pickup' ? 'opacity-40 scale-95 border-blue-300' : 'border-blue-50'} ${dragOverItem === displayIndex && dragType === 'pickup' ? 'border-t-4 border-t-blue-500 pt-2' : ''}`}
-                                                            draggable
-                                                            onDragStart={(e) => handleDragStart(e, displayIndex, 'pickup')}
-                                                            onDragOver={(e) => handleDragOver(e, displayIndex)}
-                                                            onDrop={(e) => handleDrop(e, displayIndex)}
-                                                            onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
-                                                        >
-                                                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                                <div className="flex items-center gap-2 shrink-0">
-                                                                    <div className="cursor-grab active:cursor-grabbing text-blue-300 hover:text-blue-500">
-                                                                        <FontAwesomeIcon icon={faGripVertical} className="text-[10px]" />
-                                                                    </div>
-                                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
-                                                                        {stop.pickupOrder !== undefined ? stop.pickupOrder : stop.originalIndex + 1}
-                                                                    </div>
+                                                    .reduce((acc, stop) => {
+                                                        const loc = stop.location || 'Unassigned Area';
+                                                        if (!acc[loc]) acc[loc] = [];
+                                                        acc[loc].push(stop);
+                                                        return acc;
+                                                    }, {})
+                                                ).map(([locationName, stops], groupIdx) => (
+                                                    <div 
+                                                        key={groupIdx} 
+                                                        className={`flex flex-col gap-2 p-1 rounded-xl transition-all duration-300 ${dragOverItem === `header-${locationName}` && dragType === 'pickup' ? 'bg-blue-50 border border-dashed border-blue-300' : 'border border-transparent'}`}
+                                                        onDragOver={(e) => { e.preventDefault(); if (draggedItem !== null && dragType === 'pickup') setDragOverItem(`header-${locationName}`); }}
+                                                        onDrop={(e) => handleDrop(e, null, locationName)}
+                                                    >
+                                                        <div className="flex items-center gap-2 px-1">
+                                                            <div className="w-1 h-3 rounded-full bg-blue-400"></div>
+                                                            {editingGroupHeader === locationName ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <input 
+                                                                        type="text" 
+                                                                        value={tempGroupHeaderName}
+                                                                        onChange={(e) => setTempGroupHeaderName(e.target.value)}
+                                                                        className="bg-transparent border-b border-blue-500 text-[10px] font-black uppercase tracking-widest focus:outline-none w-32 px-1 text-blue-600"
+                                                                        placeholder="New Name"
+                                                                        autoFocus
+                                                                    />
+                                                                    <button onClick={() => handleRenameGroup(locationName, tempGroupHeaderName)} className="text-emerald-500 hover:text-emerald-700 p-1">
+                                                                        <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                                                                    </button>
+                                                                    <button onClick={() => setEditingGroupHeader(null)} className="text-slate-400 hover:text-slate-600 p-1">
+                                                                        <FontAwesomeIcon icon={faTimes} className="text-[10px]" />
+                                                                    </button>
                                                                 </div>
-                                                                <div className="w-px h-8 bg-blue-100 mx-1"></div>
-                                                                <span className="text-sm font-bold text-gray-700 truncate">{stop.name}</span>
-                                                            </div>
-                                                            <button
-                                                                onClick={() => handleRemoveStop(stop.originalIndex)}
-                                                                className="text-gray-300 hover:text-red-500 transition-colors px-2 ml-2 shrink-0"
-                                                            >
-                                                                <FontAwesomeIcon icon={faTimes} className="text-sm" />
-                                                            </button>
+                                                            ) : (
+                                                                <div className="flex items-center gap-2 group/header">
+                                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{locationName}</span>
+                                                                    <button 
+                                                                        onClick={() => { setEditingGroupHeader(locationName); setTempGroupHeaderName(locationName === 'Unassigned Area' ? '' : locationName); }}
+                                                                        className="opacity-0 group-hover/header:opacity-100 text-[8px] text-blue-400 hover:text-blue-600 transition-opacity"
+                                                                    >
+                                                                        <FontAwesomeIcon icon={faEdit} />
+                                                                    </button>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    ))}
+                                                        <div className="space-y-2">
+                                                            {stops
+                                                                .sort((a, b) => (a.pickupOrder || 0) - (b.pickupOrder || 0))
+                                                                .map((stop, displayIndex) => (
+                                                                    <div 
+                                                                        key={`pickup-${stop.originalIndex}`} 
+                                                                        className={`flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border transition-all duration-200 ${draggedItem === stop.originalIndex && dragType === 'pickup' ? 'opacity-40 scale-95 border-blue-300' : 'border-blue-50'} ${dragOverItem === stop.originalIndex && dragType === 'pickup' ? 'border-t-4 border-t-blue-500 pt-2' : ''}`}
+                                                                        draggable
+                                                                        onDragStart={(e) => handleDragStart(e, stop.originalIndex, 'pickup')}
+                                                                        onDragOver={(e) => handleDragOver(e, stop.originalIndex)}
+                                                                        onDrop={(e) => handleDrop(e, stop.originalIndex, locationName)}
+                                                                        onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                                                                    >
+                                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                                            <div className="flex items-center gap-2 shrink-0">
+                                                                                <div className="cursor-grab active:cursor-grabbing text-blue-300 hover:text-blue-500">
+                                                                                    <FontAwesomeIcon icon={faGripVertical} className="text-[10px]" />
+                                                                                </div>
+                                                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs shrink-0">
+                                                                                    {stop.pickupOrder !== undefined ? stop.pickupOrder : stop.originalIndex + 1}
+                                                                                </div>
+                                                                            </div>
+                                                                                <div className="w-px h-8 bg-blue-100 mx-1"></div>
+                                                                            <div className="flex flex-col min-w-0">
+                                                                                <span className="text-sm font-bold text-gray-700 truncate">{stop.name}</span>
+                                                                                {stop.location && <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest truncate">{stop.location}</span>}
+                                                                            </div>
+                                                                        </div>
+                                                                        <button
+                                                                            onClick={() => handleRemoveStop(stop.originalIndex)}
+                                                                            className="text-gray-300 hover:text-red-500 transition-colors px-2 ml-2 shrink-0"
+                                                                        >
+                                                                            <FontAwesomeIcon icon={faTimes} className="text-sm" />
+                                                                        </button>
+                                                                    </div>
+                                                                ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         ) : (
                                             <div className="h-20 flex flex-col items-center justify-center text-blue-300 opacity-80">
@@ -680,7 +796,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                     <div className="bg-purple-50/50 rounded-xl p-3 border border-purple-100 flex flex-col shadow-sm mb-4">
                                         <div className="flex items-center justify-between mb-3">
                                             <h5 className="text-[11px] font-bold text-purple-600 uppercase tracking-widest">Drop Sequence</h5>
-                                            <button 
+                                            <button
                                                 onClick={() => handleReverseNewRouteOrder('drop')}
                                                 className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-white text-purple-600 border border-purple-100 hover:bg-purple-600 hover:text-white transition-all active:scale-95"
                                                 title="Reverse Drop Sequence"
@@ -690,34 +806,90 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                             </button>
                                         </div>
                                         {newRoute.stopPoints && newRoute.stopPoints.length > 0 ? (
-                                            <div className="space-y-2">
-                                                {newRoute.stopPoints
+                                            <div className="space-y-4">
+                                                {Object.entries(
+                                                    newRoute.stopPoints
                                                     .map((stop, originalIndex) => ({ ...stop, originalIndex }))
-                                                    .sort((a, b) => (a.dropOrder || 0) - (b.dropOrder || 0))
-                                                    .map((stop, displayIndex) => (
+                                                    .reduce((acc, stop) => {
+                                                        const loc = stop.location || 'Unassigned Area';
+                                                        if (!acc[loc]) acc[loc] = [];
+                                                        acc[loc].push(stop);
+                                                        return acc;
+                                                    }, {})
+                                                ).map(([locationName, stops], groupIdx) => {
+                                                    const locKey = `header-drop-${locationName}`;
+                                                    return (
                                                         <div 
-                                                            key={`drop-${stop.originalIndex}`} 
-                                                            className={`flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border transition-all duration-200 ${draggedItem === displayIndex && dragType === 'drop' ? 'opacity-40 scale-95 border-purple-300' : 'border-purple-50'} ${dragOverItem === displayIndex && dragType === 'drop' ? 'border-t-4 border-t-purple-500 pt-2' : ''}`}
-                                                            draggable
-                                                            onDragStart={(e) => handleDragStart(e, displayIndex, 'drop')}
-                                                            onDragOver={(e) => handleDragOver(e, displayIndex)}
-                                                            onDrop={(e) => handleDrop(e, displayIndex)}
-                                                            onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                                                            key={groupIdx} 
+                                                            className={`flex flex-col gap-2 p-1 rounded-xl transition-all duration-300 ${dragOverItem === locKey && dragType === 'drop' ? 'bg-purple-50 border border-dashed border-purple-300' : 'border border-transparent'}`}
+                                                            onDragOver={(e) => { e.preventDefault(); if (draggedItem !== null && dragType === 'drop') setDragOverItem(locKey); }}
+                                                            onDrop={(e) => handleDrop(e, null, locationName)}
                                                         >
-                                                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                                <div className="flex items-center gap-2 shrink-0">
-                                                                    <div className="cursor-grab active:cursor-grabbing text-purple-300 hover:text-purple-500">
-                                                                        <FontAwesomeIcon icon={faGripVertical} className="text-[10px]" />
+                                                            <div className="flex items-center gap-2 px-1">
+                                                                <div className="w-1 h-3 rounded-full bg-purple-400"></div>
+                                                                {editingGroupHeader === locationName ? (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <input 
+                                                                            type="text" 
+                                                                            value={tempGroupHeaderName}
+                                                                            onChange={(e) => setTempGroupHeaderName(e.target.value)}
+                                                                            className="bg-transparent border-b border-purple-500 text-[10px] font-black uppercase tracking-widest focus:outline-none w-32 px-1 text-purple-600"
+                                                                            placeholder="New Name"
+                                                                            autoFocus
+                                                                        />
+                                                                        <button onClick={() => handleRenameGroup(locationName, tempGroupHeaderName)} className="text-emerald-500 hover:text-emerald-700 p-1">
+                                                                            <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+                                                                        </button>
+                                                                        <button onClick={() => setEditingGroupHeader(null)} className="text-slate-400 hover:text-slate-600 p-1">
+                                                                            <FontAwesomeIcon icon={faTimes} className="text-[10px]" />
+                                                                        </button>
                                                                     </div>
-                                                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
-                                                                        {stop.dropOrder !== undefined ? stop.dropOrder : stop.originalIndex + 1}
+                                                                ) : (
+                                                                    <div className="flex items-center gap-2 group/header">
+                                                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{locationName}</span>
+                                                                        <button 
+                                                                            onClick={() => { setEditingGroupHeader(locationName); setTempGroupHeaderName(locationName === 'Unassigned Area' ? '' : locationName); }}
+                                                                            className="opacity-0 group-hover/header:opacity-100 text-[8px] text-purple-400 hover:text-purple-600 transition-opacity"
+                                                                        >
+                                                                            <FontAwesomeIcon icon={faEdit} />
+                                                                        </button>
                                                                     </div>
-                                                                </div>
-                                                                <div className="w-px h-8 bg-purple-100 mx-1"></div>
-                                                                <span className="text-sm font-bold text-gray-700 truncate">{stop.name}</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                {stops
+                                                                    .sort((a, b) => (a.dropOrder || 0) - (b.dropOrder || 0))
+                                                                    .map((stop, displayIndex) => (
+                                                                        <div
+                                                                            key={`drop-${stop.originalIndex}`}
+                                                                            className={`flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border transition-all duration-200 ${draggedItem === stop.originalIndex && dragType === 'drop' ? 'opacity-40 scale-95 border-purple-300' : 'border-purple-50'} ${dragOverItem === stop.originalIndex && dragType === 'drop' ? 'border-t-4 border-t-purple-500 pt-2' : ''}`}
+                                                                            draggable
+                                                                            onDragStart={(e) => handleDragStart(e, stop.originalIndex, 'drop')}
+                                                                            onDragOver={(e) => handleDragOver(e, stop.originalIndex)}
+                                                                            onDrop={(e) => handleDrop(e, stop.originalIndex, locationName)}
+                                                                            onDragEnd={() => { setDraggedItem(null); setDragOverItem(null); }}
+                                                                        >
+                                                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                                                <div className="flex items-center gap-2 shrink-0">
+                                                                                    <div className="cursor-grab active:cursor-grabbing text-purple-300 hover:text-purple-500">
+                                                                                        <FontAwesomeIcon icon={faGripVertical} className="text-[10px]" />
+                                                                                    </div>
+                                                                                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-xs shrink-0">
+                                                                                        {stop.dropOrder !== undefined ? stop.dropOrder : stop.originalIndex + 1}
+                                                                                    </div>
+                                                                                </div>
+                                                                                    <div className="w-px h-8 bg-purple-100 mx-1"></div>
+                                                                                <div className="flex flex-col min-w-0">
+                                                                                    <span className="text-sm font-bold text-gray-700 truncate">{stop.name}</span>
+                                                                                    {stop.location && <span className="text-[9px] font-black text-purple-500 uppercase tracking-widest truncate">{stop.location}</span>}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
                                                             </div>
                                                         </div>
-                                                    ))}
+                                                    );
+                                                })}
                                             </div>
                                         ) : (
                                             <div className="h-20 flex flex-col items-center justify-center text-purple-300 opacity-80">
@@ -753,6 +925,17 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                     </button>
                 </div>
             </div>
+            
+            {/* Shared Datalist for Location Suggestions */}
+            <datalist id="add-route-locations">
+                {Array.from(new Set(
+                    (newRoute.stopPoints || [])
+                    .map(s => s.location)
+                    .filter(loc => loc && loc.trim() !== '')
+                )).sort().map((loc, idx) => (
+                    <option key={idx} value={loc} />
+                ))}
+            </datalist>
         </div>
     );
 };

@@ -14,10 +14,11 @@ const CommunicationHome = () => {
     const categorySlugMap = useMemo(() => ({
         'all': 'ALL',
         'class': 'CLASS',
-        'route': 'ROUTE'
+        'route': 'ROUTE',
+        'location': 'LOCATION'
     }), []);
 
-    const [category, setCategory] = useState('ALL'); // 'ALL' | 'CLASS' | 'ROUTE'
+    const [category, setCategory] = useState('ALL'); // 'ALL' | 'CLASS' | 'ROUTE' | 'LOCATION'
 
     // Sync category with URL parameter
     useEffect(() => {
@@ -35,23 +36,33 @@ const CommunicationHome = () => {
 
     const [classes, setClasses] = useState([]);
     const [routes, setRoutes] = useState([]);
+    const [locations, setLocations] = useState([]);
     const [selectedClasses, setSelectedClasses] = useState([]);
     const [selectedRoutes, setSelectedRoutes] = useState([]);
+    const [selectedLocations, setSelectedLocations] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [classRes, routeRes] = await Promise.all([
+                const [classRes, routeRes, stopRes] = await Promise.all([
                     classService.getAllClasses(),
-                    routeService.getAllRoutes()
+                    routeService.getAllRoutes(),
+                    routeService.getAllRouteStops()
                 ]);
                 
                 const activeClasses = (classRes || []).filter(c => (c.status || '').toUpperCase() === 'ACTIVE');
                 const activeRoutes = (routeRes || []).filter(r => (r.routes_active_status || r.status || '').toUpperCase() === 'ACTIVE');
+                
+                // Extract unique location names from stops
+                const uniqueLocations = [...new Set((stopRes || [])
+                    .map(s => s.location)
+                    .filter(loc => !!loc && loc.trim() !== "")
+                )].sort();
 
                 setClasses(activeClasses);
                 setRoutes(activeRoutes);
+                setLocations(uniqueLocations);
             } catch (error) {
                 console.error("Failed to fetch categorized data:", error);
             }
@@ -88,16 +99,17 @@ const CommunicationHome = () => {
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Announcement Control</p>
                     </div>
 
-                    <div className="flex flex-row items-center gap-2 sm:gap-3 flex-1 w-full sm:max-w-2xl">
+                    <div className="flex flex-row items-center gap-2 sm:gap-3 flex-1 w-full sm:max-w-2xl px-2">
                         <CategoryButton id="ALL" label="Parents" icon={faUsers} current={category} />
                         <CategoryButton id="CLASS" label="Class" icon={faGraduationCap} current={category} />
                         <CategoryButton id="ROUTE" label="Route" icon={faRoute} current={category} />
+                        <CategoryButton id="LOCATION" label="Location" icon={faUsers} current={category} />
                     </div>
                 </div>
             </div>
 
             {/* Sub-Selector Section */}
-            {(category === 'CLASS' || category === 'ROUTE') && (
+            {(category === 'CLASS' || category === 'ROUTE' || category === 'LOCATION') && (
                 <div className="bg-white/50 backdrop-blur-md border-b border-slate-200 p-4 animate-in slide-in-from-top-4 duration-300 z-20">
                     <div className="max-w-xl mx-auto relative px-4 sm:px-0">
                         <button
@@ -106,21 +118,25 @@ const CommunicationHome = () => {
                         >
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                                    <FontAwesomeIcon icon={category === 'CLASS' ? faGraduationCap : faRoute} />
+                                    <FontAwesomeIcon icon={category === 'CLASS' ? faGraduationCap : (category === 'ROUTE' ? faRoute : faUsers)} />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Select {category === 'CLASS' ? 'Standards' : 'Travel Routes'}</p>
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+                                        Select {category === 'CLASS' ? 'Standards' : (category === 'ROUTE' ? 'Travel Routes' : 'Grouping Locations')}
+                                    </p>
                                     <p className="truncate max-w-[200px] sm:max-w-none">
                                         {category === 'CLASS' 
                                             ? (selectedClasses.length > 0 ? `${selectedClasses.length} Classes Selected` : 'Choose Classes...') 
-                                            : (selectedRoutes.length > 0 ? `${selectedRoutes.length} Routes Selected` : 'Choose Routes...')}
+                                            : (category === 'ROUTE' 
+                                                ? (selectedRoutes.length > 0 ? `${selectedRoutes.length} Routes Selected` : 'Choose Routes...')
+                                                : (selectedLocations.length > 0 ? `${selectedLocations.length} Locations Selected` : 'Choose Locations...'))}
                                     </p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                {((category === 'CLASS' && selectedClasses.length > 0) || (category === 'ROUTE' && selectedRoutes.length > 0)) && (
+                                {((category === 'CLASS' && selectedClasses.length > 0) || (category === 'ROUTE' && selectedRoutes.length > 0) || (category === 'LOCATION' && selectedLocations.length > 0)) && (
                                     <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full animate-bounce">
-                                        {category === 'CLASS' ? selectedClasses.length : selectedRoutes.length}
+                                        {category === 'CLASS' ? selectedClasses.length : (category === 'ROUTE' ? selectedRoutes.length : selectedLocations.length)}
                                     </span>
                                 )}
                                 <FontAwesomeIcon icon={faChevronDown} className={`text-slate-300 transition-transform duration-300 ${showDropdown ? 'rotate-180 text-blue-500' : ''}`} />
@@ -132,7 +148,11 @@ const CommunicationHome = () => {
                                 <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100 mb-2">
                                     <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Multi-Select Enabled</span>
                                     <button 
-                                        onClick={() => category === 'CLASS' ? setSelectedClasses([]) : setSelectedRoutes([])}
+                                        onClick={() => {
+                                            if (category === 'CLASS') setSelectedClasses([]);
+                                            else if (category === 'ROUTE') setSelectedRoutes([]);
+                                            else setSelectedLocations([]);
+                                        }}
                                         className="text-[10px] font-black text-rose-500 tracking-tight hover:underline"
                                     >
                                         Clear All
@@ -159,7 +179,7 @@ const CommunicationHome = () => {
                                                 </button>
                                             );
                                         })
-                                    ) : (
+                                    ) : category === 'ROUTE' ? (
                                         routes.map((route) => {
                                             const isSelected = selectedRoutes.some(r => r.route_id === route.route_id);
                                             return (
@@ -175,6 +195,26 @@ const CommunicationHome = () => {
                                                     className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
                                                 >
                                                     <span>{route.name}</span>
+                                                    {isSelected && <FontAwesomeIcon icon={faCheck} className="text-blue-400" />}
+                                                </button>
+                                            );
+                                        })
+                                    ) : (
+                                        locations.map((loc) => {
+                                            const isSelected = selectedLocations.includes(loc);
+                                            return (
+                                                <button
+                                                    key={loc}
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setSelectedLocations(prev => prev.filter(l => l !== loc));
+                                                        } else {
+                                                            setSelectedLocations(prev => [...prev, loc]);
+                                                        }
+                                                    }}
+                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
+                                                >
+                                                    <span>{loc}</span>
                                                     {isSelected && <FontAwesomeIcon icon={faCheck} className="text-blue-400" />}
                                                 </button>
                                             );
@@ -200,8 +240,8 @@ const CommunicationHome = () => {
                 <div className="max-w-4xl mx-auto pb-20">
                     <ComposeMessage 
                         targetCategory={category}
-                        targetIds={category === 'CLASS' ? selectedClasses.map(c => c.class_id) : (category === 'ROUTE' ? selectedRoutes.map(r => r.route_id) : [])}
-                        targetLabel={category === 'ALL' ? 'All Registered Parents' : (category === 'CLASS' ? (selectedClasses.length > 0 ? `${selectedClasses.length} Classes` : 'None') : (selectedRoutes.length > 0 ? `${selectedRoutes.length} Routes` : 'None'))}
+                        targetIds={category === 'CLASS' ? selectedClasses.map(c => c.class_id) : (category === 'ROUTE' ? selectedRoutes.map(r => r.route_id) : (category === 'LOCATION' ? selectedLocations : []))}
+                        targetLabel={category === 'ALL' ? 'All Registered Parents' : (category === 'CLASS' ? (selectedClasses.length > 0 ? `${selectedClasses.length} Classes` : 'None') : (category === 'ROUTE' ? (selectedRoutes.length > 0 ? `${selectedRoutes.length} Routes` : 'None') : (selectedLocations.length > 0 ? `${selectedLocations.length} Locations` : 'None')))}
                     />
                 </div>
             </div>

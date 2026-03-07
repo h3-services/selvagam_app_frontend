@@ -13,7 +13,7 @@ import {
     faRoute,
     faTruck
 } from '@fortawesome/free-solid-svg-icons';
-import { sendNotification, sendBroadcastNotification, broadcastToParents, sendRouteNotification, sendClassNotification } from '../../services/notificationService';
+import { sendNotification, broadcastToParents, sendRouteNotification, sendClassNotification, saveAdminNotification, sendLocationNotification } from '../../services/notificationService';
 import { parentService } from '../../services/parentService';
 import { routeService } from '../../services/routeService';
 
@@ -60,39 +60,47 @@ const ComposeMessage = ({ targetCategory, targetIds = [], targetLabel }) => {
         setIsSending(true);
 
         try {
+            // Get current admin ID (sent_by_admin_id) - assuming we can get it from auth or a service
+            // For now let's use a placeholder if not available, OR pull from auth.currentUser
+            const adminId = 'system_admin'; // Recommended: get actual ID from context/auth
+
             if (targetCategory === 'ALL') {
-                // Specialized broadcast for all parents using specific API endpoint
-                await broadcastToParents(
-                    title.trim(), 
-                    messageText.trim(), 
-                    messageType
-                );
+                await broadcastToParents(title.trim(), messageText.trim(), messageType);
+                await saveAdminNotification({
+                    title: title.trim(),
+                    message: messageText.trim(),
+                    sent_by_admin_id: adminId
+                });
             } else if (targetCategory === 'ROUTE') {
-                // Loop through all selected routes
-                const results = await Promise.all(targetIds.map(id => 
-                    sendRouteNotification(
-                        id,
-                        title.trim(), 
-                        messageText.trim(), 
-                        messageType
-                    )
-                ));
+                await Promise.all(targetIds.map(async (id) => {
+                    await sendRouteNotification(id, title.trim(), messageText.trim(), messageType);
+                }));
+                await saveAdminNotification({
+                    title: title.trim(),
+                    message: `[Route Message] ${messageText.trim()}`,
+                    sent_by_admin_id: adminId
+                });
             } else if (targetCategory === 'CLASS') {
-                // Loop through all selected classes
-                const results = await Promise.all(targetIds.map(id => 
-                    sendClassNotification(
-                        id,
-                        title.trim(), 
-                        messageText.trim(), 
-                        messageType
-                    )
+                await Promise.all(targetIds.map(async (id) => {
+                    await sendClassNotification(id, title.trim(), messageText.trim(), messageType);
+                }));
+                await saveAdminNotification({
+                    title: title.trim(),
+                    message: `[Class Message] ${messageText.trim()}`,
+                    sent_by_admin_id: adminId
+                });
+            } else if (targetCategory === 'LOCATION') {
+                // Use the location-based notification logic
+                // targetIds here will be the list of location strings
+                await Promise.all(targetIds.map(loc => 
+                    sendLocationNotification(loc, title.trim(), messageText.trim(), messageType, adminId)
                 ));
             }
             
             // Notification dispatched successfully
             setTitle('');
             setMessageText('');
-            alert('🚀 Message dispatched successfully!');
+            alert('🚀 Message dispatched successfully and recorded in history!');
         } catch (error) {
             console.error('Dispatch error:', error);
             alert(`⚠️ Delivery Failed: ${error.message}`);
