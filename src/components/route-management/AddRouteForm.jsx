@@ -345,15 +345,17 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
 
         remainingItems.splice(targetIdx, 0, movedItem);
 
-        // 5. Update orders for all items based on new positions
-        remainingItems.forEach((item, idx) => {
-            currentStops[item.originalIndex] = {
+        // 5. Update orders for all items based on new positions and update physical array order
+        const finalStops = remainingItems.map((item, idx) => {
+            const updated = {
                 ...item,
                 [orderKey]: idx + 1
             };
+            delete updated.originalIndex; // Clean up temporary property
+            return updated;
         });
 
-        setNewRoute(prev => ({ ...prev, stopPoints: currentStops }));
+        setNewRoute(prev => ({ ...prev, stopPoints: finalStops, stops: finalStops.length }));
         setDraggedItem(null);
         setDragOverItem(null);
         setDragType(null);
@@ -707,7 +709,13 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                                         acc[loc].push(stop);
                                                         return acc;
                                                     }, {})
-                                                ).map(([locationName, stops], groupIdx) => (
+                                                )
+                                                .sort(([a], [b]) => {
+                                                    if (a === 'Unassigned Area') return 1;
+                                                    if (b === 'Unassigned Area') return -1;
+                                                    return a.localeCompare(b);
+                                                })
+                                                .map(([locationName, stops], groupIdx) => (
                                                     <div 
                                                         key={groupIdx} 
                                                         className={`flex flex-col gap-2 p-1 rounded-xl transition-all duration-300 ${dragOverItem === `header-${locationName}` && dragType === 'pickup' ? 'bg-blue-50 border border-dashed border-blue-300' : 'border border-transparent'}`}
@@ -738,7 +746,7 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
                                                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{locationName}</span>
                                                                     <button 
                                                                         onClick={() => { setEditingGroupHeader(locationName); setTempGroupHeaderName(locationName === 'Unassigned Area' ? '' : locationName); }}
-                                                                        className="opacity-0 group-hover/header:opacity-100 text-[8px] text-blue-400 hover:text-blue-600 transition-opacity"
+                                                                        className="text-[8px] text-blue-400 hover:text-blue-600 transition-opacity"
                                                                     >
                                                                         <FontAwesomeIcon icon={faEdit} />
                                                                     </button>

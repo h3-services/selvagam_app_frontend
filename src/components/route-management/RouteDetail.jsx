@@ -464,13 +464,14 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplica
 
         remainingItems.splice(targetIdx, 0, movedItem);
 
-        // 5. Update orders for all items based on new positions
-        const finalStops = [...currentStops];
-        remainingItems.forEach((item, idx) => {
-            finalStops[item.originalIndex] = {
+        // 5. Update orders for all items based on new positions and update physical array order
+        const finalStops = remainingItems.map((item, idx) => {
+            const updated = {
                 ...item,
                 [orderKey]: idx + 1
             };
+            delete updated.originalIndex; // Clean up temporary property
+            return updated;
         });
 
         if (isEditing) {
@@ -708,7 +709,13 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplica
                                         acc[loc].push(stop);
                                         return acc;
                                     }, {})
-                                ).map(([locationName, stops], groupIdx) => (
+                                )
+                                .sort(([a], [b]) => {
+                                    if (a === 'Unassigned Area') return 1;
+                                    if (b === 'Unassigned Area') return -1;
+                                    return a.localeCompare(b);
+                                })
+                                .map(([locationName, stops], groupIdx) => (
                                     <div 
                                         key={groupIdx} 
                                         className={`flex flex-col gap-2 p-1.5 rounded-2xl transition-all duration-300 ${dragOverItem === `header-${locationName}` && dragType === 'pickup' ? 'bg-blue-50 border-2 border-dashed border-blue-200' : 'border-2 border-transparent'}`}
@@ -740,7 +747,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplica
                                                     {isEditing && (
                                                         <button 
                                                             onClick={() => { setEditingGroupHeader(locationName); setTempGroupHeaderName(locationName === 'Unassigned Area' ? '' : locationName); }}
-                                                            className="opacity-0 group-hover/header:opacity-100 text-[8px] text-blue-400 hover:text-blue-600 transition-opacity"
+                                                            className="text-[8px] text-blue-400 hover:text-blue-600 transition-opacity"
                                                             title="Rename this area"
                                                         >
                                                             <FontAwesomeIcon icon={faEdit} />
@@ -877,7 +884,13 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplica
                                         acc[loc].push(stop);
                                         return acc;
                                     }, {})
-                                ).map(([locationName, stops], groupIdx) => {
+                                )
+                                .sort(([a], [b]) => {
+                                    if (a === 'Unassigned Area') return 1;
+                                    if (b === 'Unassigned Area') return -1;
+                                    return a.localeCompare(b);
+                                })
+                                .map(([locationName, stops], groupIdx) => {
                                     const locKey = `header-drop-${locationName}`;
                                     return (
                                         <div 
@@ -911,7 +924,7 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplica
                                                         {isEditing && (
                                                             <button 
                                                                 onClick={() => { setEditingGroupHeader(locationName); setTempGroupHeaderName(locationName === 'Unassigned Area' ? '' : locationName); }}
-                                                                className="opacity-0 group-hover/header:opacity-100 text-[8px] text-purple-400 hover:text-purple-600 transition-opacity"
+                                                                className="text-[8px] text-purple-400 hover:text-purple-600 transition-opacity"
                                                                 title="Rename this area"
                                                             >
                                                                 <FontAwesomeIcon icon={faEdit} />

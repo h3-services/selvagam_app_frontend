@@ -130,6 +130,7 @@ const RouteManagementHome = () => {
                     id: stop.stop_id,
                     pickupOrder: stop.pickup_stop_order,
                     dropOrder: stop.drop_stop_order,
+                    location: stop.location || stop.location_name || stop.area_name || '',
                     order: stop.pickup_stop_order // Retained for backwards compatibility inside UI components
                 }));
 
@@ -325,7 +326,9 @@ const RouteManagementHome = () => {
                         latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                         longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
                         pickup_stop_order: index + 1,
-                        drop_stop_order: index + 1
+                        drop_stop_order: index + 1,
+                        location: stop.location || '',
+                        location_name: stop.location || ''
                     };
                     console.log(`📦 [CREATE STOP ${index + 1}] Payload:`, JSON.stringify(stopData, null, 2));
                     const createdStop = await routeService.createRouteStop(stopData);
@@ -406,7 +409,9 @@ const RouteManagementHome = () => {
                     latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                     longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
                     pickup_stop_order: stop.pickupOrder !== undefined ? parseInt(stop.pickupOrder) : parseInt(order),
-                    drop_stop_order: stop.dropOrder !== undefined ? parseInt(stop.dropOrder) : parseInt(order)
+                    drop_stop_order: stop.dropOrder !== undefined ? parseInt(stop.dropOrder) : parseInt(order),
+                    location: stop.location || '',
+                    location_name: stop.location || ''
                 };
                 console.log(`📦 [CREATE STOP order:${order}] Payload:`, JSON.stringify(newStopPayload, null, 2));
                 try {
@@ -440,9 +445,9 @@ const RouteManagementHome = () => {
                 
                 const pickupOrderChanged = original && parseInt(stop.pickupOrder !== undefined ? stop.pickupOrder : order) !== parseInt(original.pickupOrder || original.order || 0);
                 const dropOrderChanged = original && parseInt(stop.dropOrder !== undefined ? stop.dropOrder : order) !== parseInt(original.dropOrder || original.order || 0);
+                const locationChanged = original && (stop.location || '') !== (original.location || '');
 
-
-                if (!nameChanged && !posChanged && !pickupOrderChanged && !dropOrderChanged) {
+                if (!nameChanged && !posChanged && !pickupOrderChanged && !dropOrderChanged && !locationChanged) {
                     console.log(`⏭️ [SKIP STOP ${stop.id}] No changes detected.`);
                     continue;
                 }
@@ -452,7 +457,9 @@ const RouteManagementHome = () => {
                     latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                     longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
                     pickup_stop_order: stop.pickupOrder !== undefined ? parseInt(stop.pickupOrder) : parseInt(order),
-                    drop_stop_order: stop.dropOrder !== undefined ? parseInt(stop.dropOrder) : parseInt(order)
+                    drop_stop_order: stop.dropOrder !== undefined ? parseInt(stop.dropOrder) : parseInt(order),
+                    location: stop.location || '',
+                    location_name: stop.location || ''
                 };
                 console.log(`📦 [UPDATE STOP ${stop.id} order:${order}] Payload:`, JSON.stringify(stopPayload, null, 2));
 
@@ -502,7 +509,9 @@ const RouteManagementHome = () => {
                     latitude: parseFloat(parseFloat(stop.position[0]).toFixed(6)),
                     longitude: parseFloat(parseFloat(stop.position[1]).toFixed(6)),
                     pickup_stop_order: stop.pickupOrder || 1,
-                    drop_stop_order: stop.dropOrder || 1
+                    drop_stop_order: stop.dropOrder || 1,
+                    location: stop.location || '',
+                    location_name: stop.location || ''
                 };
                 
                 await routeService.updateRouteStop(stop.id, stopPayload);
