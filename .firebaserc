@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "school-bus-tracking-fbf78"
-  }
+  },
+  "targets": {
+    "school-bus-tracking-fbf78": {
+      "hosting": {
+        "selvagam-testing-site": [
+          "selvagam-testing"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
