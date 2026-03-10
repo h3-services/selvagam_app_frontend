@@ -73,10 +73,17 @@ const Sidebar = () => {
       const timer = setTimeout(() => {
         setActiveFlyout(null);
         setIsExiting(false);
-      }, 800); // Match the 0.8s animation duration
+      }, 300); // Reduced timeout to prevent stuck menus
       return () => clearTimeout(timer);
     }
   }, [hoveredItem, pinnedItem, activeFlyout]);
+
+  // Force close flyout on navigation
+  useEffect(() => {
+    setHoveredItem(null);
+    setPinnedItem(null);
+    setActiveFlyout(null);
+  }, [location.pathname]);
 
   // Close pinned item when clicking outside
   useEffect(() => {
