@@ -427,7 +427,7 @@ const DriverManagementHome = () => {
                 <>
                     {showBulkMenu && (
                         <div 
-                            className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] animate-in fade-in duration-500"
+                            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2001] animate-in fade-in duration-500"
                             onClick={() => setShowBulkMenu(false)}
                         />
                     )}

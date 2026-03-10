@@ -71,8 +71,8 @@ const ParentManagementHome = () => {
 
     // Sync state with URL
     useEffect(() => {
-        if (!loading && parents.length > 0) {
-            if (parentId) {
+        if (!loading) {
+            if (parentId && parents.length > 0) {
                 const parent = parents.find(p => p.parent_id === parentId);
                 if (parent) {
                     setSelectedParent(parent);

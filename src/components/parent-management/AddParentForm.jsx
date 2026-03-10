@@ -173,14 +173,18 @@ const AddParentForm = ({ show, onClose, onAdd, onUpdate, initialData }) => {
         }
     };
 
-    if (!show) return null;
-
     return (
         <>
-            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-opacity duration-300" onClick={onClose} />
+            {/* Backdrop */}
+            <div 
+                className={`fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[99999] transition-all duration-500 ease-in-out ${show ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
+                onClick={onClose} 
+            />
             
             {/* Right Side Drawer */}
-            <div className="fixed right-0 top-0 h-full w-full sm:w-[500px] md:w-[600px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1)">
+            <div 
+                className={`fixed right-0 top-0 h-full w-full sm:w-[500px] md:w-[600px] bg-slate-50 shadow-[0_0_100px_rgba(0,0,0,0.3)] z-[100000] flex flex-col transition-all duration-700 cubic-bezier(0.16, 1, 0.3, 1) ${show ? 'translate-x-0' : 'translate-x-full'}`}
+            >
                 
                 
                 {/* Static Action Buttons (Close / Auto Fill) */}
