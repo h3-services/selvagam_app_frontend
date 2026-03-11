@@ -70,22 +70,6 @@ const CommunicationHome = () => {
         fetchData();
     }, []);
 
-    const CategoryButton = ({ id, label, icon, current }) => (
-        <button
-            onClick={() => {
-                handleCategoryChange(id);
-                setShowDropdown(false);
-            }}
-            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-3 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl border transition-all font-black text-[8px] sm:text-[11px] uppercase tracking-wider sm:tracking-[0.2em] relative overflow-hidden group
-                ${current === id 
-                    ? 'bg-slate-900 border-slate-900 text-white shadow-lg sm:shadow-xl shadow-slate-200' 
-                    : 'bg-white border-slate-100 text-slate-400 hover:border-blue-400 hover:text-blue-600 shadow-sm'}`}
-        >
-            <FontAwesomeIcon icon={icon} className={`${current === id ? 'text-blue-400' : 'text-slate-300 group-hover:text-blue-400'}`} />
-            {label}
-            {current === id && <div className="absolute top-0 right-0 w-8 h-8 bg-blue-600 text-white flex items-center justify-center rounded-bl-xl rotate-12 translate-x-1 -translate-y-1"><FontAwesomeIcon icon={faCheck} className="text-[10px]" /></div>}
-        </button>
-    );
 
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in overflow-hidden">
@@ -100,10 +84,10 @@ const CommunicationHome = () => {
                     </div>
 
                     <div className="flex flex-row items-center gap-2 sm:gap-3 flex-1 w-full sm:max-w-2xl px-2">
-                        <CategoryButton id="ALL" label="Parents" icon={faUsers} current={category} />
-                        <CategoryButton id="CLASS" label="Class" icon={faGraduationCap} current={category} />
-                        <CategoryButton id="ROUTE" label="Route" icon={faRoute} current={category} />
-                        <CategoryButton id="LOCATION" label="Location" icon={faUsers} current={category} />
+                        <CategoryButton id="ALL" label="Parents" icon={faUsers} current={category} onClick={() => { handleCategoryChange('ALL'); setShowDropdown(false); }} />
+                        <CategoryButton id="CLASS" label="Class" icon={faGraduationCap} current={category} onClick={() => { handleCategoryChange('CLASS'); setShowDropdown(false); }} />
+                        <CategoryButton id="ROUTE" label="Route" icon={faRoute} current={category} onClick={() => { handleCategoryChange('ROUTE'); setShowDropdown(false); }} />
+                        <CategoryButton id="LOCATION" label="Location" icon={faUsers} current={category} onClick={() => { handleCategoryChange('LOCATION'); setShowDropdown(false); }} />
                     </div>
                 </div>
             </div>
@@ -254,5 +238,23 @@ const CommunicationHome = () => {
         </div>
     );
 };
+
+const CategoryButton = ({ id, label, icon, current, onClick }) => (
+    <button
+        onClick={onClick}
+        className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-3 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl border transition-all font-black text-[8px] sm:text-[11px] uppercase tracking-wider sm:tracking-[0.2em] relative overflow-hidden group
+            ${current === id 
+                ? 'bg-slate-900 border-slate-900 text-white shadow-lg sm:shadow-xl shadow-slate-200' 
+                : 'bg-white border-slate-100 text-slate-400 hover:border-blue-400 hover:text-blue-600 shadow-sm'}`}
+    >
+        <FontAwesomeIcon icon={icon} className={`${current === id ? 'text-blue-400' : 'text-slate-300 group-hover:text-blue-400'}`} />
+        {label}
+        {current === id && (
+            <div className="absolute top-0 right-0 w-8 h-8 bg-blue-600 text-white flex items-center justify-center rounded-bl-xl rotate-12 translate-x-1 -translate-y-1">
+                <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
+            </div>
+        )}
+    </button>
+);
 
 export default CommunicationHome;

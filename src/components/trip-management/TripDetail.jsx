@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faArrowLeft, 
@@ -8,9 +8,7 @@ import {
     faClock, 
     faMapMarkerAlt,
     faCheckCircle,
-    faCircle,
     faHistory,
-    faCalendarAlt,
     faLocationDot
 } from '@fortawesome/free-solid-svg-icons';
 import { tripService } from '../../services/tripService';
@@ -24,23 +22,37 @@ const TripDetail = ({ tripId, onBack }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchTripDetails();
-    }, [tripId]);
-
-    const fetchTripDetails = async () => {
+    const fetchTripDetails = useCallback(async () => {
         setLoading(true);
         try {
-            const [tripData, driversData, busesData, routesData] = await Promise.all([
+            const [tripData, driversData, busesData, routesData, allRouteStops] = await Promise.all([
                 tripService.getTripById(tripId),
                 driverService.getAllDrivers(),
                 busService.getAllBuses(),
-                routeService.getAllRoutes()
+                routeService.getAllRoutes(),
+                routeService.getAllRouteStops()
             ]);
+
+            const tripDataLogs = tripData.stop_logs || {};
+            const route = routesData.find(r => r.route_id === tripData.route_id);
+            const routeStops = (allRouteStops || []).filter(s => s.route_id === tripData.route_id);
+
+            // Construct logs by merging route stops with trip-specific status from JSON column
+            const mappedLogs = routeStops
+                .sort((a, b) => a.stop_order - b.stop_order)
+                .map(stop => {
+                    const status = tripDataLogs[stop.stop_id];
+                    return {
+                        stop_id: stop.stop_id,
+                        stop_name: stop.location_name || stop.stop_name || stop.name || stop.location || 'Unknown Stop',
+                        stop_order: stop.stop_order,
+                        arrived_at: (status && status !== 'SKIPPED') ? status : null,
+                        is_skipped: status === 'SKIPPED'
+                    };
+                });
 
             const driver = driversData.find(d => d.driver_id === tripData.driver_id);
             const bus = busesData.find(b => b.bus_id === tripData.bus_id);
-            const route = routesData.find(r => r.route_id === tripData.route_id);
 
             setTrip({
                 ...tripData,
@@ -49,7 +61,8 @@ const TripDetail = ({ tripId, onBack }) => {
                 busName: bus ? `${bus.registration_number || bus.bus_number || 'Bus'}` : 'Unknown',
                 busCapacity: bus ? (bus.seating_capacity || bus.capacity || '?') : '?',
                 routeName: route ? route.name : 'Unknown',
-                routeDetails: route ? `${route.start_location} to ${route.end_location}` : 'No details'
+                routeDetails: route ? `${route.start_location} to ${route.end_location}` : 'No details',
+                stop_logs: mappedLogs
             });
         } catch (err) {
             console.error("Failed to fetch trip details:", err);
@@ -57,7 +70,11 @@ const TripDetail = ({ tripId, onBack }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [tripId]);
+
+    useEffect(() => {
+        fetchTripDetails();
+    }, [fetchTripDetails]);
 
     if (loading) {
         return (
@@ -83,12 +100,23 @@ const TripDetail = ({ tripId, onBack }) => {
 
     const formatTime = (dateStr) => {
         if (!dateStr) return '-';
-        return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        // Ensure string is treated as UTC by appending Z if T is present but Z is not
+        const normalized = (dateStr.includes('T') && !dateStr.endsWith('Z')) ? `${dateStr}Z` : dateStr;
+        return new Date(normalized).toLocaleTimeString('en-IN', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: true 
+        });
     };
 
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
-        return new Date(dateStr).toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+        const normalized = (dateStr.includes('T') && !dateStr.endsWith('Z')) ? `${dateStr}Z` : dateStr;
+        return new Date(normalized).toLocaleDateString('en-IN', { 
+            day: '2-digit', 
+            month: 'long', 
+            year: 'numeric' 
+        });
     };
 
     return (
@@ -217,7 +245,6 @@ const TripDetail = ({ tripId, onBack }) => {
                                     .sort((a, b) => a.stop_order - b.stop_order)
                                     .map((stop, index) => {
                                         const isArrived = !!stop.arrived_at;
-                                        const isLast = index === trip.stop_logs.length - 1;
                                         
                                         return (
                                             <div key={stop.stop_id} className="relative group animate-in slide-in-from-left-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
@@ -234,13 +261,22 @@ const TripDetail = ({ tripId, onBack }) => {
                                                     )}
                                                 </div>
 
-                                                <div className={`flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-2xl transition-all duration-300 ${isArrived ? 'bg-blue-50/40 border border-blue-100/50' : 'hover:bg-slate-50'}`}>
+                                                <div className={`flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-2xl transition-all duration-300 ${
+                                                    stop.is_skipped ? 'bg-amber-50/40 border border-amber-100/50' : 
+                                                    isArrived ? 'bg-blue-50/40 border border-blue-100/50' : 'hover:bg-slate-50'
+                                                }`}>
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-3 mb-1">
-                                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isArrived ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                                                                stop.is_skipped ? 'bg-amber-500 text-white' :
+                                                                isArrived ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'
+                                                            }`}>
                                                                 Stop {stop.stop_order}
                                                             </span>
-                                                            <h4 className={`text-sm md:text-base font-bold ${isArrived ? 'text-blue-900' : 'text-gray-600'}`}>
+                                                            <h4 className={`text-sm md:text-base font-bold ${
+                                                                stop.is_skipped ? 'text-amber-700' :
+                                                                isArrived ? 'text-blue-900' : 'text-gray-600'
+                                                            }`}>
                                                                 {stop.stop_name}
                                                             </h4>
                                                         </div>
@@ -258,7 +294,12 @@ const TripDetail = ({ tripId, onBack }) => {
                                                         </div>
                                                     </div>
 
-                                                    {isArrived ? (
+                                                    {stop.is_skipped ? (
+                                                        <div className="hidden md:flex flex-col items-end">
+                                                            <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider mb-1">Status</span>
+                                                            <span className="bg-amber-500 text-white text-[9px] font-black px-2 py-1 rounded-full uppercase">Skipped</span>
+                                                        </div>
+                                                    ) : isArrived ? (
                                                         <div className="hidden md:flex flex-col items-end">
                                                             <span className="text-[10px] text-blue-400 font-bold uppercase tracking-wider mb-1">Status</span>
                                                             <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-1 rounded-full uppercase">Reached</span>

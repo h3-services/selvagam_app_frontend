@@ -1,36 +1,17 @@
-// Remote backend URL for notifications - targeting the production API v1
-const NOTIFICATION_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const ADMIN_API_KEY = import.meta.env.VITE_ADMIN_API_KEY;
+import api from './api';
 
 /**
  * Specifically broadcasts a notification to ALL parents.
- * API Endpoint: /api/v1/notifications/broadcast/parents
  */
 export const broadcastToParents = async (title, body, messageType = 'text') => {
   try {
     console.log('📢 Broadcasting to Parents:', { title, body, messageType });
-    
-    const response = await fetch(`${NOTIFICATION_BASE_URL}/notifications/broadcast/parents`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-key': ADMIN_API_KEY,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        title: title.trim(),
-        body: body.trim(),
-        message_type: messageType
-      })
+    const response = await api.post('/notifications/broadcast/parents', {
+      title: title.trim(),
+      body: body.trim(),
+      message_type: messageType
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `Server error: ${response.status}`);
-    }
-
-    return await response.json();
-    
+    return response.data;
   } catch (error) {
     console.error('❌ Broadcast to Parents Error:', error);
     throw error;
@@ -39,33 +20,16 @@ export const broadcastToParents = async (title, body, messageType = 'text') => {
 
 /**
  * Sends a notification to everyone on a specific route.
- * API Endpoint: /api/v1/notifications/route/{route_id}
  */
 export const sendRouteNotification = async (routeId, title, body, messageType = 'text') => {
   try {
     console.log(`🚀 Sending Notification to Route #${routeId}:`, { title, body, messageType });
-    
-    const response = await fetch(`${NOTIFICATION_BASE_URL}/notifications/route/${routeId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-key': ADMIN_API_KEY,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        title: title.trim(),
-        body: body.trim(),
-        message_type: messageType
-      })
+    const response = await api.post(`/notifications/route/${routeId}`, {
+      title: title.trim(),
+      body: body.trim(),
+      message_type: messageType
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `Server error: ${response.status}`);
-    }
-
-    return await response.json();
-    
+    return response.data;
   } catch (error) {
     console.error(`❌ Route Notification Error for Route #${routeId}:`, error);
     throw error;
@@ -74,33 +38,16 @@ export const sendRouteNotification = async (routeId, title, body, messageType = 
 
 /**
  * Sends a notification to everyone in a specific class.
- * API Endpoint: /api/v1/notifications/class/{class_id}
  */
 export const sendClassNotification = async (classId, title, body, messageType = 'text') => {
   try {
     console.log(`🚀 Sending Notification to Class #${classId}:`, { title, body, messageType });
-    
-    const response = await fetch(`${NOTIFICATION_BASE_URL}/notifications/class/${classId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-key': ADMIN_API_KEY,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        title: title.trim(),
-        body: body.trim(),
-        message_type: messageType
-      })
+    const response = await api.post(`/notifications/class/${classId}`, {
+      title: title.trim(),
+      body: body.trim(),
+      message_type: messageType
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `Server error: ${response.status}`);
-    }
-
-    return await response.json();
-    
+    return response.data;
   } catch (error) {
     console.error(`❌ Class Notification Error for Class #${classId}:`, error);
     throw error;
@@ -113,32 +60,16 @@ export const sendClassNotification = async (classId, title, body, messageType = 
 export const sendNotification = async (title, body, recipientType, messageType, fcmToken) => {
   try {
     console.log('📱 Sending Direct FCM notification:', { title, body, messageType, token: fcmToken?.substring(0, 20) + '...' });
-    
-    const response = await fetch(`${NOTIFICATION_BASE_URL}/notifications/send-device`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Key': ADMIN_API_KEY
-      },
-      body: JSON.stringify({
-        title,
-        body,
-        token: fcmToken,
-        message_type: messageType,
-        recipient_type: recipientType
-      })
+    const response = await api.post('/notifications/send-device', {
+      title: title.trim(),
+      body: body.trim(),
+      token: fcmToken,
+      message_type: messageType,
+      recipient_type: recipientType
     });
-
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log('✅ Direct FCM notification sent:', result);
-    return result;
-    
+    return response.data;
   } catch (error) {
-    console.error('❌ Direct FCM Error:', error);
+    console.error('❌ Direct FCM Notification Error:', error);
     throw error;
   }
 };
@@ -148,16 +79,8 @@ export const sendNotification = async (title, body, recipientType, messageType, 
  */
 export const getStudentNotificationHistory = async (studentId) => {
   try {
-    const response = await fetch(`${NOTIFICATION_BASE_URL}/admin-parent-notifications/student/${studentId}`, {
-      method: 'GET',
-      headers: {
-        'x-admin-key': ADMIN_API_KEY,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) return [];
-    return await response.json();
+    const response = await api.get(`/admin-parent-notifications/student/${studentId}`);
+    return response.data || [];
   } catch (error) {
     console.error('❌ Student History Error:', error);
     return [];
@@ -169,16 +92,8 @@ export const getStudentNotificationHistory = async (studentId) => {
  */
 export const getParentNotificationHistory = async (parentId) => {
   try {
-    const response = await fetch(`${NOTIFICATION_BASE_URL}/admin-parent-notifications/parent/${parentId}`, {
-      method: 'GET',
-      headers: {
-        'x-admin-key': ADMIN_API_KEY,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) return [];
-    return await response.json();
+    const response = await api.get(`/admin-parent-notifications/parent/${parentId}`);
+    return response.data || [];
   } catch (error) {
     console.error('❌ Parent History Error:', error);
     return [];
@@ -186,20 +101,12 @@ export const getParentNotificationHistory = async (parentId) => {
 };
 
 /**
- * Fetches FCM tokens by location.
+ * Fetches FCM tokens for a specific location.
  */
 export const getLocationFCMTokens = async (locationName) => {
   try {
-    const response = await fetch(`${NOTIFICATION_BASE_URL}/fcm-tokens/by-location/${encodeURIComponent(locationName)}`, {
-      method: 'GET',
-      headers: {
-        'x-admin-key': ADMIN_API_KEY,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) return [];
-    return await response.json();
+    const response = await api.get(`/fcm-tokens/by-location/${encodeURIComponent(locationName)}`);
+    return response.data || [];
   } catch (error) {
     console.error('❌ Location FCM Lookup Error:', error);
     return [];
@@ -211,17 +118,15 @@ export const getLocationFCMTokens = async (locationName) => {
  */
 export const saveAdminNotification = async (notificationData) => {
   try {
-    const response = await fetch(`${NOTIFICATION_BASE_URL}/admin-parent-notifications`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-key': ADMIN_API_KEY,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(notificationData)
-    });
+    // API safety: Remove student_id if it's null, empty or undefined
+    // Backend likely expects a valid UUID or for the key to be missing
+    const payload = { ...notificationData };
+    if (!payload.student_id) {
+        delete payload.student_id;
+    }
 
-    return await response.json();
+    const response = await api.post('/admin-parent-notifications', payload);
+    return response.data;
   } catch (error) {
     console.error('❌ Save Admin Notification Error:', error);
     throw error;
@@ -240,29 +145,13 @@ export const sendLocationNotification = async (locationName, title, body, messag
       throw new Error("No recipients found for this location");
     }
 
-    // Since we don't have a bulk 'send-tokens' endpoint shown, 
-    // we'll assume the API provides a way to target by location via broadcast
-    // or we'd have to loop. But usually, there's a topic-like mechanism.
-    // For now, let's use the FCM broadcast pattern if available, 
-    // but the user wants to target by location.
-    
-    // FETCH THE TOKENS AND SEND TO EACH (or bulk if API supported it)
-    // For now, let's assume if tokens exist, we proceed.
-    
-    // We also need to SAVE this in history
+    // 2. Save history record
     await saveAdminNotification({
       title,
       message: body,
-      sent_by_admin_id: adminId,
-      // Target is broader here, but we'll log it as a group message
+      sent_by_admin_id: adminId
     });
 
-    // IMPLEMENTATION NOTE: If the API had a direct /notifications/location endpoint
-    // it would be better. For now, we fetch and send (or just log success if simulation).
-    // Let's use the sendNotification (device-specific) for each token if needed,
-    // but a broadcast would be more efficient.
-    
-    // For the UI to "apply" it, we mostly need the lookup capability.
     return { success: true, count: tokens.length };
 
   } catch (error) {

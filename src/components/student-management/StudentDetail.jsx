@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-    faUser, faTimes, faCheck, faEdit, faChild, faPhone, 
+    faTimes, faEdit, faPhone, 
     faSearch, faArrowLeft, faUserTie, faEnvelope, 
-    faMapMarkerAlt, faInfoCircle, faEye, faRoute, 
-    faBus, faMapPin, faLocationDot, faClock, 
-    faCalendarDay, faIdCard, faVenusMars,
-    faChevronLeft, faEllipsisVertical, faBuilding,
-    faFingerprint, faCircleCheck, faArrowUpRightFromSquare,
-    faGraduationCap, faMap, faPaperclip, faSchool, faWalking, faUserPlus, faRightLeft, faUsers
+    faMapMarkerAlt, faEye, 
+    faBus, faLocationDot, faClock, 
+    faIdCard,
+    faFingerprint, faArrowUpRightFromSquare,
+    faWalking, faUserPlus, faRightLeft, faUsers, faHistory
 } from '@fortawesome/free-solid-svg-icons';
 import ParentViewDrawer from './ParentViewDrawer';
 import { parentService } from '../../services/parentService';
 import { routeService } from '../../services/routeService';
 import { studentService } from '../../services/studentService';
+import { getStudentNotificationHistory } from '../../services/notificationService';
 
 const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportStatusUpdate }) => {
     const { role } = useParams();
@@ -33,34 +33,18 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
         pickupStop: null,
         dropStop: null
     });
-    const [loadingTransport, setLoadingTransport] = useState(false);
+    
+    // Communication History State
+    const [notificationHistory, setNotificationHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
     
     // Parent Selection State
     const [allParents, setAllParents] = useState([]);
     const [loadingAllParents, setLoadingAllParents] = useState(false);
     const [parentSearchQuery, setParentSearchQuery] = useState("");
 
-    useEffect(() => {
-        if (selectedStudent) {
-            const p1Id = selectedStudent.originalData?.parent_id;
-            const p2Id = selectedStudent.originalData?.s_parent_id;
-            
-            fetchParents(p1Id, p2Id);
-            
-            if (selectedStudent.originalData?.is_transport_user || selectedStudent.originalData?.transport_status === 'ACTIVE') {
-                fetchTransportInfo(selectedStudent.originalData);
-            }
-        }
-    }, [selectedStudent]);
 
-    // Handle URL-based parent selection modal
-    useEffect(() => {
-        if (currentRole && selectedStudent) {
-            fetchAllParents(currentRole);
-        }
-    }, [currentRole, selectedStudent]);
-
-    const fetchParents = async (p1Id, p2Id) => {
+    const fetchParents = useCallback(async (p1Id, p2Id) => {
         setLoadingParents(true);
         try {
             const [data1, data2] = await Promise.all([
@@ -74,10 +58,9 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
         } finally {
             setLoadingParents(false);
         }
-    };
+    }, []);
 
-    const fetchTransportInfo = async (student) => {
-        setLoadingTransport(true);
+    const fetchTransportInfo = useCallback(async (student) => {
         try {
             const [routes, stops] = await Promise.all([
                 routeService.getAllRoutes(),
@@ -91,31 +74,60 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
             });
         } catch (error) {
             console.error("Error fetching transport:", error);
-        } finally {
-            setLoadingTransport(false);
         }
-    };
+    }, []);
 
-    const fetchAllParents = async (roleType) => {
+    const fetchHistory = useCallback(async (studentId) => {
+        setLoadingHistory(true);
+        try {
+            const history = await getStudentNotificationHistory(studentId);
+            setNotificationHistory(history || []);
+        } catch (error) {
+            console.error("Error fetching notification history:", error);
+        } finally {
+            setLoadingHistory(false);
+        }
+    }, []);
+
+    const fetchAllParents = useCallback(async (currentRoleType) => {
         setLoadingAllParents(true);
         try {
             const data = await parentService.getAllParents({ active_filter: 'ACTIVE_ONLY' });
-            // Filter logic:
-            // 1. If replacing Primary: Filter out current Secondary
-            // 2. If replacing Secondary: Filter out current Primary
-            // This enforces the "One Role Per Parent" rule
-            const otherParentId = roleType === 'PRIMARY' 
+            
+            // Filter logic: enforced one role per parent
+            const otherParentId = currentRoleType === 'PRIMARY' 
                 ? selectedStudent.originalData?.s_parent_id 
                 : selectedStudent.originalData?.parent_id;
             
-            const filtered = data.filter(p => p.parent_id !== otherParentId && p.parents_active_status === 'ACTIVE');
+            const filtered = (data || []).filter(p => p.parent_id !== otherParentId && p.parents_active_status === 'ACTIVE');
             setAllParents(filtered);
         } catch (error) {
             console.error("Error fetching all parents:", error);
         } finally {
             setLoadingAllParents(false);
         }
-    };
+    }, [selectedStudent.originalData?.parent_id, selectedStudent.originalData?.s_parent_id]);
+
+    useEffect(() => {
+        if (selectedStudent) {
+            const p1Id = selectedStudent.originalData?.parent_id;
+            const p2Id = selectedStudent.originalData?.s_parent_id;
+            
+            fetchParents(p1Id, p2Id);
+            
+            if (selectedStudent.originalData?.is_transport_user || selectedStudent.originalData?.transport_status === 'ACTIVE') {
+                fetchTransportInfo(selectedStudent.originalData);
+            }
+            fetchHistory(selectedStudent.id);
+        }
+    }, [selectedStudent, fetchHistory, fetchParents, fetchTransportInfo]);
+
+    // Handle URL-based parent selection modal
+    useEffect(() => {
+        if (currentRole && selectedStudent) {
+            fetchAllParents(currentRole);
+        }
+    }, [currentRole, selectedStudent, fetchAllParents]);
 
     const handleAssignParent = async (parentId) => {
         try {
@@ -477,6 +489,65 @@ const StudentDetail = ({ selectedStudent, onBack, onUpdate, onEdit, onTransportS
                                         </div>
                                     );
                                 })}
+                            </div>
+                        </div>
+
+                        {/* Communication History Section */}
+                        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden mt-8">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/30 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none"></div>
+                            
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+                                    <FontAwesomeIcon icon={faHistory} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight leading-none">Communication History</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-none">Record of sent notifications</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {loadingHistory ? (
+                                    <div className="py-12 flex flex-col items-center justify-center text-slate-300">
+                                        <FontAwesomeIcon icon={faClock} className="text-4xl mb-4 animate-spin-slow" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest">Retrieving logs...</p>
+                                    </div>
+                                ) : notificationHistory.length > 0 ? (
+                                    <div className="relative pl-8 space-y-6">
+                                        {/* Timeline Line */}
+                                        <div className="absolute left-3.5 top-0 bottom-0 w-0.5 bg-slate-100"></div>
+                                        
+                                        {notificationHistory.map((note, idx) => (
+                                            <div key={note.notification_id || idx} className="relative group">
+                                                {/* Timeline Dot */}
+                                                <div className="absolute -left-[1.375rem] top-1.5 w-3 h-3 rounded-full bg-white border-2 border-indigo-500 z-10"></div>
+                                                
+                                                <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 group-hover:bg-white group-hover:border-indigo-200 group-hover:shadow-md transition-all">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-tight">{note.title}</h4>
+                                                        <span className="text-[9px] font-bold text-slate-400 whitespace-nowrap">
+                                                            {(() => {
+                                                                const dt = (note.created_at.includes('T') && !note.created_at.endsWith('Z')) ? `${note.created_at}Z` : note.created_at;
+                                                                const date = new Date(dt);
+                                                                return `${date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} • ${date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+                                                            })()}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[11px] font-medium text-slate-600 leading-relaxed">{note.message}</p>
+                                                    <div className="mt-3 flex items-center gap-2">
+                                                        <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Sender:</span>
+                                                        <span className="text-[9px] font-bold text-slate-500 uppercase">{note.sent_by_admin_id === 'system_admin' ? 'SYSTEM' : 'ADMIN'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-12 flex flex-col items-center justify-center text-slate-200 border-2 border-dashed border-slate-100 rounded-3xl">
+                                        <FontAwesomeIcon icon={faEnvelope} className="text-4xl mb-4 opacity-20" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest">No communication records found</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
