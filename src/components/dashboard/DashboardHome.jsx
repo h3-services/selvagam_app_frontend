@@ -46,7 +46,7 @@ const DashboardHome = () => {
                             </button>
                         </div>
                         <div className="h-[400px] w-full relative">
-                            <LiveFleetMap height="400px" zoom={13} />
+                            <LiveFleetMap height="400px" zoom={13} navigate={navigate} />
                         </div>
                     </div>
 

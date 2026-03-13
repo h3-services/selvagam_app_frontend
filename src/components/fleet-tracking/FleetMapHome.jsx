@@ -6,15 +6,19 @@ import {
     faArrowsRotate, 
     faPhone,
     faIdCard,
-    faCircleDot
+    faCircleDot,
+    faArrowRight
 } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 import { driverService } from '../../services/driverService';
 import LiveFleetMap from './LiveFleetMap';
 
 const FleetMapHome = () => {
+    const navigate = useNavigate();
     const [locations, setLocations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedBus, setSelectedBus] = useState(null);
+    const [mapCenter, setMapCenter] = useState(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     const fetchLocations = useCallback(async (manual = false) => {
@@ -98,7 +102,10 @@ const FleetMapHome = () => {
                             ) : locations.map((loc) => (
                                 <button
                                     key={loc.driver_id}
-                                    onClick={() => setSelectedBus(loc)}
+                                    onClick={() => {
+                                        setSelectedBus(loc);
+                                        setMapCenter([loc.latitude, loc.longitude]);
+                                    }}
                                     className={`w-full p-4 rounded-3xl border transition-all flex items-center gap-4 group text-left ${selectedBus?.driver_id === loc.driver_id ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-200' : 'bg-white border-slate-100 hover:border-indigo-200 hover:bg-slate-50 text-slate-600'}`}
                                 >
                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${selectedBus?.driver_id === loc.driver_id ? 'bg-white/20' : 'bg-indigo-50 text-indigo-600'}`}>
@@ -112,68 +119,30 @@ const FleetMapHome = () => {
                                             Active • {loc.updated_at ? new Date(loc.updated_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '-'}
                                         </p>
                                     </div>
-                                    <FontAwesomeIcon icon={faMapMarkerAlt} className={`text-xs ${selectedBus?.driver_id === loc.driver_id ? 'text-white' : 'text-slate-300 group-hover:text-indigo-500 transition-colors'}`} />
+                                    <div className="flex flex-col items-end gap-2">
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const busId = loc.bus_id || loc.id || loc.driver_id; // Fallback to driver_id if not mapped
+                                                navigate(`/buses/${busId}/detail`);
+                                            }}
+                                            className="w-8 h-8 rounded-full bg-slate-100/50 hover:bg-slate-200 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-all"
+                                            title="View Bus Management"
+                                        >
+                                            <FontAwesomeIcon icon={faIdCard} className="text-[10px]" />
+                                        </button>
+                                        <FontAwesomeIcon icon={faMapMarkerAlt} className={`text-xs ${selectedBus?.driver_id === loc.driver_id ? 'text-white' : 'text-slate-300 group-hover:text-indigo-500 transition-colors'}`} />
+                                    </div>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Bus Detail Card (Selected) */}
-                    {selectedBus && (
-                        <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl animate-in slide-in-from-bottom-8 duration-500 relative overflow-hidden group">
-                           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
-                           
-                           <div className="flex items-center justify-between mb-8">
-                               <div className="flex items-center gap-3">
-                                   <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                                       <FontAwesomeIcon icon={faBus} />
-                                   </div>
-                                   <div>
-                                       <h3 className="text-base font-black uppercase tracking-tight">Bus Information</h3>
-                                       <div className="flex items-center gap-2">
-                                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                           <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-400">Linked to Trip</span>
-                                       </div>
-                                   </div>
-                               </div>
-                               <button 
-                                onClick={() => setSelectedBus(null)}
-                                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                               >
-                                   <FontAwesomeIcon icon={faIdCard} className="text-[10px]" />
-                               </button>
-                           </div>
-
-                           <div className="space-y-6">
-                               <div>
-                                   <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Full Name</p>
-                                   <p className="text-lg font-black tracking-tight">{selectedBus.driver_name}</p>
-                               </div>
-
-                               <div className="grid grid-cols-2 gap-4">
-                                   <div>
-                                       <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Contact</p>
-                                       <div className="flex items-center gap-2 text-indigo-400">
-                                           <FontAwesomeIcon icon={faPhone} className="text-[10px]" />
-                                           <span className="text-xs font-bold font-mono">{selectedBus.contact_number || 'N/A'}</span>
-                                       </div>
-                                   </div>
-                                   <div>
-                                       <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Coordinates</p>
-                                       <div className="flex items-center gap-2 text-slate-400">
-                                           <FontAwesomeIcon icon={faCircleDot} className="text-[10px]" />
-                                           <span className="text-xs font-bold font-mono text-white/80">{selectedBus.latitude?.toFixed(4)}, {selectedBus.longitude?.toFixed(4)}</span>
-                                       </div>
-                                   </div>
-                               </div>
-                           </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* Map Interface */}
                 <div className="flex-1 h-[500px] lg:h-auto rounded-[3rem] border-4 border-white shadow-2xl relative overflow-hidden group order-1 lg:order-2 bg-white">
-                    <LiveFleetMap onSelectBus={setSelectedBus} />
+                    <LiveFleetMap onSelectBus={setSelectedBus} center={mapCenter} navigate={navigate} />
                     
                     {/* Floating Legend */}
                     <div className="absolute bottom-10 left-10 z-[1000] p-6 bg-white/90 backdrop-blur-2xl border border-white shadow-2xl rounded-[2.5rem] max-w-xs text-slate-900 pointer-events-none">

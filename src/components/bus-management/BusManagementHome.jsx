@@ -85,7 +85,7 @@ const BusManagementHome = () => {
     useEffect(() => {
         if (buses.length > 0) {
             if (busId) {
-                const bus = buses.find(b => b.id === busId);
+                const bus = buses.find(b => b.id === busId || b.driver_id === busId);
                 if (bus) {
                     if (isEditPath) {
                         setEditingBus(bus);

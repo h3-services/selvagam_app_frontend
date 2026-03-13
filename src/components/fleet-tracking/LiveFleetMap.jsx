@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBus, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faBus, faMapMarkerAlt, faIdCard } from '@fortawesome/free-solid-svg-icons';
 import { driverService } from '../../services/driverService';
 
 // Fix Leaflet icon issue
@@ -42,10 +42,17 @@ const ChangeView = ({ center, zoom }) => {
     return null;
 };
 
-const LiveFleetMap = ({ onSelectBus, height = "100%", zoom = 14 }) => {
+const LiveFleetMap = ({ onSelectBus, height = "100%", zoom = 14, center, navigate }) => {
     const [locations, setLocations] = useState([]);
-    const [mapCenter, setMapCenter] = useState([12.7050, 80.0150]);
+    const [mapCenter, setMapCenter] = useState(center || [12.7050, 80.0150]);
     const [loading, setLoading] = useState(true);
+
+    // Update internal center when prop changes
+    useEffect(() => {
+        if (center) {
+            setMapCenter(center);
+        }
+    }, [center]);
 
     const fetchLocations = useCallback(async () => {
         try {
@@ -88,10 +95,21 @@ const LiveFleetMap = ({ onSelectBus, height = "100%", zoom = 14 }) => {
                         <Popup className="custom-popup">
                             <div className="p-2">
                                 <h5 className="font-black text-slate-900 border-b pb-1 mb-2 tracking-tight uppercase text-xs">{loc.driver_name}</h5>
-                                <div className="space-y-1">
+                                <div className="space-y-1 mb-2">
                                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest italic">Live Status</p>
                                     <p className="text-[9px] font-bold text-indigo-600 uppercase">Updating via Satellite</p>
                                 </div>
+                                <button 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        const busId = loc.bus_id || loc.id || loc.driver_id;
+                                        navigate?.(`/buses/${busId}/detail`);
+                                    }}
+                                    className="w-full py-2 bg-slate-900 text-white rounded-lg text-[8px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <FontAwesomeIcon icon={faIdCard} />
+                                    Manage Bus
+                                </button>
                             </div>
                         </Popup>
                     </Marker>
