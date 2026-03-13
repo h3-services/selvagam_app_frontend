@@ -13,6 +13,7 @@ import RouteManagement from './components/route-management/RouteManagementHome';
 import TripManagement from './components/trip-management/TripManagementHome';
 import ComingSoon from './components/layout/ComingSoon';
 import Communication from './components/communication/CommunicationHome';
+import FleetTracking from './components/fleet-tracking/FleetMapHome';
 import SuperAdmin from './components/super-admin/SuperAdminHome';
 import Reports from './components/reports/ReportsHome';
 import './App.css';
@@ -61,6 +62,7 @@ function App() {
           <Route path="/trips/:tripId/detail" element={<TripManagement />} />
           <Route path="/communication" element={<Communication />} />
           <Route path="/communication/view/:category" element={<Communication />} />
+          <Route path="/fleet" element={<FleetTracking />} />
           <Route path="/admin" element={<SuperAdmin />} />
           <Route path="/admin/add" element={<SuperAdmin />} />
           <Route path="/admin/:adminId/edit" element={<SuperAdmin />} />

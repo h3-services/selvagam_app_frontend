@@ -64,5 +64,15 @@ export const driverService = {
             console.error(`Error updating driver status ${driverId}:`, error);
             throw error;
         }
+    },
+    // Get all driver locations (Live fleet map)
+    getAllDriverLocations: async () => {
+        try {
+            const response = await api.get('/drivers/locations/all');
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching driver locations:", error);
+            throw error;
+        }
     }
 };

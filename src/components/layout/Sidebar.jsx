@@ -16,8 +16,8 @@ import {
   faUserGraduate,
   faUserGroup,
   faUsers,
-  faChevronDown,
-  faChevronRight
+  faChevronRight,
+  faRoute
 } from '@fortawesome/free-solid-svg-icons';
 import { RiMenu4Fill, RiCloseFill } from 'react-icons/ri';
 import { COLORS } from '../../constants/colors';
@@ -109,8 +109,9 @@ const Sidebar = () => {
       subItems: [
         { icon: faCar, label: 'Drivers', path: '/drivers' },
         { icon: faBus, label: 'Buses', path: '/buses' },
-        { icon: faMapLocationDot, label: 'Routes', path: '/routes' },
+        { icon: faRoute, label: 'Routes', path: '/routes' },
         { icon: faCalendarCheck, label: 'Trips', path: '/trips' },
+        { icon: faMapLocationDot, label: 'Live Map', path: '/fleet' },
       ]
     },
 
@@ -387,12 +388,12 @@ const Sidebar = () => {
                         <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-sm ${
                           subActive 
                             ? 'bg-white/20 shadow-inner' 
-                            : 'bg-blue-600/10 group-hover/sub:bg-blue-600 group-hover/sub:rotate-[15deg] group-hover/sub:scale-110'
+                            : 'bg-blue-600/10 group-hover/sub:bg-blue-600 group-hover/sub:scale-110'
                         }`}>
                           <FontAwesomeIcon 
                             icon={sub.icon} 
                             className={`text-base transition-transform duration-500 ${
-                              subActive ? 'text-white' : 'text-blue-600 group-hover/sub:text-white group-hover/sub:-rotate-[15deg]'
+                              subActive ? 'text-white' : 'text-blue-600 group-hover/sub:text-white'
                             }`} 
                           />
                         </div>
