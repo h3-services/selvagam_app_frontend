@@ -156,7 +156,7 @@ const CommunicationHome = () => {
                                                             setSelectedClasses(prev => [...prev, cls]);
                                                         }
                                                     }}
-                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
+                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'}`}
                                                 >
                                                     <span>{cls.class_name} - {cls.section}</span>
                                                     {isSelected && <FontAwesomeIcon icon={faCheck} className="text-blue-400" />}
@@ -176,7 +176,7 @@ const CommunicationHome = () => {
                                                             setSelectedRoutes(prev => [...prev, route]);
                                                         }
                                                     }}
-                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
+                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'}`}
                                                 >
                                                     <span>{route.name}</span>
                                                     {isSelected && <FontAwesomeIcon icon={faCheck} className="text-blue-400" />}
@@ -196,7 +196,7 @@ const CommunicationHome = () => {
                                                             setSelectedLocations(prev => [...prev, loc]);
                                                         }
                                                     }}
-                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600'}`}
+                                                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-xs font-black text-left transition-all ${isSelected ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'}`}
                                                 >
                                                     <span>{loc}</span>
                                                     {isSelected && <FontAwesomeIcon icon={faCheck} className="text-blue-400" />}
@@ -208,7 +208,7 @@ const CommunicationHome = () => {
                                 <div className="p-2 mt-2 border-t border-slate-100">
                                     <button 
                                         onClick={() => setShowDropdown(false)}
-                                        className="w-full bg-blue-600 text-white py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-slate-900 transition-all"
+                                        className="w-full bg-indigo-600 text-white py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md hover:bg-indigo-700 transition-all"
                                     >
                                         Apply Selection
                                     </button>
@@ -244,13 +244,13 @@ const CategoryButton = ({ id, label, icon, current, onClick }) => (
         onClick={onClick}
         className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-3 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl border transition-all font-black text-[8px] sm:text-[11px] uppercase tracking-wider sm:tracking-[0.2em] relative overflow-hidden group
             ${current === id 
-                ? 'bg-slate-900 border-slate-900 text-white shadow-lg sm:shadow-xl shadow-slate-200' 
-                : 'bg-white border-slate-100 text-slate-400 hover:border-blue-400 hover:text-blue-600 shadow-sm'}`}
+                ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg sm:shadow-xl shadow-indigo-100' 
+                : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-400 hover:text-indigo-600 shadow-sm'}`}
     >
         <FontAwesomeIcon icon={icon} className={`${current === id ? 'text-blue-400' : 'text-slate-300 group-hover:text-blue-400'}`} />
         {label}
         {current === id && (
-            <div className="absolute top-0 right-0 w-8 h-8 bg-blue-600 text-white flex items-center justify-center rounded-bl-xl rotate-12 translate-x-1 -translate-y-1">
+            <div className="absolute top-0 right-0 w-8 h-8 bg-indigo-500 text-white flex items-center justify-center rounded-bl-xl rotate-12 translate-x-1 -translate-y-1">
                 <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
             </div>
         )}

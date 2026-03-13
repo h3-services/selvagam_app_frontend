@@ -114,29 +114,9 @@ export const getLocationFCMTokens = async (locationName) => {
 };
 
 /**
- * Saves a notification record in the tracking history.
- */
-export const saveAdminNotification = async (notificationData) => {
-  try {
-    // API safety: Remove student_id if it's null, empty or undefined
-    // Backend likely expects a valid UUID or for the key to be missing
-    const payload = { ...notificationData };
-    if (!payload.student_id) {
-        delete payload.student_id;
-    }
-
-    const response = await api.post('/admin-parent-notifications', payload);
-    return response.data;
-  } catch (error) {
-    console.error('❌ Save Admin Notification Error:', error);
-    throw error;
-  }
-};
-
-/**
  * Sends a notification to everyone at a specific location.
  */
-export const sendLocationNotification = async (locationName, title, body, messageType = 'text', adminId) => {
+export const sendLocationNotification = async (locationName, title, body, messageType = 'text') => {
   try {
     // 1. Get tokens for this location
     const tokens = await getLocationFCMTokens(locationName);
@@ -144,13 +124,6 @@ export const sendLocationNotification = async (locationName, title, body, messag
     if (!tokens || tokens.length === 0) {
       throw new Error("No recipients found for this location");
     }
-
-    // 2. Save history record
-    await saveAdminNotification({
-      title,
-      message: body,
-      sent_by_admin_id: adminId
-    });
 
     return { success: true, count: tokens.length };
 

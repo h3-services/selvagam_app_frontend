@@ -8,7 +8,7 @@ import {
     faShieldHalved
 } from '@fortawesome/free-solid-svg-icons';
 import { auth } from '../../config/firebase';
-import { broadcastToParents, sendRouteNotification, sendClassNotification, saveAdminNotification, sendLocationNotification } from '../../services/notificationService';
+import { broadcastToParents, sendRouteNotification, sendClassNotification, sendLocationNotification } from '../../services/notificationService';
 
 const ComposeMessage = ({ targetCategory, targetIds = [] }) => {
     const [messageType, setMessageType] = useState('text'); // 'text' | 'audio'
@@ -29,48 +29,25 @@ const ComposeMessage = ({ targetCategory, targetIds = [] }) => {
         setIsSending(true);
 
         try {
-            // Get current admin ID from Firebase Auth
-            const adminId = auth.currentUser?.uid || 'f81d4fae-7dec-11d0-a765-00a0c91e6bf6'; // Real UID or fallback valid UUID
-
             if (targetCategory === 'ALL') {
                 await broadcastToParents(title.trim(), messageText.trim(), messageType);
-                await saveAdminNotification({
-                    title: title.trim(),
-                    message: messageText.trim(),
-                    sent_by_admin_id: adminId,
-                    student_id: null
-                });
             } else if (targetCategory === 'ROUTE') {
                 await Promise.all(targetIds.map(async (id) => {
                     await sendRouteNotification(id, title.trim(), messageText.trim(), messageType);
                 }));
-                await saveAdminNotification({
-                    title: title.trim(),
-                    message: `[Route Message] ${messageText.trim()}`,
-                    sent_by_admin_id: adminId,
-                    student_id: null
-                });
             } else if (targetCategory === 'CLASS') {
                 await Promise.all(targetIds.map(async (id) => {
                     await sendClassNotification(id, title.trim(), messageText.trim(), messageType);
                 }));
-                await saveAdminNotification({
-                    title: title.trim(),
-                    message: `[Class Message] ${messageText.trim()}`,
-                    sent_by_admin_id: adminId,
-                    student_id: null
-                });
             } else if (targetCategory === 'LOCATION') {
-                // sendLocationNotification already handles saveAdminNotification internally
                 await Promise.all(targetIds.map(loc => 
-                    sendLocationNotification(loc, title.trim(), messageText.trim(), messageType, adminId)
+                    sendLocationNotification(loc, title.trim(), messageText.trim(), messageType)
                 ));
             }
             
             // Notification dispatched successfully
             setTitle('');
             setMessageText('');
-            alert('🚀 Message dispatched successfully and recorded in history!');
         } catch (error) {
             console.error("Failed to send notification:", error);
             alert("❌ Failed to send notification. Please check console for details.");
@@ -82,19 +59,19 @@ const ComposeMessage = ({ targetCategory, targetIds = [] }) => {
     return (
         <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col animate-fade-in">
             {/* Context Header */}
-            <div className="bg-slate-900 px-8 py-6 flex items-center justify-between">
+            <div className="bg-indigo-600/5 px-8 py-6 flex items-center justify-between border-b border-indigo-100">
                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-blue-400">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-100">
                         <FontAwesomeIcon icon={faCommentDots} className="text-xl" />
                     </div>
                     <div>
-                        <h2 className="text-white text-lg font-black tracking-tight uppercase">Compose Announcement</h2>
-                        <p className="text-blue-400 text-[10px] font-black tracking-[0.2em] uppercase">Target: {targetCategory}</p>
+                        <h2 className="text-slate-900 text-lg font-black tracking-tight uppercase">Compose Announcement</h2>
+                        <p className="text-indigo-600 text-[10px] font-black tracking-[0.2em] uppercase">Target: {targetCategory}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10">
-                    <FontAwesomeIcon icon={faShieldHalved} className="text-blue-400 text-xs" />
-                    <span className="text-white/60 text-[10px] font-black uppercase tracking-widest">Admin Encryption Active</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-indigo-100 shadow-sm">
+                    <FontAwesomeIcon icon={faShieldHalved} className="text-indigo-400 text-xs" />
+                    <span className="text-indigo-600 text-[10px] font-black uppercase tracking-widest">Secure Matrix Sync</span>
                 </div>
             </div>
 
@@ -108,7 +85,7 @@ const ComposeMessage = ({ targetCategory, targetIds = [] }) => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Urgent: School Bus Update / Weather Alert..."
-                            className="w-full px-6 py-4 bg-slate-50 rounded-2xl border-2 border-slate-100 text-sm font-bold text-slate-600 focus:border-blue-500 focus:bg-white transition-all outline-none"
+                            className="w-full px-6 py-4 bg-slate-50 rounded-2xl border-2 border-slate-100 text-sm font-bold text-slate-600 focus:border-indigo-500 focus:bg-white transition-all outline-none"
                             required
                         />
                     </div>
@@ -121,7 +98,7 @@ const ComposeMessage = ({ targetCategory, targetIds = [] }) => {
                                 value={messageText}
                                 onChange={(e) => setMessageText(e.target.value)}
                                 placeholder="Type your detailed message here..."
-                                className="w-full h-40 px-6 py-5 bg-slate-50 rounded-[2rem] border-2 border-slate-100 text-sm font-bold text-slate-600 focus:border-blue-500 focus:bg-white transition-all outline-none resize-none custom-scrollbar"
+                                className="w-full h-40 px-6 py-5 bg-slate-50 rounded-[2rem] border-2 border-slate-100 text-sm font-bold text-slate-600 focus:border-indigo-500 focus:bg-white transition-all outline-none resize-none custom-scrollbar"
                                 required
                             />
                             <div className="absolute bottom-4 right-6 flex items-center gap-2">
@@ -139,14 +116,14 @@ const ComposeMessage = ({ targetCategory, targetIds = [] }) => {
                             <button 
                                 type="button"
                                 onClick={() => setMessageType('text')}
-                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${messageType === 'text' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${messageType === 'text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-400 hover:text-indigo-600'}`}
                             >
                                 Standard Text
                             </button>
                             <button 
                                 type="button"
                                 onClick={() => setMessageType('audio')}
-                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${messageType === 'audio' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${messageType === 'audio' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-400 hover:text-indigo-600'}`}
                             >
                                 <FontAwesomeIcon icon={faMicrophone} className="mr-2" />
                                 Voice Alert
@@ -158,7 +135,7 @@ const ComposeMessage = ({ targetCategory, targetIds = [] }) => {
                     <button
                         type="submit"
                         disabled={isSending}
-                        className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-black transition-all shadow-xl shadow-slate-200 active:scale-95 disabled:opacity-50 group overflow-hidden relative"
+                        className="w-full py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-4 hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 active:scale-95 disabled:opacity-50 group overflow-hidden relative"
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/20 to-blue-600/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                         {isSending ? (
