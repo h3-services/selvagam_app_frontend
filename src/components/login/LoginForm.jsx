@@ -161,13 +161,7 @@ const LoginForm = () => {
                     </button>
                 </form>
 
-                {/* Temporary Test Button */}
-                <button
-                    onClick={() => { localStorage.setItem('access_token', 'test-token'); navigate('/dashboard'); }}
-                    className="w-full mt-4 h-12 sm:h-14 bg-white hover:bg-slate-900 text-slate-600 hover:text-white rounded-xl sm:rounded-2xl font-bold text-sm border-2 border-slate-100 hover:border-slate-900 transition-all duration-500 flex items-center justify-center gap-3 active:scale-95"
-                >
-                    Skip Login (Testing)
-                </button>
+
                 <p className="text-center mt-6 sm:mt-8 text-[9px] sm:text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em]">
                     Selvagam Santhanalakshmi Noble School
                 </p>
