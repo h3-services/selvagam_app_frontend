@@ -16,8 +16,6 @@ api.interceptors.request.use(
         
         // Handle Content-Type intelligently
         if (config.data instanceof FormData) {
-            // For FormData, we MUST NOT set Content-Type manually. 
-            // The browser needs to set it to include the boundary string.
             delete config.headers['Content-Type'];
         } else if (!config.headers['Content-Type'] && config.data) {
             config.headers['Content-Type'] = 'application/json';

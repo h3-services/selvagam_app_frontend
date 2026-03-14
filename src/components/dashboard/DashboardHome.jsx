@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserGraduate, faUserFriends } from '@fortawesome/free-solid-svg-icons';
@@ -9,6 +10,11 @@ import { faMapLocationDot } from '@fortawesome/free-solid-svg-icons';
 
 const DashboardHome = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL;
+        console.log(`🌐 API Active Base URL: ${baseUrl}`);
+    }, []);
 
     return (
         <div className="h-full flex flex-col bg-slate-50 relative animate-fade-in overflow-hidden">
