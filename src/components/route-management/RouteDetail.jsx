@@ -233,9 +233,15 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplica
             (error) => {
                 console.error("Error detecting location:", error);
                 setIsLocating(false);
-                alert("Could not detect your location. Please check your browser permissions.");
+                if (error.code === 2) {
+                    alert("📍 Position Unavailable: Your device cannot pinpoint your location right now. Please make sure your WiFi is ON or try moving closer to a window.");
+                } else if (error.code === 1) {
+                    alert("🔒 Permission Denied: Please allow location access in your browser and system settings.");
+                } else {
+                    alert("Could not detect your location. Please check your browser permissions.");
+                }
             },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
         );
     };
 
@@ -513,12 +519,13 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplica
                         </button>
                         <div className="flex flex-col items-start min-w-0">
                             {isEditing ? (
-                                <input
-                                    type="text"
-                                    value={editData?.routeName}
-                                    onChange={(e) => setEditData({ ...editData, routeName: e.target.value })}
-                                    className="bg-transparent border-b border-white text-white font-bold text-lg sm:text-2xl focus:outline-none placeholder-white/50 w-full"
-                                />
+                                    <input
+                                        type="text"
+                                        value={editData?.routeName}
+                                        onChange={(e) => setEditData({ ...editData, routeName: e.target.value })}
+                                        className="bg-transparent border-b-2 border-white/50 focus:border-white text-white font-black text-lg sm:text-2xl focus:outline-none placeholder-white/50 w-full transition-all"
+                                        placeholder="Enter Route Name"
+                                    />
                             ) : (
                                 <>
                                     <h2 className="text-base sm:text-2xl font-bold text-white truncate">{selectedRoute.routeName}</h2>
@@ -530,47 +537,54 @@ const RouteDetail = ({ selectedRoute, onBack, onUpdate, onReorderStop, onDuplica
                         </div>
                     </div>
                     {isEditing ? (
-                        <div className="flex flex-row gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end shrink-0">
+                        <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 w-full sm:w-auto mt-4 sm:mt-0 shrink-0">
                             <button 
                                 onClick={() => setIsEditing(false)} 
                                 disabled={isSaving}
-                                className="flex-1 sm:flex-none px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium disabled:opacity-50 text-center"
+                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl hover:bg-white/20 transition-all text-xs sm:text-sm font-bold disabled:opacity-50"
                             >
-                                <FontAwesomeIcon icon={faTimes} className="mr-1" />Cancel
+                                <FontAwesomeIcon icon={faTimes} />
+                                <span className="hidden xs:inline">Cancel</span>
                             </button>
                             <button 
                                 onClick={handleSaveEdit} 
                                 disabled={isSaving}
-                                className="flex-1 sm:flex-none px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium disabled:bg-gray-200 flex items-center justify-center gap-2"
+                                className="flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-[#3A7BFF] rounded-xl hover:bg-white/90 transition-all text-xs sm:text-sm font-black shadow-lg disabled:bg-white/50"
                             >
                                 {isSaving ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faCheck} />}
-                                {isSaving ? 'Saving...' : 'Save'}
+                                {isSaving ? 'Saving...' : 'Save Changes'}
                             </button>
                         </div>
                     ) : (
-                        <div className="flex flex-row gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end shrink-0">
+                        <div className="grid grid-cols-2 md:flex md:flex-row gap-2 w-full sm:w-auto mt-4 md:mt-0 shrink-0">
                             <button 
                                 onClick={() => onDuplicate(selectedRoute)}
-                                className="flex-1 sm:flex-none px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium flex items-center justify-center gap-2"
-                                title="Duplicate this route with all its stops"
+                                className="flex items-center justify-center gap-2 px-3 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl hover:bg-white/20 transition-all text-[10px] sm:text-xs font-bold"
+                                title="Duplicate this route"
                             >
                                 <FontAwesomeIcon icon={faClone} />
-                                Duplicate
+                                <span className="xs:inline">Duplicate</span>
                             </button>
-                            <button onClick={handleViewStudents} className="flex-1 sm:flex-none px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium flex items-center justify-center gap-2">
+                            <button 
+                                onClick={handleViewStudents} 
+                                className="flex items-center justify-center gap-2 px-3 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl hover:bg-white/20 transition-all text-[10px] sm:text-xs font-bold"
+                            >
                                 <FontAwesomeIcon icon={faUserGraduate} />
-                                Students
+                                <span className="xs:inline">Students</span>
                             </button>
                             <button 
                                 onClick={handleExportExcel} 
-                                className="flex-1 sm:flex-none px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20"
-                                title="Download stops as Excel"
+                                className="flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-500/90 hover:bg-emerald-500 text-white rounded-xl transition-all text-[10px] sm:text-xs font-black shadow-lg shadow-emerald-900/10 border border-emerald-400/30"
                             >
                                 <FontAwesomeIcon icon={faFileExcel} />
-                                Export Excel
+                                <span className="xs:inline whitespace-nowrap">Excel</span>
                             </button>
-                            <button onClick={handleStartEditing} className="flex-1 sm:flex-none px-4 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all text-sm font-medium flex items-center justify-center">
-                                <FontAwesomeIcon icon={faEdit} className="mr-1" />Edit
+                            <button 
+                                onClick={handleStartEditing} 
+                                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-[#3A7BFF] rounded-xl hover:bg-white/90 transition-all text-[10px] sm:text-xs font-black shadow-xl"
+                            >
+                                <FontAwesomeIcon icon={faEdit} />
+                                <span className="xs:inline uppercase tracking-tight">Edit</span>
                             </button>
                         </div>
                     )}

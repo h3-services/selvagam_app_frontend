@@ -210,9 +210,15 @@ const AddRouteForm = ({ show, onClose, onAdd, schoolLocations = [], availableBus
             (error) => {
                 console.error("Error detecting location:", error);
                 setIsLocating(false);
-                alert("Could not detect your location. Please check your browser permissions.");
+                if (error.code === 2) {
+                    alert("📍 Position Unavailable: Your device cannot pinpoint your location right now. Please make sure your WiFi is ON or try moving closer to a window.");
+                } else if (error.code === 1) {
+                    alert("🔒 Permission Denied: Please allow location access in your browser and system settings.");
+                } else {
+                    alert("Could not detect your location. Please check your browser permissions.");
+                }
             },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 }
         );
     };
 
